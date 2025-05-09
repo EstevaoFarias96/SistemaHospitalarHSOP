@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evolução do Paciente</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Add Quill Rich Text Editor CSS -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    
+    <!-- Script para interceptar e substituir scroll.js -->
+    <script>
+        // Interceptar scripts antes que sejam carregados
+        const originalCreateElement = document.createElement;
+        document.createElement = function(tagName) {
+            const element = originalCreateElement.call(document, tagName);
+            
+            if (tagName.toLowerCase() === 'script') {
+                const originalSetAttribute = element.setAttribute;
+                element.setAttribute = function(name, value) {
+                    if (name === 'src' && value && value.includes('scroll.js')) {
+                        console.log('Interceptado carregamento de scroll.js - Substituindo com implementação moderna');
+                        // Não carregamos o script original
+                        return element;
+                    }
+                    return originalSetAttribute.call(this, name, value);
+                };
+            }
+            
+            return element;
+        };
+        
+        // Sobrescrever EventTarget.prototype.addEventListener para monitorar eventos depreciados
+        (function() {
+            const originalAddEventListener = EventTarget.prototype.addEventListener;
+            const deprecatedEvents = [
+                'DOMNodeInserted', 
+                'DOMNodeRemoved', 
+                'DOMSubtreeModified',
+                'DOMAttrModified',
+                'DOMCharacterDataModified'
+            ];
+            
+            EventTarget.prototype.addEventListener = function(type, listener, options) {
+                if (deprecatedEvents.includes(type)) {
+                    console.warn(`Evento depreciado '${type}' detectado e não será adicionado`);
+                    // Não adicionamos o listener para eventos depreciados
+                    return;
+                }
+                
+                return originalAddEventListener.call(this, type, listener, options);
+            };
+        })();
+    </script>
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .nav-pills .nav-link {
+            margin-right: 10px;
+            border-radius: 50rem;
+            padding: 0.5rem 1rem;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #0d6efd;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .paciente-info {
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        .paciente-info .info-item {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        .paciente-info .info-item strong {
+            color: #495057;
+        }
+        .table-medicamentos {
+            background: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .alerta-alergia {
+            border: 2px solid #ffc107;
+            padding: 5px 10px;
+            display: none;
+            font-weight: bold;
+            color: #856404;
+            background-color: #fff3cd;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+        /* Estilos adicionais para a tabela de evoluções */
+        .table-medicamentos td {
+            vertical-align: middle;
+            padding: 10px;
+        }
+        
+        /* Estilos para as tabelas de medicamentos nas prescrições */
+        .prescricao-card {
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+        
+        .prescricao-card .card-header {
+            padding: 5px 10px;
+            font-size: 0.85rem;
+        }
+        
+        .prescricao-card .card-body {
+            padding: 8px;
+        }
+        
+        .tabela-medicamentos-prescricao th,
+        .tabela-medicamentos-prescricao td {
+            padding: 4px 8px;
+            font-size: 0.85rem;
+        }
+        
+        .tabela-medicamentos-prescricao tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+        
+        /* Novos estilos para melhorar a distinção entre prescrições */
+        .prescricao-container {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        
+        .prescricao-container:hover {
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .prescricao-header {
+            background-color: #f1f8ff;
+            padding: 5px 10px;
+            margin: -12px -12px 10px -12px;
+            border-bottom: 1px solid #dee2e6;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .prescricao-header .medico-info {
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        
+        .prescricao-header .timestamp {
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+        
+        .prescricao-section {
+            margin-bottom: 10px;
+            border-left: 3px solid #cfe2ff;
+            padding-left: 10px;
+        }
+        
+        .prescricao-section.dieta {
+            border-color: #d1e7dd;
+        }
+        
+        .prescricao-section.medicamentos {
+            border-color: #cfe2ff;
+        }
+        
+        .prescricao-section.procedimentos {
+            border-color: #f8d7da;
+        }
+        
+        .prescricao-section-title {
+            font-weight: bold;
+            color: #495057;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .prescricao-section-content {
+            background-color: #f8f9fa;
+            padding: 8px;
+        }
+        
+        .prescricao-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        
+        .data-header {
+            background-color: #6c757d;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        /* Formatação especial para a coluna de texto de evolução */
+        .texto-evolucao {
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 450px;
+            min-height: 150px;
+            overflow-y: auto;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 6px;
+            border-left: 4px solid #0d6efd;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            transition: max-height 0.3s ease;
+        }
+        
+        .texto-evolucao:hover {
+            max-height: 600px;
+        }
+        
+        .texto-evolucao p {
+            margin-bottom: 0.6rem;
+        }
+        
+        .texto-evolucao * {
+            max-width: 100%;
+        }
+        
+        .texto-evolucao h1, .texto-evolucao h2, .texto-evolucao h3 {
+            margin-top: 0.8rem;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .texto-evolucao ul, .texto-evolucao ol {
+            padding-left: 25px;
+            margin-bottom: 0.8rem;
+        }
+        
+        .texto-evolucao li {
+            margin-bottom: 0.3rem;
+        }
+        
+        .texto-evolucao strong, .texto-evolucao b {
+            font-weight: 700;
+        }
+        
+        .texto-evolucao em, .texto-evolucao i {
+            font-style: italic;
+        }
+        
+        .texto-evolucao blockquote {
+            margin: 0.8rem 0;
+            padding: 0.5rem 1rem;
+            border-left: 3px solid #adb5bd;
+            background-color: #f0f0f0;
+        }
+        
+        .texto-evolucao::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        .texto-evolucao::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .texto-evolucao::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        
+        .texto-evolucao::-webkit-scrollbar-thumb:hover {
+            background: #0d6efd;
+        }
+        
+        #editor-container {
+            height: 450px;
+            margin-bottom: 15px;
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+        }
+        
+        .ql-editor {
+            font-size: 13px;
+            line-height: 1.5;
+            min-height: 400px;
+        }
+        
+        .ql-tooltip {
+            z-index: 1060 !important;
+        }
+        
+        @media (max-width: 768px) {
+            .texto-evolucao {
+                max-height: 250px;
+                font-size: 0.85rem;
+                min-height: 100px;
+            }
+            #editor-container {
+                height: 250px;
+            }
+            .ql-editor {
+                min-height: 200px;
+            }
+        }
+        
+        /* Estilos para adaptar a altura da caixa baseado no tamanho do conteúdo */
+        .texto-evolucao[data-lines="1"],
+        .texto-evolucao[data-lines="2"],
+        .texto-evolucao[data-lines="3"] {
+            max-height: 150px;
+            min-height: 80px;
+        }
+        
+        .texto-evolucao[data-lines="4"],
+        .texto-evolucao[data-lines="5"],
+        .texto-evolucao[data-lines="6"] {
+            max-height: 200px;
+            min-height: 100px;
+        }
+        
+        .texto-evolucao[data-lines="7"],
+        .texto-evolucao[data-lines="8"],
+        .texto-evolucao[data-lines="9"] {
+            max-height: 250px;
+            min-height: 150px;
+        }
+        
+        .texto-evolucao[data-lines="10"],
+        .texto-evolucao[data-lines="11"],
+        .texto-evolucao[data-lines="12"] {
+            max-height: 300px;
+            min-height: 200px;
+        }
+        
+        .texto-evolucao[data-lines="13"],
+        .texto-evolucao[data-lines="14"],
+        .texto-evolucao[data-lines="15"] {
+            max-height: 350px;
+            min-height: 250px;
+        }
+        
+        .texto-evolucao[data-lines="16"],
+        .texto-evolucao[data-lines="17"],
+        .texto-evolucao[data-lines="18"] {
+            max-height: 400px;
+            min-height: 300px;
+        }
+        
+        .texto-evolucao[data-lines="19"],
+        .texto-evolucao[data-lines="20"],
+        .texto-evolucao[data-lines="21"] {
+            max-height: 450px;
+            min-height: 350px;
+        }
+        
+        .texto-evolucao[data-lines="22"] {
+            max-height: 500px;
+            min-height: 400px;
+        }
+        
+        /* Estilos para o calendário de aprazamento */
+        .calendar-day {
+            width: 120px;
+            min-height: 80px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            background-color: #f8f9fa;
+        }
+        
+        .calendar-day:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background-color: #fff;
+        }
+        
+        .day-header {
+            font-weight: bold;
+            border-bottom: 1px dashed #dee2e6;
+            padding-bottom: 5px;
+        }
+        
+        .time-pill {
+            border: 1px solid #e9ecef;
+            transition: all 0.2s;
+        }
+        
+        .time-pill:hover {
+            background-color: #e9ecef;
+        }
+        
+        /* Estilos para popovers dos dias */
+        .popover {
+            max-width: 300px;
+        }
+        
+        .popover-body {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        /* Novos estilos para o modal de aprazamento redesenhado */
+        #modalAprazamento .modal-content {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        #modalAprazamento .modal-header {
+            background: linear-gradient(135deg, #4a6fdc 0%, #2856d4 100%);
+            border-bottom: none;
+            padding: 20px 24px;
+        }
+        
+        #modalAprazamento .modal-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+        
+        #modalAprazamento .modal-body {
+            padding: 24px;
+        }
+        
+        #modalAprazamento .form-label {
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+        
+        #modalAprazamento .input-group-text {
+            background-color: #f8f9fa;
+            border-color: #ced4da;
+            color: #6c757d;
+        }
+        
+        #modalAprazamento .form-control,
+        #modalAprazamento .form-select {
+            border-color: #ced4da;
+            padding: 10px 15px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        
+        #modalAprazamento .form-control:focus,
+        #modalAprazamento .form-select:focus {
+            border-color: #4a6fdc;
+            box-shadow: 0 0 0 0.25rem rgba(74, 111, 220, 0.25);
+        }
+        
+        #modalAprazamento .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        
+        #modalAprazamento .card:hover {
+            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+        }
+        
+        #modalAprazamento .alert {
+            border-radius: 8px;
+            border: none;
+        }
+        
+        #modalAprazamento .alert-info {
+            background-color: #e6f3fd;
+            color: #0c63e4;
+        }
+        
+        #modalAprazamento .btn-primary {
+            background: linear-gradient(to right, #4a6fdc, #2856d4);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        
+        #modalAprazamento .btn-primary:hover {
+            background: linear-gradient(to right, #5d7fe3, #3967e5);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(45, 85, 211, 0.3);
+        }
+        
+        #modalAprazamento .btn-outline-secondary {
+            border-color: #ced4da;
+            color: #495057;
+        }
+        
+        #modalAprazamento .btn-success {
+            background: linear-gradient(to right, #28a745, #218838);
+            border: none;
+            font-weight: 500;
+        }
+        
+        #modalAprazamento .btn-success:hover {
+            background: linear-gradient(to right, #2fd050, #27a844);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+        
+        #horarios_multiplos_dias .form-check-input {
+            width: 18px;
+            height: 18px;
+            margin-top: 3px;
+        }
+        
+        #horarios_multiplos_dias .form-check-input:checked {
+            background-color: #4a6fdc;
+            border-color: #4a6fdc;
+        }
+        
+        #horarios_multiplos_dias .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            font-weight: 600;
+            padding: 12px 15px;
+        }
+        
+        #horarios_multiplos_dias .btn-group .btn {
+            padding: 5px 10px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Evolução do Paciente</h2>
+        <a href="/clinica/pacientes-internados" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <!-- Informações do Paciente -->
+    <div class="paciente-info row">
+        <div class="col-md-3 info-item"><strong>Nome:</strong> {{ paciente.nome }}</div>
+        <div class="col-md-3 info-item"><strong>CPF:</strong> {{ paciente.cpf }}</div>
+        <div class="col-md-3 info-item"><strong>Cartão SUS:</strong> {{ paciente.cartao_sus }}</div>
+        <div class="col-md-3 info-item"><strong>Sexo:</strong> {{ paciente.sexo }}</div>
+        <div class="col-md-3 info-item"><strong>Data de Nascimento:</strong> {{ paciente.data_nascimento.strftime('%d/%m/%Y') if paciente.data_nascimento else '-' }}</div>
+        <div class="col-md-3 info-item"><strong>Endereço:</strong> {{ paciente.endereco }}</div>
+        <div class="col-md-3 info-item"><strong>Município:</strong> {{ paciente.municipio }}</div>
+        <div class="col-md-3 info-item"><strong>Telefone:</strong> {{ paciente.telefone }}</div>
+        <div class="col-md-3 info-item"><strong>Nome Social:</strong> {{ paciente.nome_social }}</div>
+        <div class="col-md-3 info-item"><strong>Filiação:</strong> {{ paciente.filiacao }}</div>
+    </div>
+
+    <ul class="nav nav-pills mb-4" id="menuTabs">
+        <li class="nav-item">
+            <a class="nav-link" href="#" data-target="printSection"><i class="fas fa-print me-2"></i>Imprimir</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" data-target="prescricaoSection"><i class="fas fa-pills me-2"></i>Prescrição</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" data-target="evolucaoSection"><i class="fas fa-notes-medical me-2"></i>Evolução</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" data-target="enfermagemSection"><i class="fas fa-user-nurse me-2"></i>Enfermagem</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" data-target="examesSection"><i class="fas fa-vial me-2"></i>Exames Laboratoriais</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" data-target="imagensSection"><i class="fas fa-image me-2"></i>Ver Imagens</a>
+        </li>
+    </ul>
+
+    <div id="printSection" class="content-section">
+        <div class="alert alert-secondary">Função de impressão será implementada futuramente.</div>
+    </div>
+
+    <div id="prescricaoSection" class="content-section">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Prescrições do Paciente</h5>
+            <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalPrescricao">
+                <i class="fas fa-plus-circle"></i> Nova Prescrição
+            </button>
+        </div>
+        
+        <div class="table-responsive mb-3">
+            <table class="table table-borderless">
+                <thead class="d-none">
+                    <tr>
+                        <th>Conteúdo</th>
+                    </tr>
+                </thead>
+                <tbody id="listaPrescricoes">
+                    <tr>
+                        <td class="text-center"><i class="fas fa-spinner fa-spin"></i> Carregando prescrições...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Prescrição -->
+    <div class="modal fade" id="modalPrescricao" tabindex="-1" aria-labelledby="modalPrescricaoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalPrescricaoLabel">Nova Prescrição</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formPrescricao">
+                        <input type="hidden" id="prescricao_id" value="">
+                        
+                        <!-- Dieta -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">Dieta</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="texto_dieta" class="form-label">Descrição da Dieta</label>
+                                    <textarea class="form-control" id="texto_dieta" rows="3" placeholder="Descreva a dieta recomendada para o paciente..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Medicamentos -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">Medicamentos</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-4">
+                                        <label for="nome_medicamento" class="form-label">Nome do Medicamento</label>
+                                        <input type="text" class="form-control" id="nome_medicamento" placeholder="Ex: Dipirona 500mg">
+                                    </div>
+                                    <div class="col-md-8">
+                                        <label for="descricao_uso" class="form-label">Uso / Posologia</label>
+                                        <input type="text" class="form-control" id="descricao_uso" placeholder="Ex: 1 comprimido VO de 6/6h se dor ou febre">
+                                    </div>
+                                </div>
+                                <button type="button" id="btn_adicionar_medicamento" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-plus-circle"></i> Adicionar Medicamento
+                                </button>
+                                
+                                <div class="mt-3">
+                                    <h6>Medicamentos Adicionados</h6>
+                                    <table class="table table-sm table-bordered" id="tabela_medicamentos">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Medicamento</th>
+                                                <th>Uso</th>
+                                                <th>Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr id="sem_medicamentos">
+                                                <td colspan="3" class="text-center text-muted">Nenhum medicamento adicionado</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Procedimentos Médicos -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">Procedimentos Médicos</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="texto_procedimento_medico" class="form-label">Descrição dos Procedimentos</label>
+                                    <textarea class="form-control" id="texto_procedimento_medico" rows="3" placeholder="Descreva os procedimentos médicos a serem realizados..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Procedimentos Multidisciplinares -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">Procedimentos Multidisciplinares</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="texto_procedimento_multi" class="form-label">Descrição dos Procedimentos</label>
+                                    <textarea class="form-control" id="texto_procedimento_multi" rows="3" placeholder="Descreva os procedimentos multidisciplinares a serem realizados..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Salvar Prescrição</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="evolucaoSection" class="content-section">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Evolução e Conduta</h5>
+                <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalEvolucao">
+                    <i class="fas fa-plus-circle"></i> Nova Evolução
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="mt-3 mb-3">
+                    <h6 class="fw-bold">Informações de Admissão</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">HDA (História da Doença Atual)</label>
+                            <textarea class="form-control" rows="2" readonly>{{ internacao.hda or 'Não registrado.' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-responsive mb-3">
+                    <table class="table table-striped table-medicamentos">
+                        <thead class="table-primary">
+                            <tr>
+                                <th scope="col" style="width: 12%">Data/Hora</th>
+                                <th scope="col" style="width: 13%">Médico</th>
+                                <th scope="col" style="width: 75%">Evolução</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaEvolucoes">
+                            <tr>
+                                <td colspan="3" class="text-center">Carregando evoluções...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Evolução -->
+    <div class="modal fade" id="modalEvolucao" tabindex="-1" aria-labelledby="modalEvolucaoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalEvolucaoLabel">Registrar Nova Evolução</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formEvolucao">
+                        <div class="mb-3">
+                            <label class="form-label">Texto da Evolução</label>
+                            <!-- Editor container -->
+                            <div id="editor-container"></div>
+                            <!-- Hidden textarea to store the content -->
+                            <textarea id="texto_evolucao" name="texto_evolucao" style="display:none"></textarea>
+                            <small class="text-muted">Descreva a evolução do paciente, sinais, sintomas, exames, condutas realizadas, etc.</small>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Registrar Evolução</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="enfermagemSection" class="content-section">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Enfermagem</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Admissão de Enfermagem</label>
+                    <textarea class="form-control" rows="2" readonly>{{ internacao.admissao_enfermagem or 'Não registrado.' }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Prescrição de Enfermagem</label>
+                    <textarea class="form-control" rows="2" readonly>{{ internacao.prescricao_enfermagem or 'Não registrado.' }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Checklist</label>
+                    <textarea class="form-control" rows="2" readonly>{{ internacao.checklist_enfermagem or 'Não registrado.' }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Folha de Anamnese</label>
+                    <textarea class="form-control" rows="2" readonly>{{ internacao.folha_de_anamnese or 'Não registrado.' }}</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="examesSection" class="content-section">
+        <div class="card shadow-sm">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">Exames Laboratoriais</h5>
+            </div>
+            <div class="card-body">
+                <textarea class="form-control" rows="5" readonly>{{ internacao.exames_laboratoriais or 'Não registrado.' }}</textarea>
+            </div>
+        </div>
+    </div>
+
+    <div id="imagensSection" class="content-section">
+        <div class="alert alert-info">Visualização de imagens ainda não disponível.</div>
+    </div>
+</div>
+
+<!-- Bootstrap Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Quill Rich Text Editor -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+
+<script src="/static/js/aprazamento.js"></script>
+<script src="/static/js/calendario_aprazamento.js"></script>
+<script src="/static/js/calculo_horarios.js"></script>
+<script>
+    // Extrair ID do atendimento da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const atendimentoId = "{{ internacao.atendimento_id }}";
+    const internacaoIdRaw = "{{ internacao.id }}";
+    console.log('Valor raw de internacao.id:', internacaoIdRaw);
+    const internacaoId = parseInt(internacaoIdRaw, 10);
+    console.log('Valor de internacaoId após parse:', internacaoId, typeof internacaoId);
+    
+    // Verificar se internacaoId é um número válido
+    if (isNaN(internacaoId)) {
+        console.error('Erro: internacaoId não é um número válido!');
+        alert('Erro ao carregar o ID da internação. Por favor, recarregue a página ou contate o suporte.');
+    } else {
+        console.log('internacaoId válido:', internacaoId);
+    }
+    
+    // Variáveis globais
+    let quill;
+    let medicamentosAdicionados = [];
+
+    $(document).ready(function() {
+        // Debugar cargo do usuário
+        console.log("Cargo do usuário na sessão:", "{{ session.get('cargo') }}");
+        
+        // Verificar permissão do usuário
+        if ("{{ session.get('cargo')|lower|trim }}" !== "medico") {
+            $('body').prepend('<div class="alert alert-warning text-center">Esta página está otimizada para uso por médicos. Algumas funcionalidades podem estar limitadas.</div>');
+        }
+        
+        // Configurar navegação das abas
+        document.querySelectorAll('#menuTabs .nav-link').forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+
+                const target = this.getAttribute('data-target');
+                document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+                if (target) document.getElementById(target).classList.add('active');
+            });
+        });
+
+        // Ativar a primeira aba por padrão
+        document.querySelector('#menuTabs .nav-link').click();
+        
+        // Inicializar o Editor Quill
+        try {
+            quill = new Quill('#editor-container', {
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'indent': '-1'}, { 'indent': '+1' }],
+                        ['clean']
+                    ]
+                },
+                placeholder: 'Descreva a evolução do paciente...',
+                theme: 'snow'
+            });
+            
+            // Ao mudar o conteúdo do Quill, atualizar o textarea
+            quill.on('text-change', function() {
+                const html = quill.root.innerHTML;
+                document.getElementById('texto_evolucao').value = html;
+            });
+        } catch (error) {
+            console.error('Erro ao inicializar o editor Quill:', error);
+            // Criar um fallback para o editor
+            $('#editor-container').html('<textarea id="fallback-editor" class="form-control" rows="10" placeholder="Descreva a evolução do paciente..."></textarea>');
+            
+            // Atualizar o textarea oculto quando o fallback for alterado
+            $('#fallback-editor').on('input', function() {
+                $('#texto_evolucao').val($(this).val());
+            });
+        }
+
+        // Carregar prescrições ao iniciar
+        carregarPrescricoes();
+        
+        // Carregar evoluções ao iniciar
+        carregarEvolucoes();
+        
+        // Adicionar evento para o botão de adicionar medicamento
+        $('#btn_adicionar_medicamento').on('click', function() {
+            const nome_medicamento = $('#nome_medicamento').val().trim();
+            const descricao_uso = $('#descricao_uso').val().trim();
+            
+            if (!nome_medicamento || !descricao_uso) {
+                alert('Por favor, preencha o nome do medicamento e a descrição de uso.');
+                return;
+            }
+            
+            // Adicionar medicamento à lista
+            medicamentosAdicionados.push({
+                nome_medicamento: nome_medicamento,
+                descricao_uso: descricao_uso
+            });
+            
+            // Limpar campos
+            $('#nome_medicamento').val('');
+            $('#descricao_uso').val('');
+            
+            // Atualizar tabela
+            atualizarTabelaMedicamentos();
+            
+            // Focar no campo de nome do medicamento para facilitar a adição de vários
+            $('#nome_medicamento').focus();
+        });
+        
+        // Função para atualizar a tabela de medicamentos
+        function atualizarTabelaMedicamentos() {
+            const tbody = $('#tabela_medicamentos tbody');
+            
+            if (medicamentosAdicionados.length === 0) {
+                tbody.html(`
+                    <tr id="sem_medicamentos">
+                        <td colspan="3" class="text-center text-muted">Nenhum medicamento adicionado</td>
+                    </tr>
+                `);
+                return;
+            }
+            
+            tbody.empty();
+            
+            medicamentosAdicionados.forEach((med, index) => {
+                tbody.append(`
+                    <tr>
+                        <td>${med.nome_medicamento}</td>
+                        <td>${med.descricao_uso}</td>
+                        <td>
+                            <button type="button" class="btn btn-danger btn-sm btn-remover-medicamento" data-index="${index}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+            
+            // Adicionar evento para os botões de remover
+            $('.btn-remover-medicamento').on('click', function() {
+                const index = $(this).data('index');
+                
+                if (confirm('Tem certeza que deseja remover este medicamento?')) {
+                    medicamentosAdicionados.splice(index, 1);
+                    atualizarTabelaMedicamentos();
+                }
+            });
+        }
+        
+        // Função para limpar o formulário de prescrição
+        function limparFormularioPrescricao() {
+            $('#prescricao_id').val('');
+            $('#texto_dieta').val('');
+            $('#texto_procedimento_medico').val('');
+            $('#texto_procedimento_multi').val('');
+            $('#nome_medicamento').val('');
+            $('#descricao_uso').val('');
+            
+            // Limpar medicamentos adicionados
+            medicamentosAdicionados = [];
+            atualizarTabelaMedicamentos();
+            
+            // Restaurar título do modal
+            $('#modalPrescricaoLabel').text('Nova Prescrição');
+        }
+        
+        // Função para carregar prescrições da internação
+        function carregarPrescricoes(idInternacao = null, lastUpdate = false) {
+            // Se internacaoId não foi fornecido, use a variável global
+            const id = idInternacao || internacaoId;
+            
+            if (!lastUpdate) {
+                $("#listaPrescricoes").html("<tr><td class='text-center'><i class='fas fa-spinner fa-spin'></i> Carregando prescrições...</td></tr>");
+            }
+            
+            $.ajax({
+                url: "/api/prescricoes/" + id,
+                type: 'GET',
+                success: function(response) {
+                    if (!response.success) {
+                        $("#listaPrescricoes").html("<tr><td class='text-center text-warning'>Erro ao carregar prescrições: " + response.error + "</td></tr>");
+                        return;
+                    }
+                    
+                    if (!response.prescricoes || response.prescricoes.length === 0) {
+                        $("#listaPrescricoes").html("<tr><td class='text-center'>Nenhuma prescrição encontrada</td></tr>");
+                        return;
+                    }
+                    
+                    // Ordenar prescrições por data (mais recente primeiro)
+                    var prescricoes = response.prescricoes.sort(function(a, b) {
+                        return new Date(b.data_prescricao) - new Date(a.data_prescricao);
+                    });
+                    
+                    // Agrupar prescrições por data
+                    var prescricoesPorData = {};
+                    prescricoes.forEach(function(p) {
+                        // Extrair apenas a data (sem a hora)
+                        var dataApenas = p.data_prescricao ? p.data_prescricao.split(' ')[0] : 'Sem data';
+                        
+                        if (!prescricoesPorData[dataApenas]) {
+                            prescricoesPorData[dataApenas] = [];
+                        }
+                        prescricoesPorData[dataApenas].push(p);
+                    });
+                    
+                    var html = "<tr><td>";
+                    
+                    // Para cada data
+                    Object.keys(prescricoesPorData).forEach(function(data) {
+                        html += '<div class="card mb-3">' +
+                            '<div class="card-header bg-info text-white">' +
+                            '<h5 class="mb-0">Prescrições do dia ' + data + '</h5>' +
+                            '</div>' +
+                            '<div class="card-body">';
+                        
+                        // Para cada prescrição na data
+                        prescricoesPorData[data].forEach(function(prescricao) {
+                            var horario = prescricao.data_prescricao ? prescricao.data_prescricao.split(' ')[1] : '';
+                            
+                            html += '<div class="prescricao-item mb-4" data-id="' + prescricao.id + '">' +
+                                '<h6 class="prescricao-horario text-secondary d-flex justify-content-between">' +
+                                '<span><i class="fas fa-clock mr-1"></i> ' + horario + ' - ' +
+                                '<span class="text-primary">' + (prescricao.medico_nome || 'Médico não informado') + '</span></span>';
+                            
+                            // Adicionar botões de ações (editar, etc.)
+                            html += '<div class="btn-group">' +
+                                '<button class="btn btn-sm btn-outline-primary btn-editar-prescricao" data-id="' + prescricao.id + '">' +
+                                '<i class="fas fa-edit"></i> Editar' +
+                                '</button>' +
+                                '</div>';
+                                
+                            html += '</h6>';
+                                
+                            // Seção de Dieta
+                            if (prescricao.texto_dieta) {
+                                html += '<div class="mt-3 mb-2">' +
+                                    '<h6><i class="fas fa-utensils text-success mr-1"></i> Dieta</h6>' +
+                                    '<div class="card card-body bg-light">' + prescricao.texto_dieta + '</div>' +
+                                    '</div>';
+                            }
+                            
+                            // Seção de Medicamentos
+                            if (prescricao.medicamentos && prescricao.medicamentos.length > 0) {
+                                html += '<div class="mt-3 mb-2">' +
+                                    '<h6><i class="fas fa-pills text-danger mr-1"></i> Medicamentos</h6>' +
+                                    '<table class="table table-sm table-bordered table-striped">' +
+                                    '<thead class="thead-light">' +
+                                    '<tr>' +
+                                    '<th>Medicamento</th>' +
+                                    '<th>Uso</th>' +
+                                    '<th>Aprazamento</th>' +
+                                    '<th>Enfermeiro</th>' +
+                                    '</tr>' +
+                                    '</thead>' +
+                                    '<tbody>';
+                                    
+                                prescricao.medicamentos.forEach(function(medicamento) {
+                                    html += '<tr>' +
+                                        '<td>' + (medicamento.nome_medicamento || '') + '</td>' +
+                                        '<td>' + (medicamento.descricao_uso || '') + '</td>' +
+                                        '<td>';
+                                        
+                                    // Adicionar o texto de aprazamento com botão para visualizar em calendário
+                                    if (medicamento.aprazamento) {
+                                        html += '<div class="d-flex align-items-center">' +
+                                            '<div class="text-truncate me-2" style="max-width: 150px;">' + 
+                                            medicamento.aprazamento + 
+                                            '</div>' +
+                                            '<button type="button" class="btn btn-sm btn-outline-info btn-visualizar-aprazamento" ' +
+                                            'data-aprazamento="' + medicamento.aprazamento.replace(/"/g, '&quot;') + '" ' +
+                                            'data-medicamento="' + (medicamento.nome_medicamento || '').replace(/"/g, '&quot;') + '">' +
+                                            '<i class="fas fa-calendar-alt"></i> Ver horários' +
+                                            '</button>' +
+                                            '</div>';
+                                    } else {
+                                        html += '<span class="text-muted">Não aprazado</span>';
+                                    }
+                                    
+                                    html += '</td>' +
+                                        '<td>' + (medicamento.enfermeiro_nome || '') + '</td>';
+                                    
+                                    html += '</tr>';
+                                });
+                                
+                                html += '</tbody></table></div>';
+                            }
+                            
+                            // Seção de Procedimentos Médicos
+                            if (prescricao.texto_procedimento_medico) {
+                                html += '<div class="mt-3 mb-2">' +
+                                    '<h6><i class="fas fa-user-md text-primary mr-1"></i> Procedimentos Médicos</h6>' +
+                                    '<div class="card card-body bg-light">' + prescricao.texto_procedimento_medico + '</div>' +
+                                    '</div>';
+                            }
+                            
+                            // Seção de Procedimentos Multidisciplinares
+                            if (prescricao.texto_procedimento_multi) {
+                                html += '<div class="mt-3">' +
+                                    '<h6><i class="fas fa-users text-warning mr-1"></i> Procedimentos Multidisciplinares</h6>' +
+                                    '<div class="card card-body bg-light">' + prescricao.texto_procedimento_multi + '</div>' +
+                                    '</div>';
+                            }
+                            
+                            html += '</div>';
+                            
+                            // Adicionar divisor entre prescrições, exceto na última
+                            if (prescricoesPorData[data].indexOf(prescricao) < prescricoesPorData[data].length - 1) {
+                                html += '<hr class="my-3">';
+                            }
+                        });
+                        
+                        html += '</div></div>';
+                    });
+                    
+                    html += "</td></tr>";
+                    $("#listaPrescricoes").html(html);
+                    
+                    // Adicionar eventos para botões de editar prescrição
+                    $('.btn-editar-prescricao').on('click', function() {
+                        const prescricaoId = $(this).data('id');
+                        editarPrescricao(prescricaoId);
+                    });
+                },
+                error: function(xhr, status, error) {
+                    $("#listaPrescricoes").html("<tr><td class='text-center text-danger'>Erro ao carregar prescrições: " + error + "</td></tr>");
+                    console.error("Erro ao carregar prescrições:", error);
+                }
+            });
+        }
+
+        // Função para carregar evoluções da internação
+        function carregarEvolucoes() {
+            console.log('Carregando evoluções para internacaoId:', internacaoId);
+            
+            if (!internacaoId || isNaN(internacaoId)) {
+                console.error('ID de internação inválido ao carregar evoluções:', internacaoId);
+                $('#listaEvolucoes').html('<tr><td colspan="3" class="text-center text-danger">Erro: ID de internação inválido</td></tr>');
+                return;
+            }
+            
+            $.ajax({
+                url: `/api/evolucoes/${internacaoId}`,
+                method: 'GET',
+                success: function(response) {
+                    console.log('Resposta da API de evoluções:', response);
+                    const tabela = $('#listaEvolucoes');
+                    tabela.empty();
+                    
+                    if (response.success && response.evolucoes && response.evolucoes.length > 0) {
+                        response.evolucoes.forEach(ev => {
+                            const evolucaoHtml = ev.evolucao || '---';
+                            
+                            // Criar um container para a evolução com estilo seguro
+                            tabela.append(`
+                                <tr>
+                                    <td>${ev.data_evolucao || '---'}</td>
+                                    <td>${ev.nome_medico || '---'}</td>
+                                    <td>
+                                        <div class="texto-evolucao">
+                                            ${evolucaoHtml}
+                                        </div>
+                                    </td>
+                                </tr>
+                            `);
+                        });
+                        
+                        // Calcular o número de linhas e aplicar o atributo data-lines
+                        setTimeout(() => {
+                            $('.texto-evolucao').each(function() {
+                                const texto = $(this).text();
+                                const linhas = texto.split(/\r\n|\r|\n/).length;
+                                const palavras = texto.split(/\s+/).length;
+                                
+                                // Estimar o número de linhas com base no tamanho do texto
+                                let estimativaLinhas = Math.max(linhas, Math.ceil(palavras / 15));
+                                
+                                // Limitar a no máximo 22 para não criar muitas regras CSS
+                                estimativaLinhas = Math.min(estimativaLinhas, 22);
+                                
+                                // Aplicar o atributo data-lines ao elemento
+                                $(this).attr('data-lines', estimativaLinhas);
+                                
+                                console.log(`Evolução com ${linhas} linhas e ${palavras} palavras. Estimativa: ${estimativaLinhas}`);
+                            });
+                        }, 100);
+                    } else {
+                        tabela.html('<tr><td colspan="3" class="text-center">Nenhuma evolução registrada até o momento.</td></tr>');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Erro ao carregar evoluções:', xhr.responseText, status, error);
+                    $('#listaEvolucoes').html('<tr><td colspan="3" class="text-center text-danger">Erro ao carregar evoluções.</td></tr>');
+                }
+            });
+        }
+        
+        // Função para editar prescrição
+        function editarPrescricao(prescricaoId) {
+            // Limpar o formulário primeiro
+            limparFormularioPrescricao();
+            
+            // Buscar os dados da prescrição específica
+            $.ajax({
+                url: `/api/prescricoes/${internacaoId}`,
+                method: 'GET',
+                success: function(response) {
+                    if (response.success && response.prescricoes) {
+                        // Encontrar a prescrição pelo ID
+                        const prescricao = response.prescricoes.find(p => p.id == prescricaoId);
+                        
+                        if (prescricao) {
+                            console.log("Editando prescrição:", prescricao);
+                            
+                            // Preencher o formulário com os dados da prescrição
+                            $('#prescricao_id').val(prescricao.id);
+                            $('#texto_dieta').val(prescricao.texto_dieta || '');
+                            $('#texto_procedimento_medico').val(prescricao.texto_procedimento_medico || '');
+                            $('#texto_procedimento_multi').val(prescricao.texto_procedimento_multi || '');
+                            
+                            // Limpar a lista atual de medicamentos
+                            medicamentosAdicionados = [];
+                            
+                            // Adicionar medicamentos da prescrição na lista
+                            if (prescricao.medicamentos && prescricao.medicamentos.length > 0) {
+                                prescricao.medicamentos.forEach(med => {
+                                    medicamentosAdicionados.push({
+                                        nome_medicamento: med.nome_medicamento,
+                                        descricao_uso: med.descricao_uso
+                                    });
+                                });
+                                
+                                // Atualizar a tabela de medicamentos
+                                atualizarTabelaMedicamentos();
+                            }
+                            
+                            // Alterar o título do modal
+                            $('#modalPrescricaoLabel').text('Editar Prescrição');
+                            
+                            // Abrir o modal
+                            $('#modalPrescricao').modal('show');
+                        } else {
+                            alert('Prescrição não encontrada.');
+                        }
+                    } else {
+                        alert('Erro ao buscar dados da prescrição: ' + (response.error || 'Erro desconhecido'));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Erro ao buscar dados da prescrição:', xhr.responseText);
+                    alert('Erro de comunicação ao buscar dados da prescrição: ' + error);
+                }
+            });
+        }
+
+        // Submissão do formulário de prescrição
+        $('#formPrescricao').on('submit', function(e) {
+            e.preventDefault();
+            
+            // Verificar se é uma nova prescrição ou uma edição
+            const prescricaoId = $('#prescricao_id').val();
+            const isEdicao = prescricaoId !== "";
+            
+            const texto_dieta = $('#texto_dieta').val().trim();
+            const texto_procedimento_medico = $('#texto_procedimento_medico').val().trim();
+            const texto_procedimento_multi = $('#texto_procedimento_multi').val().trim();
+            
+            // Verificar se ao menos algo foi preenchido (dieta, procedimentos ou medicamentos)
+            if (!texto_dieta && !texto_procedimento_medico && !texto_procedimento_multi && medicamentosAdicionados.length === 0) {
+                alert('Por favor, preencha pelo menos um dos campos da prescrição ou adicione ao menos um medicamento.');
+                return;
+            }
+            
+            // Obter horário atual formatado para o Brasil
+            const dataAtual = new Date();
+            const horarioBrasil = dataAtual.toLocaleString('pt-BR', { 
+                timeZone: 'America/Sao_Paulo',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+            
+            // Log para debug do horário
+            console.log('Horário formatado para Brasil:', horarioBrasil);
+            
+            // Preparar dados para envio
+            let dados = {
+                atendimentos_clinica_id: isNaN(internacaoId) ? null : internacaoId,
+                medico_id: parseInt("{{ session.get('user_id', 0) }}", 10),
+                funcionario_id: parseInt("{{ session.get('user_id', 0) }}", 10),
+                texto_dieta: texto_dieta || null,
+                texto_procedimento_medico: texto_procedimento_medico || null,
+                texto_procedimento_multi: texto_procedimento_multi || null,
+                horario_prescricao: horarioBrasil,
+                medicamentos: medicamentosAdicionados
+            };
+            
+            // Log para debug
+            console.log('Dados da prescrição:', dados);
+            
+            if (!dados.atendimentos_clinica_id) {
+                alert('Erro: ID da internação inválido.');
+                return;
+            }
+            
+            // URL e método dependem se é edição ou nova prescrição
+            const url = isEdicao ? `/api/prescricoes/${prescricaoId}` : '/api/prescricoes';
+            const method = isEdicao ? 'PUT' : 'POST';
+            
+            // Mostrar indicador de carregamento
+            const btnSubmit = $(this).find('button[type="submit"]');
+            const textoOriginal = btnSubmit.html();
+            btnSubmit.html('<i class="fas fa-spinner fa-spin"></i> Processando...');
+            btnSubmit.prop('disabled', true);
+            
+            $.ajax({
+                url: url,
+                method: method,
+                contentType: 'application/json',
+                data: JSON.stringify(dados),
+                success: function(response) {
+                    // Restaurar botão
+                    btnSubmit.html(textoOriginal);
+                    btnSubmit.prop('disabled', false);
+                    
+                    if (response.success) {
+                        // Fechar modal e limpar campos
+                        $('#modalPrescricao').modal('hide');
+                        limparFormularioPrescricao();
+                        
+                        // Recarregar lista de prescrições
+                        carregarPrescricoes();
+                        
+                        // Mostrar mensagem de sucesso
+                        alert(isEdicao ? 'Prescrição atualizada com sucesso!' : 'Prescrição registrada com sucesso!');
+                    } else {
+                        alert('Erro ao registrar prescrição: ' + (response.message || 'Erro desconhecido'));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    // Restaurar botão
+                    btnSubmit.html(textoOriginal);
+                    btnSubmit.prop('disabled', false);
+                    
+                    console.error('Erro ao registrar prescrição:', xhr.responseText);
+                    alert('Erro de comunicação ao tentar registrar prescrição: ' + (xhr.responseJSON?.error || error));
+                }
+            });
+        });
+        
+        // Submissão do formulário de evolução
+        $('#formEvolucao').on('submit', function(e) {
+            e.preventDefault();
+            
+            // Obter o conteúdo do editor
+            let evolucaoHTML;
+            if (quill) {
+                evolucaoHTML = quill.root.innerHTML;
+            } else if ($('#fallback-editor').length > 0) {
+                evolucaoHTML = $('#fallback-editor').val();
+            } else {
+                evolucaoHTML = $('#texto_evolucao').val();
+            }
+            
+            if (!evolucaoHTML || evolucaoHTML.trim() === '' || evolucaoHTML === '<p><br></p>') {
+                alert('Por favor, preencha o texto da evolução.');
+                return;
+            }
+            
+            // Mostrar indicador de carregamento
+            const btnSubmit = $(this).find('button[type="submit"]');
+            const textoOriginal = btnSubmit.html();
+            btnSubmit.html('<i class="fas fa-spinner fa-spin"></i> Processando...');
+            btnSubmit.prop('disabled', true);
+            
+            // Preparar dados para envio
+            const dados = {
+                atendimentos_clinica_id: internacaoId,
+                funcionario_id: parseInt("{{ session.get('user_id', 0) }}", 10),
+                evolucao: evolucaoHTML
+            };
+            
+            // Log para debug
+            console.log('Dados da evolução:', dados);
+            
+            $.ajax({
+                url: '/api/evolucoes/registrar',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(dados),
+                success: function(response) {
+                    // Restaurar botão
+                    btnSubmit.html(textoOriginal);
+                    btnSubmit.prop('disabled', false);
+                    
+                    if (response.success) {
+                        // Fechar modal e limpar campos
+                        $('#modalEvolucao').modal('hide');
+                        
+                        // Limpar o editor Quill
+                        if (quill) {
+                            quill.setText('');
+                        } else if ($('#fallback-editor').length > 0) {
+                            $('#fallback-editor').val('');
+                        }
+                        
+                        // Recarregar lista de evoluções
+                        carregarEvolucoes();
+                        
+                        // Mostrar mensagem de sucesso
+                        alert('Evolução registrada com sucesso!');
+                    } else {
+                        alert('Erro ao registrar evolução: ' + (response.message || 'Erro desconhecido'));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    // Restaurar botão
+                    btnSubmit.html(textoOriginal);
+                    btnSubmit.prop('disabled', false);
+                    
+                    console.error('Erro ao registrar evolução:', xhr.responseText);
+                    alert('Erro de comunicação ao tentar registrar evolução: ' + (xhr.responseJSON?.error || error));
+                }
+            });
+        });
+
+        // Carregar dados ao iniciar
+        carregarPrescricoes();
+        carregarEvolucoes();
+    });
+</script>
+
+</body>
+</html>
+

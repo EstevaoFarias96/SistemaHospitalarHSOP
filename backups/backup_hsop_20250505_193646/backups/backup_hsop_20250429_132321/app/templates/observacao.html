@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pacientes em Observação</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+  <style>
+    body {
+      background-color: #f5f8fc;
+    }
+    h3, .section-title {
+      color: #004085;
+      font-weight: bold;
+    }
+    .table thead th {
+      background-color: #cfe2ff;
+    }
+    .table-danger-custom {
+      background-color: #f8d7da !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-5 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3>Pacientes em Observação</h3>
+      <a href="/medico" class="btn btn-secondary">Voltar ao Painel</a>
+    </div>
+
+    <!-- Seção 1: Pacientes em Observação -->
+    <h4 class="section-title">Pacientes em Observação</h4>
+    <table class="table table-hover table-bordered bg-white">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Horário de Observação</th>
+          <th>Médico Responsável</th>
+          <th>Atendimento ID</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaObservacao"></tbody>
+    </table>
+
+    <!-- Seção 2: Pacientes que Necessitam Conduta -->
+    <h4 class="section-title">Pacientes Necessita Conduta</h4>
+    <table class="table table-hover table-bordered bg-white">
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Horário de Observação</th>
+          <th>Médico Responsável</th>
+          <th>Atendimento ID</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaConduta"></tbody>
+    </table>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script>
+    $(document).ready(function () {
+      $.getJSON('/api/observacao/pacientes', function (data) {
+        const pacientes = data.pacientes || [];
+        const agora = new Date();
+
+        const htmlObservacao = [];
+        const htmlConduta = [];
+
+        pacientes.forEach(p => {
+          const horario = p.horario_observacao ? new Date(p.horario_observacao) : null;
+          const diffHoras = horario ? ((agora - horario) / 1000 / 3600) : 0;
+
+          const linha = `
+            <tr>
+              <td>${p.nome}</td>
+              <td>${horario ? horario.toLocaleString() : '---'}</td>
+              <td>${p.medico_nome || '---'}</td>
+              <td>${p.atendimento_id}</td>
+              <td>
+                <a href="/ficha/paciente?atendimento_id=${p.atendimento_id}" class="btn btn-sm btn-info">Ficha Paciente</a>
+              </td>
+            </tr>
+          `;
+
+          const linhaAlerta = `
+            <tr class="table-danger-custom">
+              <td>${p.nome}</td>
+              <td>${horario ? horario.toLocaleString() : '---'}</td>
+              <td>${p.medico_nome || '---'}</td>
+              <td>${p.atendimento_id}</td>
+              <td>
+                <a href="/ficha/paciente?atendimento_id=${p.atendimento_id}" class="btn btn-sm btn-info">Ficha Paciente</a>
+              </td>
+            </tr>
+          `;
+
+          if (horario && diffHoras > 24) {
+            htmlConduta.push(linhaAlerta);
+          } else {
+            htmlObservacao.push(linha);
+          }
+        });
+
+        $('#tabelaObservacao').html(htmlObservacao.join('') || '<tr><td colspan="5" class="text-center text-muted">Nenhum paciente em observação.</td></tr>');
+        $('#tabelaConduta').html(htmlConduta.join('') || '<tr><td colspan="5" class="text-center text-muted">Nenhum paciente aguardando conduta há mais de 24h.</td></tr>');
+      });
+    });
+  </script>
+</body>
+</html>

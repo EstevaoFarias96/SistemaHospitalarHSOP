@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel do Recepcionista</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .sidebar {
+      width: 80px;
+      height: 100vh;
+      background-color: #2d2ddcec;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 20px;
+      position: relative;
+    }
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      width: 100%;
+    }
+    .sidebar li {
+      position: relative;
+      width: 100%;
+    }
+    .sidebar a {
+      color: #fff;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+      width: 100%;
+      font-size: 18px;
+      white-space: nowrap;
+      position: relative;
+      text-decoration: none;
+    }
+    .sidebar a:hover::after {
+      content: attr(data-title);
+      position: absolute;
+      left: 100%;
+      background-color: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 5px;
+      white-space: nowrap;
+      margin-left: 10px;
+      font-size: 14px;
+    }
+    .badge-notification {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      background-color: red;
+      color: #fff;
+      border-radius: 50%;
+      padding: 2px 6px;
+      font-size: 12px;
+    }
+    .main-content {
+      padding: 20px;
+    }
+    .hidden {
+      display: none;
+    }
+    /* Menu do Usuário na sidebar */
+    .user-menu {
+      position: absolute;
+      bottom: 20px;
+      width: 100%;
+      text-align: center;
+    }
+    .user-menu-button {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #fff;
+      color: #2d2ddcec;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 24px;
+      border: none;
+    }
+    .user-dropdown {
+      display: none;
+      position: absolute;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(20px);
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      min-width: 150px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+    .user-dropdown a, .user-dropdown span {
+      display: block;
+      padding: 10px;
+      color: #333;
+      text-decoration: none;
+    }
+    .user-dropdown a:hover {
+      background-color: #f8f9fa;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="sidebar" id="sidebar">
+        <ul class="nav flex-column">
+          <li class="nav-item" data-title="Menu Inicial">
+            <a class="nav-link" href="#" onclick="onVoltarMenu()">
+              <i class="fas fa-home"></i>
+            </a>
+          </li>
+          <li class="nav-item" data-title="Cadastrar novo paciente">
+            <a class="nav-link" href="#" onclick="showCadastroPaciente()">
+              <i class="fas fa-user-plus"></i>
+            </a>
+          </li>
+          <li class="nav-item" data-title="Buscar Paciente">
+            <a class="nav-link" href="#" onclick="showBuscaPaciente()">
+              <i class="fas fa-search"></i>
+            </a>
+          </li>
+          <li class="nav-item" data-title="Pacientes Não Identificados">
+            <a class="nav-link" href="#" onclick="abrirNaoIdentificados()">
+              <i class="fas fa-exclamation-circle"></i>
+              <span id="badge-nao-identificados" class="badge-notification">0</span>
+            </a>
+          </li>
+          <!-- Novo botão lateral: Listas -->
+          <li class="nav-item" data-title="Listas">
+            <a class="nav-link" href="/listas_recepcao">
+              <i class="fas fa-list"></i>
+            </a>
+          </li>
+          
+        </ul>
+        <!-- Menu do Usuário -->
+        <div class="user-menu">
+          <button class="user-menu-button" id="userMenuButton"><i class="fas fa-user"></i></button>
+          <div class="user-dropdown" id="userDropdown">
+            <span id="userNameDisplay">Nome do Funcionário</span>
+            <a href="#" id="changePasswordOption">Mudar a senha</a>
+            <a href="/logout" id="logoutOption">Sair</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col main-content">
+        <!-- Dashboard -->
+        <div id="dashboard">
+          <button class="btn btn-primary mb-3" onclick="abrirFicha()">Criar Ficha de Atendimento</button>
+          <!-- As listas de atendimentos foram removidas -->
+        </div>
+
+        <!-- Tela de Cadastro -->
+        <div id="cadastro-paciente" class="form-container hidden">
+          <h2>Cadastrar Paciente</h2>
+          <button class="btn btn-secondary mb-3" onclick="onVoltarMenu()">Voltar ao Menu</button>
+          <form id="form-paciente">
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" id="checkIdentificado" checked onchange="toggleIdentificacao()" />
+              <label class="form-check-label" for="checkIdentificado">Paciente tem identificação?</label>
+            </div>
+            <!-- Campos Identificado -->
+            <div id="campos-identificado">
+              <div class="form-group">
+                <label for="cpf">CPF <span id="cpf-asterisk" class="required-asterisk">*</span></label>
+                <input type="text" class="form-control" id="cpf" name="cpf" />
+              </div>
+              <div class="form-group">
+                <label for="nome">Nome Completo <span id="nome-asterisk" class="required-asterisk">*</span></label>
+                <input type="text" class="form-control" id="nome" name="nome" />
+              </div>
+              <div class="form-group">
+                <label for="cartao_sus">Cartão SUS</label>
+                <input type="text" class="form-control" id="cartao_sus" name="cartao_sus" />
+              </div>
+              <div class="form-group">
+                <label for="nome_social">Nome Social</label>
+                <input type="text" class="form-control" id="nome_social" name="nome_social" />
+              </div>
+              <div class="form-group">
+                <label for="filiacao">Filiação</label>
+                <input type="text" class="form-control" id="filiacao" name="filiacao" />
+              </div>
+              <div class="form-group">
+                <label for="data_nascimento">Data de Nascimento <span id="data-asterisk" class="required-asterisk">*</span></label>
+                <input type="date" class="form-control" id="data_nascimento" name="data_nascimento" />
+              </div>
+              <div class="form-group">
+                <label for="sexo">Sexo</label>
+                <select class="form-control" id="sexo" name="sexo">
+                  <option value="Masculino">Masculino</option>
+                  <option value="Feminino">Feminino</option>
+                  <option value="Outro">Outro</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="endereco">Endereço</label>
+                <input type="text" class="form-control" id="endereco" name="endereco" />
+              </div>
+            </div>
+            <!-- Campo Telefone (sempre visível) -->
+            <div class="form-group">
+              <label for="telefone">Telefone</label>
+              <input type="text" class="form-control" id="telefone" name="telefone" placeholder="(XX) XXXXX-XXXX" />
+            </div>
+            <!-- Campos não identificado -->
+            <div id="campos-nao-identificado" class="hidden">
+              <div class="form-group">
+                <label for="descricao_nao-identificado">Descrição do Paciente <span id="desc-asterisk" class="required-asterisk">*</span></label>
+                <textarea class="form-control" id="descricao_nao-identificado" name="descricao_nao_identificado"></textarea>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Cadastrar</button>
+          </form>
+        </div>
+
+        <!-- Tela de Busca -->
+        <div id="busca-paciente" class="hidden">
+          <h2>Buscar Paciente</h2>
+          <button class="btn btn-secondary mb-3" onclick="onVoltarMenu()">Voltar ao Menu</button>
+          <div class="form-group">
+            <label for="filtro-busca">Nome ou CPF</label>
+            <input type="text" class="form-control" id="filtro-busca" />
+          </div>
+          <button class="btn btn-primary mb-3" onclick="buscarPaciente()">Buscar</button>
+          <div id="resultado-busca"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Mudar Senha -->
+  <div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="changePasswordModalLabel">Mudar a senha</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="changePasswordForm">
+            <div class="form-group">
+              <label for="senhaAtual">Senha Atual</label>
+              <input type="password" class="form-control" id="senhaAtual" name="senhaAtual" required>
+            </div>
+            <div class="form-group">
+              <label for="novaSenha">Nova Senha</label>
+              <input type="password" class="form-control" id="novaSenha" name="novaSenha" required>
+            </div>
+            <div class="form-group">
+              <label for="confirmarNovaSenha">Confirmar Nova Senha</label>
+              <input type="password" class="form-control" id="confirmarNovaSenha" name="confirmarNovaSenha" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Alterar Senha</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- jQuery, Bootstrap JS e jQuery Mask Plugin -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+
+  <script>
+    $(document).ready(function () {
+      $('#cpf').mask('000.000.000-00');
+      carregarContagemNaoIdentificados();
+      document.getElementById('form-paciente').addEventListener('submit', cadastrarPaciente);
+      toggleIdentificacao();
+      $.getJSON('/api/recepcionista/nome', function(data) {
+        if(data.nome) {
+          $('#userNameDisplay').text(data.nome);
+        }
+      });
+      // As listas de atendimentos foram removidas
+    });
+
+    $('#userMenuButton').click(function() {
+      $('#userDropdown').toggle();
+    });
+    $(document).click(function(event) {
+      if(!$(event.target).closest('#userMenuButton, #userDropdown').length) {
+        $('#userDropdown').hide();
+      }
+    });
+    $('#changePasswordOption').click(function(e) {
+      e.preventDefault();
+      $('#userDropdown').hide();
+      $('#changePasswordModal').modal('show');
+    });
+    $('#changePasswordForm').submit(function(e) {
+      e.preventDefault();
+      const senhaAtual = $('#senhaAtual').val();
+      const novaSenha = $('#novaSenha').val();
+      const confirmarNovaSenha = $('#confirmarNovaSenha').val();
+      if(novaSenha !== confirmarNovaSenha) {
+        alert('A nova senha e a confirmação não conferem.');
+        return;
+      }
+      fetch('/api/recepcionista/mudar-senha', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ senha_atual: senhaAtual, nova_senha: novaSenha })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if(data.success) {
+          alert('Senha alterada com sucesso.');
+          $('#changePasswordModal').modal('hide');
+          $('#changePasswordForm')[0].reset();
+        } else {
+          alert('Erro: ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao alterar a senha.');
+      });
+    });
+
+    function abrirFicha() {
+      window.open('/ficha-de-atendimento', 'FichaAtendimento', 'width=1000,height=700');
+    }
+    function showDashboard() {
+      $('#dashboard').show();
+      $('#cadastro-paciente').hide();
+      $('#busca-paciente').hide();
+    }
+    function showCadastroPaciente() {
+      $('#dashboard').hide();
+      $('#cadastro-paciente').show();
+      $('#busca-paciente').hide();
+    }
+    function showBuscaPaciente() {
+      $('#dashboard').hide();
+      $('#cadastro-paciente').hide();
+      $('#busca-paciente').show();
+    }
+    function onVoltarMenu() {
+      if($('#cadastro-paciente').is(':visible')) {
+        if(!confirm('Deseja cancelar o cadastro e voltar ao menu? Todos os dados serão perdidos.')) return;
+        $('#form-paciente')[0].reset();
+        toggleIdentificacao();
+      }
+      if($('#busca-paciente').is(':visible')) {
+        $('#filtro-busca').val('');
+        $('#resultado-busca').html('');
+      }
+      showDashboard();
+    }
+
+    function toggleIdentificacao() {
+      const identificado = $('#checkIdentificado').is(':checked');
+      $('#campos-identificado').toggle(identificado);
+      $('#campos-nao-identificado').toggle(!identificado);
+      $('#cpf, #nome, #data_nascimento, #sexo, #endereco, #cartao_sus, #nome_social, #filiacao').prop('disabled', !identificado);
+      $('#cpf, #nome, #data_nascimento').prop('required', identificado);
+      $('#telefone').prop('required', identificado);
+      $('#cpf-asterisk, #nome-asterisk, #data-asterisk').toggle(identificado);
+      $('#desc-asterisk').toggle(!identificado);
+    }
+
+    function validarCPF(cpf) {
+      cpf = cpf.replace(/\D/g, '');
+      if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+      let soma = 0;
+      for (let i = 0; i < 9; i++) {
+        soma += parseInt(cpf.charAt(i)) * (10 - i);
+      }
+      let resto = (soma * 10) % 11;
+      if (resto === 10 || resto === 11) resto = 0;
+      if (resto !== parseInt(cpf.charAt(9))) return false;
+      soma = 0;
+      for (let i = 0; i < 10; i++) {
+        soma += parseInt(cpf.charAt(i)) * (11 - i);
+      }
+      resto = (soma * 10) % 11;
+      if (resto === 10 || resto === 11) resto = 0;
+      if (resto !== parseInt(cpf.charAt(10))) return false;
+      return true;
+    }
+
+    function cadastrarPaciente(event) {
+      event.preventDefault();
+      const identificado = $('#checkIdentificado').is(':checked');
+      if (identificado) {
+        let cpfVal = $('#cpf').val().replace(/\D/g, '');
+        if (!validarCPF(cpfVal)) {
+          alert('CPF inválido.');
+          return;
+        }
+      }
+      const formData = new FormData(document.getElementById('form-paciente'));
+      let data = Object.fromEntries(formData.entries());
+      data.identificado = identificado;
+      if (!identificado) {
+        delete data.cpf;
+        delete data.nome;
+        delete data.cartao_sus;
+        delete data.nome_social;
+        delete data.filiacao;
+        delete data.data_nascimento;
+        delete data.sexo;
+        delete data.endereco;
+      }
+      fetch('/api/pacientes/cadastrar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      .then(response => response.json())
+      .then(result => {
+        if (result.success) {
+          alert('Paciente cadastrado com sucesso!');
+          document.getElementById('form-paciente').reset();
+          toggleIdentificacao();
+          showDashboard();
+        } else {
+          alert('Erro ao cadastrar paciente: ' + result.message);
+        }
+      })
+      .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao cadastrar paciente.');
+      });
+    }
+
+    function buscarPaciente() {
+      const filtro = $('#filtro-busca').val().trim();
+      if (!filtro) {
+        alert('Digite um nome ou CPF para buscar.');
+        return;
+      }
+      fetch('/api/pacientes/buscar?filtro=' + encodeURIComponent(filtro))
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          exibirResultadosBusca(data.pacientes);
+        } else {
+          alert('Erro ao buscar pacientes: ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao buscar pacientes.');
+      });
+    }
+
+    function exibirResultadosBusca(listaPacientes) {
+      if (!listaPacientes || listaPacientes.length === 0) {
+        $('#resultado-busca').html('<p>Nenhum paciente encontrado.</p>');
+        return;
+      }
+      let html = `<table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>CPF</th>
+                        <th>Nome</th>
+                        <th>Data de Nascimento</th>
+                        <th>Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody>`;
+      listaPacientes.forEach(pac => {
+        html += `<tr>
+                  <td>${pac.cpf || ''}</td>
+                  <td>${pac.nome || ''}</td>
+                  <td>${pac.data_nascimento || ''}</td>
+                  <td>
+                    <button class="btn btn-info btn-sm" onclick="abrirObservacoes(${pac.id})">Informações</button>
+                  </td>
+                </tr>`;
+      });
+      html += `   </tbody>
+                </table>`;
+      $('#resultado-busca').html(html);
+    }
+
+    function abrirObservacoes(pacienteId) {
+      window.open('/observacoes-recepcao?paciente_id=' + pacienteId, 'ObservacoesPaciente', 'width=800,height=600');
+    }
+
+    function carregarContagemNaoIdentificados() {
+      fetch('/api/pacientes/nao_identificados')
+      .then(response => response.json())
+      .then(data => {
+        if(data.success) {
+          $('#badge-nao-identificados').text(data.count);
+        } else {
+          $('#badge-nao-identificados').text("0");
+        }
+      })
+      .catch(error => {
+        console.error("Erro:", error);
+        $('#badge-nao-identificados').text("0");
+      });
+    }
+
+    function abrirNaoIdentificados() {
+      window.location.href = '/nao-identificados';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ficha de Triagem - Enfermeiro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+      body {
+        background-color: #f8f9fa;
+      }
+      .card-header {
+        font-weight: bold;
+        font-size: 1.5rem;
+      }
+      .section-header {
+        background-color: #e9ecef;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        font-weight: bold;
+      }
+      .info-row {
+        margin-bottom: 10px;
+      }
+      .nurse-signature {
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-top: 30px;
+        text-align: center;
+        border-radius: 5px;
+        background-color: #fff;
+      }
+      .nurse-signature h5 {
+        margin-bottom: 5px;
+      }
+      .nurse-signature p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #555;
+      }
+      /* As seções de informações de gestante e condições clínicas ficam ocultas por padrão */
+      .gestante-fields, .condicoes-clinicas {
+        display: none;
+        border: 1px solid #ccc;
+        padding: 15px;
+        margin-top: 15px;
+        border-radius: 5px;
+        background-color: #fff;
+      }
+      .back-btn {
+        margin-bottom: 20px;
+      }
+      /* Campo de DST oculto por padrão */
+      #dstTextContainer {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container my-5">
+      <!-- Botão de voltar ao menu principal -->
+      <button class="btn btn-secondary back-btn" onclick="window.location.href='/enfermeiro'">Voltar ao Menu Principal</button>
+      
+      <div class="card">
+        <div class="card-header text-center">
+          Ficha de Triagem
+        </div>
+        <div class="card-body">
+          <!-- Dados do Paciente -->
+          <div class="mb-4" id="dadosPaciente">
+            <div class="section-header">Dados do Paciente</div>
+            <div class="row info-row">
+              <div class="col-md-4"><strong>Cartão SUS:</strong> <span id="pacienteCartaoSus"></span></div>
+              <div class="col-md-4"><strong>Nome:</strong> <span id="pacienteNome"></span></div>
+              <div class="col-md-4"><strong>Nome Social:</strong> <span id="pacienteNomeSocial"></span></div>
+            </div>
+            <div class="row info-row">
+              <div class="col-md-4"><strong>Filiação:</strong> <span id="pacienteFiliacao"></span></div>
+              <div class="col-md-4"><strong>Data Nasc. / Idade:</strong> <span id="pacienteDataNasc"></span> (<span id="pacienteIdade"></span> anos)</div>
+              <div class="col-md-4"><strong>Sexo:</strong> <span id="pacienteSexo"></span></div>
+            </div>
+            <div class="row info-row">
+              <div class="col-md-4"><strong>CPF:</strong> <span id="pacienteCpf"></span></div>
+              <div class="col-md-4"><strong>Endereço:</strong> <span id="pacienteEndereco"></span></div>
+              <div class="col-md-4"><strong>Município / Bairro:</strong> <span id="pacienteMunicipio"></span> / <span id="pacienteBairro"></span></div>
+            </div>
+            <div class="row info-row">
+              <div class="col-md-4"><strong>Telefone:</strong> <span id="pacienteTelefone"></span></div>
+            </div>
+          </div>
+          
+          <!-- Checkbox para informar se o paciente é gestante -->
+          <div class="mb-3">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="isGestante" name="isGestante">
+              <label class="form-check-label" for="isGestante">Paciente é Gestante?</label>
+            </div>
+          </div>
+          
+          <!-- Formulário de triagem -->
+          <form id="triagemForm">
+            <!-- Campo oculto para id do atendimento -->
+            <input type="hidden" id="atendimento_id" name="atendimento_id">
+            
+            <!-- Sinais Vitais -->
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <label for="pressao" class="form-label">Pressão</label>
+                <input type="text" class="form-control" id="pressao" name="pressao" placeholder="Ex: 120/80">
+              </div>
+              <div class="col-md-4">
+                <label for="pulso" class="form-label">Pulso</label>
+                <input type="text" class="form-control" id="pulso" name="pulso" placeholder="Ex: 72 bpm">
+              </div>
+              <div class="col-md-4">
+                <label for="sp02" class="form-label">SpO₂</label>
+                <input type="text" class="form-control" id="sp02" name="sp02" placeholder="Ex: 98%">
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <label for="temp" class="form-label">Temperatura</label>
+                <input type="text" class="form-control" id="temp" name="temp" placeholder="Ex: 36.5">
+              </div>
+              <div class="col-md-4">
+                <label for="peso" class="form-label">Peso</label>
+                <input type="number" class="form-control" id="peso" name="peso" placeholder="70" step="any">
+              </div>
+              <div class="col-md-4">
+                <label for="altura" class="form-label">Altura</label>
+                <input type="text" class="form-control" id="altura" name="altura" placeholder="Ex: 1.75">
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="fr" class="form-label">Frequência Respiratória (FR)</label>
+                <input type="text" class="form-control" id="fr" name="fr" placeholder="Ex: 18">
+              </div>
+              <div class="col-md-6">
+                <label for="dx" class="form-label">DX</label>
+                <input type="text" class="form-control" id="dx" name="dx" placeholder="Observações iniciais">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="triagem" class="form-label">Triagem</label>
+              <textarea class="form-control" id="triagem" name="triagem" rows="2" placeholder="Descreva a triagem"></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="alergias" class="form-label">Alergias</label>
+              <textarea class="form-control" id="alergias" name="alergias" rows="2" placeholder="Informe alergias conhecidas"></textarea>
+            </div>
+            
+            <!-- Informações de Gestante (exibidas somente se marcado) -->
+            <div id="gestanteFields" class="gestante-fields">
+              <div class="section-header">Informações de Gestante</div>
+              <div class="row mb-3">
+                <div class="col-md-2">
+                  <label for="idade_gestacional_semanas" class="form-label">Semanas</label>
+                  <input type="number" class="form-control" id="idade_gestacional_semanas" name="idade_gestacional_semanas" placeholder="Ex: 24">
+                </div>
+                <div class="col-md-2">
+                  <label for="idade_gestacional_dias" class="form-label">Dias</label>
+                  <input type="number" class="form-control" id="idade_gestacional_dias" name="idade_gestacional_dias" placeholder="Ex: 5">
+                </div>
+                <div class="col-md-4">
+                  <label for="altura_uterina" class="form-label">Altura Uterina (cm)</label>
+                  <input type="text" class="form-control" id="altura_uterina" name="altura_uterina" placeholder="Ex: 30">
+                </div>
+                <div class="col-md-4">
+                  <label for="quantidade_de_gestacoes" class="form-label">Quantidade de Gestacoes</label>
+                  <input type="number" class="form-control" id="quantidade_de_gestacoes" name="quantidade_de_gestacoes" placeholder="Ex: 2">
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-md-4">
+                  <label for="ultima_mestruacao" class="form-label">Última Menstruação</label>
+                  <input type="date" class="form-control" id="ultima_mestruacao" name="ultima_mestruacao">
+                </div>
+                <div class="col-md-4">
+                  <label for="bcf" class="form-label">BCF</label>
+                  <input type="text" class="form-control" id="bcf" name="bcf" placeholder="Ex: Valor">
+                </div>
+                <div class="col-md-4">
+                  <label for="data_primeira_ultrassom" class="form-label">Data do 1º Ultrassom</label>
+                  <input type="date" class="form-control" id="data_primeira_ultrassom" name="data_primeira_ultrassom">
+                </div>
+              </div>
+              <!-- Abo/RH na seção de gestante -->
+              <div class="row mb-3">
+                <div class="col-md-4">
+                  <label for="abo_rh" class="form-label">Abo/RH</label>
+                  <input type="text" class="form-control" id="abo_rh" name="abo_rh" placeholder="Ex: A+">
+                </div>
+              </div>
+            </div>
+            
+            <!-- Condições Clínicas (apenas se gestante estiver marcada) -->
+            <div id="condicoesClinicas" class="condicoes-clinicas">
+              <div class="section-header">Condições Clínicas</div>
+              <div class="row mb-3">
+                <div class="col-md-2">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="itu" name="itu">
+                    <label class="form-check-label" for="itu">ITU</label>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="sheg" name="sheg">
+                    <label class="form-check-label" for="sheg">SHEG</label>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="diabetes" name="diabetes">
+                    <label class="form-check-label" for="diabetes">Diabetes</label>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="cardiopata" name="cardiopata">
+                    <label class="form-check-label" for="cardiopata">Cardiopata</label>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="tromboembolismo" name="tromboembolismo">
+                    <label class="form-check-label" for="tromboembolismo">Tromboembolismo</label>
+                  </div>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-md-2">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="hipertensao_arterial" name="hipertensao_arterial">
+                    <label class="form-check-label" for="hipertensao_arterial">Hipertensão Arterial</label>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="cirugia" name="cirugia">
+                    <label class="form-check-label" for="cirugia">Cirurgia</label>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="usa_insulina" name="usa_insulina">
+                    <label class="form-check-label" for="usa_insulina">Usa Insulina</label>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="anemia" name="anemia">
+                    <label class="form-check-label" for="anemia">Anemia</label>
+                  </div>
+                </div>
+                <div class="col-md-2">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="toxoplasmose" name="toxoplasmose">
+                    <label class="form-check-label" for="toxoplasmose">Toxoplasmose</label>
+                  </div>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-md-2">
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="dst_checkbox" name="dst_checkbox">
+                    <label class="form-check-label" for="dst_checkbox">DST</label>
+                  </div>
+                </div>
+                <div class="col-md-4" id="dstTextContainer">
+                  <input type="text" class="form-control" id="dst_text" name="dst_text" placeholder="Nome da DST">
+                </div>
+              </div>
+            </div>
+            
+            <!-- Resto do formulário -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="classificacao_risco" class="form-label">Classificação de Risco (Manchester)</label>
+                <select class="form-select" id="classificacao_risco" name="classificacao_risco">
+                  <option value="">Selecione</option>
+                  <option value="Azul">Azul</option>
+                  <option value="Verde">Verde</option>
+                  <option value="Amarelo">Amarelo</option>
+                  <option value="Laranja">Laranja</option>
+                  <option value="Vermelho">Vermelho</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="anamnese_exame_fisico" class="form-label">Anamnese/Exame Físico</label>
+                <textarea class="form-control" id="anamnese_exame_fisico" name="anamnese_exame_fisico" rows="2" placeholder="Observações do exame"></textarea>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="observacao" class="form-label">Observações Adicionais</label>
+              <textarea class="form-control" id="observacao" name="observacao" rows="3" placeholder="Outras observações"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Salvar Triagem</button>
+          </form>
+          
+          <!-- Quadro de assinatura do enfermeiro -->
+          <div class="nurse-signature mt-4" id="nurseSignature">
+            <h5>Enfermeiro</h5>
+            <p id="nurseNome"></p>
+            <p id="nurseNumero" class="text-muted"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Assinatura -->
+    <div class="modal fade" id="assinaturaModal" tabindex="-1" aria-labelledby="assinaturaModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="assinaturaModalLabel">Assinatura de Triagem</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            Você, enfermeiro, assina essa triagem?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Não</button>
+            <button type="button" class="btn btn-primary" id="confirmarAssinatura">Sim</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Toggle do campo DST: exibe campo de texto se checkbox estiver marcado
+      document.getElementById('dst_checkbox').addEventListener('change', function() {
+        const dstTextContainer = document.getElementById('dstTextContainer');
+        dstTextContainer.style.display = this.checked ? 'block' : 'none';
+      });
+
+      // Exibe as seções de gestante e condições clínicas somente se o paciente for gestante
+      document.getElementById('isGestante').addEventListener('change', function() {
+        const gestanteFields = document.getElementById('gestanteFields');
+        const condicoesClinicas = document.getElementById('condicoesClinicas');
+        if(this.checked) {
+          gestanteFields.style.display = 'block';
+          condicoesClinicas.style.display = 'block';
+        } else {
+          gestanteFields.style.display = 'none';
+          condicoesClinicas.style.display = 'none';
+          // Limpa campos da seção de condições clínicas
+          document.getElementById('itu').checked = false;
+          document.getElementById('sheg').checked = false;
+          document.getElementById('diabetes').checked = false;
+          document.getElementById('cardiopata').checked = false;
+          document.getElementById('tromboembolismo').checked = false;
+          document.getElementById('hipertensao_arterial').checked = false;
+          document.getElementById('cirugia').checked = false;
+          document.getElementById('usa_insulina').checked = false;
+          document.getElementById('anemia').checked = false;
+          document.getElementById('toxoplasmose').checked = false;
+          document.getElementById('abo_rh').value = "";
+        }
+      });
+
+      // Função para obter parâmetros da query string
+      function getQueryParam(param) {
+        let urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+      }
+
+      // Verifica quais seções estão vazias
+      function verificarCamposVazios() {
+        let emptySections = [];
+
+        // Sinais Vitais
+        const sinaisVitaisIds = ['pressao', 'pulso', 'sp02', 'temp', 'peso', 'altura', 'fr', 'dx'];
+        const sinaisVitaisPreenchido = sinaisVitaisIds.some(id => document.getElementById(id).value.trim() !== "");
+        if (!sinaisVitaisPreenchido) {
+          emptySections.push("Sinais Vitais");
+        }
+
+        // Triagem
+        if(document.getElementById('triagem').value.trim() === ""){
+          emptySections.push("Triagem");
+        }
+
+        // Alergias
+        if(document.getElementById('alergias').value.trim() === ""){
+          emptySections.push("Alergias");
+        }
+
+        // Se for gestante, verifica Informações de Gestante e Condições Clínicas
+        if(document.getElementById('isGestante').checked){
+          const gestanteIds = ['idade_gestacional_semanas', 'idade_gestacional_dias', 'altura_uterina', 'quantidade_de_gestacoes', 'ultima_mestruacao', 'bcf', 'data_primeira_ultrassom', 'abo_rh'];
+          const gestantePreenchido = gestanteIds.some(id => {
+            const campo = document.getElementById(id);
+            return campo && campo.value.trim() !== "";
+          });
+          if(!gestantePreenchido){
+            emptySections.push("Informações de Gestante");
+          }
+
+          const condicoes = document.querySelectorAll('#condicoesClinicas input[type="checkbox"]');
+          const algumaCondicaoMarcada = Array.from(condicoes).some(checkbox => checkbox.checked);
+          if(!algumaCondicaoMarcada){
+            emptySections.push("Condições Clínicas");
+          }
+        }
+
+        return emptySections;
+      }
+
+      // Carrega os dados do paciente via API
+      function carregarDadosPaciente() {
+        const pacienteId = getQueryParam('paciente_id');
+        if (!pacienteId) {
+          alert("Paciente não informado na URL.");
+          return;
+        }
+        fetch('/api/enfermeiro/paciente_detalhado?paciente_id=' + pacienteId)
+          .then(response => response.json())
+          .then(data => {
+            if(data.success) {
+              const paciente = data.paciente;
+              document.getElementById('pacienteCartaoSus').textContent = paciente.cartao_sus || '';
+              document.getElementById('pacienteNome').textContent = paciente.nome || '';
+              document.getElementById('pacienteNomeSocial').textContent = paciente.nome_social || '';
+              document.getElementById('pacienteFiliacao').textContent = paciente.filiacao || '';
+              document.getElementById('pacienteDataNasc').textContent = paciente.data_nascimento || '';
+              document.getElementById('pacienteIdade').textContent = paciente.idade !== null ? paciente.idade : '';
+              document.getElementById('pacienteSexo').textContent = paciente.sexo || '';
+              document.getElementById('pacienteCpf').textContent = paciente.cpf || '';
+              document.getElementById('pacienteEndereco').textContent = paciente.endereco || '';
+              document.getElementById('pacienteMunicipio').textContent = paciente.municipio || '';
+              document.getElementById('pacienteBairro').textContent = paciente.bairro || '';
+              document.getElementById('pacienteTelefone').textContent = paciente.telefone || '';
+              fetch('/api/enfermeiro/atendimento?paciente_id=' + pacienteId)
+                .then(response => response.json())
+                .then(atData => {
+                  if(atData.success) {
+                    document.getElementById('atendimento_id').value = atData.atendimento_id;
+                  } else {
+                    alert("Erro: " + atData.message);
+                  }
+                })
+                .catch(error => {
+                  console.error("Erro ao carregar atendimento:", error);
+                  alert("Erro ao carregar o atendimento vinculado.");
+                });
+            } else {
+              alert("Erro ao carregar os dados do paciente: " + data.message);
+            }
+          })
+          .catch(error => {
+            console.error("Erro:", error);
+            alert("Erro ao carregar os dados do paciente.");
+          });
+      }
+
+      // Carrega os dados do enfermeiro via API
+      function carregarDadosEnfermeiro() {
+        fetch('/api/enfermeiro/info')
+          .then(response => response.json())
+          .then(data => {
+            if(data.success) {
+              const info = data.funcionario;
+              document.getElementById('nurseNome').textContent = info.nome;
+              document.getElementById('nurseNumero').textContent = info.numero_profissional;
+            } else {
+              document.getElementById('nurseNome').textContent = "";
+              document.getElementById('nurseNumero').textContent = "";
+            }
+          })
+          .catch(error => {
+            console.error("Erro ao carregar dados do enfermeiro:", error);
+          });
+      }
+
+      // Submissão do formulário com validação e cálculo da idade gestacional em dias
+      document.getElementById('triagemForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const atendimentoId = document.getElementById('atendimento_id').value;
+        if (!atendimentoId) {
+          alert("Atendimento não identificado.");
+          return;
+        }
+
+        const emptySections = verificarCamposVazios();
+        if(emptySections.length > 0) {
+          const confirmMsg = "Os seguintes quadros estão vazios: " + emptySections.join(", ") +
+                             ".\nDeseja concluir a triagem mesmo assim?";
+          if(!window.confirm(confirmMsg)) {
+            return;
+          }
+        }
+
+        const isGestante = document.getElementById('isGestante').checked;
+        // Se for gestante, usamos o endpoint de transformação; senão, o endpoint de atualização da triagem
+        const endpoint = isGestante ?
+          '/api/atendimentos/' + atendimentoId + '/transformar_gestante' :
+          '/api/atendimentos/' + atendimentoId + '/triagem';
+
+        // Calcula a idade gestacional total em dias se for gestante; caso contrário, ignora
+        let totalDias = 0;
+        if(isGestante) {
+          let semanas = parseInt(document.getElementById('idade_gestacional_semanas').value) || 0;
+          let dias = parseInt(document.getElementById('idade_gestacional_dias').value) || 0;
+          totalDias = semanas * 7 + dias;
+        }
+
+        const formData = {
+          pressao: document.getElementById('pressao').value,
+          pulso: document.getElementById('pulso').value,
+          sp02: document.getElementById('sp02').value,
+          temp: document.getElementById('temp').value,
+          peso: document.getElementById('peso').value,
+          altura: document.getElementById('altura').value,
+          fr: document.getElementById('fr').value,
+          dx: document.getElementById('dx').value,
+          triagem: document.getElementById('triagem').value,
+          alergias: document.getElementById('alergias').value,
+          classificacao_risco: document.getElementById('classificacao_risco').value,
+          anamnese_exame_fisico: document.getElementById('anamnese_exame_fisico').value,
+          observacao: document.getElementById('observacao').value,
+          // Envia a idade gestacional total em dias (se for gestante)
+          idade_gestacional: totalDias,
+          altura_uterina: document.getElementById('altura_uterina').value,
+          quantidade_de_gestacoes: document.getElementById('quantidade_de_gestacoes').value,
+          ultima_mestruacao: document.getElementById('ultima_mestruacao').value,
+          bcf: document.getElementById('bcf').value,
+          data_primeira_ultrassom: document.getElementById('data_primeira_ultrassom').value,
+          // Condições clínicas (apenas se gestante estiver marcada)
+          itu: document.getElementById('itu').checked,
+          sheg: document.getElementById('sheg').checked,
+          diabetes: document.getElementById('diabetes').checked,
+          cardiopata: document.getElementById('cardiopata').checked,
+          tromboembolismo: document.getElementById('tromboembolismo').checked,
+          hipertensao_arterial: document.getElementById('hipertensao_arterial').checked,
+          cirugia: document.getElementById('cirugia').checked,
+          usa_insulina: document.getElementById('usa_insulina').checked,
+          anemia: document.getElementById('anemia').checked,
+          abo_rh: document.getElementById('abo_rh').value,
+          dst: document.getElementById('dst_checkbox').checked ? document.getElementById('dst_text').value : "",
+          toxoplasmose: document.getElementById('toxoplasmose').checked
+        };
+
+        fetch(endpoint, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+          if(data.success) {
+            // Se for gestante, atualiza o campo de atendimento com o novo ID retornado
+            if(isGestante && data.novo_id) {
+              document.getElementById('atendimento_id').value = data.novo_id;
+            }
+            var assinaturaModal = new bootstrap.Modal(document.getElementById('assinaturaModal'));
+            assinaturaModal.show();
+          } else {
+            alert("Erro ao salvar triagem: " + data.message);
+          }
+        })
+        .catch(error => {
+          console.error("Erro:", error);
+          alert("Erro ao salvar triagem.");
+        });
+      });
+
+      // Confirma a assinatura
+      document.getElementById('confirmarAssinatura').addEventListener('click', function() {
+        const atendimentoId = document.getElementById('atendimento_id').value;
+        const isGestante = document.getElementById('isGestante').checked;
+        const signatureEndpoint = isGestante ?
+          '/api/atendimentos_gestantes/' + atendimentoId + '/assinatura' :
+          '/api/atendimentos/' + atendimentoId + '/assinatura';
+        fetch(signatureEndpoint, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if(data.success) {
+            alert("Triagem assinada com sucesso!");
+            window.location.href = '/enfermeiro';
+          } else {
+            alert("Erro ao assinar triagem: " + data.message);
+          }
+        })
+        .catch(error => {
+          console.error("Erro ao assinar triagem:", error);
+          alert("Erro ao assinar triagem.");
+        });
+      });
+
+      window.onload = function() {
+        carregarDadosPaciente();
+        carregarDadosEnfermeiro();
+      };
+    </script>
+  </body>
+</html>

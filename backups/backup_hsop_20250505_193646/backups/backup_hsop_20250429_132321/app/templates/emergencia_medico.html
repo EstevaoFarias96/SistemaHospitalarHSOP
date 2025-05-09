@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Emergência - Médico</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    .paciente-card {
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 15px;
+      margin-bottom: 10px;
+      background-color: #fff;
+    }
+    .section-title {
+      margin-top: 40px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-4">
+    <h2>Área de Emergência</h2>
+    <p>Visualize os pacientes que já passaram pela triagem e estão aguardando consulta.</p>
+
+    <!-- 🔍 Seção de busca por nome ou CPF -->
+    <h4 class="section-title">Buscar Paciente por Nome ou CPF</h4>
+    <div class="form-group">
+      <input type="text" id="buscaPaciente" class="form-control" placeholder="Digite o nome ou CPF e pressione Enter">
+    </div>
+    <div id="resultadoBusca"></div>
+
+    <!-- 🩺 Seção de pacientes aguardando consulta médica -->
+    <h4 class="section-title">Lista de Pacientes Ordenada</h4>
+
+    <!-- Filtro de ordenação -->
+    <div class="form-group">
+      <label for="ordenarPor">Ordenar por:</label>
+      <select id="ordenarPor" class="form-control w-auto" onchange="carregarPacientesTriagem()">
+        <option value="tempo">Tempo de Chegada</option>
+        <option value="risco">Classificação de Risco</option>
+      </select>
+    </div>
+
+    <div id="listaTriagem"></div>
+
+    <a href="/medico" class="btn btn-secondary mt-4">Voltar ao Painel</a>
+  </div>
+
+  <!-- Modal de Histórico de Atendimentos -->
+  <div class="modal fade" id="modalHistorico" tabindex="-1" role="dialog" aria-labelledby="historicoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="historicoLabel">Histórico de Atendimentos</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" id="historicoConteudo">
+          Carregando...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script>
+    let pacientesTriagem = [];
+
+    $(document).ready(function () {
+      carregarPacientesTriagem();
+
+      // Buscar pacientes por CPF ou nome ao pressionar Enter
+      $('#buscaPaciente').keypress(function (e) {
+        if (e.which === 13) {
+          buscarPorNomeOuCpf($(this).val().trim());
+        }
+      });
+    });
+
+    function carregarPacientesTriagem() {
+      const criterio = $('#ordenarPor').val() || 'tempo';
+
+      $.getJSON(`/api/medico/emergencia/pacientes?ordenar_por=${criterio}`, function (data) {
+        if (data.success && data.pacientes.length > 0) {
+          pacientesTriagem = data.pacientes;
+          renderizarTriagem(pacientesTriagem);
+        } else {
+          $('#listaTriagem').html('<p>Nenhum paciente aguardando consulta médica.</p>');
+        }
+      }).fail(function () {
+        $('#listaTriagem').html('<p>Erro ao carregar pacientes com triagem concluída.</p>');
+      });
+    }
+
+    function renderizarTriagem(pacientes) {
+  let html = '';
+  pacientes.forEach(p => {
+    html += `
+      <div class="paciente-card">
+        <strong>${p.nome}</strong> - CPF: ${p.cpf}<br>
+        Status: ${p.status}<br>
+        Risco: ${p.classificacao_risco || '---'}<br>
+        Triado em: ${p.horario_triagem ? new Date(p.horario_triagem).toLocaleString() : '---'}<br>
+        <a href="/medico/emergencia/atendimento?atendimento_id=${p.atendimento_id}" class="btn btn-primary btn-sm mt-2">Iniciar Atendimento</a>
+      </div>
+    `;
+  });
+  $('#listaTriagem').html(html);
+}
+
+
+
+    function buscarPorNomeOuCpf(filtro) {
+      if (!filtro) return;
+
+      $.ajax({
+        url: '/api/medico/emergencia/buscar',
+        method: 'GET',
+        data: { filtro: filtro },
+        dataType: 'json',
+        success: function (data) {
+          if (data.success && data.pacientes.length > 0) {
+            let html = '';
+            data.pacientes.forEach(p => {
+              html += `
+                <div class="paciente-card">
+                  <strong>${p.nome}</strong> - CPF: ${p.cpf}<br>
+                  Data de Nascimento: ${p.data_nascimento || '---'}<br>
+                  <button class="btn btn-info btn-sm mt-2" onclick="verHistorico(${p.id}, '${p.nome}')">Ver Histórico</button>
+                </div>
+              `;
+            });
+            $('#resultadoBusca').html(html);
+          } else {
+            $('#resultadoBusca').html('<p>Nenhum paciente encontrado com triagem concluída.</p>');
+          }
+        },
+        error: function () {
+          $('#resultadoBusca').html('<p>Erro ao buscar pacientes.</p>');
+        }
+      });
+    }
+
+
+    function renderizarTriagem(pacientes) {
+  let html = '';
+  pacientes.forEach(p => {
+    html += `
+      <div class="paciente-card">
+        <strong>${p.nome}</strong> - CPF: ${p.cpf}<br>
+        Status: ${p.status}<br>
+        Risco: ${p.classificacao_risco || '---'}<br>
+        Triado em: ${p.horario_triagem ? new Date(p.horario_triagem).toLocaleString() : '---'}<br>
+        <a href="/medico/emergencia/atendimento?atendimento_id=${p.atendimento_id}" class="btn btn-primary btn-sm mt-2">Iniciar Atendimento</a>
+
+      </div>
+    `;
+  });
+  $('#listaTriagem').html(html);
+}
+
+
+    function verHistorico(pacienteId, nome) {
+      $('#historicoLabel').text('Histórico de Atendimentos de ' + nome);
+      $('#historicoConteudo').html('Carregando...');
+      $('#modalHistorico').modal('show');
+
+      $.ajax({
+        url: `/api/pacientes/${pacienteId}/atendimentos`,
+        method: 'GET',
+        dataType: 'json',
+        success: function(data) {
+          if (data.success && data.atendimentos.length > 0) {
+            let html = '<ul class="list-group">';
+            data.atendimentos.forEach(at => {
+              html += `
+                <li class="list-group-item">
+                  <strong>ID:</strong> ${at.id} |
+                  <strong>Data:</strong> ${at.data_atendimento || '---'} |
+                  <strong>Status:</strong> ${at.status || '---'}<br>
+                  <strong>Diagnóstico:</strong> ${at.dx || '---'}
+                </li>
+              `;
+            });
+            html += '</ul>';
+            $('#historicoConteudo').html(html);
+          } else {
+            $('#historicoConteudo').html('<p>Nenhum atendimento encontrado.</p>');
+          }
+        },
+        error: function () {
+          $('#historicoConteudo').html('<p>Erro ao carregar histórico.</p>');
+        }
+      });
+    }
+  </script>
+</body>
+</html>

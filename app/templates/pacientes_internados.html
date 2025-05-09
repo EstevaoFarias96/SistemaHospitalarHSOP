@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Container Principal -->
+<div class="container-fluid py-4" id="page-data" data-cargo="{{ session.get('cargo', '') }}">
+    <!-- Cabeçalho da Página -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Pacientes Internados</h2>
+            <p class="text-muted mb-0">
+                <i class="fas fa-user-md me-1"></i>
+                Cargo: <strong>{{ session.get('cargo', 'Não definido') }}</strong>
+            </p>
+        </div>
+        <button id="btnVoltar" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i> Voltar
+        </button>
+    </div>
+
+    <!-- Barra de Pesquisa -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="input-group">
+                <span class="input-group-text bg-light">
+                    <i class="fas fa-search text-muted"></i>
+                </span>
+                <input type="text" id="searchInput" class="form-control form-control-lg" 
+                       placeholder="Buscar paciente por nome, CPF ou leito...">
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Pacientes -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nome do Paciente</th>
+                            <th>CPF</th>
+                            <th>Data de Nascimento</th>
+                            <th>Leito</th>
+                            <th>Data de Internação</th>
+                            <th>Diagnóstico</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pacientesTable">
+                        <!-- Dados serão preenchidos via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Relatório de Alta -->
+<div class="modal fade" id="modalRelatorioAlta" tabindex="-1" aria-labelledby="modalRelatorioAltaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title" id="modalRelatorioAltaLabel">
+                    <i class="fas fa-clipboard-check me-2"></i>
+                    Relatório de Alta
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formRelatorioAlta" class="needs-validation" novalidate>
+                    <input type="hidden" id="internacaoId" name="internacaoId">
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label for="diagnosticoAlta" class="form-label">Diagnóstico Final</label>
+                            <textarea class="form-control" id="diagnosticoAlta" name="diagnostico" rows="3" required></textarea>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="historico" class="form-label">Histórico da Internação</label>
+                            <textarea class="form-control" id="historico" name="historico_internacao" rows="5" required></textarea>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="relatorioAlta" class="form-label">Relatório de Alta</label>
+                            <textarea class="form-control" id="relatorioAlta" name="relatorio_alta" rows="5" required></textarea>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="condutaFinal" class="form-label">Conduta Final</label>
+                            <textarea class="form-control" id="condutaFinal" name="conduta" rows="3" required></textarea>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="medicacaoAlta" class="form-label">Medicação de Alta</label>
+                            <textarea class="form-control" id="medicacaoAlta" name="medicacao" rows="3"></textarea>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="cuidadosGerais" class="form-label">Cuidados Gerais</label>
+                            <textarea class="form-control" id="cuidadosGerais" name="cuidados_gerais" rows="3"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancelar
+                </button>
+                <button type="button" class="btn btn-success" id="btnConfirmarAlta">
+                    <span id="spinnerConfirmarAlta" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    <span id="textConfirmarAlta">Confirmar Alta</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script>
+// Configurações e Constantes
+const CONFIG = {
+    API_ENDPOINTS: {
+        PACIENTES: '/api/pacientes/internados',
+        INTERNACAO: (id) => `/api/internacao/${id}`,
+        ALTA: (id) => `/api/internacao/${id}/alta`
+    },
+    ROTAS: {
+        ENFERMEIRO: '/enfermeiro',
+        MEDICO: '/medico',
+        HOME: '/'
+    }
+};
+
+// Classe principal para gerenciar a página
+class PacientesInternadosManager {
+    constructor() {
+        this.cargoUsuario = document.getElementById('page-data').dataset.cargo?.toLowerCase().trim() || '';
+        this.initializeEventListeners();
+        this.fetchPacientesInternados();
+    }
+
+    initializeEventListeners() {
+        // Evento de busca
+        document.getElementById('searchInput').addEventListener('input', (e) => this.filtrarTabela(e.target.value));
+
+        // Evento do botão voltar
+        document.getElementById('btnVoltar').addEventListener('click', () => this.navegarVoltar());
+
+        // Evento do botão confirmar alta
+        document.getElementById('btnConfirmarAlta').addEventListener('click', () => this.salvarRelatorioAlta());
+    }
+
+    navegarVoltar() {
+        const rotas = {
+            'enfermeiro': CONFIG.ROTAS.ENFERMEIRO,
+            'medico': CONFIG.ROTAS.MEDICO
+        };
+        window.location.href = rotas[this.cargoUsuario] || CONFIG.ROTAS.HOME;
+    }
+
+    async fetchPacientesInternados() {
+        try {
+            const response = await fetch(CONFIG.API_ENDPOINTS.PACIENTES);
+            const data = await response.json();
+
+            if (data.success) {
+                this.renderizarTabelaPacientes(data.pacientes);
+            }
+        } catch (error) {
+            console.error('Erro ao carregar pacientes:', error);
+            this.mostrarNotificacao('Erro ao carregar pacientes', 'error');
+        }
+    }
+
+    renderizarTabelaPacientes(pacientes) {
+        const tableBody = document.getElementById('pacientesTable');
+        tableBody.innerHTML = '';
+
+        pacientes.forEach(paciente => {
+            const row = this.criarLinhaPaciente(paciente);
+            tableBody.appendChild(row);
+        });
+
+        this.initializeAltaButtons();
+    }
+
+    criarLinhaPaciente(paciente) {
+        const row = document.createElement('tr');
+        const evolucaoLink = this.cargoUsuario === 'enfermeiro'
+            ? `/clinica/evolucao-paciente-enfermeiro/${paciente.atendimento_id}`
+            : `/clinica/evolucao-paciente-medico/${paciente.atendimento_id}`;
+
+        let acoesHTML = `
+            <div class="d-flex justify-content-center gap-2">
+                <a href="${evolucaoLink}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-notes-medical"></i> Evoluir
+                </a>`;
+
+        if (this.cargoUsuario === 'medico') {
+            acoesHTML += `
+                <button class="btn btn-sm btn-success btn-alta" data-internacao-id="${paciente.atendimento_id}">
+                    <i class="fas fa-clipboard-check"></i> Alta
+                </button>`;
+        }
+
+        acoesHTML += '</div>';
+
+        row.innerHTML = `
+            <td>${paciente.nome}</td>
+            <td>${paciente.cpf}</td>
+            <td>${this.formatarData(paciente.data_nascimento)}</td>
+            <td>${paciente.leito}</td>
+            <td>${this.formatarData(paciente.data_internacao)}</td>
+            <td>${paciente.diagnostico || '-'}</td>
+            <td>${acoesHTML}</td>
+        `;
+
+        return row;
+    }
+
+    initializeAltaButtons() {
+        document.querySelectorAll('.btn-alta').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const internacaoId = btn.getAttribute('data-internacao-id');
+                this.abrirModalAlta(internacaoId);
+            });
+        });
+    }
+
+    formatarData(dataString) {
+        if (!dataString) return '-';
+        return new Date(dataString).toLocaleDateString('pt-BR');
+    }
+
+    filtrarTabela(termo) {
+        const linhas = document.getElementById('pacientesTable').getElementsByTagName('tr');
+        termo = termo.toLowerCase();
+
+        Array.from(linhas).forEach(linha => {
+            const texto = linha.textContent.toLowerCase();
+            linha.style.display = texto.includes(termo) ? '' : 'none';
+        });
+    }
+
+    async abrirModalAlta(internacaoId) {
+        document.getElementById('internacaoId').value = internacaoId;
+
+        try {
+            const response = await fetch(CONFIG.API_ENDPOINTS.INTERNACAO(internacaoId));
+            const data = await response.json();
+
+            if (data.success) {
+                this.preencherFormularioAlta(data.internacao);
+            }
+        } catch (error) {
+            console.error('Erro ao carregar dados da internação:', error);
+            this.mostrarNotificacao('Erro ao carregar dados da internação', 'error');
+        }
+
+        const modalAlta = new bootstrap.Modal(document.getElementById('modalRelatorioAlta'));
+        modalAlta.show();
+    }
+
+    preencherFormularioAlta(dados) {
+        const campos = {
+            'diagnosticoAlta': dados.diagnostico,
+            'historico': dados.historico_internacao,
+            'relatorioAlta': dados.relatorio_alta,
+            'condutaFinal': dados.conduta,
+            'medicacaoAlta': dados.medicacao,
+            'cuidadosGerais': dados.cuidados_gerais
+        };
+
+        Object.entries(campos).forEach(([id, valor]) => {
+            document.getElementById(id).value = valor || '';
+        });
+    }
+
+    async salvarRelatorioAlta() {
+        const btnConfirmar = document.getElementById('btnConfirmarAlta');
+        const spinner = document.getElementById('spinnerConfirmarAlta');
+        const text = document.getElementById('textConfirmarAlta');
+
+        try {
+            this.atualizarEstadoBotao(btnConfirmar, spinner, text, true);
+            
+            const internacaoId = document.getElementById('internacaoId').value;
+            const formData = this.coletarDadosFormulario();
+
+            const response = await fetch(CONFIG.API_ENDPOINTS.ALTA(internacaoId), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                this.finalizarProcessoAlta();
+            } else {
+                throw new Error(data.message || 'Erro ao registrar alta');
+            }
+        } catch (error) {
+            console.error('Erro ao salvar alta:', error);
+            this.mostrarNotificacao('Erro ao registrar alta', 'error');
+        } finally {
+            this.atualizarEstadoBotao(btnConfirmar, spinner, text, false);
+        }
+    }
+
+    coletarDadosFormulario() {
+        return {
+            diagnostico: document.getElementById('diagnosticoAlta').value,
+            historico_internacao: document.getElementById('historico').value,
+            relatorio_alta: document.getElementById('relatorioAlta').value,
+            conduta: document.getElementById('condutaFinal').value,
+            medicacao: document.getElementById('medicacaoAlta').value,
+            cuidados_gerais: document.getElementById('cuidadosGerais').value
+        };
+    }
+
+    atualizarEstadoBotao(btn, spinner, text, loading) {
+        btn.disabled = loading;
+        spinner.classList.toggle('d-none', !loading);
+        text.textContent = loading ? 'Salvando...' : 'Confirmar Alta';
+    }
+
+    finalizarProcessoAlta() {
+        const modalAlta = bootstrap.Modal.getInstance(document.getElementById('modalRelatorioAlta'));
+        modalAlta.hide();
+        this.fetchPacientesInternados();
+        this.mostrarNotificacao('Alta registrada com sucesso!', 'success');
+    }
+
+    mostrarNotificacao(mensagem, tipo) {
+        // Implementar sistema de notificações se necessário
+        alert(mensagem);
+    }
+}
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', () => {
+    new PacientesInternadosManager();
+});
+</script>
+{% endblock %}

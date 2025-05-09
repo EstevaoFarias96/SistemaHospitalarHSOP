@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evolução do Paciente</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Add Quill Rich Text Editor CSS -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    
+    <!-- Script para interceptar e substituir scroll.js -->
+    <script>
+        // Interceptar scripts antes que sejam carregados
+        const originalCreateElement = document.createElement;
+        document.createElement = function(tagName) {
+            const element = originalCreateElement.call(document, tagName);
+            
+            if (tagName.toLowerCase() === 'script') {
+                const originalSetAttribute = element.setAttribute;
+                element.setAttribute = function(name, value) {
+                    if (name === 'src' && value && value.includes('scroll.js')) {
+                        console.log('Interceptado carregamento de scroll.js - Substituindo com implementação moderna');
+                        // Não carregamos o script original
+                        return element;
+                    }
+                    return originalSetAttribute.call(this, name, value);
+                };
+            }
+            
+            return element;
+        };
+        
+        // Sobrescrever EventTarget.prototype.addEventListener para monitorar eventos depreciados
+        (function() {
+            const originalAddEventListener = EventTarget.prototype.addEventListener;
+            const deprecatedEvents = [
+                'DOMNodeInserted', 
+                'DOMNodeRemoved', 
+                'DOMSubtreeModified',
+                'DOMAttrModified',
+                'DOMCharacterDataModified'
+            ];
+            
+            EventTarget.prototype.addEventListener = function(type, listener, options) {
+                if (deprecatedEvents.includes(type)) {
+                    console.warn(`Evento depreciado '${type}' detectado e não será adicionado`);
+                    // Não adicionamos o listener para eventos depreciados
+                    return;
+                }
+                
+                return originalAddEventListener.call(this, type, listener, options);
+            };
+        })();
+    </script>
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .nav-pills .nav-link {
+            margin-right: 10px;
+            border-radius: 50rem;
+            padding: 0.5rem 1rem;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #0d6efd;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .paciente-info {
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        .paciente-info .info-item {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        .paciente-info .info-item strong {
+            color: #495057;
+        }
+        .table-medicamentos {
+            background: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .alerta-alergia {
+            border: 2px solid #ffc107;
+            padding: 5px 10px;
+            display: none;
+            font-weight: bold;
+            color: #856404;
+            background-color: #fff3cd;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+        /* Estilos adicionais para a tabela de evoluções */
+        .table-medicamentos td {
+            vertical-align: middle;
+            padding: 10px;
+        }
+        
+        /* Estilos para as tabelas de medicamentos nas prescrições */
+        .prescricao-card {
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+        
+        .prescricao-card .card-header {
+            padding: 5px 10px;
+            font-size: 0.85rem;
+        }
+        
+        .prescricao-card .card-body {
+            padding: 8px;
+        }
+        
+        .tabela-medicamentos-prescricao th,
+        .tabela-medicamentos-prescricao td {
+            padding: 4px 8px;
+            font-size: 0.85rem;
+        }
+        
+        .tabela-medicamentos-prescricao tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+        
+        /* Novos estilos para melhorar a distinção entre prescrições */
+        .prescricao-container {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        
+        .prescricao-container:hover {
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .prescricao-header {
+            background-color: #f1f8ff;
+            padding: 5px 10px;
+            margin: -12px -12px 10px -12px;
+            border-bottom: 1px solid #dee2e6;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .prescricao-header .medico-info {
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        
+        .prescricao-header .timestamp {
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+        
+        .prescricao-section {
+            margin-bottom: 10px;
+            border-left: 3px solid #cfe2ff;
+            padding-left: 10px;
+        }
+        
+        .prescricao-section.dieta {
+            border-color: #d1e7dd;
+        }
+        
+        .prescricao-section.medicamentos {
+            border-color: #cfe2ff;
+        }
+        
+        .prescricao-section.procedimentos {
+            border-color: #f8d7da;
+        }
+        
+        .prescricao-section-title {
+            font-weight: bold;
+            color: #495057;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .prescricao-section-content {
+            background-color: #f8f9fa;
+            padding: 8px;
+        }
+        
+        .prescricao-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        
+        .data-header {
+            background-color: #6c757d;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        /* Formatação especial para a coluna de texto de evolução */
+        .texto-evolucao {
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 450px;
+            min-height: 150px;
+            overflow-y: auto;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 6px;
+            border-left: 4px solid #0d6efd;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            transition: max-height 0.3s ease;
+        }
+        
+        .texto-evolucao:hover {
+            max-height: 600px;
+        }
+        
+        .texto-evolucao p {
+            margin-bottom: 0.6rem;
+        }
+        
+        .texto-evolucao * {
+            max-width: 100%;
+        }
+        
+        .texto-evolucao h1, .texto-evolucao h2, .texto-evolucao h3 {
+            margin-top: 0.8rem;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .texto-evolucao ul, .texto-evolucao ol {
+            padding-left: 25px;
+            margin-bottom: 0.8rem;
+        }
+        
+        .texto-evolucao li {
+            margin-bottom: 0.3rem;
+        }
+        
+        .texto-evolucao strong, .texto-evolucao b {
+            font-weight: 700;
+        }
+        
+        .texto-evolucao em, .texto-evolucao i {
+            font-style: italic;
+        }
+        
+        .texto-evolucao blockquote {
+            margin: 0.8rem 0;
+            padding: 0.5rem 1rem;
+            border-left: 3px solid #adb5bd;
+            background-color: #f0f0f0;
+        }
+        
+        .texto-evolucao::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        .texto-evolucao::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .texto-evolucao::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        
+        .texto-evolucao::-webkit-scrollbar-thumb:hover {
+            background: #0d6efd;
+        }
+        
+        #editor-container {
+            height: 450px;
+            margin-bottom: 15px;
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+        }
+        
+        .ql-editor {
+            font-size: 13px;
+            line-height: 1.5;
+            min-height: 400px;
+        }
+        
+        .ql-tooltip {
+            z-index: 1060 !important;
+        }
+        
+        @media (max-width: 768px) {
+            .texto-evolucao {
+                max-height: 250px;
+                font-size: 0.85rem;
+                min-height: 100px;
+            }
+            #editor-container {
+                height: 250px;
+            }
+            .ql-editor {
+                min-height: 200px;
+            }
+        }
+        
+        /* Estilos para adaptar a altura da caixa baseado no tamanho do conteúdo */
+        .texto-evolucao[data-lines="1"],
+        .texto-evolucao[data-lines="2"],
+        .texto-evolucao[data-lines="3"] {
+            max-height: 150px;
+            min-height: 80px;
+        }
+        
+        .texto-evolucao[data-lines="4"],
+        .texto-evolucao[data-lines="5"],
+        .texto-evolucao[data-lines="6"] {
+            max-height: 200px;
+            min-height: 100px;
+        }
+        
+        .texto-evolucao[data-lines="7"],
+        .texto-evolucao[data-lines="8"],
+        .texto-evolucao[data-lines="9"] {
+            max-height: 250px;
+            min-height: 150px;
+        }
+        
+        .texto-evolucao[data-lines="10"],
+        .texto-evolucao[data-lines="11"],
+        .texto-evolucao[data-lines="12"] {
+            max-height: 300px;
+            min-height: 200px;
+        }
+        
+        .texto-evolucao[data-lines="13"],
+        .texto-evolucao[data-lines="14"],
+        .texto-evolucao[data-lines="15"] {
+            max-height: 350px;
+            min-height: 250px;
+        }
+        
+        .texto-evolucao[data-lines="16"],
+        .texto-evolucao[data-lines="17"],
+        .texto-evolucao[data-lines="18"] {
+            max-height: 400px;
+            min-height: 300px;
+        }
+        
+        .texto-evolucao[data-lines="19"],
+        .texto-evolucao[data-lines="20"],
+        .texto-evolucao[data-lines="21"] {
+            max-height: 450px;
+            min-height: 350px;
+        }
+        
+        .texto-evolucao[data-lines="22"] {
+            max-height: 500px;
+            min-height: 400px;
+        }
+        
+        /* Estilos para o calendário de aprazamento */
+        .calendar-day {
+            width: 120px;
+            min-height: 80px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            background-color: #f8f9fa;
+        }
+        
+        .calendar-day:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background-color: #fff;
+        }
+        
+        .day-header {
+            font-weight: bold;
+            border-bottom: 1px dashed #dee2e6;
+            padding-bottom: 5px;
+        }
+        
+        .time-pill {
+            border: 1px solid #e9ecef;
+            transition: all 0.2s;
+        }
+        
+        .time-pill:hover {
+            background-color: #e9ecef;
+        }
+        
+        /* Estilos para popovers dos dias */
+        .popover {
+            max-width: 300px;
+        }
+        
+        .popover-body {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        /* Novos estilos para o modal de aprazamento redesenhado */
+        #modalAprazamento .modal-content {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        #modalAprazamento .modal-header {
+            background: linear-gradient(135deg, #4a6fdc 0%, #2856d4 100%);
+            border-bottom: none;
+            padding: 20px 24px;
+        }
+        
+        #modalAprazamento .modal-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+        
+        #modalAprazamento .modal-body {
+            padding: 24px;
+        }
+        
+        #modalAprazamento .form-label {
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+        
+        #modalAprazamento .input-group-text {
+            background-color: #f8f9fa;
+            border-color: #ced4da;
+            color: #6c757d;
+        }
+        
+        #modalAprazamento .form-control,
+        #modalAprazamento .form-select {
+            border-color: #ced4da;
+            padding: 10px 15px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        
+        #modalAprazamento .form-control:focus,
+        #modalAprazamento .form-select:focus {
+            border-color: #4a6fdc;
+            box-shadow: 0 0 0 0.25rem rgba(74, 111, 220, 0.25);
+        }
+        
+        #modalAprazamento .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        
+        #modalAprazamento .card:hover {
+            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+        }
+        
+        #modalAprazamento .alert {
+            border-radius: 8px;
+            border: none;
+        }
+        
+        #modalAprazamento .alert-info {
+            background-color: #e6f3fd;
+            color: #0c63e4;
+        }
+        
+        #modalAprazamento .btn-primary {
+            background: linear-gradient(to right, #4a6fdc, #2856d4);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        
+        #modalAprazamento .btn-primary:hover {
+            background: linear-gradient(to right, #5d7fe3, #3967e5);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(45, 85, 211, 0.3);
+        }
+        
+        #modalAprazamento .btn-outline-secondary {
+            border-color: #ced4da;
+            color: #495057;
+        }
+        
+        #modalAprazamento .btn-success {
+            background: linear-gradient(to right, #28a745, #218838);
+            border: none;
+            font-weight: 500;
+        }
+        
+        #modalAprazamento .btn-success:hover {
+            background: linear-gradient(to right, #2fd050, #27a844);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+        
+        #horarios_multiplos_dias .form-check-input {
+            width: 18px;
+            height: 18px;
+            margin-top: 3px;
+        }
+        
+        #horarios_multiplos_dias .form-check-input:checked {
+            background-color: #4a6fdc;
+            border-color: #4a6fdc;
+        }
+        
+        #horarios_multiplos_dias .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            font-weight: 600;
+            padding: 12px 15px;
+        }
+        
+        #horarios_multiplos_dias .btn-group .btn {
+            padding: 5px 10px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Evolução do Paciente</h2>
+        <a href="/clinica/pacientes-internados" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <!-- Informações do Paciente -->
+    <div class="paciente-info row">
+        <div class="col-md-3 info-item"><strong>Nome:</strong> {{ paciente.nome }}</div>
+        <div class="col-md-3 info-item"><strong>CPF:</strong> {{ paciente.cpf }}</div>
+        <div class="col-md-3 info-item"><strong>Cartão SUS:</strong> {{ paciente.cartao_sus }}</div>
+        <div class="col-md-3 info-item"><strong>Sexo:</strong> {{ paciente.sexo }}</div>
+        <div class="col-md-3 info-item"><strong>Data de Nascimento:</strong> {{ paciente.data_nascimento.strftime('%d/%m/%Y') if paciente.data_nascimento else '-' }}</div>
+        <div class="col-md-3 info-item"><strong>Endereço:</strong> {{ paciente.endereco }}</div>
+        <div class="col-md-3 info-item"><strong>Município:</strong> {{ paciente.municipio }}</div>
+        <div class="col-md-3 info-item"><strong>Telefone:</strong> {{ paciente.telefone }}</div>
+        <div class="col-md-3 info-item"><strong>Nome Social:</strong> {{ paciente.nome_social }}</div>
+        <div class="col-md-3 info-item"><strong>Filiação:</strong> {{ paciente.filiacao }}</div>
+    </div>
+
+    <ul class="nav nav-pills mb-4" id="menuTabs">
+        <li class="nav-item">
+            <a class="nav-link" href="#" data-target="printSection"><i class="fas fa-print me-2"></i>Imprimir</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" data-target="prescricaoSection"><i class="fas fa-pills me-2"></i>Prescrição</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" data-target="evolucaoSection"><i class="fas fa-notes-medical me-2"></i>Evolução</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" data-target="enfermagemSection"><i class="fas fa-user-nurse me-2"></i>Enfermagem</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" data-target="examesSection"><i class="fas fa-vial me-2"></i>Exames Laboratoriais</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#" data-target="imagensSection"><i class="fas fa-image me-2"></i>Ver Imagens</a>
+        </li>
+    </ul>
+
+    <div id="printSection" class="content-section">
+        <div class="alert alert-secondary">Função de impressão será implementada futuramente.</div>
+    </div>
+
+    <div id="prescricaoSection" class="content-section">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Prescrições do Paciente</h5>
+            <!-- Botão de Nova Prescrição removido (exclusivo para médicos) -->
+        </div>
+        
+        <div class="table-responsive mb-3">
+            <table class="table table-borderless">
+                <thead class="d-none">
+                    <tr>
+                        <th>Conteúdo</th>
+                    </tr>
+                </thead>
+                <tbody id="listaPrescricoes">
+                    <tr>
+                        <td class="text-center"><i class="fas fa-spinner fa-spin"></i> Carregando prescrições...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Prescrição removido (exclusivo para médicos) -->
+
+    <div id="evolucaoSection" class="content-section">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Evolução e Conduta</h5>
+                <!-- Botão de Nova Evolução removido (exclusivo para médicos) -->
+            </div>
+            <div class="card-body">
+                <div class="mt-3 mb-3">
+                    <h6 class="fw-bold">Informações de Admissão</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">HDA (História da Doença Atual)</label>
+                            <textarea class="form-control" rows="2" readonly>{{ internacao.hda or 'Não registrado.' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-responsive mb-3">
+                    <table class="table table-striped table-medicamentos">
+                        <thead class="table-primary">
+                            <tr>
+                                <th scope="col" style="width: 12%">Data/Hora</th>
+                                <th scope="col" style="width: 13%">Médico</th>
+                                <th scope="col" style="width: 75%">Evolução</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaEvolucoes">
+                            <tr>
+                                <td colspan="3" class="text-center">Carregando evoluções...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Evolução removido (exclusivo para médicos) -->
+
+    <div id="enfermagemSection" class="content-section">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Enfermagem</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Admissão de Enfermagem</label>
+                    <textarea class="form-control" rows="2" readonly>{{ internacao.admissao_enfermagem or 'Não registrado.' }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Prescrição de Enfermagem</label>
+                    <textarea class="form-control" rows="2" readonly>{{ internacao.prescricao_enfermagem or 'Não registrado.' }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Checklist</label>
+                    <textarea class="form-control" rows="2" readonly>{{ internacao.checklist_enfermagem or 'Não registrado.' }}</textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Folha de Anamnese</label>
+                    <textarea class="form-control" rows="2" readonly>{{ internacao.folha_de_anamnese or 'Não registrado.' }}</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="examesSection" class="content-section">
+        <div class="card shadow-sm">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">Exames Laboratoriais</h5>
+            </div>
+            <div class="card-body">
+                <textarea class="form-control" rows="5" readonly>{{ internacao.exames_laboratoriais or 'Não registrado.' }}</textarea>
+            </div>
+        </div>
+    </div>
+
+    <div id="imagensSection" class="content-section">
+        <div class="alert alert-info">Visualização de imagens ainda não disponível.</div>
+    </div>
+</div>
+
+<!-- Modal Aprazamento -->
+<div class="modal fade" id="modalAprazamento" tabindex="-1" aria-labelledby="modalAprazamentoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalAprazamentoLabel">Aprazar Medicamento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formAprazamento">
+                    <input type="hidden" id="aprazamento_prescricao_id">
+                    <input type="hidden" id="aprazamento_medicamento_index">
+                    
+                    <div class="alert alert-info mb-4 d-flex align-items-center">
+                        <i class="fas fa-pills me-3 fs-4"></i>
+                        <div>
+                            <strong id="aprazamento_medicamento_nome">Medicamento</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="aprazamento_data_inicio" class="form-label">Data de Início</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fas fa-calendar-alt"></i></span>
+                                        <input type="date" class="form-control" id="aprazamento_data_inicio">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="aprazamento_data_fim" class="form-label">Data de Fim</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fas fa-calendar-alt"></i></span>
+                                        <input type="date" class="form-control" id="aprazamento_data_fim">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row g-3 mt-2">
+                                <div class="col-md-6">
+                                    <label for="aprazamento_hora_inicial_multiplos" class="form-label">Hora Inicial</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fas fa-clock"></i></span>
+                                        <input type="time" class="form-control" id="aprazamento_hora_inicial_multiplos">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="aprazamento_multiplos_intervalo" class="form-label">Intervalo (Horas)</label>
+                                    <select class="form-select" id="aprazamento_multiplos_intervalo">
+                                        <option value="4">4 horas</option>
+                                        <option value="6" selected>6 horas</option>
+                                        <option value="8">8 horas</option>
+                                        <option value="12">12 horas</option>
+                                        <option value="24">24 horas</option>
+                                        <option value="custom">Personalizado</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mt-2" id="multiplos_intervalo_custom" style="display: none;">
+                                <div class="col-md-6 offset-md-6">
+                                    <label for="aprazamento_multiplos_intervalo_custom" class="form-label">Intervalo Personalizado (Horas)</label>
+                                    <input type="number" class="form-control" id="aprazamento_multiplos_intervalo_custom" min="0.5" max="24" step="0.5" value="6">
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid mt-4">
+                                <button type="button" class="btn btn-primary" id="btn_calcular_multiplos_dias">
+                                    <i class="fas fa-calculator me-1"></i> Calcular Horários
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="horarios_multiplos_dias" class="card shadow-sm">
+                        <div class="card-body text-center py-4">
+                            <i class="fas fa-calendar-week text-muted mb-3" style="font-size: 2rem;"></i>
+                            <p class="text-muted">Configure os parâmetros acima e clique em "Calcular Horários" para ver os horários de administração por dia.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check me-1"></i> Registrar Aprazamento
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Quill Rich Text Editor -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+
+<script src="/static/js/aprazamento.js"></script>
+<script src="/static/js/calendario_aprazamento.js"></script>
+<script src="/static/js/calculo_horarios.js"></script>
+<script>
+    // Extrair ID do atendimento da URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const atendimentoId = "{{ internacao.atendimento_id }}";
+    const internacaoIdRaw = "{{ internacao.id }}";
+    console.log('Valor raw de internacao.id:', internacaoIdRaw);
+    const internacaoId = parseInt(internacaoIdRaw, 10);
+    console.log('Valor de internacaoId após parse:', internacaoId, typeof internacaoId);
+    
+    // Verificar se internacaoId é um número válido
+    if (isNaN(internacaoId)) {
+        console.error('Erro: internacaoId não é um número válido!');
+        alert('Erro ao carregar o ID da internação. Por favor, recarregue a página ou contate o suporte.');
+    } else {
+        console.log('internacaoId válido:', internacaoId);
+    }
+    
+    // Remover variáveis e funções relacionadas a médicos
+    // Manter apenas o que é necessário para enfermeiros
+
+    $(document).ready(function() {
+        // Debugar cargo do usuário
+        console.log("Cargo do usuário na sessão:", "{{ session.get('cargo') }}");
+        
+        // Verificar permissão do usuário
+        if ("{{ session.get('cargo')|lower|trim }}" !== "enfermeiro") {
+            $('body').prepend('<div class="alert alert-warning text-center">Esta página está otimizada para uso por enfermeiros. Algumas funcionalidades podem estar limitadas.</div>');
+        }
+        
+        // Configurar navegação das abas
+        document.querySelectorAll('#menuTabs .nav-link').forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+
+                const target = this.getAttribute('data-target');
+                document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+                if (target) document.getElementById(target).classList.add('active');
+            });
+        });
+
+        // Ativar a primeira aba por padrão
+        document.querySelector('#menuTabs .nav-link').click();
+
+        // Carregar prescrições ao iniciar
+        carregarPrescricoes();
+        
+        // Carregar evoluções ao iniciar
+        carregarEvolucoes();
+        
+        // Função para carregar prescrições da internação (apenas visualização para enfermeiro)
+        function carregarPrescricoes(idInternacao = null, lastUpdate = false) {
+            // Se internacaoId não foi fornecido, use a variável global
+            const id = idInternacao || internacaoId;
+            
+            if (!lastUpdate) {
+                $("#listaPrescricoes").html("<tr><td class='text-center'><i class='fas fa-spinner fa-spin'></i> Carregando prescrições...</td></tr>");
+            }
+            
+            $.ajax({
+                url: "/api/prescricoes/" + id,
+                type: 'GET',
+                success: function(response) {
+                    if (!response.success) {
+                        $("#listaPrescricoes").html("<tr><td class='text-center text-warning'>Erro ao carregar prescrições: " + response.error + "</td></tr>");
+                        return;
+                    }
+                    
+                    if (!response.prescricoes || response.prescricoes.length === 0) {
+                        $("#listaPrescricoes").html("<tr><td class='text-center'>Nenhuma prescrição encontrada</td></tr>");
+                        return;
+                    }
+                    
+                    // Ordenar prescrições por data (mais recente primeiro)
+                    var prescricoes = response.prescricoes.sort(function(a, b) {
+                        return new Date(b.data_prescricao) - new Date(a.data_prescricao);
+                    });
+                    
+                    // Agrupar prescrições por data
+                    var prescricoesPorData = {};
+                    prescricoes.forEach(function(p) {
+                        // Extrair apenas a data (sem a hora)
+                        var dataApenas = p.data_prescricao ? p.data_prescricao.split(' ')[0] : 'Sem data';
+                        
+                        if (!prescricoesPorData[dataApenas]) {
+                            prescricoesPorData[dataApenas] = [];
+                        }
+                        prescricoesPorData[dataApenas].push(p);
+                    });
+                    
+                    var html = "<tr><td>";
+                    
+                    // Para cada data
+                    Object.keys(prescricoesPorData).forEach(function(data) {
+                        html += '<div class="card mb-3">' +
+                            '<div class="card-header bg-info text-white">' +
+                            '<h5 class="mb-0">Prescrições do dia ' + data + '</h5>' +
+                            '</div>' +
+                            '<div class="card-body">';
+                        
+                        // Para cada prescrição na data
+                        prescricoesPorData[data].forEach(function(prescricao) {
+                            var horario = prescricao.data_prescricao ? prescricao.data_prescricao.split(' ')[1] : '';
+                            
+                            html += '<div class="prescricao-item mb-4" data-id="' + prescricao.id + '">' +
+                                '<h6 class="prescricao-horario text-secondary">' +
+                                '<i class="fas fa-clock mr-1"></i> ' + horario + ' - ' +
+                                '<span class="text-primary">' + (prescricao.medico_nome || 'Médico não informado') + '</span>';
+                            
+                            html += '</h6>';
+                                
+                            // Seção de Dieta
+                            if (prescricao.texto_dieta) {
+                                html += '<div class="mt-3 mb-2">' +
+                                    '<h6><i class="fas fa-utensils text-success mr-1"></i> Dieta</h6>' +
+                                    '<div class="card card-body bg-light">' + prescricao.texto_dieta + '</div>' +
+                                    '</div>';
+                            }
+                            
+                            // Seção de Medicamentos
+                            if (prescricao.medicamentos && prescricao.medicamentos.length > 0) {
+                                html += '<div class="mt-3 mb-2">' +
+                                    '<h6><i class="fas fa-pills text-danger mr-1"></i> Medicamentos</h6>' +
+                                    '<table class="table table-sm table-bordered table-striped">' +
+                                    '<thead class="thead-light">' +
+                                    '<tr>' +
+                                    '<th>Medicamento</th>' +
+                                    '<th>Uso</th>' +
+                                    '<th>Aprazamento</th>' +
+                                    '<th>Enfermeiro</th>' +
+                                    '<th>Ações</th>' +
+                                    '</tr>' +
+                                    '</thead>' +
+                                    '<tbody>';
+                                    
+                                prescricao.medicamentos.forEach(function(medicamento) {
+                                    html += '<tr>' +
+                                        '<td>' + (medicamento.nome_medicamento || '') + '</td>' +
+                                        '<td>' + (medicamento.descricao_uso || '') + '</td>' +
+                                        '<td>';
+                                        
+                                    // Adicionar o texto de aprazamento com botão para visualizar em calendário
+                                    if (medicamento.aprazamento) {
+                                        html += '<div class="d-flex align-items-center">' +
+                                            '<div class="text-truncate me-2" style="max-width: 150px;">' + 
+                                            medicamento.aprazamento + 
+                                            '</div>' +
+                                            '<button type="button" class="btn btn-sm btn-outline-info btn-visualizar-aprazamento" ' +
+                                            'data-aprazamento="' + medicamento.aprazamento.replace(/"/g, '&quot;') + '" ' +
+                                            'data-medicamento="' + (medicamento.nome_medicamento || '').replace(/"/g, '&quot;') + '">' +
+                                            '<i class="fas fa-calendar-alt"></i> Ver horários' +
+                                            '</button>' +
+                                            '</div>';
+                                    } else {
+                                        html += '<span class="text-muted">Não aprazado</span>';
+                                    }
+                                    
+                                    html += '</td>' +
+                                        '<td>' + (medicamento.enfermeiro_nome || '') + '</td>';
+                                    
+                                    // Adicionar botão de aprazamento para enfermeiros
+                                    html += '<td>' +
+                                        '<button class="btn btn-primary btn-sm btn-aprazamento" ' +
+                                        'data-prescricao-id="' + prescricao.id + '" ' +
+                                        'data-medicamento-index="' + prescricao.medicamentos.indexOf(medicamento) + '" ' +
+                                        'data-medicamento-nome="' + (medicamento.nome_medicamento || '').replace(/"/g, '&quot;') + '">' +
+                                        '<i class="fas fa-clock"></i> Aprazar' +
+                                        '</button>' +
+                                        '</td>';
+                                    
+                                    html += '</tr>';
+                                });
+                                
+                                html += '</tbody></table></div>';
+                            }
+                            
+                            // Seção de Procedimentos Médicos
+                            if (prescricao.texto_procedimento_medico) {
+                                html += '<div class="mt-3 mb-2">' +
+                                    '<h6><i class="fas fa-user-md text-primary mr-1"></i> Procedimentos Médicos</h6>' +
+                                    '<div class="card card-body bg-light">' + prescricao.texto_procedimento_medico + '</div>' +
+                                    '</div>';
+                            }
+                            
+                            // Seção de Procedimentos Multidisciplinares
+                            if (prescricao.texto_procedimento_multi) {
+                                html += '<div class="mt-3">' +
+                                    '<h6><i class="fas fa-users text-warning mr-1"></i> Procedimentos Multidisciplinares</h6>' +
+                                    '<div class="card card-body bg-light">' + prescricao.texto_procedimento_multi + '</div>' +
+                                    '</div>';
+                            }
+                            
+                            html += '</div>';
+                            
+                            // Adicionar divisor entre prescrições, exceto na última
+                            if (prescricoesPorData[data].indexOf(prescricao) < prescricoesPorData[data].length - 1) {
+                                html += '<hr class="my-3">';
+                            }
+                        });
+                        
+                        html += '</div></div>';
+                    });
+                    
+                    html += "</td></tr>";
+                    $("#listaPrescricoes").html(html);
+                },
+                error: function(xhr, status, error) {
+                    $("#listaPrescricoes").html("<tr><td class='text-center text-danger'>Erro ao carregar prescrições: " + error + "</td></tr>");
+                    console.error("Erro ao carregar prescrições:", error);
+                }
+            });
+        }
+
+        // Função para carregar evoluções da internação (apenas visualização para enfermeiro)
+        function carregarEvolucoes() {
+            console.log('Carregando evoluções para internacaoId:', internacaoId);
+            
+            if (!internacaoId || isNaN(internacaoId)) {
+                console.error('ID de internação inválido ao carregar evoluções:', internacaoId);
+                $('#listaEvolucoes').html('<tr><td colspan="3" class="text-center text-danger">Erro: ID de internação inválido</td></tr>');
+                return;
+            }
+            
+            $.ajax({
+                url: `/api/evolucoes/${internacaoId}`,
+                method: 'GET',
+                success: function(response) {
+                    console.log('Resposta da API de evoluções:', response);
+                    const tabela = $('#listaEvolucoes');
+                    tabela.empty();
+                    
+                    if (response.success && response.evolucoes && response.evolucoes.length > 0) {
+                        response.evolucoes.forEach(ev => {
+                            const evolucaoHtml = ev.evolucao || '---';
+                            
+                            // Criar um container para a evolução com estilo seguro
+                            tabela.append(`
+                                <tr>
+                                    <td>${ev.data_evolucao || '---'}</td>
+                                    <td>${ev.nome_medico || '---'}</td>
+                                    <td>
+                                        <div class="texto-evolucao">
+                                            ${evolucaoHtml}
+                                        </div>
+                                    </td>
+                                </tr>
+                            `);
+                        });
+                        
+                        // Calcular o número de linhas e aplicar o atributo data-lines
+                        setTimeout(() => {
+                            $('.texto-evolucao').each(function() {
+                                const texto = $(this).text();
+                                const linhas = texto.split(/\r\n|\r|\n/).length;
+                                const palavras = texto.split(/\s+/).length;
+                                
+                                // Estimar o número de linhas com base no tamanho do texto
+                                let estimativaLinhas = Math.max(linhas, Math.ceil(palavras / 15));
+                                
+                                // Limitar a no máximo 22 para não criar muitas regras CSS
+                                estimativaLinhas = Math.min(estimativaLinhas, 22);
+                                
+                                // Aplicar o atributo data-lines ao elemento
+                                $(this).attr('data-lines', estimativaLinhas);
+                                
+                                console.log(`Evolução com ${linhas} linhas e ${palavras} palavras. Estimativa: ${estimativaLinhas}`);
+                            });
+                        }, 100);
+                    } else {
+                        tabela.html('<tr><td colspan="3" class="text-center">Nenhuma evolução registrada até o momento.</td></tr>');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Erro ao carregar evoluções:', xhr.responseText, status, error);
+                    $('#listaEvolucoes').html('<tr><td colspan="3" class="text-center text-danger">Erro ao carregar evoluções.</td></tr>');
+                }
+            });
+        }
+
+        // Evento para o botão de aprazamento
+        $(document).on('click', '.btn-aprazamento', function() {
+            const prescricaoId = $(this).data('prescricao-id');
+            const medicamentoIndex = $(this).data('medicamento-index');
+            const medicamentoNome = $(this).data('medicamento-nome');
+            
+            // Preencher os campos do modal de aprazamento
+            $('#aprazamento_prescricao_id').val(prescricaoId);
+            $('#aprazamento_medicamento_index').val(medicamentoIndex);
+            $('#aprazamento_medicamento_nome').text(medicamentoNome);
+            
+            // Armazenar o ID do enfermeiro para uso no formulário
+            $('#formAprazamento').data('enfermeiro-id', "{{ session.get('user_id', 0) }}");
+            
+            // Definir data/hora atual como valores padrão
+            const agora = new Date();
+            const anoAtual = agora.getFullYear();
+            const mesAtual = String(agora.getMonth() + 1).padStart(2, '0');
+            const diaAtual = String(agora.getDate()).padStart(2, '0');
+            const horaAtual = String(agora.getHours()).padStart(2, '0');
+            const minutoAtual = String(agora.getMinutes()).padStart(2, '0');
+            
+            // Definir datas de início e fim para aprazamento de múltiplos dias
+            $('#aprazamento_data_inicio').val(`${anoAtual}-${mesAtual}-${diaAtual}`);
+            
+            // Data de fim como padrão de 7 dias depois
+            const dataFim = new Date(agora);
+            dataFim.setDate(dataFim.getDate() + 7);
+            const anoFim = dataFim.getFullYear();
+            const mesFim = String(dataFim.getMonth() + 1).padStart(2, '0');
+            const diaFim = String(dataFim.getDate()).padStart(2, '0');
+            $('#aprazamento_data_fim').val(`${anoFim}-${mesFim}-${diaFim}`);
+            
+            // Inicializar campo de hora
+            $('#aprazamento_hora_inicial_multiplos').val(`${horaAtual}:${minutoAtual}`);
+            
+            // Limpar os horários calculados
+            $('#horarios_multiplos_dias').html(`
+                <div class="card-body text-center py-4">
+                    <i class="fas fa-calendar-week text-muted mb-3" style="font-size: 2rem;"></i>
+                    <p class="text-muted">Configure os parâmetros acima e clique em "Calcular Horários" para ver os horários de administração por dia.</p>
+                </div>
+            `);
+            
+            // Exibir o modal
+            $('#modalAprazamento').modal('show');
+        });
+        
+        // Carregar dados ao iniciar
+        carregarPrescricoes();
+        carregarEvolucoes();
+    });
+</script>
+
+</body>
+</html>
+

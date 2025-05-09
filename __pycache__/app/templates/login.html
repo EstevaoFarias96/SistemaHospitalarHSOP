@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div id="login-form">
+            <h1 class="text-center">Login</h1>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="cpf">CPF</label>
+                    <input type="text" class="form-control" id="cpf" name="cpf" required>
+                </div>
+                <div class="form-group">
+                    <label for="senha">Senha</label>
+                    <input type="password" class="form-control" id="senha" name="senha" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Entrar</button>
+            </form>
+        </div>
+
+        <!-- Interfaces por cargo -->
+        <div id="medico" class="hidden">
+            <h1 class="text-center">Bem-vindo, Médico</h1>
+            <!-- Conteúdo específico para médicos -->
+        </div>
+
+        <div id="enfermeiro" class="hidden">
+            <h1 class="text-center">Bem-vindo, Enfermeiro</h1>
+            <!-- Conteúdo específico para enfermeiros -->
+        </div>
+
+        <div id="nutricionista" class="hidden">
+            <h1 class="text-center">Bem-vindo, Nutricionista</h1>
+            <!-- Conteúdo específico para nutricionistas -->
+        </div>
+
+        <div id="assistente_social" class="hidden">
+            <h1 class="text-center">Bem-vindo, Assistente Social</h1>
+            <!-- Conteúdo específico para assistentes sociais -->
+        </div>
+
+        <div id="recepcionista" class="hidden">
+            <h1 class="text-center">Bem-vindo, Recepcionista</h1>
+            <!-- Conteúdo específico para recepcionistas -->
+        </div>
+
+        <div id="administrador" class="hidden">
+            <h1 class="text-center">Bem-vindo, Administrador</h1>
+            <!-- Conteúdo específico para administradores -->
+        </div>
+
+        <div id="fisioterapeuta" class="hidden">
+            <h1 class="text-center">Bem-vindo, Fisioterapeuta</h1>
+            <!-- Conteúdo específico para fisioterapeutas -->
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#loginForm').on('submit', function(e) {
+                e.preventDefault(); // Evita o envio padrão do formulário
+
+                $.ajax({
+                    url: '/login',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        if (response.error) {
+                            alert(response.error); // Mostra mensagem de erro
+                        } else {
+                            $('#login-form').addClass('hidden'); // Oculta o formulário de login
+                            $('#' + response.cargo.toLowerCase()).removeClass('hidden'); // Mostra a interface correspondente
+                        }
+                    },
+                    error: function() {
+                        alert('Erro ao processar o login.');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

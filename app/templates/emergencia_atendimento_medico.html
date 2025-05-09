@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Atendimento Médico</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    h2, h4 {
+      font-weight: bold;
+      color: #004085;
+    }
+    .card {
+      border-radius: 10px;
+      border: 1px solid #b8daff;
+      background-color: #ffffff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.03);
+    }
+    .card-title {
+      color: #004085;
+      border-bottom: 1px solid #b8daff;
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+    }
+    label {
+      font-weight: 500;
+    }
+    .info-line {
+      margin-bottom: 6px;
+    }
+    .is-valid {
+      border: 2px solid #28a745 !important;
+      background-color: #e6ffed;
+    }
+    .is-invalid {
+      border: 2px solid #dc3545 !important;
+      background-color: #ffe6e6;
+    }
+    .modal-header {
+      background-color: #004085;
+      color: white;
+    }
+    .modal-footer {
+      background-color: #f8f9fa;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-5 mb-5">
+    <h2 class="text-center mb-4">Atendimento Médico</h2>
+
+    <div class="card mb-4">
+      <div class="card-body" id="dadosPaciente">
+        <h4 class="card-title">Dados do Paciente</h4>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-body" id="dadosTriagem">
+        <h4 class="card-title">Dados da Triagem</h4>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title">Preenchimento Médico</h4>
+        <form id="formAtendimento">
+          <div class="form-group">
+            <label for="anamnese">Anamnese e Exame Físico</label>
+            <textarea id="anamnese" class="form-control" rows="4"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="conduta">Conduta Médica</label>
+            <textarea id="conduta" class="form-control" rows="3"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="medicamento">Nome do Medicamento</label>
+            <input id="medicamento" class="form-control" list="listaMedicamentos" placeholder="Digite o nome do medicamento" />
+            <datalist id="listaMedicamentos"></datalist>
+            <small id="avisoAlergia" class="form-text text-warning font-weight-bold" style="display: none;"></small>
+          </div>
+
+          <div class="form-group">
+            <label for="descricaoMedicamento">Como será utilizado</label>
+            <textarea id="descricaoMedicamento" class="form-control" rows="2" placeholder="Descreva como o medicamento será utilizado"></textarea>
+          </div>
+
+          <button type="button" id="btnAdicionarMedicacao" class="btn btn-info mb-3">Adicionar Medicação</button>
+
+          <div class="form-group">
+            <label>Lista de Medicamentos</label>
+            <ul id="listaMedicacoesRegistradas" class="list-group mb-3">
+              <li class="list-group-item text-muted">Nenhuma medicação registrada ainda.</li>
+            </ul>
+          </div>
+
+          <div class="form-group">
+            <label for="status">Conduta Final</label>
+            <select id="status" class="form-control">
+              <option value="">Selecione</option>
+              <option value="observacao">Observação</option>
+              <option value="internacao">Internação</option>
+              <option value="alta">Alta</option>
+              <option value="medicacao">Alta após Medicação</option>
+            </select>
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <div>
+              <button type="submit" class="btn btn-success">Salvar Atendimento</button>
+              <button type="button" id="btnInternacao" class="btn btn-primary ml-2">Internação</button>
+            </div>
+            <a href="/medico/emergencia" class="btn btn-secondary">Voltar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Internação -->
+  <div class="modal fade" id="modalInternacao" tabindex="-1" role="dialog" aria-labelledby="modalInternacaoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalInternacaoLabel">Protocolo de Internação</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="formInternacao">
+            <!-- Informações Básicas -->
+            <div class="card mb-3">
+              <div class="card-header">
+                <h6 class="mb-0">Informações Básicas</h6>
+              </div>
+              <div class="card-body">
+                <div class="form-row">
+                  <div class="form-group col-md-4">
+                    <label for="leito">Leito *</label>
+                    <input type="text" class="form-control" id="leito" required>
+                  </div>
+                  <div class="form-group col-md-4">
+                    <label for="carater_internacao">Caráter da Internação *</label>
+                    <select class="form-control" id="carater_internacao" required>
+                      <option value="">Selecione...</option>
+                      <option value="eletiva">Eletiva</option>
+                      <option value="urgencia">Urgência</option>
+                      <option value="emergencia">Emergência</option>
+                    </select>
+                  </div>
+                  <div class="form-group col-md-4">
+                    <label for="acidente_trabalho">Acidente de Trabalho</label>
+                    <div class="custom-control custom-switch mt-2">
+                      <input type="checkbox" class="custom-control-input" id="acidente_trabalho">
+                      <label class="custom-control-label" for="acidente_trabalho">Sim</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Diagnóstico -->
+            <div class="card mb-3">
+              <div class="card-header">
+                <h6 class="mb-0">Diagnóstico</h6>
+              </div>
+              <div class="card-body">
+                <div class="form-row">
+                  <div class="form-group col-md-4">
+                    <label for="cid_principal">CID-10 Principal *</label>
+                    <input type="text" class="form-control" id="cid_principal" required>
+                  </div>
+                  <div class="form-group col-md-4">
+                    <label for="cid_secundario">CID-10 Secundário</label>
+                    <input type="text" class="form-control" id="cid_secundario">
+                  </div>
+                  <div class="form-group col-md-4">
+                    <label for="cid_causas_associadas">CID-10 Causas Associadas</label>
+                    <input type="text" class="form-control" id="cid_causas_associadas">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Procedimento -->
+            <div class="card mb-3">
+              <div class="card-header">
+                <h6 class="mb-0">Procedimento</h6>
+              </div>
+              <div class="card-body">
+                <div class="form-row">
+                  <div class="form-group col-md-8">
+                    <label for="procedimento_solicitado">Descrição do Procedimento</label>
+                    <input type="text" class="form-control" id="procedimento_solicitado">
+                  </div>
+                  <div class="form-group col-md-4">
+                    <label for="codigo_procedimento">Código do Procedimento</label>
+                    <input type="text" class="form-control" id="codigo_procedimento">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Justificativas -->
+            <div class="card">
+              <div class="card-header">
+                <h6 class="mb-0">Justificativas da Internação</h6>
+              </div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label for="justificativa_sinais_sintomas">Sinais e Sintomas *</label>
+                  <textarea class="form-control" id="justificativa_sinais_sintomas" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                  <label for="justificativa_condicoes">Condições que Justificam a Internação *</label>
+                  <textarea class="form-control" id="justificativa_condicoes" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                  <label for="justificativa_resultados">Principais Resultados de Provas Diagnósticas *</label>
+                  <textarea class="form-control" id="justificativa_resultados" rows="3" required></textarea>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="btnConfirmarInternacao">Confirmar Internação</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const atendimentoId = urlParams.get('atendimento_id');
+    let medicacoesPendentes = [];
+    let alergiasPaciente = '';
+    let dadosInternacao = {};
+
+    $(document).ready(function () {
+      if (!atendimentoId) {
+        alert('ID do atendimento não encontrado na URL.');
+        return;
+      }
+
+      carregarMedicacoes();
+
+      $.getJSON(`/api/medico/atendimento/${atendimentoId}`, function (data) {
+        if (!data.success) {
+          alert('Erro ao carregar dados do atendimento.');
+          return;
+        }
+
+        const p = data.paciente;
+        const a = data.atendimento;
+
+        alergiasPaciente = a.alergias ? a.alergias.toLowerCase() : '';
+
+        $('#dadosPaciente').append(`
+          <div class="info-line"><strong>Nome:</strong> ${p.nome} | <strong>CPF:</strong> ${p.cpf}</div>
+          <div class="info-line"><strong>Cartão SUS:</strong> ${p.cartao_sus || '---'} | <strong>Sexo:</strong> ${p.sexo} | <strong>Nasc.:</strong> ${p.data_nascimento}</div>
+          <div class="info-line"><strong>Endereço:</strong> ${p.endereco}, ${p.bairro}, ${p.municipio}</div>
+          <div class="info-line"><strong>Telefone:</strong> ${p.telefone}</div>
+        `);
+
+        $('#dadosTriagem').append(`
+          <div class="d-flex justify-content-between">
+            <div><strong>Enfermeiro:</strong> ${data.enfermeiro} | <strong>Horário:</strong> ${a.horario_triagem ? new Date(a.horario_triagem).toLocaleString() : '---'}</div>
+            <div><strong>Classificação de Risco:</strong> ${a.classificacao_risco || '---'}</div>
+          </div>
+          <div class="info-line mt-2">
+            <strong>Temperatura:</strong> ${a.temp || '---'} |
+            <strong>Pressão:</strong> ${a.pressao || '---'} |
+            <strong>Pulso:</strong> ${a.pulso || '---'} |
+            <strong>SpO2:</strong> ${a.sp02 || '---'} |
+            <strong>FR:</strong> ${a.fr || '---'} |
+            <strong>Peso:</strong> ${a.peso ? a.peso + 'kg' : '---'} |
+            <strong>Altura:</strong> ${a.altura ? a.altura + 'm' : '---'} |
+            <strong>DX:</strong> ${a.dx || '---'}
+          </div>
+          <div class="info-line mt-2"><strong>Alergias:</strong> ${a.alergias || '---'}</div>
+          <div class="info-line mt-1"><strong>Queixa Principal:</strong> ${a.triagem || '---'}</div>
+        `);
+
+        $('#anamnese').val(a.anamnese_exame_fisico || '');
+        $('#conduta').val(a.conduta_final || '');
+        $('#status').val(a.status || '');
+        
+        // Preencher os campos do modal com os dados da anamnese e conduta
+        $('#justificativa_sinais_sintomas').val(a.anamnese_exame_fisico || '');
+        $('#justificativa_condicoes').val(a.conduta_final || '');
+        $('#justificativa_resultados').val(a.conduta_final || '');
+      });
+
+      $('#medicamento').on('input', function () {
+        const termo = $(this).val();
+        const valorDigitado = termo.toLowerCase().trim();
+        const input = $(this);
+        const aviso = $('#avisoAlergia');
+
+        if (termo.length >= 2) {
+          $.getJSON(`/api/medicamentos/buscar?termo=${termo}`, function (nomes) {
+            $('#listaMedicamentos').empty();
+            nomes.forEach(nome => {
+              $('#listaMedicamentos').append(`<option value="${nome}">`);
+            });
+          });
+        }
+
+        let encontrado = false;
+        $('#listaMedicamentos option').each(function () {
+          if ($(this).val().toLowerCase() === valorDigitado) {
+            encontrado = true;
+            return false;
+          }
+        });
+
+        const termosAlergia = alergiasPaciente.split(/[\s,;.]+/).map(t => t.trim().toLowerCase()).filter(t => t.length > 2);
+        const ehAlergico = valorDigitado.length >= 3 && termosAlergia.some(t =>
+          t === valorDigitado || valorDigitado.includes(t) || t.includes(valorDigitado)
+        );
+
+        if (ehAlergico) {
+          input.removeClass('is-valid is-invalid').css('border', '2px solid #ffc107');
+          aviso.text('Atenção: paciente possui alergia a este medicamento.');
+          aviso.show();
+        } else if (!encontrado) {
+          input.removeClass('is-valid').addClass('is-invalid').css('border', '2px solid #dc3545');
+          aviso.hide();
+        } else {
+          input.removeClass('is-invalid').addClass('is-valid').css('border', '2px solid #28a745');
+          aviso.hide();
+        }
+      });
+
+      $('#btnAdicionarMedicacao').click(function () {
+        const nome = $('#medicamento').val().trim();
+        const descricao = $('#descricaoMedicamento').val().trim();
+
+        if (!nome || !descricao) {
+          alert('Preencha o nome e a descrição da medicação.');
+          return;
+        }
+
+        medicacoesPendentes.push({ nome, descricao });
+
+        $('#listaMedicacoesRegistradas').append(`<li class="list-group-item"><strong>${nome}</strong>: ${descricao}</li>`);
+        $('#medicamento').val('').removeClass('is-valid is-invalid').css('border', '');
+        $('#descricaoMedicamento').val('');
+        $('#avisoAlergia').hide();
+      });
+
+      // Evento para abrir o modal quando o botão de internação for clicado
+      $('#btnInternacao').click(function() {
+        // Preencher campos do modal com dados do atendimento
+        $('#justificativa_sinais_sintomas').val($('#anamnese').val());
+        $('#justificativa_condicoes').val($('#conduta').val());
+        $('#justificativa_resultados').val($('#conduta').val());
+        
+        // Definir o status como internação
+        $('#status').val('internacao');
+        
+        // Abrir o modal
+        $('#modalInternacao').modal('show');
+      });
+
+      // Validação do formulário de internação
+      $('#btnConfirmarInternacao').click(function() {
+        const form = document.getElementById('formInternacao');
+        if (!form.checkValidity()) {
+          // Trigger HTML5 validation
+          $('<input type="submit">').hide().appendTo(form).click().remove();
+          return;
+        }
+        
+        // Coletar dados do formulário
+        dadosInternacao = {
+          leito: $('#leito').val(),
+          cid_principal: $('#cid_principal').val(),
+          cid_10_secundario: $('#cid_secundario').val() || 'N/A',
+          cid_10_causas_associadas: $('#cid_causas_associadas').val() || 'N/A',
+          carater_internacao: $('#carater_internacao').val(),
+          acidente_de_trabalho: $('#acidente_trabalho').is(':checked'),
+          descr_procedimento_solicitado: $('#procedimento_solicitado').val() || 'Não especificado',
+          codigo_procedimento: $('#codigo_procedimento').val() || 'N/A',
+          justificativa_internacao_sinais_e_sintomas: $('#justificativa_sinais_sintomas').val(),
+          justificativa_internacao_condicoes: $('#justificativa_condicoes').val(),
+          justificativa_internacao_principais_resultados_diagnostico: $('#justificativa_resultados').val()
+        };
+        
+        // Fechar o modal
+        $('#modalInternacao').modal('hide');
+        
+        // Salvar o atendimento automaticamente
+        salvarAtendimento();
+      });
+
+      // Função para salvar o atendimento
+      function salvarAtendimento() {
+        const status = $('#status').val();
+        const agora = new Date().toISOString();
+
+        const payload = {
+          anamnese_exame_fisico: $('#anamnese').val(),
+          conduta_final: $('#conduta').val(),
+          status: status
+        };
+
+        if (status === 'observacao') {
+          payload.horario_observacao = agora;
+        } else if (status === 'internacao') {
+          // Verificar se os dados de internação foram preenchidos
+          if (!dadosInternacao.leito || !dadosInternacao.cid_principal) {
+            alert('Por favor, preencha os dados de internação.');
+            $('#modalInternacao').modal('show');
+            return;
+          }
+          
+          payload.horario_internacao = agora;
+          payload.leito = dadosInternacao.leito;
+          payload.cid_principal = dadosInternacao.cid_principal;
+          payload.cid_10_secundario = dadosInternacao.cid_10_secundario;
+          payload.cid_10_causas_associadas = dadosInternacao.cid_10_causas_associadas;
+          payload.carater_internacao = dadosInternacao.carater_internacao;
+          payload.acidente_de_trabalho = dadosInternacao.acidente_de_trabalho;
+          payload.descr_procedimento_solicitado = dadosInternacao.descr_procedimento_solicitado;
+          payload.codigo_procedimento = dadosInternacao.codigo_procedimento;
+          payload.justificativa_internacao_sinais_e_sintomas = dadosInternacao.justificativa_internacao_sinais_e_sintomas;
+          payload.justificativa_internacao_condicoes = dadosInternacao.justificativa_internacao_condicoes;
+          payload.justificativa_internacao_principais_resultados_diagnostico = dadosInternacao.justificativa_internacao_principais_resultados_diagnostico;
+        } else if (status === 'alta') {
+          payload.horario_alta = agora;
+        } else if (status === 'medicacao') {
+          payload.horario_medicacao = agora;
+        }
+
+        $.ajax({
+          url: `/api/medico/atendimento/${atendimentoId}`,
+          method: 'PUT',
+          contentType: 'application/json',
+          data: JSON.stringify(payload),
+          success: function (response) {
+            if (response.success) {
+              if (medicacoesPendentes.length > 0) {
+                let chamadas = medicacoesPendentes.map(m => {
+                  return $.ajax({
+                    url: `/api/medicacoes/registrar`,
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                      atendimento_id: atendimentoId,
+                      nome_medicamento: m.nome,
+                      descricao_uso: m.descricao
+                    })
+                  });
+                });
+
+                Promise.all(chamadas).then(() => {
+                  alert('Atendimento e medicações salvos com sucesso!');
+                  window.location.href = "/medico/emergencia";
+                }).catch(() => {
+                  alert('Erro ao salvar as medicações.');
+                });
+              } else {
+                alert('Atendimento salvo com sucesso!');
+                window.location.href = "/medico/emergencia";
+              }
+            } else {
+              alert('Erro: ' + response.message);
+            }
+          },
+          error: function () {
+            alert('Erro na comunicação com o servidor.');
+          }
+        });
+      }
+
+      $('#formAtendimento').submit(function (e) {
+        e.preventDefault();
+        salvarAtendimento();
+      });
+    });
+
+    function carregarMedicacoes() {
+      $.getJSON(`/api/medico/atendimento/${atendimentoId}/medicacoes`, function (res) {
+        if (res.success) {
+          const lista = $('#listaMedicacoesRegistradas');
+          lista.empty();
+          if (res.medicacoes.length === 0) {
+            lista.append('<li class="list-group-item text-muted">Nenhuma medicação registrada ainda.</li>');
+          } else {
+            res.medicacoes.forEach(med => {
+              lista.append(`<li class="list-group-item">${med}</li>`);
+            });
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>

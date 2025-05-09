@@ -1,0 +1,32 @@
+﻿/* Estilos para prescrições médicas */
+
+
+/* Cartão de prescrição */
+.card {
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+
+.card-header.bg-primary {
+    border-bottom: none;
+}
+
+
+/* Ícones nas prescrições */
+.fa-calendar-check {
+    color: #28a745;
+}
+
+.fa-calendar-times {
+    color: #6c757d;
+}
+
+
+/* Conteúdo em caixas */
+.bg-light.rounded {
+    background-color: #f8f9fa;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}

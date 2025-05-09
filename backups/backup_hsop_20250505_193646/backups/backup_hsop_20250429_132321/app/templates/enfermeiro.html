@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel do Enfermeiro</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .sidebar {
+      width: 80px;
+      height: 100vh;
+      background-color: #2d2ddcec;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 20px;
+      position: relative;
+    }
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      width: 100%;
+    }
+    .sidebar li {
+      position: relative;
+      width: 100%;
+    }
+    .sidebar a {
+      color: #fff;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+      width: 100%;
+      font-size: 18px;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+    .sidebar a:hover::after {
+      content: attr(data-title);
+      position: absolute;
+      left: 100%;
+      background-color: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 5px;
+      white-space: nowrap;
+      margin-left: 10px;
+      font-size: 14px;
+    }
+    .main-content {
+      padding: 20px;
+    }
+    .hidden {
+      display: none;
+    }
+    /* Menu do usuário na sidebar */
+    .user-menu {
+      position: absolute;
+      bottom: 20px;
+      width: 100%;
+      text-align: center;
+    }
+    .user-menu-button {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #fff;
+      color: #2d2ddcec;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 24px;
+      border: none;
+    }
+    .user-dropdown {
+      display: none;
+      position: absolute;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(20px);
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      min-width: 150px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+    .user-dropdown a, .user-dropdown span {
+      display: block;
+      padding: 10px;
+      color: #333;
+      text-decoration: none;
+    }
+    .user-dropdown a:hover {
+      background-color: #f8f9fa;
+    }
+    /* Seção de Triagem */
+    #triagem-section {
+      display: none;
+      max-width: 50%;
+      margin: 20px auto;
+    }
+    #triagem-section h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    /* Seção de Busca de Pacientes */
+    #patient-search-section {
+      display: none;
+      max-width: 50%;
+      margin: 20px auto;
+    }
+    #patient-search-section h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .search-group {
+      margin-bottom: 15px;
+    }
+    /* Itens de paciente e atendimento com layout em linha */
+    .patient-item, .atendimento-item {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      background-color: #fff;
+    }
+    /* Submenu para histórico */
+    .submenu {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="sidebar" id="sidebar">
+        <ul class="nav flex-column">
+          <li class="nav-item" data-title="Buscar Pacientes">
+            <a class="nav-link" href="#" onclick="abrirBuscaPacientes()">
+              <i class="fas fa-search"></i>
+            </a>
+          </li>
+          <li class="nav-item" data-title="Triagem">
+            <a class="nav-link" href="#" onclick="abrirTriagem()">
+              <i class="fas fa-notes-medical"></i>
+            </a>
+          </li>
+          <li class="nav-item" data-title="Maternidade">
+            <a class="nav-link" href="#" onclick="abrirMaternidade()">
+              <i class="fas fa-baby"></i>
+            </a>
+          </li>
+          <li class="nav-item" data-title="Clínica">
+            <a class="nav-link" href="#" onclick="abrirClinica()">
+              <i class="fas fa-stethoscope"></i>
+            </a>
+          </li>
+        </ul>
+        <!-- Menu do Usuário -->
+        <div class="user-menu">
+          <button class="user-menu-button" id="userMenuButton">
+            <i class="fas fa-user"></i>
+          </button>
+          <div class="user-dropdown" id="userDropdown">
+            <span id="userNameDisplay">Nome do Funcionário</span>
+            <a href="#" id="changePasswordOption">Mudar a senha</a>
+            <a href="/logout" id="logoutOption">Sair</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col main-content">
+        <!-- Seção de Triagem -->
+        <div id="triagem-section">
+          <h2>Pacientes Aguardando Triagem</h2>
+          <div class="form-group">
+            <input type="text" class="form-control" id="triagemSearch" placeholder="Buscar paciente..." onkeyup="filtrarPacientes()">
+          </div>
+          <div id="triagem-list"></div>
+        </div>
+
+        <!-- Seção de Busca de Pacientes -->
+        <div id="patient-search-section">
+          <h2>Busca de Pacientes</h2>
+          <div class="form-group search-group">
+            <input type="text" class="form-control" id="buscaIdentificados" placeholder="Buscar por CPF ou nome" onkeyup="buscarPacientesIdentificados()">
+          </div>
+          <div id="listaIdentificados"></div>
+
+          <!-- Novo submenu para histórico de atendimentos -->
+          <div id="submenuAtendimentos" class="submenu" style="display:none;">
+            <h3>Histórico de Atendimentos</h3>
+            <div id="listaAtendimentos"></div>
+          </div>
+
+          <div class="form-group search-group mt-3">
+            <input type="checkbox" id="mostrarNaoIdentificados" onchange="togglePacientesNaoIdentificados()"> 
+            <label for="mostrarNaoIdentificados">Mostrar pacientes não identificados</label>
+          </div>
+          <div id="listaNaoIdentificados"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Mudar Senha -->
+  <div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="changePasswordModalLabel">Mudar a senha</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="changePasswordForm">
+            <div class="form-group">
+              <label for="senhaAtual">Senha Atual</label>
+              <input type="password" class="form-control" id="senhaAtual" name="senhaAtual" required>
+            </div>
+            <div class="form-group">
+              <label for="novaSenha">Nova Senha</label>
+              <input type="password" class="form-control" id="novaSenha" name="novaSenha" required>
+            </div>
+            <div class="form-group">
+              <label for="confirmarNovaSenha">Confirmar Nova Senha</label>
+              <input type="password" class="form-control" id="confirmarNovaSenha" name="confirmarNovaSenha" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Alterar Senha</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- jQuery, Bootstrap JS e jQuery Mask Plugin -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+
+  <script>
+    console.log("Script iniciado no painel do enfermeiro.");
+
+    $(document).ready(function () {
+      console.log("DOM totalmente carregado.");
+      // Carrega o nome do enfermeiro via API
+      $.getJSON('/api/enfermeiro/nome', function(data) {
+        console.log("Dados do enfermeiro recebidos:", data);
+        if(data.nome) {
+          $('#userNameDisplay').text(data.nome);
+        }
+      });
+    });
+
+    // Toggle do menu do usuário
+    $('#userMenuButton').click(function() {
+      console.log("Botão do menu do usuário clicado.");
+      $('#userDropdown').toggle();
+    });
+
+    // Fechar o menu ao clicar fora
+    $(document).click(function(event) {
+      if(!$(event.target).closest('#userMenuButton, #userDropdown').length) {
+        $('#userDropdown').hide();
+      }
+    });
+
+    // Ação para "Mudar a senha": abre o modal
+    $('#changePasswordOption').click(function(e) {
+      e.preventDefault();
+      console.log("Opção para mudar senha selecionada.");
+      $('#userDropdown').hide();
+      $('#changePasswordModal').modal('show');
+    });
+
+    // Submissão do formulário de mudança de senha
+    $('#changePasswordForm').submit(function(e) {
+      e.preventDefault();
+      const senhaAtual = $('#senhaAtual').val();
+      const novaSenha = $('#novaSenha').val();
+      const confirmarNovaSenha = $('#confirmarNovaSenha').val();
+      if(novaSenha !== confirmarNovaSenha) {
+        alert('A nova senha e a confirmação não conferem.');
+        return;
+      }
+      console.log("Enviando solicitação de mudança de senha...");
+      fetch('/api/enfermeiro/mudar-senha', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ senha_atual: senhaAtual, nova_senha: novaSenha })
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log("Resposta da mudança de senha:", data);
+        if(data.success) {
+          alert('Senha alterada com sucesso.');
+          $('#changePasswordModal').modal('hide');
+          $('#changePasswordForm')[0].reset();
+        } else {
+          alert('Erro: ' + data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Erro ao alterar senha:', error);
+        alert('Erro ao alterar a senha.');
+      });
+    });
+
+    // Função para abrir a seção de triagem
+    function abrirTriagem() {
+      console.log("Abrindo seção de triagem.");
+      $('.main-content > div').hide();
+      $('#triagem-section').show();
+      $.ajax({
+        url: '/api/enfermeiro/pacientes-triagem',
+        method: 'GET',
+        dataType: 'json',
+        success: function(data) {
+          console.log("Dados de pacientes para triagem recebidos:", data);
+          if(data.success) {
+            renderTriageList(data.pacientes);
+          } else {
+            $('#triagem-list').html('<p>Nenhum paciente aguardando triagem.</p>');
+          }
+        },
+        error: function() {
+          console.error("Erro ao buscar pacientes para triagem.");
+          $('#triagem-list').html('<p>Erro ao buscar pacientes.</p>');
+        }
+      });
+    }
+
+    // Renderiza a lista de triagem
+    function renderTriageList(patients) {
+      let html = '';
+      if(patients.length === 0) {
+        html = '<p>Nenhum paciente aguardando triagem.</p>';
+      } else {
+        patients.forEach(function(patient) {
+          html += '<div class="patient-item d-flex justify-content-between align-items-center">';
+          html += '<span>' + patient.nome + '</span>';
+          html += '<button class="btn btn-sm btn-primary" onclick="iniciarTriagem(' + patient.id + ')">Iniciar triagem</button>';
+          html += '</div>';
+        });
+      }
+      $('#triagem-list').html(html);
+      console.log("Lista de triagem renderizada.");
+    }
+
+    // Filtra pacientes na lista de triagem
+    function filtrarPacientes() {
+      var input = document.getElementById('triagemSearch');
+      var filter = input.value.toUpperCase();
+      var container = document.getElementById('triagem-list');
+      var items = container.getElementsByClassName('patient-item');
+      for (var i = 0; i < items.length; i++) {
+        var span = items[i].getElementsByTagName('span')[0];
+        if (span) {
+          var txtValue = span.textContent || span.innerText;
+          items[i].style.display = txtValue.toUpperCase().indexOf(filter) > -1 ? "" : "none";
+        }
+      }
+      console.log("Filtro de triagem aplicado: ", filter);
+    }
+
+    // Inicia a triagem de um paciente
+    function iniciarTriagem(patientId) {
+      console.log("Iniciando triagem para paciente ID:", patientId);
+      location.href = '/ficha_paciente_triagem?paciente_id=' + patientId;
+    }
+
+    // Abre a seção de busca de pacientes
+    function abrirBuscaPacientes() {
+      console.log("Abrindo seção de busca de pacientes.");
+      $('.main-content > div').hide();
+      $('#patient-search-section').show();
+      $('#buscaIdentificados').val('');
+      $('#listaIdentificados').html('');
+      $('#mostrarNaoIdentificados').prop('checked', false);
+      $('#listaNaoIdentificados').html('');
+      // Esconde o submenu de atendimentos
+      $('#submenuAtendimentos').hide();
+    }
+
+    // Busca de pacientes identificados por CPF ou nome – exibe nome à esquerda e botão "Histórico" à direita
+    function buscarPacientesIdentificados() {
+      var filtro = $('#buscaIdentificados').val().trim();
+      console.log("Buscando pacientes identificados com filtro:", filtro);
+      if(filtro === "") {
+        $('#listaIdentificados').html('');
+        return;
+      }
+      $.ajax({
+        url: '/api/pacientes/buscar',
+        method: 'GET',
+        data: { filtro: filtro },
+        dataType: 'json',
+        success: function(data) {
+          console.log("Resultado da busca de pacientes:", data);
+          if(data.success && data.pacientes.length > 0) {
+            var html = '';
+            data.pacientes.forEach(function(paciente) {
+              html += '<div class="patient-item d-flex justify-content-between align-items-center">';
+              html += '<span>' + paciente.nome + ' (' + paciente.cpf + ')</span>';
+              html += '<button class="btn btn-sm btn-info" onclick="mostrarHistoricoAtendimentos(' + paciente.id + ', \'' + paciente.nome + '\')">Histórico</button>';
+              html += '</div>';
+            });
+            $('#listaIdentificados').html(html);
+          } else {
+            $('#listaIdentificados').html('<p>Nenhum paciente identificado encontrado.</p>');
+          }
+        },
+        error: function() {
+          console.error("Erro na busca de pacientes identificados.");
+          $('#listaIdentificados').html('<p>Erro ao buscar pacientes identificados.</p>');
+        }
+      });
+    }
+
+    // Exibe o submenu com o histórico de atendimentos do paciente
+    function mostrarHistoricoAtendimentos(pacienteId, pacienteNome) {
+      // Armazena o id do paciente para uso na função de imprimir ficha
+      window.currentPacienteId = pacienteId;
+      $('#submenuAtendimentos').show();
+      $('#submenuAtendimentos h3').text('Histórico de Atendimentos de ' + pacienteNome);
+      $.ajax({
+        url: '/api/pacientes/' + pacienteId + '/atendimentos',
+        method: 'GET',
+        dataType: 'json',
+        success: function(data) {
+          if(data.success && data.atendimentos.length > 0) {
+            var html = '';
+            data.atendimentos.forEach(function(atendimento) {
+              html += '<div class="atendimento-item d-flex justify-content-between align-items-center" style="border-bottom:1px solid #ccc; padding:5px;">';
+              html += '<div>';
+              html += '<strong>Atendimento:</strong> ' + atendimento.id + ' - ' + atendimento.data_atendimento + '<br>';
+              html += '<strong>Status:</strong> ' + atendimento.status;
+              html += '</div>';
+              html += '<div>';
+              html += '<button class="btn btn-sm btn-info" onclick="toggleImprimirFicha(this)">Ver Histórico</button> ';
+              html += '<button class="btn btn-sm btn-secondary imprimir-btn" style="display:none;" onclick="imprimirFicha()">Imprimir Ficha</button>';
+              html += '</div>';
+              html += '</div>';
+            });
+            $('#listaAtendimentos').html(html);
+          } else {
+            $('#listaAtendimentos').html('<p>Nenhum atendimento encontrado para este paciente.</p>');
+          }
+        },
+        error: function() {
+          $('#listaAtendimentos').html('<p>Erro ao buscar histórico de atendimentos.</p>');
+        }
+      });
+    }
+
+    // Função para alternar a exibição do botão "Imprimir Ficha" no atendimento
+    function toggleImprimirFicha(button) {
+      var imprimirBtn = $(button).siblings('.imprimir-btn');
+      imprimirBtn.toggle();
+    }
+
+    // Redireciona para a página de ficha geral usando o id do paciente armazenado
+    function imprimirFicha() {
+      if(window.currentPacienteId) {
+        window.location.href = '/ficha_geral_paciente?paciente_id=' + window.currentPacienteId;
+      } else {
+        alert('Paciente não definido.');
+      }
+    }
+
+    // Exibe ou oculta pacientes não identificados
+    function togglePacientesNaoIdentificados() {
+      if($('#mostrarNaoIdentificados').is(':checked')) {
+        console.log("Mostrando pacientes não identificados.");
+        $.ajax({
+          url: '/api/recepcionista/nao-identificados',
+          method: 'GET',
+          dataType: 'json',
+          success: function(data) {
+            console.log("Dados de pacientes não identificados:", data);
+            if(data.success && data.pacientes.length > 0) {
+              var html = '';
+              data.pacientes.forEach(function(paciente) {
+                html += '<div class="patient-item d-flex justify-content-between align-items-center">';
+                html += '<span>' + paciente.descricao + ' - ' + paciente.registrado_por + '</span>';
+                html += '<button class="btn btn-sm btn-primary" onclick="abrirFichaPacienteNaoIdentificado(' + paciente.id + ')">Ver Ficha</button>';
+                html += '</div>';
+              });
+              $('#listaNaoIdentificados').html(html);
+            } else {
+              $('#listaNaoIdentificados').html('<p>Nenhum paciente não identificado encontrado.</p>');
+            }
+          },
+          error: function() {
+            console.error("Erro ao buscar pacientes não identificados.");
+            $('#listaNaoIdentificados').html('<p>Erro ao buscar pacientes não identificados.</p>');
+          }
+        });
+      } else {
+        console.log("Ocultando pacientes não identificados.");
+        $('#listaNaoIdentificados').html('');
+      }
+    }
+
+    function abrirFichaPacienteNaoIdentificado(patientId) {
+      console.log("Abrindo ficha do paciente não identificado, ID:", patientId);
+      location.href = '/ficha_geral_paciente?paciente_id=' + patientId;
+    }
+
+    function abrirFichaPaciente(patientId) {
+      console.log("Abrindo ficha do paciente identificado, ID:", patientId);
+      location.href = '/ficha_geral_paciente?paciente_id=' + patientId;
+    }
+
+    function abrirMaternidade() {
+      alert("Abrir Maternidade");
+    }
+
+    function abrirClinica() {
+      window.location.href = "/clinica";
+    }
+
+    window.onload = function() {
+      console.log("Página carregada. Iniciando carregamento de dados...");
+    };
+  </script>
+</body>
+</html>

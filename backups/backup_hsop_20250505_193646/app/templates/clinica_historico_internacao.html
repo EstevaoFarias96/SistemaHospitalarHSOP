@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Histórico de Internações</h2>
+        <a href="/clinica" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+    </div>
+    
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">
+                            <i class="fas fa-search text-primary"></i>
+                        </span>
+                        <input type="text" id="searchInput" class="form-control" placeholder="Buscar paciente...">
+                    </div>
+                </div>
+            </div>
+            
+            <div id="statusMessage" class="alert alert-info mb-3" style="display: none;">
+                Carregando histórico de internações...
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nome</th>
+                            <th>CPF</th>
+                            <th>Data de Nascimento</th>
+                            <th>Leito</th>
+                            <th>Data de Internação</th>
+                            <th>Data de Alta</th>
+                            <th>Diagnóstico</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historicoTableBody">
+                        <!-- Os dados serão inseridos aqui via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Detalhes -->
+<div class="modal fade" id="modalDetalhes" tabindex="-1" aria-labelledby="modalDetalhesLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalDetalhesLabel">Detalhes da Internação</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6>Relatório de Alta</h6>
+                        <p id="relatorioAlta" class="border rounded p-2"></p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Evolução</h6>
+                        <p id="evolucao" class="border rounded p-2"></p>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h6>Parâmetros na Alta</h6>
+                        <p id="parametros" class="border rounded p-2"></p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Exames Laboratoriais</h6>
+                        <p id="examesLaboratoriais" class="border rounded p-2"></p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <h6>Conduta</h6>
+                        <p id="conduta" class="border rounded p-2"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mostrar mensagem de carregamento
+    const statusMessage = document.getElementById('statusMessage');
+    statusMessage.style.display = 'block';
+    statusMessage.textContent = 'Carregando histórico de internações...';
+    
+    // Carregar histórico ao iniciar a página
+    carregarHistorico();
+
+    // Configurar busca
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#historicoTableBody tr');
+        
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+});
+
+function carregarHistorico() {
+    const statusMessage = document.getElementById('statusMessage');
+    statusMessage.style.display = 'block';
+    
+    fetch('/api/internacoes/historico')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                const tbody = document.getElementById('historicoTableBody');
+                tbody.innerHTML = '';
+                
+                if (data.internacoes && data.internacoes.length > 0) {
+                    statusMessage.style.display = 'none';
+                    
+                    data.internacoes.forEach(internacao => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${internacao.nome_paciente}</td>
+                            <td>${internacao.cpf}</td>
+                            <td>${formatarData(internacao.data_nascimento)}</td>
+                            <td>${internacao.leito}</td>
+                            <td>${formatarData(internacao.data_internacao)}</td>
+                            <td>${formatarData(internacao.data_alta)}</td>
+                            <td>${internacao.diagnostico || '-'}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="verDetalhes(${JSON.stringify(internacao).replace(/"/g, '&quot;')})">
+                                    <i class="fas fa-eye"></i> Ver Detalhes
+                                </button>
+                                <a href="/clinica/relatorio-paciente/${internacao.id}" class="btn btn-sm btn-primary ms-1">
+                                    <i class="fas fa-file-medical-alt"></i> Ver Relatório
+                                </a>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                } else {
+                    statusMessage.className = 'alert alert-info mb-3';
+                    statusMessage.textContent = 'Não há histórico de internações registrado.';
+                }
+            } else {
+                console.error('Erro ao carregar histórico:', data.error);
+                statusMessage.className = 'alert alert-danger mb-3';
+                statusMessage.textContent = 'Erro ao carregar histórico de internações: ' + (data.error || 'Erro desconhecido');
+            }
+        })
+        .catch(error => {
+            console.error('Erro na requisição:', error);
+            statusMessage.className = 'alert alert-danger mb-3';
+            statusMessage.textContent = 'Erro ao carregar histórico de internações: ' + error.message;
+            
+            // Adicionar botão para tentar novamente
+            statusMessage.innerHTML += '<br><button class="btn btn-sm btn-outline-primary mt-2" onclick="carregarHistorico()">Tentar novamente</button>';
+        });
+}
+
+function formatarData(dataString) {
+    if (!dataString) return '-';
+    const data = new Date(dataString);
+    return data.toLocaleDateString('pt-BR');
+}
+
+function verDetalhes(internacao) {
+    document.getElementById('relatorioAlta').textContent = internacao.relatorio_alta || 'Não informado';
+    document.getElementById('evolucao').textContent = internacao.evolucao || 'Não informado';
+    document.getElementById('parametros').textContent = internacao.parametros || 'Não informado';
+    document.getElementById('examesLaboratoriais').textContent = internacao.exames_laboratoriais || 'Não informado';
+    document.getElementById('conduta').textContent = internacao.conduta || 'Não informado';
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalDetalhes'));
+    modal.show();
+}
+</script>
+{% endblock %} 
