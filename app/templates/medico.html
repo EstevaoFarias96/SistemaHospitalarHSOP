@@ -282,38 +282,74 @@
             </div>
             
             <!-- Etapa 2: Relatório de Internação -->
-            <div class="tab-pane fade" id="relatorio-internacao" role="tabpanel" aria-labelledby="relatorio-internacao-tab">
+            <div class="tab-pane fade" id="relatorio-internacao" role="tabpanel">
               <form id="relatorioInternacaoForm">
-                <input type="hidden" id="pacienteId" name="pacienteId">
-                
+                <input type="hidden" id="pacienteId">
+
                 <div class="form-group">
                   <label for="hda">História da Doença Atual (HDA)*</label>
-                  <textarea class="form-control" id="hda" name="hda" rows="3" required></textarea>
+                  <textarea id="hda" name="hda" rows="3" class="form-control" required></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label for="justificativa_internacao_sinais_e_sintomas">Justificativa da Internação*</label>
+                  <textarea id="justificativa_internacao_sinais_e_sintomas" name="justificativa_internacao_sinais_e_sintomas" rows="3" class="form-control" required></textarea>
                 </div>
 
                 <div class="form-group">
                   <label for="diagnosticoInicial">Diagnóstico Inicial*</label>
-                  <textarea class="form-control" id="diagnosticoInicial" name="diagnosticoInicial" rows="3" required></textarea>
+                  <textarea id="diagnosticoInicial" name="diagnostico_inicial" rows="3" class="form-control" required></textarea>
                 </div>
 
                 <div class="form-group">
-                  <label for="exameFisico">Exame Físico*</label>
-                  <textarea class="form-control" id="exameFisico" name="exameFisico" rows="3" required></textarea>
+                  <label for="anamnese_exame_fisico">Exame Físico*</label>
+                  <textarea id="anamnese_exame_fisico" name="anamnese_exame_fisico" rows="3" class="form-control" required></textarea>
                 </div>
-                
+
+                <div class="form-group">
+                  <label for="condutaInicial">Conduta Inicial*</label>
+                  <textarea id="condutaInicial" name="conduta_inicial" rows="3" class="form-control" required></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label for="caraterInternacao">Caráter da Internação*</label>
+                  <select id="caraterInternacao" name="carater_internacao" class="form-control" required>
+                    <option value="">Selecione…</option>
+                    <option>Urgência</option>
+                    <option>Eletiva</option>
+                    <option>Outros</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="cidPrincipal">CID Principal*</label>
+                  <input id="cidPrincipal" name="cid_principal" class="form-control" placeholder="Ex.: K35.2" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="cid10Secundario">CID 10 Secundário</label>
+                  <input id="cid10Secundario" name="cid_10_secundario" class="form-control" placeholder="Ex.: K35.2">
+                </div>
+
+                <div class="form-group">
+                  <label for="cid10CausasAssociadas">CID 10 Causas Associadas</label>
+                  <input id="cid10CausasAssociadas" name="cid_10_causas_associadas" class="form-control" placeholder="Ex.: K35.2">
+                </div>
+
+                <div class="form-group">
+                  <label for="examesRealizados">Exames realizados</label>
+                  <textarea id="examesRealizados" name="exames_realizados" rows="2" class="form-control"></textarea>
+                </div>
+
                 <p class="text-muted">* Campos obrigatórios</p>
-                
+
                 <div class="d-flex justify-content-between">
                   <button type="button" class="btn btn-secondary" id="btnVoltarDados">Voltar</button>
                   <button type="submit" class="btn btn-success">Finalizar Internação</button>
                 </div>
               </form>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+            
 
   <!-- Scripts -->
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
@@ -377,66 +413,54 @@
       }
       
       // Submissão do formulário de relatório de internação (etapa 2)
-      $('#relatorioInternacaoForm').submit(function(e) {
+      $('#relatorioInternacaoForm').submit(function (e) {
         e.preventDefault();
-        
-        // Recuperar dados do paciente da primeira etapa
+
         const dadosPaciente = JSON.parse(sessionStorage.getItem('dadosPaciente'));
-        
-        // Coletar dados da internação
+
         const dadosInternacao = {
           hda: $('#hda').val(),
+          justificativa_internacao_sinais_e_sintomas: $('#justificativa_internacao_sinais_e_sintomas').val(),
           diagnostico_inicial: $('#diagnosticoInicial').val(),
-          anamnese_exame_fisico: $('#exameFisico').val()
+          anamnese_exame_fisico: $('#anamnese_exame_fisico').val(),
+          conduta_inicial: $('#condutaInicial').val(),
+          carater_internacao: $('#caraterInternacao').val(),
+          cid_principal: $('#cidPrincipal').val(),
+          cid_10_secundario: $('#cid10Secundario').val(),
+          cid_10_causas_associadas: $('#cid10CausasAssociadas').val(),
+          exames_realizados: $('#examesRealizados').val()
         };
-        
-        // Combinar todos os dados para enviar à API
-        const dadosCompletos = {
+
+        const payload = {
           ...dadosPaciente,
           ...dadosInternacao,
-          atendimento_id: gerarAtendimentoId() // Gerar ID automaticamente sem mostrar
+          atendimento_id: gerarAtendimentoId()
         };
-        
-        // Enviar dados para a API
+
         fetch('/api/internar-paciente', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(dadosCompletos)
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
         })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            // Fechar o modal e mostrar mensagem de sucesso
-            $('#internarPacienteModal').modal('hide');
-            
-            alert('Paciente internado com sucesso! Atendimento: ' + data.atendimento_id);
-            
-            // Limpar os formulários
-            $('#dadosPacienteForm')[0].reset();
-            $('#relatorioInternacaoForm')[0].reset();
-            
-            // Limpar dados armazenados
-            sessionStorage.removeItem('dadosPaciente');
-            
-            // Resetar as abas para a próxima vez
-            setTimeout(function() {
+          .then(r => r.json())
+          .then(d => {
+            if (d.success) {
+              $('#internarPacienteModal').modal('hide');
+              alert('Paciente internado com sucesso! Atendimento: ' + d.atendimento_id);
+              $('#dadosPacienteForm')[0].reset();
+              $('#relatorioInternacaoForm')[0].reset();
+              sessionStorage.removeItem('dadosPaciente');
               $('#dados-paciente-tab').tab('show');
               $('#relatorio-internacao-tab').addClass('disabled');
-            }, 500);
-            
-            // Redirecionar para a página de pacientes internados
-            window.location.href = '/clinica/pacientes-internados';
-          } else {
-            alert('Erro ao internar paciente: ' + data.message);
-          }
-        })
-        .catch(error => {
-          console.error('Erro ao internar paciente:', error);
-          alert('Erro ao processar a internação. Por favor, tente novamente.');
-        });
+              window.location.href = '/clinica/pacientes-internados';
+            } else {
+              alert('Erro: ' + d.message);
+            }
+          })
+          .catch(() => alert('Falha na comunicação com o servidor.'));
       });
+
+      $('#btnVoltarDados').click(() => $('#dados-paciente-tab').tab('show'));
     });
 
     // Toggle do menu do usuário

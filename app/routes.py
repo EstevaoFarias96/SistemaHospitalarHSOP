@@ -1613,7 +1613,16 @@ def buscar_internacao(internacao_id):
             'historico_internacao': internacao.historico_internacao,
             'relatorio_alta': internacao.relatorio_alta,
             'conduta': internacao.conduta,
-            'cuidados_gerais': internacao.cuidados_gerais
+            'cuidados_gerais': internacao.cuidados_gerais,
+            # CAMPOS EXTRAS
+            'justificativa_internacao_sinais_e_sintomas': internacao.justificativa_internacao_sinais_e_sintomas,
+            'justificativa_internacao_condicoes': internacao.justificativa_internacao_condicoes,
+            'justificativa_internacao_principais_resultados_diagnostico': internacao.justificativa_internacao_principais_resultados_diagnostico,
+            'cid_10_secundario': internacao.cid_10_secundario,
+            'cid_10_causas_associadas': internacao.cid_10_causas_associadas,
+            'descr_procedimento_solicitado': internacao.descr_procedimento_solicitado,
+            'codigo_procedimento': internacao.codigo_procedimento,
+            'acidente_de_trabalho': internacao.acidente_de_trabalho
         }
         
         return jsonify({
@@ -2121,9 +2130,9 @@ def atualizar_hda():
     Atualiza a História da Doença Atual (HDA) de uma internação.
     """
     try:
-        # Verificar se o usuário é médico
+        # Verificar se o usuário é médico (ignorar variações de capitalização e espaços)
         current_user = get_current_user()
-        if current_user.cargo.lower() != 'medico':
+        if current_user.cargo and current_user.cargo.strip().lower() != 'medico':
             return jsonify({
                 'success': False,
                 'message': 'Apenas médicos podem atualizar o HDA'
@@ -2450,7 +2459,16 @@ def registrar_aprazamento_prescricao():
         medicamento_nome = None
         
         # Obter os medicamentos como lista JSON
-        medicamentos_lista = prescricao.medicamentos_json
+        # Ensure medicamentos_json is parsed as a list
+        if isinstance(prescricao.medicamentos_json, str):
+            try:
+                medicamentos_lista = json.loads(prescricao.medicamentos_json)
+                if not isinstance(medicamentos_lista, list):
+                    medicamentos_lista = []
+            except json.JSONDecodeError:
+                medicamentos_lista = []
+        else:
+            medicamentos_lista = prescricao.medicamentos_json if isinstance(prescricao.medicamentos_json, list) else []
         
         if medicamento_index is not None and medicamentos_lista and len(medicamentos_lista) > medicamento_index:
             medicamento = medicamentos_lista[medicamento_index]
@@ -3608,3 +3626,145 @@ def verificar_internacao_ativa(paciente_id):
     except Exception as e:
         print('[ERRO verificar_internacao_ativa]:', e)
         return jsonify({'success': False, 'message': 'Erro interno'}), 500
+
+@bp.route('/api/internacao/<string:internacao_id>', methods=['PUT'])
+@login_required
+def editar_internacao(internacao_id):
+    """
+    Permite que médicos editem os dados de uma internação existente.
+    """
+    try:
+        # Verificar se o usuário é médico
+        current_user = get_current_user()
+        if current_user.cargo.lower() != 'medico':
+            return jsonify({
+                'success': False,
+                'message': 'Apenas médicos podem editar dados de internação.'
+            }), 403
+
+        # Buscar a internação pelo atendimento_id
+        internacao = Internacao.query.filter_by(atendimento_id=internacao_id).first()
+        if not internacao:
+            return jsonify({
+                'success': False,
+                'message': 'Internação não encontrada.'
+            }), 404
+
+        # Obter dados enviados no JSON
+        dados = request.get_json()
+
+        # Atualizar os campos da internação
+        campos_editaveis = [
+            'leito', 'data_internacao', 'data_alta', 'diagnostico',
+            'diagnostico_inicial', 'cid_principal', 'historico_internacao',
+            'relatorio_alta', 'conduta', 'cuidados_gerais',
+            'justificativa_internacao_sinais_e_sintomas',
+            'justificativa_internacao_condicoes',
+            'justificativa_internacao_principais_resultados_diagnostico',
+            'cid_10_secundario', 'cid_10_causas_associadas',
+            'descr_procedimento_solicitado', 'codigo_procedimento',
+            'acidente_de_trabalho'
+        ]
+
+        for campo in campos_editaveis:
+            if campo in dados:
+                setattr(internacao, campo, dados[campo])
+
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Internação atualizada com sucesso.'
+        })
+
+    except Exception as e:
+        logging.error(f'Erro ao editar internação: {str(e)}')
+        logging.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'message': f'Erro ao editar internação: {str(e)}'
+        }), 500
+
+
+@bp.route('/clinica/historico-internacao/<string:atendimento_id>', methods=['GET'])
+@login_required
+def historico_internacao(atendimento_id):
+    atendimento = Atendimento.query.get_or_404(atendimento_id)
+    paciente = Paciente.query.get_or_404(atendimento.paciente_id)
+    medico = Funcionario.query.get(atendimento.medico_id)
+
+    # Buscar a internação vinculada ao atendimento
+    internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
+
+    if not internacao:
+        return f"Nenhuma internação encontrada para o atendimento {atendimento_id}", 404
+
+    return render_template(
+        'clinica_evolucao_historico.html',
+        internacao=internacao,
+        atendimento=atendimento,
+        paciente=paciente,
+        medico=medico
+    )
+
+@bp.route('/api/internacao/<string:atendimento_id>', methods=['GET'])
+@login_required
+def get_internacao_por_id(internacao_id):
+    internacao = Internacao.query.get_or_404(internacao_id)
+
+    atendimento = Atendimento.query.get(internacao.atendimento_id)
+    paciente = Paciente.query.get(atendimento.paciente_id)
+    medico = Funcionario.query.get(atendimento.medico_id)
+
+    return jsonify({
+        'success': True,
+        'internacao': {
+            'nome_paciente': paciente.nome,
+            'cpf': paciente.cpf,
+            'data_internacao': internacao.data_internacao.isoformat() if internacao.data_internacao else None,
+            'data_alta': internacao.data_alta.isoformat() if internacao.data_alta else None,
+            'diagnostico': internacao.diagnostico,
+            'historico_internacao': internacao.historico_internacao,
+            'relatorio_alta': internacao.relatorio_alta,
+            'conduta': internacao.conduta,
+            'medicacao_alta': internacao.medicacao,
+            'cuidados_gerais': internacao.cuidados_gerais,
+            'medico': medico.nome if medico else None
+        }
+    })
+
+@bp.route('/api/internacao/<int:internacao_id>/hda', methods=['GET'])
+@login_required
+def obter_hda(internacao_id):
+    """
+    Retorna o texto da História da Doença Atual (HDA) da internação.
+    """
+    try:
+        # Verificar se o usuário é médico ou enfermeiro
+        current_user = get_current_user()
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
+            return jsonify({
+                'success': False,
+                'message': 'Acesso permitido apenas para médicos e enfermeiros'
+            }), 403
+
+        internacao = Internacao.query.get(internacao_id)
+        if not internacao:
+            return jsonify({
+                'success': False,
+                'message': 'Internação não encontrada'
+            }), 404
+
+        return jsonify({
+            'success': True,
+            'hda': internacao.hda or ''
+        })
+
+    except Exception as e:
+        logging.error(f'Erro ao buscar HDA: {str(e)}')
+        logging.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'message': 'Erro ao buscar HDA',
+            'error': str(e)
+        }), 500

@@ -9192,3 +9192,541 @@ ModuleNotFoundError: No module named 'pdfkit'
 2025-05-09 11:09:59,781 [INFO] __init__:62 - LoginManager inicializado com sucesso
 2025-05-09 11:10:00,024 [INFO] __init__:81 - Blueprints registrados com sucesso
 2025-05-09 11:10:00,074 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-12 11:31:56,526 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-12 11:31:56,527 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-12 11:31:56,589 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-12 11:31:56,590 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-12 11:31:56,964 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-12 11:31:57,032 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-12 11:31:57,612 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-12 11:31:57,614 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-12 11:31:57,654 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-12 11:31:57,655 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-12 11:31:57,881 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-12 11:31:57,936 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-12 11:43:50,325 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-12 11:43:50,325 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-12 11:43:50,362 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-12 11:43:50,367 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-12 11:43:50,596 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-12 11:43:50,657 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-12 11:44:04,344 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-12 11:44:04,345 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-12 11:44:04,380 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-12 11:44:04,381 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-12 11:44:04,606 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-12 11:44:04,786 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-12 11:44:37,528 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-12 11:44:37,528 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-12 11:44:37,568 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-12 11:44:37,570 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-12 11:44:37,797 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-12 11:44:37,848 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-12 13:49:45,962 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-12 13:49:45,962 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-12 13:49:45,999 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-12 13:49:45,999 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-12 13:49:46,235 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-12 13:49:46,291 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-12 14:08:26,451 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-12 14:08:26,451 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-12 14:08:26,493 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-12 14:08:26,493 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-12 14:08:26,721 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-12 14:08:26,772 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-13 10:44:25,258 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-13 10:44:25,258 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-13 10:44:25,302 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-13 10:44:25,302 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-13 10:44:25,735 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-13 10:44:25,803 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-13 10:44:26,323 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-13 10:44:26,323 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-13 10:44:26,377 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-13 10:44:26,378 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-13 10:44:26,583 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-13 10:44:26,636 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-13 11:29:43,398 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-13 11:29:43,398 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-13 11:29:43,441 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-13 11:29:43,441 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-13 11:29:43,661 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-13 11:29:43,718 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-13 12:39:31,856 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-13 12:39:31,856 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-13 12:39:31,901 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-13 12:39:31,901 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-13 12:39:32,134 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-13 12:39:32,191 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-13 13:01:12,923 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-13 13:01:12,924 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-13 13:01:12,973 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-13 13:01:12,974 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-13 13:01:13,207 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-13 13:01:13,256 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-13 13:06:32,969 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-13 13:06:32,970 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-13 13:06:33,011 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-13 13:06:33,011 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-13 13:06:33,266 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-13 13:06:33,329 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-13 13:09:42,036 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-13 13:09:42,037 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-13 13:09:42,079 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-13 13:09:42,079 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-13 13:09:42,337 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-13 13:09:42,511 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-13 13:17:44,996 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-13 13:17:44,996 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-13 13:17:45,032 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-13 13:17:45,033 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-13 13:17:45,287 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-13 13:17:45,343 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-13 13:17:59,943 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-13 13:17:59,943 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-13 13:17:59,987 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-13 13:17:59,987 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-13 13:18:00,256 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-13 13:18:00,313 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-13 13:19:22,177 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-13 13:19:22,177 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-13 13:19:22,220 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-13 13:19:22,220 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-13 13:19:22,462 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-13 13:19:22,514 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-14 08:04:56,241 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-14 08:04:56,241 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-14 08:04:56,283 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-14 08:04:56,283 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-14 08:04:56,547 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-14 08:04:56,600 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-14 08:04:57,068 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-14 08:04:57,068 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-14 08:04:57,117 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-14 08:04:57,117 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-14 08:04:57,318 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-14 08:04:57,373 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-14 08:31:43,997 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-14 08:31:43,997 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-14 08:31:44,044 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-14 08:31:44,044 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-14 08:31:44,268 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-14 08:31:44,442 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-14 08:32:04,754 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-14 08:32:04,754 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-14 08:32:04,788 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-14 08:32:04,788 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-14 08:32:04,989 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-14 08:32:05,037 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-14 08:34:41,816 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-14 08:34:41,816 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-14 08:34:41,857 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-14 08:34:41,857 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-14 08:34:42,059 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-14 08:34:42,110 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-16 11:55:18,785 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-16 11:55:18,785 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-16 11:55:18,848 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-16 11:55:18,848 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-16 11:55:19,200 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-16 11:55:19,265 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-16 11:55:19,759 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-16 11:55:19,759 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-16 11:55:19,806 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-16 11:55:19,807 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-16 11:55:19,999 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-16 11:55:20,049 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-16 19:56:44,106 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-16 19:56:44,107 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-16 19:56:44,156 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-16 19:56:44,156 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-16 19:56:44,487 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-16 19:56:44,556 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-16 19:56:45,234 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-16 19:56:45,234 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-16 19:56:45,279 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-16 19:56:45,280 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-16 19:56:45,574 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-16 19:56:45,640 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-17 09:09:42,589 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-17 09:09:42,589 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-17 09:09:42,636 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-17 09:09:42,638 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-17 09:09:42,905 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-17 09:09:42,956 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-17 09:09:43,469 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-17 09:09:43,470 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-17 09:09:43,506 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-17 09:09:43,509 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-17 09:09:43,711 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-17 09:09:43,766 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-17 10:40:15,341 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-17 10:40:15,341 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-17 10:40:15,437 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-17 10:40:15,437 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-17 10:40:15,496 [ERROR] __init__:83 - Erro ao registrar blueprint: No module named 'pdfkit'
+2025-05-17 10:40:15,496 [ERROR] __init__:84 - Traceback (most recent call last):
+  File "C:\HSOP\app\__init__.py", line 78, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "C:\HSOP\app\routes.py", line 3, in <module>
+    import pdfkit
+ModuleNotFoundError: No module named 'pdfkit'
+
+2025-05-17 10:40:15,573 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-17 10:40:16,245 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-17 10:40:16,245 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-17 10:40:16,299 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-17 10:40:16,300 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-17 10:40:16,330 [ERROR] __init__:83 - Erro ao registrar blueprint: No module named 'pdfkit'
+2025-05-17 10:40:16,332 [ERROR] __init__:84 - Traceback (most recent call last):
+  File "C:\HSOP\app\__init__.py", line 78, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "C:\HSOP\app\routes.py", line 3, in <module>
+    import pdfkit
+ModuleNotFoundError: No module named 'pdfkit'
+
+2025-05-17 10:40:16,400 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-17 12:35:18,563 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-17 12:35:18,563 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-17 12:35:18,623 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-17 12:35:18,623 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-17 12:35:18,985 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-17 12:35:19,048 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-17 12:35:19,651 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-17 12:35:19,651 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-17 12:35:19,703 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-17 12:35:19,703 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-17 12:35:19,943 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-17 12:35:20,006 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-18 19:21:58,265 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-18 19:21:58,267 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-18 19:21:58,336 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-18 19:21:58,336 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-18 19:21:58,871 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-18 19:21:58,967 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-18 19:21:59,875 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-18 19:21:59,875 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-18 19:21:59,944 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-18 19:21:59,944 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-18 19:22:00,281 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-18 19:22:00,379 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-18 19:59:49,324 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-18 19:59:49,324 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-18 19:59:49,363 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-18 19:59:49,364 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-18 19:59:49,597 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-18 19:59:49,660 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-18 19:59:50,219 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-18 19:59:50,221 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-18 19:59:50,267 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-18 19:59:50,268 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-18 19:59:50,528 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-18 19:59:50,587 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-18 20:00:26,237 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-18 20:00:26,238 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-18 20:00:26,278 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-18 20:00:26,279 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-18 20:00:26,498 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-18 20:00:26,553 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-18 20:00:27,096 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-18 20:00:27,097 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-18 20:00:27,140 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-18 20:00:27,140 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-18 20:00:27,355 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-18 20:00:27,408 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-19 08:02:50,497 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-19 08:02:50,497 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-19 08:02:50,545 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-19 08:02:50,545 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-19 08:02:50,810 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-19 08:02:50,872 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-19 08:02:51,374 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-19 08:02:51,374 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-19 08:02:51,415 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-19 08:02:51,415 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-19 08:02:51,619 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-19 08:02:51,789 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-19 19:41:43,144 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-19 19:41:43,144 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-19 19:41:43,199 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-19 19:41:43,200 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-19 19:41:43,561 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-19 19:41:43,622 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-19 19:41:44,121 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-19 19:41:44,121 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-19 19:41:44,163 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-19 19:41:44,164 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-19 19:41:44,373 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-19 19:41:44,426 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-19 20:15:16,808 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-19 20:15:16,808 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-19 20:15:16,862 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-19 20:15:16,862 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-19 20:15:16,886 [ERROR] __init__:83 - Erro ao registrar blueprint: No module named 'pdfkit'
+2025-05-19 20:15:16,887 [ERROR] __init__:84 - Traceback (most recent call last):
+  File "C:\HSOP\app\__init__.py", line 78, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "C:\HSOP\app\routes.py", line 3, in <module>
+    import pdfkit
+ModuleNotFoundError: No module named 'pdfkit'
+
+2025-05-19 20:15:16,949 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-19 20:15:17,474 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-19 20:15:17,474 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-19 20:15:17,513 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-19 20:15:17,513 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-19 20:15:17,535 [ERROR] __init__:83 - Erro ao registrar blueprint: No module named 'pdfkit'
+2025-05-19 20:15:17,537 [ERROR] __init__:84 - Traceback (most recent call last):
+  File "C:\HSOP\app\__init__.py", line 78, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "C:\HSOP\app\routes.py", line 3, in <module>
+    import pdfkit
+ModuleNotFoundError: No module named 'pdfkit'
+
+2025-05-19 20:15:17,592 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-19 20:23:40,917 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-19 20:23:40,917 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-19 20:23:40,958 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-19 20:23:40,959 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-19 20:23:41,159 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-19 20:23:41,215 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-19 20:23:41,706 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-19 20:23:41,706 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-19 20:23:41,741 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-19 20:23:41,741 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-19 20:23:41,943 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-19 20:23:41,992 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-19 20:46:32,017 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-19 20:46:32,017 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-19 20:46:32,070 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-19 20:46:32,071 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-19 20:46:32,316 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-19 20:46:32,377 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-19 20:46:33,037 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-19 20:46:33,038 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-19 20:46:33,086 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-19 20:46:33,086 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-19 20:46:33,331 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-19 20:46:33,387 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-19 20:57:13,484 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-19 20:57:13,485 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-19 20:57:13,519 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-19 20:57:13,520 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-19 20:57:13,716 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-19 20:57:13,771 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-19 20:57:14,258 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-19 20:57:14,259 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-19 20:57:14,295 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-19 20:57:14,295 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-19 20:57:14,490 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-19 20:57:14,542 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-19 21:52:34,250 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-19 21:52:34,250 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-19 21:52:34,288 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-19 21:52:34,288 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-19 21:52:34,528 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-19 21:52:34,584 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-20 04:43:53,015 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-20 04:43:53,015 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-20 04:43:53,060 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-20 04:43:53,060 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-20 04:43:53,325 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-20 04:43:53,389 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-20 04:43:53,906 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-20 04:43:53,906 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-20 04:43:53,944 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-20 04:43:53,945 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-20 04:43:54,138 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-20 04:43:54,191 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-20 05:00:47,376 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-20 05:00:47,377 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-20 05:00:47,418 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-20 05:00:47,418 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-20 05:00:47,670 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-20 05:00:47,722 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-20 05:05:08,139 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-20 05:05:08,139 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-20 05:05:08,181 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-20 05:05:08,181 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-20 05:05:08,406 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-20 05:05:08,578 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-20 06:00:23,729 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-20 06:00:23,729 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-20 06:00:23,761 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-20 06:00:23,761 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-20 06:00:23,959 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-20 06:00:24,019 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-20 06:00:24,479 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-20 06:00:24,479 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-20 06:00:24,523 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-20 06:00:24,523 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-20 06:00:24,711 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-20 06:00:24,759 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-20 08:21:34,760 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-20 08:21:34,760 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-20 08:21:34,808 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-20 08:21:34,808 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-20 08:21:35,081 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-20 08:21:35,154 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-20 08:21:35,693 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-20 08:21:35,693 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-20 08:21:35,725 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-20 08:21:35,725 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-20 08:21:35,949 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-20 08:21:36,004 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-20 10:30:13,970 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-20 10:30:13,970 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-20 10:30:14,009 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-20 10:30:14,009 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-20 10:30:14,221 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-20 10:30:14,270 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-20 10:30:14,743 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-20 10:30:14,744 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-20 10:30:14,786 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-20 10:30:14,786 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-20 10:30:14,983 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-20 10:30:15,036 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-20 13:11:33,986 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-20 13:11:33,986 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-20 13:11:34,028 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-20 13:11:34,029 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-20 13:11:34,267 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-20 13:11:34,329 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-20 13:11:34,862 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-20 13:11:34,862 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-20 13:11:34,901 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-20 13:11:34,901 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-20 13:11:35,114 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-20 13:11:35,165 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-20 15:05:33,901 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-20 15:05:33,901 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-20 15:05:33,943 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-20 15:05:33,944 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-20 15:05:34,207 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-20 15:05:34,260 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-20 15:05:34,761 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-20 15:05:34,761 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-20 15:05:34,795 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-20 15:05:34,796 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-20 15:05:34,977 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-20 15:05:35,040 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-20 15:16:15,881 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-20 15:16:15,881 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-20 15:16:15,920 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-20 15:16:15,921 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-20 15:16:16,115 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-20 15:16:16,172 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-20 15:16:16,646 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-20 15:16:16,646 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-20 15:16:16,688 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-20 15:16:16,688 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-20 15:16:16,885 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-20 15:16:16,935 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-20 15:48:34,388 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-20 15:48:34,388 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-20 15:48:34,426 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-20 15:48:34,426 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-20 15:48:34,647 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-20 15:48:34,701 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-20 15:48:35,224 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-20 15:48:35,224 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-20 15:48:35,265 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-20 15:48:35,265 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-20 15:48:35,487 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-20 15:48:35,647 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-20 17:55:19,151 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-20 17:55:19,151 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-20 17:55:19,219 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-20 17:55:19,219 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-20 17:55:19,658 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-20 17:55:19,745 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-20 17:55:20,558 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-20 17:55:20,558 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-20 17:55:20,650 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-20 17:55:20,650 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-20 17:55:21,120 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-20 17:55:21,205 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-21 08:38:50,691 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-21 08:38:50,691 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-21 08:38:50,754 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-21 08:38:50,754 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-21 08:38:51,109 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-21 08:38:51,178 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-21 08:38:51,852 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-21 08:38:51,854 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-21 08:38:51,911 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-21 08:38:51,911 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-21 08:38:52,179 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-21 08:38:52,242 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-21 08:52:38,322 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-21 08:52:38,322 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-21 08:52:38,371 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-21 08:52:38,371 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-21 08:52:38,602 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-21 08:52:38,668 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-21 08:52:39,297 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-21 08:52:39,297 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-21 08:52:39,356 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-21 08:52:39,356 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-21 08:52:39,572 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-21 08:52:39,642 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-21 12:12:03,637 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-21 12:12:03,637 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-21 12:12:03,675 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-21 12:12:03,675 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-21 12:12:04,001 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-21 12:12:04,042 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-21 12:21:56,301 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-21 12:21:56,301 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-21 12:21:56,349 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-21 12:21:56,349 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-21 12:21:56,653 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-21 12:21:56,825 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-21 12:23:06,161 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-21 12:23:06,161 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-21 12:23:06,199 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-21 12:23:06,199 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-21 12:23:06,491 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-21 12:23:06,542 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-21 12:24:35,201 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-21 12:24:35,201 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-21 12:24:35,237 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-21 12:24:35,237 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-21 12:24:35,510 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-21 12:24:35,564 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-21 12:24:47,006 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-21 12:24:47,006 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-21 12:24:47,044 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-21 12:24:47,044 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-21 12:24:47,308 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-21 12:24:47,356 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-21 12:25:05,001 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-21 12:25:05,001 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-21 12:25:05,051 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-21 12:25:05,051 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-21 12:25:05,314 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-21 12:25:05,362 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-22 16:26:24,141 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-22 16:26:24,142 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-22 16:26:24,195 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-22 16:26:24,195 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-22 16:26:24,512 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-22 16:26:24,575 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-22 16:26:25,103 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-22 16:26:25,103 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-22 16:26:25,145 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-22 16:26:25,145 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-22 16:26:25,344 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-22 16:26:25,386 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-23 14:34:22,038 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-23 14:34:22,038 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-23 14:34:22,074 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-23 14:34:22,074 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-23 14:34:22,349 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-23 14:34:22,398 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-23 14:34:22,898 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-23 14:34:22,898 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-23 14:34:22,934 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-23 14:34:22,934 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-23 14:34:23,145 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-23 14:34:23,200 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas

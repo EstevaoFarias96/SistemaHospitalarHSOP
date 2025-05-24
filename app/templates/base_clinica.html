@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sistema Clínico{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link rel="icon" href="{{ url_for('static', filename='img/favicon.png') }}" type="image/png">
+    <meta name="theme-color" content="#2c3e50">
+    <!-- O cabeçalho Content-Security-Policy será configurado no Flask -->
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Variáveis de cores */
+        :root {
+            --primary-dark: #1a237e;
+            --primary-main: #283593;
+            --primary-light: #3949ab;
+            --accent: #1565c0;
+            --hover-light: rgba(255,255,255,0.08);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255,255,255,0.95);
+            --shadow-soft: 0 2px 4px rgba(0,0,0,0.08);
+            --shadow-strong: 0 4px 8px rgba(0,0,0,0.12);
+            --gradient-primary: linear-gradient(135deg, var(--primary-main), var(--primary-light));
+            --gradient-accent: linear-gradient(135deg, var(--accent), var(--primary-light));
+            /* Variáveis RGB para transparência */
+            --primary-main-rgb: 40, 53, 147;
+            --primary-light-rgb: 57, 73, 171;
+        }
+
+        /* Estilos globais para cards e headers */
+        .card {
+            border: none;
+            box-shadow: var(--shadow-soft);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-strong);
+        }
+
+        .card-header {
+            border-bottom: none;
+            background: var(--gradient-primary) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            border: none;
+            box-shadow: var(--shadow-soft);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--gradient-accent);
+            box-shadow: var(--shadow-strong);
+            transform: translateY(-1px);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f57c00, #ffb74d);
+            border: none;
+            color: var(--text-primary);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #ff9800, #ffa726);
+            color: var(--text-primary);
+            box-shadow: var(--shadow-strong);
+            transform: translateY(-1px);
+        }
+
+        .badge {
+            background: var(--gradient-primary);
+            border: none;
+            box-shadow: var(--shadow-soft);
+        }
+
+        /* Estilos para prescrições */
+        .prescricao-container {
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            border: 1px solid #e9ecef;
+            background-color: #fff;
+        }
+
+        .prescricao-container:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-strong);
+        }
+
+        /* Estilo para prescrições do dia */
+        .prescricao-hoje {
+            border-left: 4px solid var(--primary-main);
+            background-color: rgba(var(--primary-main-rgb), 0.02);
+            position: relative;
+        }
+
+        .prescricao-hoje::before {
+            content: "Hoje";
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--primary-main);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .prescricao-antiga {
+            border-left: 4px solid transparent;
+        }
+
+        .prescricao-header {
+            padding: 12px 15px;
+            background: var(--gradient-primary);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .prescricao-body {
+            padding: 15px;
+        }
+
+        /* Estilo do menu lateral */
+        .sidebar {
+            width: 60px;
+            height: 100vh;
+            background: linear-gradient(180deg, var(--primary-dark) 0%, var(--primary-main) 100%);
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding-top: 20px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            z-index: 1000;
+            box-shadow: var(--shadow-soft);
+        }
+        
+        .sidebar:hover {
+            width: 200px;
+            box-shadow: var(--shadow-strong);
+        }
+        
+        .nav-pills {
+            flex-direction: column;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .nav-pills .nav-link {
+            margin: 5px 10px;
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-pills .nav-link:hover {
+            background-color: var(--hover-light);
+            transform: translateX(5px);
+            color: var(--text-primary);
+            border-color: rgba(255,255,255,0.1);
+        }
+        
+        .nav-pills .nav-link i {
+            font-size: 1.2rem;
+            min-width: 30px;
+            text-align: center;
+            transition: transform 0.3s ease;
+            color: var(--text-primary);
+        }
+        
+        .nav-pills .nav-link:hover i {
+            transform: scale(1.1);
+        }
+        
+        .nav-pills .nav-link span {
+            margin-left: 10px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .sidebar:hover .nav-pills .nav-link span {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .nav-pills .nav-link.active {
+            background-color: var(--accent);
+            color: var(--text-primary);
+            box-shadow: 0 2px 4px rgba(21,101,192,0.3);
+            border-color: rgba(255,255,255,0.2);
+        }
+        
+        .nav-pills .nav-link.active:hover {
+            transform: translateX(5px) scale(1.02);
+            background-color: var(--accent);
+        }
+        
+        /* Ajuste do conteúdo principal */
+        .main-content {
+            margin-left: 60px;
+            flex: 1;
+            padding: 20px;
+            transition: all 0.3s ease;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+        
+        .sidebar:hover + .main-content {
+            margin-left: 200px;
+        }
+
+        /* Estilos para as ações rápidas */
+        .quick-actions {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            background: linear-gradient(0deg, var(--primary-dark) 0%, transparent 100%);
+        }
+
+        .quick-actions .action-btn {
+            background-color: transparent;
+            border: none;
+            color: var(--text-secondary);
+            opacity: 0.9;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .quick-actions .action-btn:hover {
+            opacity: 1;
+            color: var(--text-primary);
+            background-color: var(--hover-light);
+            transform: translateX(5px);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .menu-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .nav-pills {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        /* Estilos básicos para as seções de conteúdo */
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        
+        /* Estilos para informações do paciente */
+        .paciente-info {
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        .paciente-info .info-item {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        .paciente-info .info-item strong {
+            color: #495057;
+        }
+        
+        /* Estilos para tabelas */
+        .table-medicamentos {
+            background: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .table-medicamentos td {
+            vertical-align: middle;
+            padding: 10px;
+        }
+        
+        /* Alerta de alergia */
+        .alerta-alergia {
+            border: 2px solid #ffc107;
+            padding: 5px 10px;
+            display: none;
+            font-weight: bold;
+            color: #856404;
+            background-color: #fff3cd;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+        
+        /* Formatação de textos */
+        .texto-evolucao {
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            max-height: 450px;
+            min-height: 150px;
+            overflow-y: auto;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 6px;
+            border-left: 4px solid #0d6efd;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            transition: max-height 0.3s ease;
+        }
+        
+        .texto-evolucao:hover {
+            max-height: 600px;
+        }
+        
+        .texto-evolucao p {
+            margin-bottom: 0.6rem;
+        }
+        
+        .texto-evolucao * {
+            max-width: 100%;
+        }
+        
+        .texto-evolucao h1, .texto-evolucao h2, .texto-evolucao h3 {
+            margin-top: 0.8rem;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .texto-evolucao ul, .texto-evolucao ol {
+            padding-left: 25px;
+            margin-bottom: 0.8rem;
+        }
+        
+        .texto-evolucao li {
+            margin-bottom: 0.3rem;
+        }
+        
+        .texto-evolucao strong, .texto-evolucao b {
+            font-weight: 700;
+        }
+        
+        .texto-evolucao em, .texto-evolucao i {
+            font-style: italic;
+        }
+        
+        .texto-evolucao blockquote {
+            margin: 0.8rem 0;
+            padding: 0.5rem 1rem;
+            border-left: 3px solid #adb5bd;
+            background-color: #f0f0f0;
+        }
+        
+        .texto-evolucao::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        .texto-evolucao::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .texto-evolucao::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        
+        .texto-evolucao::-webkit-scrollbar-thumb:hover {
+            background: #0d6efd;
+        }
+        
+        /* Estilos para editor Quill */
+        #editor-container {
+            height: 450px;
+            margin-bottom: 15px;
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+        }
+        
+        .ql-editor {
+            overflow-y: auto !important;
+            max-height: 100% !important;
+            scroll-behavior: smooth;
+            font-size: 13px;
+            line-height: 1.5;
+            min-height: 400px;
+        }
+        
+        .ql-tooltip {
+            z-index: 1060 !important;
+        }
+        
+        /* Responsividade do menu lateral */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 200px;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .nav-pills .nav-link span {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .texto-evolucao {
+                max-height: 250px;
+                font-size: 0.85rem;
+                min-height: 100px;
+            }
+            #editor-container {
+                height: 250px;
+            }
+            .ql-editor {
+                min-height: 200px;
+            }
+            
+            /* Botão para mostrar menu em dispositivos móveis */
+            .menu-toggle {
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                z-index: 1100;
+                background: var(--primary-main);
+                color: white;
+                border: none;
+                border-radius: 4px;
+                padding: 8px;
+                display: block;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .menu-toggle {
+                display: none;
+            }
+        }
+        
+        /* Mensagens de notificação */
+        .alert-dismissible {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            box-shadow: var(--shadow-strong);
+        }
+        
+        /* Botões para RN */
+        .rn-buttons {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .rn-buttons .btn {
+            margin-right: 10px;
+        }
+
+        /* Submenu lateral */
+        .submenu .nav-link {
+            padding-left: 40px;
+            font-size: 0.85rem;
+        }
+
+        .submenu .nav-link i {
+            font-size: 0.9rem;
+        }
+
+        .submenu {
+            display: none; /* escondida por padrão */
+            flex-direction: column;
+        }
+
+        /* Mostrar submenu quando o item principal estiver em hover ou o próprio submenu em hover */
+        .nav-pills .nav-link:hover + .submenu,
+        .submenu:hover {
+            display: flex;
+        }
+
+        .nav-pills .nav-link.has-submenu {
+            margin-bottom: 0; /* remove gap abaixo do item principal */
+        }
+
+        .submenu {
+            margin: 0 10px 5px 10px; /* mesmo recuo lateral e espaçamento inferior */
+        }
+
+        /* Mostrar submenu ao passar o mouse */
+        .nav-pills .nav-link.has-submenu:hover + .submenu,
+        .submenu:hover {
+            display: flex;
+        }
+
+        /* Link ativo no submenu */
+        .submenu .nav-link.active {
+            background-color: var(--accent);
+            color: var(--text-primary);
+        }
+
+        /* Seções de Enfermagem */
+        .enf-section {display: none;}
+        .enf-section.active {display: block;}
+    </style>
+    {% block extra_styles %}{% endblock %}
+</head>
+<body>
+    <!-- Botão móvel para mostrar menu -->
+    <button class="menu-toggle" 
+            aria-label="Abrir menu" 
+            aria-controls="sidebar" 
+            aria-expanded="false">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Menu Lateral -->
+    <div class="sidebar" id="sidebar" role="navigation">
+        <nav class="nav nav-pills flex-column">
+            <!-- Menu Principal -->
+            <div class="menu-section">
+                {% block sidebar_menu %}
+                <a class="nav-link active" href="#prescricaoSection" data-bs-toggle="pill" aria-label="Acessar seção de prescrição médica">
+                    <i class="fas fa-pills"></i>
+                    <span>Prescrição</span>
+                </a>
+                <a class="nav-link" href="#evolucaoSection" data-bs-toggle="pill" aria-label="Acessar seção de evolução médica">
+                    <i class="fas fa-notes-medical"></i>
+                    <span>Evolução</span>
+                </a>
+                <a class="nav-link" href="#enfermagemSection" data-bs-toggle="pill" aria-label="Acessar seção de enfermagem">
+                    <i class="fas fa-user-nurse"></i>
+                    <span>Enfermagem</span>
+                </a>
+                <a class="nav-link" href="#prescricaoEnfermagemSection" data-bs-toggle="pill" aria-label="Acessar seção de prescrição de enfermagem">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Prescrição Enf.</span>
+                </a>
+                <a class="nav-link" href="#examesSection" data-bs-toggle="pill" aria-label="Acessar seção de exames">
+                    <i class="fas fa-vial"></i>
+                    <span>Exames</span>
+                </a>
+                <a class="nav-link" href="#receituarioSection" data-bs-toggle="pill" aria-label="Acessar seção de receituário">
+                    <i class="fas fa-prescription"></i>
+                    <span>Receituário</span>
+                </a>
+                <a class="nav-link" href="#atestadoSection" data-bs-toggle="pill" aria-label="Acessar seção de atestados">
+                    <i class="fas fa-file-medical"></i>
+                    <span>Atestados</span>
+                </a>
+                {% endblock %}
+            </div>
+
+            <!-- Ações Rápidas -->
+            <div class="quick-actions">
+                {% block quick_actions %}
+                <a class="nav-link action-btn" href="#" onclick="abrirImpressao(); return false;" aria-label="Imprimir documentos">
+                    <i class="fas fa-print"></i>
+                    <span>Imprimir</span>
+                </a>
+                <a class="nav-link action-btn" href="#" id="btnMostrarInformacoes" aria-label="Mostrar informações do paciente">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Informações</span>
+                </a>
+                {% endblock %}
+            </div>
+        </nav>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <div class="main-content">
+        <div class="container-fluid py-4">
+            {% block page_header %}
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">{% block page_title %}Título da Página{% endblock %}</h2>
+                <div>
+                    <a href="/clinica/pacientes-internados" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left"></i> Voltar
+                    </a>
+                </div>
+            </div>
+            {% endblock %}
+
+            <!-- Tab Content para as seções do menu lateral -->
+            <div class="tab-content">
+                <!-- Seção de Prescrição -->
+                <div class="tab-pane fade show active" id="prescricaoSection" role="tabpanel">
+                    {% block prescricao_content %}{% endblock %}
+                </div>
+                
+                <!-- Seção de Evolução -->
+                <div class="tab-pane fade" id="evolucaoSection" role="tabpanel">
+                    {% block evolucao_content %}{% endblock %}
+                </div>
+                
+                <!-- Seção de Enfermagem -->
+                <div class="tab-pane fade" id="enfermagemSection" role="tabpanel">
+                    {% block enfermagem_content %}{% endblock %}
+                </div>
+                
+                <!-- Seção de Prescrição de Enfermagem -->
+                <div class="tab-pane fade" id="prescricaoEnfermagemSection" role="tabpanel">
+                    {% block prescricao_enfermagem_content %}{% endblock %}
+                </div>
+                
+                <!-- Seção de Exames -->
+                <div class="tab-pane fade" id="examesSection" role="tabpanel">
+                    {% block exames_content %}{% endblock %}
+                </div>
+                
+                <!-- Seção de Receituário -->
+                <div class="tab-pane fade" id="receituarioSection" role="tabpanel">
+                    {% block receituario_content %}{% endblock %}
+                </div>
+                
+                <!-- Seção de Atestados -->
+                <div class="tab-pane fade" id="atestadoSection" role="tabpanel">
+                    {% block atestado_content %}{% endblock %}
+                </div>
+                
+                {% block content %}
+                <!-- O conteúdo específico de cada página será inserido aqui -->
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts comuns -->
+    <script defer src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script defer src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script type="module" src="{{ url_for('static', filename='js/observer.js') }}"></script>
+    
+    <!-- Funções de utilidade comuns -->
+    <script>
+        // Função para mostrar mensagem de sucesso
+        function mostrarMensagemSucesso(mensagem) {
+            const alertHtml = `
+                <div class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3" role="alert" style="z-index: 1060">
+                    ${mensagem}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            $('body').append(alertHtml);
+            
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 3000);
+        }
+
+        // Função para mostrar mensagem de erro
+        function mostrarMensagemErro(mensagem) {
+            const alertHtml = `
+                <div class="alert alert-danger alert-dismissible fade show position-fixed top-0 end-0 m-3" role="alert" style="z-index: 1060">
+                    ${mensagem}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            $('body').append(alertHtml);
+            
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 3000);
+        }
+
+        // Função para formatar data para o padrão brasileiro
+        function formatarDataBR(data) {
+            if (!data) return '';
+            const dt = new Date(data);
+            return dt.toLocaleDateString('pt-BR');
+        }
+
+        // Função para formatar data e hora para o padrão brasileiro
+        function formatarDataHoraBR(data) {
+            if (!data) return '';
+            const dt = new Date(data);
+            return dt.toLocaleString('pt-BR');
+        }
+
+        // Configuração global para as requisições AJAX
+        $.ajaxSetup({
+            beforeSend: function(xhr) {
+                // Adicionar aqui qualquer header necessário
+            },
+            error: function(xhr, status, error) {
+                // Log de erro padrão
+                console.error('Erro na requisição AJAX:', {
+                    status: xhr.status,
+                    statusText: xhr.statusText,
+                    responseText: xhr.responseText,
+                    error: error
+                });
+                
+                // Tratamento de erros de autenticação (401) ou permissão (403)
+                if (xhr.status === 401) {
+                    mostrarMensagemErro('Sessão expirada. Por favor, faça login novamente.');
+                    setTimeout(() => window.location.href = '/login', 2000);
+                } else if (xhr.status === 403) {
+                    mostrarMensagemErro('Você não tem permissão para executar esta ação.');
+                }
+            }
+        });
+
+        // Verificar se o usuário autenticado está com a sessão válida
+        function verificarSessao() {
+            $.ajax({
+                url: '/api/verificar-sessao',
+                type: 'GET',
+                success: function(response) {
+                    if (!response.autenticado) {
+                        mostrarMensagemErro('Sessão expirada ou inválida. Por favor, faça login novamente.');
+                        setTimeout(() => window.location.href = '/login', 2000);
+                    }
+                }
+            });
+        }
+
+        // Executar verificação de sessão a cada 5 minutos
+        setInterval(verificarSessao, 300000);
+        
+        // Controle da sidebar em dispositivos móveis
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.querySelector('.menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            
+            if (menuToggle && sidebar) {
+                menuToggle.addEventListener('click', function() {
+                    const open = sidebar.classList.toggle('show');
+                    menuToggle.setAttribute('aria-expanded', open);
+                });
+                
+                // Fechar menu ao clicar em um link em dispositivos móveis
+                const navLinks = sidebar.querySelectorAll('.nav-link');
+                navLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        if (window.innerWidth <= 768) {
+                            sidebar.classList.remove('show');
+                            menuToggle.setAttribute('aria-expanded', 'false');
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+    
+    {% block scripts %}
+    <!-- Scripts específicos de cada página serão inseridos aqui -->
+    {% endblock %}
+</body>
+</html>
