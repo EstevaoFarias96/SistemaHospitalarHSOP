@@ -3304,7 +3304,8 @@ function visualizarAprazamentosMedicamento(atendimentoId, nomeMedicamento) {
                 
                 // Para cada data
                 Object.keys(aprazamentosPorData).sort().forEach(data => {
-                    const dataFormatada = new Date(data).toLocaleDateString('pt-BR');
+                    const [ano, mes, dia] = data.split('-');
+                    const dataFormatada = `${dia}/${mes}/${ano}`;
                     
                     html += `
                         <div class="card mb-3">

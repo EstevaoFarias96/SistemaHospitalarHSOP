@@ -9730,3 +9730,27 @@ ModuleNotFoundError: No module named 'pdfkit'
 2025-05-23 14:34:22,934 [INFO] __init__:62 - LoginManager inicializado com sucesso
 2025-05-23 14:34:23,145 [INFO] __init__:81 - Blueprints registrados com sucesso
 2025-05-23 14:34:23,200 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-25 20:27:48,778 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-25 20:27:48,779 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-25 20:27:48,838 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-25 20:27:48,840 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-25 20:27:49,267 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-25 20:27:49,340 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-25 20:27:49,977 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-25 20:27:49,978 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-25 20:27:50,020 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-25 20:27:50,020 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-25 20:27:50,266 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-25 20:27:50,320 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-26 08:44:57,239 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-26 08:44:57,239 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-26 08:44:57,292 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-26 08:44:57,292 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-26 08:44:57,715 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-26 08:44:57,783 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-05-26 08:44:58,466 [INFO] __init__:41 - Logging configurado: C:\HSOP\logs\app.log
+2025-05-26 08:44:58,467 [INFO] __init__:53 - Configurações básicas definidas
+2025-05-26 08:44:58,516 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-05-26 08:44:58,517 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-05-26 08:44:58,820 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-05-26 08:44:58,894 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas

@@ -43026,3 +43026,142 @@ DETAIL:  Chave (atendimentos_clinica_id)=(25051623) não está presente na tabela 
 2025-05-23 16:28:34,569 [INFO] 127.0.0.1 - - [23/May/2025 16:28:34] "GET /api/prescricoes/8 HTTP/1.1" 200 -
 2025-05-23 16:28:38,558 [INFO] 127.0.0.1 - - [23/May/2025 16:28:38] "GET /api/aprazamentos/atendimento/25051623/medicamento/asd HTTP/1.1" 200 -
 2025-05-23 16:28:38,877 [INFO] 127.0.0.1 - - [23/May/2025 16:28:38] "GET /api/aprazamentos/atendimento/25051623/medicamento/asd HTTP/1.1" 200 -
+2025-05-25 20:27:48,775 [INFO] Iniciando aplicação...
+2025-05-25 20:27:48,778 [INFO] Logging configurado: C:\HSOP\logs\app.log
+2025-05-25 20:27:48,779 [INFO] Configurações básicas definidas
+2025-05-25 20:27:48,838 [INFO] Banco de dados inicializado com sucesso
+2025-05-25 20:27:48,840 [INFO] LoginManager inicializado com sucesso
+2025-05-25 20:27:49,267 [INFO] Blueprints registrados com sucesso
+2025-05-25 20:27:49,340 [INFO] Tabelas do banco de dados criadas/verificadas
+2025-05-25 20:27:49,342 [INFO] Executando aplicação Flask em modo debug
+2025-05-25 20:27:49,374 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-05-25 20:27:49,375 [INFO] [33mPress CTRL+C to quit[0m
+2025-05-25 20:27:49,376 [INFO]  * Restarting with stat
+2025-05-25 20:27:49,976 [INFO] Iniciando aplicação...
+2025-05-25 20:27:49,977 [INFO] Logging configurado: C:\HSOP\logs\app.log
+2025-05-25 20:27:49,978 [INFO] Configurações básicas definidas
+2025-05-25 20:27:50,020 [INFO] Banco de dados inicializado com sucesso
+2025-05-25 20:27:50,020 [INFO] LoginManager inicializado com sucesso
+2025-05-25 20:27:50,266 [INFO] Blueprints registrados com sucesso
+2025-05-25 20:27:50,320 [INFO] Tabelas do banco de dados criadas/verificadas
+2025-05-25 20:27:50,320 [INFO] Executando aplicação Flask em modo debug
+2025-05-25 20:27:50,334 [WARNING]  * Debugger is active!
+2025-05-25 20:27:50,338 [INFO]  * Debugger PIN: 509-857-677
+2025-05-25 20:28:13,090 [INFO] 127.0.0.1 - - [25/May/2025 20:28:13] "GET / HTTP/1.1" 200 -
+2025-05-25 20:28:13,404 [INFO] 127.0.0.1 - - [25/May/2025 20:28:13] "GET /static/imagens/Imagem1.png HTTP/1.1" 200 -
+2025-05-25 20:28:13,416 [INFO] 127.0.0.1 - - [25/May/2025 20:28:13] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-05-25 20:28:17,701 [INFO] Recebendo requisição de login
+2025-05-25 20:28:17,704 [INFO] Tentativa de login para CPF: 000.000.000-02
+2025-05-25 20:28:17,929 [INFO] Usuário Cleiton (ID: 5) com cargo Enfermeiro logado com sucesso
+2025-05-25 20:28:17,933 [INFO] 127.0.0.1 - - [25/May/2025 20:28:17] "POST /login HTTP/1.1" 200 -
+2025-05-25 20:28:18,283 [INFO] 127.0.0.1 - - [25/May/2025 20:28:18] "GET /enfermeiro HTTP/1.1" 200 -
+2025-05-25 20:28:19,087 [INFO] 127.0.0.1 - - [25/May/2025 20:28:19] "GET /api/enfermeiro/nome HTTP/1.1" 200 -
+2025-05-25 20:28:20,012 [INFO] 127.0.0.1 - - [25/May/2025 20:28:20] "GET /clinica HTTP/1.1" 200 -
+2025-05-25 20:28:20,595 [INFO] 127.0.0.1 - - [25/May/2025 20:28:20] "GET /clinica/pacientes-internados HTTP/1.1" 200 -
+2025-05-25 20:28:20,898 [INFO] 127.0.0.1 - - [25/May/2025 20:28:20] "GET /api/pacientes/internados HTTP/1.1" 200 -
+2025-05-25 20:28:22,012 [INFO] 127.0.0.1 - - [25/May/2025 20:28:22] "GET /clinica/evolucao-paciente-enfermeiro/25050959 HTTP/1.1" 200 -
+2025-05-25 20:28:22,048 [INFO] 127.0.0.1 - - [25/May/2025 20:28:22] "GET /static/js/aprazamento.js HTTP/1.1" 200 -
+2025-05-25 20:28:22,133 [INFO] 127.0.0.1 - - [25/May/2025 20:28:22] "GET /static/js/calculo_horarios.js HTTP/1.1" 200 -
+2025-05-25 20:28:22,356 [INFO] 127.0.0.1 - - [25/May/2025 20:28:22] "GET /static/js/sae.js HTTP/1.1" 200 -
+2025-05-25 20:28:22,360 [INFO] 127.0.0.1 - - [25/May/2025 20:28:22] "GET /static/js/admissao_enfermagem.js HTTP/1.1" 200 -
+2025-05-25 20:28:22,360 [INFO] 127.0.0.1 - - [25/May/2025 20:28:22] "GET /static/js/evolucoes_enfermagem.js HTTP/1.1" 200 -
+2025-05-25 20:28:22,974 [INFO] 127.0.0.1 - - [25/May/2025 20:28:22] "[33mGET /api/enfermagem/sae/31 HTTP/1.1[0m" 404 -
+2025-05-25 20:28:22,994 [INFO] 127.0.0.1 - - [25/May/2025 20:28:22] "GET /api/enfermagem/evolucao/6 HTTP/1.1" 200 -
+2025-05-25 20:28:23,028 [INFO] 127.0.0.1 - - [25/May/2025 20:28:23] "GET /api/evolucoes/6 HTTP/1.1" 200 -
+2025-05-25 20:28:23,034 [INFO] 127.0.0.1 - - [25/May/2025 20:28:23] "GET /api/prescricoes/6 HTTP/1.1" 200 -
+2025-05-25 20:28:23,207 [INFO] 127.0.0.1 - - [25/May/2025 20:28:23] "GET /api/enfermagem/evolucao/6 HTTP/1.1" 200 -
+2025-05-25 20:28:23,315 [INFO] 127.0.0.1 - - [25/May/2025 20:28:23] "GET /api/evolucoes/6 HTTP/1.1" 200 -
+2025-05-25 20:28:23,354 [INFO] 127.0.0.1 - - [25/May/2025 20:28:23] "GET /api/prescricoes/6 HTTP/1.1" 200 -
+2025-05-25 20:28:24,952 [INFO] 127.0.0.1 - - [25/May/2025 20:28:24] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-05-25 20:28:29,338 [INFO] 127.0.0.1 - - [25/May/2025 20:28:29] "GET /clinica/pacientes-internados HTTP/1.1" 200 -
+2025-05-25 20:28:29,361 [INFO] 127.0.0.1 - - [25/May/2025 20:28:29] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-05-25 20:28:29,604 [INFO] 127.0.0.1 - - [25/May/2025 20:28:29] "GET /api/pacientes/internados HTTP/1.1" 200 -
+2025-05-25 20:28:31,516 [INFO] 127.0.0.1 - - [25/May/2025 20:28:31] "GET /clinica/evolucao-paciente-enfermeiro/25051623 HTTP/1.1" 200 -
+2025-05-25 20:28:31,560 [INFO] 127.0.0.1 - - [25/May/2025 20:28:31] "[36mGET /static/js/aprazamento.js HTTP/1.1[0m" 304 -
+2025-05-25 20:28:31,761 [INFO] 127.0.0.1 - - [25/May/2025 20:28:31] "[36mGET /static/js/calculo_horarios.js HTTP/1.1[0m" 304 -
+2025-05-25 20:28:31,854 [INFO] 127.0.0.1 - - [25/May/2025 20:28:31] "[36mGET /static/js/sae.js HTTP/1.1[0m" 304 -
+2025-05-25 20:28:31,857 [INFO] 127.0.0.1 - - [25/May/2025 20:28:31] "[36mGET /static/js/evolucoes_enfermagem.js HTTP/1.1[0m" 304 -
+2025-05-25 20:28:31,858 [INFO] 127.0.0.1 - - [25/May/2025 20:28:31] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-05-25 20:28:31,859 [INFO] 127.0.0.1 - - [25/May/2025 20:28:31] "[36mGET /static/js/admissao_enfermagem.js HTTP/1.1[0m" 304 -
+2025-05-25 20:28:32,188 [INFO] 127.0.0.1 - - [25/May/2025 20:28:32] "GET /api/enfermagem/sae/32 HTTP/1.1" 200 -
+2025-05-25 20:28:32,208 [INFO] 127.0.0.1 - - [25/May/2025 20:28:32] "GET /api/evolucoes/8 HTTP/1.1" 200 -
+2025-05-25 20:28:32,211 [INFO] 127.0.0.1 - - [25/May/2025 20:28:32] "GET /api/enfermagem/evolucao/8 HTTP/1.1" 200 -
+2025-05-25 20:28:32,245 [INFO] 127.0.0.1 - - [25/May/2025 20:28:32] "GET /api/prescricoes/8 HTTP/1.1" 200 -
+2025-05-25 20:28:32,451 [INFO] 127.0.0.1 - - [25/May/2025 20:28:32] "GET /api/evolucoes/8 HTTP/1.1" 200 -
+2025-05-25 20:28:32,531 [INFO] 127.0.0.1 - - [25/May/2025 20:28:32] "GET /api/enfermagem/evolucao/8 HTTP/1.1" 200 -
+2025-05-25 20:28:32,550 [INFO] 127.0.0.1 - - [25/May/2025 20:28:32] "GET /api/prescricoes/8 HTTP/1.1" 200 -
+2025-05-26 08:44:57,236 [INFO] Iniciando aplicação...
+2025-05-26 08:44:57,239 [INFO] Logging configurado: C:\HSOP\logs\app.log
+2025-05-26 08:44:57,239 [INFO] Configurações básicas definidas
+2025-05-26 08:44:57,292 [INFO] Banco de dados inicializado com sucesso
+2025-05-26 08:44:57,292 [INFO] LoginManager inicializado com sucesso
+2025-05-26 08:44:57,715 [INFO] Blueprints registrados com sucesso
+2025-05-26 08:44:57,783 [INFO] Tabelas do banco de dados criadas/verificadas
+2025-05-26 08:44:57,784 [INFO] Executando aplicação Flask em modo debug
+2025-05-26 08:44:57,817 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-05-26 08:44:57,817 [INFO] [33mPress CTRL+C to quit[0m
+2025-05-26 08:44:57,819 [INFO]  * Restarting with stat
+2025-05-26 08:44:58,465 [INFO] Iniciando aplicação...
+2025-05-26 08:44:58,466 [INFO] Logging configurado: C:\HSOP\logs\app.log
+2025-05-26 08:44:58,467 [INFO] Configurações básicas definidas
+2025-05-26 08:44:58,516 [INFO] Banco de dados inicializado com sucesso
+2025-05-26 08:44:58,517 [INFO] LoginManager inicializado com sucesso
+2025-05-26 08:44:58,820 [INFO] Blueprints registrados com sucesso
+2025-05-26 08:44:58,894 [INFO] Tabelas do banco de dados criadas/verificadas
+2025-05-26 08:44:58,895 [INFO] Executando aplicação Flask em modo debug
+2025-05-26 08:44:58,913 [WARNING]  * Debugger is active!
+2025-05-26 08:44:58,917 [INFO]  * Debugger PIN: 509-857-677
+2025-05-26 08:45:24,665 [INFO] 127.0.0.1 - - [26/May/2025 08:45:24] "GET / HTTP/1.1" 200 -
+2025-05-26 08:45:24,813 [INFO] 127.0.0.1 - - [26/May/2025 08:45:24] "GET /static/imagens/Imagem1.png HTTP/1.1" 200 -
+2025-05-26 08:45:26,072 [INFO] 127.0.0.1 - - [26/May/2025 08:45:26] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-05-26 08:45:31,745 [INFO] Recebendo requisição de login
+2025-05-26 08:45:31,755 [INFO] Tentativa de login para CPF: 000.000.000-02
+2025-05-26 08:45:31,896 [INFO] Usuário Cleiton (ID: 5) com cargo Enfermeiro logado com sucesso
+2025-05-26 08:45:31,899 [INFO] 127.0.0.1 - - [26/May/2025 08:45:31] "POST /login HTTP/1.1" 200 -
+2025-05-26 08:45:31,996 [INFO] 127.0.0.1 - - [26/May/2025 08:45:31] "GET /enfermeiro HTTP/1.1" 200 -
+2025-05-26 08:45:33,286 [INFO] 127.0.0.1 - - [26/May/2025 08:45:33] "GET /api/enfermeiro/nome HTTP/1.1" 200 -
+2025-05-26 08:45:40,440 [INFO] 127.0.0.1 - - [26/May/2025 08:45:40] "GET /clinica HTTP/1.1" 200 -
+2025-05-26 08:45:41,811 [INFO] 127.0.0.1 - - [26/May/2025 08:45:41] "GET /clinica/pacientes-internados HTTP/1.1" 200 -
+2025-05-26 08:45:41,852 [INFO] 127.0.0.1 - - [26/May/2025 08:45:41] "GET /api/pacientes/internados HTTP/1.1" 200 -
+2025-05-26 08:45:44,632 [INFO] 127.0.0.1 - - [26/May/2025 08:45:44] "GET /clinica/evolucao-paciente-enfermeiro/25050959 HTTP/1.1" 200 -
+2025-05-26 08:45:44,664 [INFO] 127.0.0.1 - - [26/May/2025 08:45:44] "[36mGET /static/js/aprazamento.js HTTP/1.1[0m" 304 -
+2025-05-26 08:45:44,811 [INFO] 127.0.0.1 - - [26/May/2025 08:45:44] "[36mGET /static/js/calculo_horarios.js HTTP/1.1[0m" 304 -
+2025-05-26 08:45:44,980 [INFO] 127.0.0.1 - - [26/May/2025 08:45:44] "[36mGET /static/js/admissao_enfermagem.js HTTP/1.1[0m" 304 -
+2025-05-26 08:45:44,981 [INFO] 127.0.0.1 - - [26/May/2025 08:45:44] "[36mGET /static/js/sae.js HTTP/1.1[0m" 304 -
+2025-05-26 08:45:44,981 [INFO] 127.0.0.1 - - [26/May/2025 08:45:44] "[36mGET /static/js/evolucoes_enfermagem.js HTTP/1.1[0m" 304 -
+2025-05-26 08:45:54,047 [INFO] 127.0.0.1 - - [26/May/2025 08:45:54] "[33mGET /api/enfermagem/sae/31 HTTP/1.1[0m" 404 -
+2025-05-26 08:45:54,380 [INFO] 127.0.0.1 - - [26/May/2025 08:45:54] "GET /api/prescricoes/6 HTTP/1.1" 200 -
+2025-05-26 08:45:54,432 [INFO] 127.0.0.1 - - [26/May/2025 08:45:54] "GET /api/enfermagem/evolucao/6 HTTP/1.1" 200 -
+2025-05-26 08:45:54,432 [INFO] 127.0.0.1 - - [26/May/2025 08:45:54] "GET /api/evolucoes/6 HTTP/1.1" 200 -
+2025-05-26 08:45:54,704 [INFO] 127.0.0.1 - - [26/May/2025 08:45:54] "GET /api/prescricoes/6 HTTP/1.1" 200 -
+2025-05-26 08:45:54,744 [INFO] 127.0.0.1 - - [26/May/2025 08:45:54] "GET /api/enfermagem/evolucao/6 HTTP/1.1" 200 -
+2025-05-26 08:45:54,746 [INFO] 127.0.0.1 - - [26/May/2025 08:45:54] "GET /api/evolucoes/6 HTTP/1.1" 200 -
+2025-05-26 08:45:59,130 [INFO] 127.0.0.1 - - [26/May/2025 08:45:59] "GET /clinica/pacientes-internados HTTP/1.1" 200 -
+2025-05-26 08:45:59,169 [INFO] 127.0.0.1 - - [26/May/2025 08:45:59] "GET /api/pacientes/internados HTTP/1.1" 200 -
+2025-05-26 08:46:03,776 [INFO] 127.0.0.1 - - [26/May/2025 08:46:03] "GET /clinica/evolucao-paciente-enfermeiro/25050572 HTTP/1.1" 200 -
+2025-05-26 08:46:04,080 [INFO] 127.0.0.1 - - [26/May/2025 08:46:04] "[36mGET /static/js/aprazamento.js HTTP/1.1[0m" 304 -
+2025-05-26 08:46:04,112 [INFO] 127.0.0.1 - - [26/May/2025 08:46:04] "[36mGET /static/js/calculo_horarios.js HTTP/1.1[0m" 304 -
+2025-05-26 08:46:04,114 [INFO] 127.0.0.1 - - [26/May/2025 08:46:04] "[36mGET /static/js/sae.js HTTP/1.1[0m" 304 -
+2025-05-26 08:46:04,119 [INFO] 127.0.0.1 - - [26/May/2025 08:46:04] "[36mGET /static/js/admissao_enfermagem.js HTTP/1.1[0m" 304 -
+2025-05-26 08:46:04,120 [INFO] 127.0.0.1 - - [26/May/2025 08:46:04] "[36mGET /static/js/evolucoes_enfermagem.js HTTP/1.1[0m" 304 -
+2025-05-26 08:46:04,441 [INFO] 127.0.0.1 - - [26/May/2025 08:46:04] "GET /api/enfermagem/sae/24 HTTP/1.1" 200 -
+2025-05-26 08:46:04,450 [INFO] 127.0.0.1 - - [26/May/2025 08:46:04] "GET /api/evolucoes/5 HTTP/1.1" 200 -
+2025-05-26 08:46:04,453 [INFO] 127.0.0.1 - - [26/May/2025 08:46:04] "GET /api/enfermagem/evolucao/5 HTTP/1.1" 200 -
+2025-05-26 08:46:04,514 [INFO] 127.0.0.1 - - [26/May/2025 08:46:04] "GET /api/prescricoes/5 HTTP/1.1" 200 -
+2025-05-26 08:46:04,708 [INFO] 127.0.0.1 - - [26/May/2025 08:46:04] "GET /api/evolucoes/5 HTTP/1.1" 200 -
+2025-05-26 08:46:04,774 [INFO] 127.0.0.1 - - [26/May/2025 08:46:04] "GET /api/enfermagem/evolucao/5 HTTP/1.1" 200 -
+2025-05-26 08:46:04,848 [INFO] 127.0.0.1 - - [26/May/2025 08:46:04] "GET /api/prescricoes/5 HTTP/1.1" 200 -
+2025-05-26 09:00:20,018 [INFO] 127.0.0.1 - - [26/May/2025 09:00:20] "GET /api/aprazamentos/atendimento/25050572/medicamento/01 HTTP/1.1" 200 -
+2025-05-26 09:00:20,278 [INFO] 127.0.0.1 - - [26/May/2025 09:00:20] "GET /api/aprazamentos/atendimento/25050572/medicamento/01 HTTP/1.1" 200 -
+2025-05-26 09:00:24,102 [INFO] 127.0.0.1 - - [26/May/2025 09:00:24] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-05-26 09:03:29,805 [INFO] 127.0.0.1 - - [26/May/2025 09:03:29] "GET /clinica/evolucao-paciente-enfermeiro/25050572 HTTP/1.1" 200 -
+2025-05-26 09:03:29,831 [INFO] 127.0.0.1 - - [26/May/2025 09:03:29] "[36mGET /static/js/aprazamento.js HTTP/1.1[0m" 304 -
+2025-05-26 09:03:30,022 [INFO] 127.0.0.1 - - [26/May/2025 09:03:30] "[36mGET /static/js/calculo_horarios.js HTTP/1.1[0m" 304 -
+2025-05-26 09:03:30,144 [INFO] 127.0.0.1 - - [26/May/2025 09:03:30] "[36mGET /static/js/admissao_enfermagem.js HTTP/1.1[0m" 304 -
+2025-05-26 09:03:30,145 [INFO] 127.0.0.1 - - [26/May/2025 09:03:30] "[36mGET /static/js/sae.js HTTP/1.1[0m" 304 -
+2025-05-26 09:03:30,145 [INFO] 127.0.0.1 - - [26/May/2025 09:03:30] "[36mGET /static/js/evolucoes_enfermagem.js HTTP/1.1[0m" 304 -
+2025-05-26 09:03:30,478 [INFO] 127.0.0.1 - - [26/May/2025 09:03:30] "GET /api/enfermagem/sae/24 HTTP/1.1" 200 -
+2025-05-26 09:03:30,725 [INFO] 127.0.0.1 - - [26/May/2025 09:03:30] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-05-26 09:03:44,874 [INFO] 127.0.0.1 - - [26/May/2025 09:03:44] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
