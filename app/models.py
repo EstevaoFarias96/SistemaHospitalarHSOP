@@ -1,5 +1,5 @@
 from datetime import datetime, date, time, timezone, timedelta
-from sqlalchemy import Column, Integer, String, Date, Time, Text, DateTime, Numeric, Boolean, ForeignKey
+from sqlalchemy import func, Column, Integer, String, Date, Time, Text, DateTime, Numeric, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from . import db
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -58,6 +58,7 @@ class Paciente(db.Model):
     telefone = db.Column(db.String(15))
     identificado = db.Column(db.Boolean, nullable=False, default=True)
     descricao_nao_identificado = db.Column(db.Text)
+    cor = db.Column(db.String(20), default='Não informada')
 
     atendimentos = relationship('Atendimento', backref='paciente', lazy=True)
     internacoes_sae = relationship('InternacaoSae', backref='paciente', lazy=True)
@@ -396,3 +397,39 @@ class PacienteRN(db.Model):
 
     def __repr__(self):
         return f'<PacienteRN RN={self.paciente_id} Responsavel={self.responsavel_id}>'
+
+
+class Leito(db.Model):
+    __tablename__ = 'leitos'
+
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(50), unique=True, nullable=False)  # ex: "UTI-01", "Enfermaria A - 03"
+    tipo = db.Column(db.String(50), nullable=False)               # ex: "UTI", "Enfermaria", "Observação"
+    setor = db.Column(db.String(50), nullable=True)               # ex: "Ala A", "Pediatria"
+    capacidade_maxima = db.Column(db.Integer, nullable=False)     # Número máximo de pacientes que podem ocupar o leito
+    status = db.Column(db.String(30), nullable=False, default='Disponível')  # ex: "Disponível", "Ocupado", "Interditado"
+    ocupacao_atual = db.Column(db.Integer, nullable=False, default=0)
+    observacoes = db.Column(db.Text, nullable=True)
+
+
+class AdmissaoEnfermagem(db.Model):
+    __tablename__ = 'admissoes_enfermagem'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    internacao_id = db.Column(
+        db.Integer,
+        db.ForeignKey('atendimentos_clinica.id', ondelete='CASCADE'),
+        nullable=False
+    )
+    enfermeiro_id = db.Column(
+        db.Integer,
+        db.ForeignKey('funcionarios.id', ondelete='SET NULL'),
+        nullable=True
+    )
+
+    data_hora = db.Column(db.DateTime, default=func.now(), nullable=False)
+    admissao_texto = db.Column(db.Text)
+
+    internacao = relationship("Internacao", backref="admissoes_enfermagem", passive_deletes=True)
+    enfermeiro = relationship("Funcionario", backref="admissoes_enfermagem", passive_deletes=True)

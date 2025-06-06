@@ -272,30 +272,112 @@ function excluirAprazamento(aprazamentoId, callback) {
     });
 }
 
+// Função utilitária para garantir formato HH:MM
+function formatarHoraParaHHMM(horaStr) {
+    if (!horaStr) return '00:00';
+    const partes = horaStr.split(':');
+    let h = partes[0] ? String(partes[0]).padStart(2, '0') : '00';
+    let m = partes[1] ? String(partes[1]).padStart(2, '0') : '00';
+    return `${h}:${m}`;
+}
+
 // Processar horários selecionados para formar o texto de aprazamento
 function processarHorariosSelecionados() {
     console.log('Iniciando processamento de horários selecionados');
     
     // Obter todos os horários marcados
     const horariosSelecionados = [];
+    let checkboxes = $('#horarios_multiplos_dias .horario-check:checked');
     
-    $('#horarios_multiplos_dias .horario-check:checked').each(function() {
-        const data = $(this).data('date');  // Formato: DD/MM/YYYY
-        const hora = $(this).val();         // Formato: HH:MM
+    console.log(`Encontrados ${checkboxes.length} checkboxes marcados`);
+    
+    if (checkboxes.length === 0) {
+        // Se não encontrou checkboxes, tenta obter todos os horários disponíveis
+        const todosHorarios = $('#horarios_multiplos_dias .horario-check');
+        console.log(`Nenhum checkbox marcado, encontrados ${todosHorarios.length} checkboxes totais`);
         
-        console.log('Processando horário:', { data, hora });
+        if (todosHorarios.length === 0) {
+            // Última tentativa: obter texto dos horários
+            const divHorarios = $('#horarios_multiplos_dias');
+            const texto = divHorarios.text().trim();
+            console.log('Conteúdo do container de horários:', texto);
+            
+            // Tentativa de extrair horários do texto usando regex
+            const regex = /(\d{1,2}\/\d{1,2}\/\d{4}).*?(\d{1,2}:\d{1,2})/g;
+            let match;
+            while ((match = regex.exec(texto)) !== null) {
+                const data = match[1];
+                const hora = match[2];
+                console.log('Extraído do texto:', { data, hora });
+                horariosSelecionados.push({
+                    data_hora_aprazamento: `${data} ${hora}`
+                });
+            }
+            
+            if (horariosSelecionados.length > 0) {
+                console.log(`Extraídos ${horariosSelecionados.length} horários do texto`);
+                return horariosSelecionados;
+            }
+            
+            console.log('Não foi possível encontrar horários');
+            return null;
+        }
         
+        // Se não houver nenhum checkbox marcado mas existirem checkboxes, 
+        // marca todos automaticamente
+        todosHorarios.prop('checked', true);
+        checkboxes = todosHorarios;
+        console.log('Marcando todos os checkboxes automaticamente');
+    }
+    
+    checkboxes.each(function() {
+        const elem = $(this);
+        let data = elem.data('date');  // Formato esperado: DD/MM/YYYY
+        let hora = elem.val();       // Formato esperado: HH:MM ou HH
+        
+        // Se não tiver data-date, tenta extrair da label ou id
+        if (!data) {
+            const id = elem.attr('id') || '';
+            const labelText = $('label[for="' + id + '"]').text().trim();
+            const parent = elem.closest('.mb-2');
+            const dateHeader = parent.find('.fw-bold.mb-1.small').text().trim();
+            
+            // Tenta extrair a data do header da seção
+            if (dateHeader.match(/\d{1,2}\/\d{1,2}\/\d{4}/)) {
+                data = dateHeader;
+                console.log('Data extraída do header:', data);
+            }
+            // Ou tenta extrair do id (ex: horario_01012023_0)
+            else if (id.includes('horario_') && id.length > 10) {
+                const numericPart = id.split('_')[1];
+                if (numericPart && numericPart.length >= 8) {
+                    // Tenta converter o formato numérico para DD/MM/YYYY
+                    const dia = numericPart.substring(0, 2);
+                    const mes = numericPart.substring(2, 4);
+                    const ano = numericPart.substring(4, 8);
+                    data = `${dia}/${mes}/${ano}`;
+                    console.log('Data extraída do id:', data);
+                }
+            }
+        }
+        
+        console.log('Processando horário:', { data, hora, elem: elem[0] });
+        
+        // Verifica se data e hora são válidos
         if (data && hora) {
+            hora = formatarHoraParaHHMM(hora); // garantir HH:MM
             horariosSelecionados.push({
                 data_hora_aprazamento: `${data} ${hora}`
             });
+        } else {
+            console.warn('Ignorando horário com dados incompletos', { data, hora, elem: elem[0] });
         }
     });
     
     console.log('Horários processados:', horariosSelecionados);
     
     if (horariosSelecionados.length === 0) {
-        console.log('Nenhum horário selecionado');
+        console.log('Nenhum horário selecionado válido');
         return null;
     }
     
@@ -346,6 +428,22 @@ function calcularHorariosIntervaloFixo(dataInicio, dataFim, intervaloHoras, hora
     const timestampFim = new Date(fim);
     timestampFim.setHours(23, 59, 59, 999);
     
+    // Definir dias da semana - considera todos como selecionados por padrão se os checkboxes não existirem
+    const diasSelecionados = {
+        0: $('#dia_dom').length ? $('#dia_dom').is(':checked') : true, // domingo
+        1: $('#dia_seg').length ? $('#dia_seg').is(':checked') : true, // segunda
+        2: $('#dia_ter').length ? $('#dia_ter').is(':checked') : true, // terça
+        3: $('#dia_qua').length ? $('#dia_qua').is(':checked') : true, // quarta
+        4: $('#dia_qui').length ? $('#dia_qui').is(':checked') : true, // quinta
+        5: $('#dia_sex').length ? $('#dia_sex').is(':checked') : true, // sexta
+        6: $('#dia_sab').length ? $('#dia_sab').is(':checked') : true  // sábado
+    };
+    
+    // Cálculo de debug para verificar
+    console.log('Dias selecionados:', diasSelecionados);
+    console.log('Data início:', inicio, 'Data fim:', fim);
+    console.log('Intervalo (horas):', intervaloHoras);
+    
     // Calcular horários até o fim do período
     while (dataAtual <= timestampFim) {
         // Formatar a data (DD/MM/YYYY)
@@ -362,20 +460,11 @@ function calcularHorariosIntervaloFixo(dataInicio, dataFim, intervaloHoras, hora
             hour12: false
         });
         
-        // Verificar os dias selecionados
+        // Verificar se o dia da semana está selecionado
         const diaSemana = dataAtual.getDay(); // 0=dom, 1=seg, ... 6=sáb
-        const diaCheckboxes = {
-            0: $('#dia_dom').is(':checked'),
-            1: $('#dia_seg').is(':checked'),
-            2: $('#dia_ter').is(':checked'),
-            3: $('#dia_qua').is(':checked'),
-            4: $('#dia_qui').is(':checked'),
-            5: $('#dia_sex').is(':checked'),
-            6: $('#dia_sab').is(':checked')
-        };
         
-        // Só adicionar o horário se o dia da semana estiver selecionado
-        if (diaCheckboxes[diaSemana]) {
+        // Adicionar o horário ao array - agora usando diasSelecionados
+        if (diasSelecionados[diaSemana]) {
             // Inicializar o array de horários para esta data se ainda não existir
             if (!horariosPorDia[dataFormatada]) {
                 horariosPorDia[dataFormatada] = [];
@@ -389,6 +478,7 @@ function calcularHorariosIntervaloFixo(dataInicio, dataFim, intervaloHoras, hora
         dataAtual = new Date(dataAtual.getTime() + intervaloMs);
     }
     
+    console.log('Horários calculados:', horariosPorDia);
     return horariosPorDia;
 }
 
@@ -490,23 +580,88 @@ function configurarFormularioAprazamento() {
         btnSubmit.html('<i class="fas fa-spinner fa-spin"></i> Processando...');
         btnSubmit.prop('disabled', true);
         
-        // Verificar se existem horários para o aprazamento
-        if ($('#horarios_multiplos_dias .horario-check').length === 0) {
-            alert('Por favor, calcule os horários primeiro clicando no botão "Calcular Horários".');
+        // Verificar se os dados básicos foram preenchidos
+        const dataInicio = $('#aprazamento_data_inicio').val();
+        const dataFim = $('#aprazamento_data_fim').val();
+        const horaInicial = $('#aprazamento_hora_inicial_multiplos').val();
+        
+        if (!dataInicio || !dataFim || !horaInicial) {
+            alert('Por favor, preencha as datas de início/fim e o horário inicial.');
             btnSubmit.html(textoOriginal);
             btnSubmit.prop('disabled', false);
             return;
+        }
+        
+        // Verificar se o botão Calcular foi clicado
+        const conteudoHorarios = $('#horarios_multiplos_dias').html().trim();
+        const precisaCalcular = conteudoHorarios === '' || 
+                               conteudoHorarios.includes('Clique em "Calcular" para ver os horários') ||
+                               conteudoHorarios.includes('Nenhum horário calculado');
+                               
+        if (precisaCalcular) {
+            // Tentar calcular automaticamente
+            console.log('Calculando horários automaticamente...');
+            try {
+                // Obter o intervalo
+                let intervaloHoras;
+                if ($('#aprazamento_multiplos_intervalo').val() === 'custom') {
+                    intervaloHoras = parseFloat($('#aprazamento_multiplos_intervalo_custom').val());
+                    if (!intervaloHoras || intervaloHoras <= 0 || intervaloHoras > 24) {
+                        alert('Por favor, defina um intervalo válido entre 0.5 e 24 horas e clique em "Calcular".');
+                        btnSubmit.html(textoOriginal);
+                        btnSubmit.prop('disabled', false);
+                        return;
+                    }
+                } else {
+                    intervaloHoras = parseFloat($('#aprazamento_multiplos_intervalo').val());
+                }
+                
+                // Calcular os horários
+                const horariosPorDia = calcularHorariosIntervaloFixo(dataInicio, dataFim, intervaloHoras, horaInicial);
+                
+                if (Object.keys(horariosPorDia).length === 0) {
+                    alert('Não foi possível calcular horários com os parâmetros informados. Por favor, revise os dados e clique em "Calcular".');
+                    btnSubmit.html(textoOriginal);
+                    btnSubmit.prop('disabled', false);
+                    return;
+                }
+                
+                // Formatar HTML com dias e horários
+                const html = gerarHTMLHorariosPorDia(horariosPorDia);
+                $('#horarios_multiplos_dias').html(html);
+                
+                console.log('Horários calculados automaticamente');
+            } catch (error) {
+                console.error('Erro ao calcular horários:', error);
+                alert('Por favor, clique no botão "Calcular" para gerar os horários antes de registrar.');
+                btnSubmit.html(textoOriginal);
+                btnSubmit.prop('disabled', false);
+                return;
+            }
         }
         
         // Processar os horários selecionados
         const horariosSelecionados = processarHorariosSelecionados();
         
         if (!horariosSelecionados) {
+            alert('Não foi possível processar os horários. Por favor, certifique-se de que pelo menos um horário está selecionado.');
+            btnSubmit.html(textoOriginal);
+            btnSubmit.prop('disabled', false);
+            return;
+        }
+        
+        if (horariosSelecionados.length === 0) {
             alert('Selecione pelo menos um horário de administração.');
             btnSubmit.html(textoOriginal);
             btnSubmit.prop('disabled', false);
             return;
         }
+        
+        // Log de debug
+        console.log(`Processados ${horariosSelecionados.length} horários para envio.`);
+        horariosSelecionados.forEach((h, i) => {
+            console.log(`Horário ${i+1}:`, h.data_hora_aprazamento);
+        });
         
         // Extrair a descrição de uso se disponível
         let descricaoUso = '';
@@ -657,4 +812,4 @@ $(document).ready(function() {
     $('#btn_desmarcar_todos').click(function() {
         $('#horarios_multiplos_dias .horario-check').prop('checked', false);
     });
-}); 
+});

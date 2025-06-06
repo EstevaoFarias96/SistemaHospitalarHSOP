@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha de Admissão - {{ paciente.nome }}</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 1cm;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+            line-height: 1.3;
+            color: #333;
+            background: white;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        
+        .page-container {
+            width: 100%;
+            background: white;
+            padding: 0;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #2c5282;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .header h1 {
+            font-size: 16px;
+            color: #2c5282;
+            margin-bottom: 3px;
+            font-weight: bold;
+        }
+        
+        .header h2 {
+            font-size: 12px;
+            color: #4a5568;
+            font-weight: normal;
+        }
+        
+        .section {
+            border: 1px solid #2c5282;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 8px;
+            break-inside: avoid;
+            page-break-inside: avoid;
+            width: 100%;
+        }
+        
+        .section-title {
+            background: #2c5282;
+            color: white;
+            padding: 5px 8px;
+            font-size: 11px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .section-content {
+            padding: 8px;
+            background: white;
+            height: auto !important;
+            max-height: none !important;
+        }
+        
+        .row {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 6px;
+            align-items: start;
+            width: 100%;
+        }
+        
+        .row-2 { 
+            grid-template-columns: 1fr 1fr; 
+        }
+        .row-3 { 
+            grid-template-columns: 1fr 1fr 1fr; 
+        }
+        .row-4 { 
+            grid-template-columns: 1fr 1fr 1fr 1fr; 
+        }
+        .row-5 { 
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr; 
+        }
+        .row-mixed { 
+            grid-template-columns: 3fr 1.5fr 1.5fr; 
+        }
+        
+        /* Layout especial para anamnese/exame físico e conduta */
+        .row-clinical {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .row-clinical-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            height: auto !important;
+            max-height: none !important;
+        }
+        
+        .clinical-field-large {
+            min-height: 50px;
+            height: auto !important;
+            max-height: none !important;
+        }
+        
+        .conduta-field {
+            min-height: 110px;
+            height: auto !important;
+            max-height: none !important;
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            min-height: fit-content;
+            height: auto !important;
+            max-height: none !important;
+            width: 100%;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #2c5282;
+            font-size: 8px;
+            margin-bottom: 1px;
+            text-transform: uppercase;
+            line-height: 1.1;
+        }
+        
+        .info-value {
+            font-size: 9px;
+            color: #1a202c;
+            padding: 2px;
+            border-bottom: 1px solid #e2e8f0;
+            min-height: 18px;
+            display: flex;
+            align-items: center;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            line-height: 1.2;
+            flex-grow: 1;
+            width: 100%;
+        }
+        
+        .info-value:empty::after {
+            content: "-";
+            color: #999;
+        }
+        
+        .highlight {
+            background: #bee3f8;
+            padding: 3px 5px;
+            border-radius: 2px;
+            font-weight: bold;
+            border: 1px solid #2c5282;
+        }
+        
+        .text-area {
+            width: 100%;
+            min-height: 25px;
+            height: auto !important;
+            max-height: none !important;
+            padding: 5px;
+            border: 1px solid #cbd5e0;
+            border-radius: 2px;
+            font-family: Arial, sans-serif;
+            font-size: 9px;
+            line-height: 1.4;
+            resize: none;
+            background: #f7fafc;
+            overflow: visible !important;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            box-sizing: border-box;
+        }
+        
+        .hda-area {
+            font-size: 9px;
+            border: 1px solid #2c5282;
+            background: #f8f9fa;
+            padding: 8px;
+            line-height: 1.4;
+            min-height: 60px;
+            height: auto !important;
+            max-height: none !important;
+            width: 100%;
+            overflow: visible !important;
+        }
+        
+        /* Campos clínicos com mais espaço */
+        .clinical-field {
+            min-height: 50px;
+            height: auto !important;
+            max-height: none !important;
+        }
+        
+        .diagnostic-field {
+            min-height: 45px;
+            height: auto !important;
+            max-height: none !important;
+        }
+        
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .signature-area {
+            border: 1px solid #cbd5e0;
+            border-radius: 2px;
+            padding: 12px;
+            text-align: center;
+            background: #f8f9fa;
+            font-size: 9px;
+            min-height: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 100%;
+        }
+        
+        .signature-title {
+            font-size: 9px;
+            font-weight: bold;
+            color: #4a5568;
+            margin-bottom: 6px;
+        }
+        
+        .signature-line {
+            border-top: 1px solid #999;
+            margin-top: 18px;
+            padding-top: 4px;
+            font-weight: normal;
+            font-size: 8px;
+            color: #666;
+        }
+        
+        .date-info {
+            text-align: right;
+            color: #718096;
+            font-size: 8px;
+            margin-top: 12px;
+            break-inside: avoid;
+        }
+        
+        .compact-section {
+            border: 1px solid #cbd5e0;
+            border-radius: 2px;
+            padding: 8px;
+            background: #f8f9fa;
+            margin-bottom: 6px;
+            break-inside: avoid;
+            width: 100%;
+        }
+        
+        .compact-title {
+            font-weight: bold;
+            color: #2c5282;
+            font-size: 10px;
+            margin-bottom: 6px;
+            text-align: center;
+            border-bottom: 1px solid #2c5282;
+            padding-bottom: 3px;
+        }
+        
+        /* Otimizações para conteúdo dinâmico */
+        .dynamic-content {
+            min-height: fit-content;
+            height: auto;
+        }
+        
+        .empty-content {
+            min-height: 18px;
+        }
+        
+        .medium-content {
+            min-height: 25px;
+        }
+        
+        .large-content {
+            min-height: 35px;
+        }
+        
+        /* Quebras de página inteligentes */
+        .avoid-break {
+            break-inside: auto;
+            page-break-inside: auto;
+        }
+        
+        .allow-break {
+            break-inside: auto;
+        }
+        
+        /* Garantir layout responsivo */
+        @media screen and (max-width: 900px) {
+            body {
+                width: 100%;
+                max-width: 100%;
+                padding: 5px;
+            }
+            
+            .row-5 {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+            
+            .row-mixed {
+                grid-template-columns: 2fr 1fr 1fr;
+            }
+        }
+        
+        @media print {
+            /* FORÇAR EXPANSÃO TOTAL NA IMPRESSÃO */
+            textarea,
+            textarea.text-area,
+            textarea.hda-area,
+            textarea.clinical-field-large,
+            textarea.conduta-field,
+            textarea.clinical-field,
+            textarea.diagnostic-field {
+                height: auto !important;
+                max-height: none !important;
+                min-height: 30px !important;
+                overflow: visible !important;
+                resize: none !important;
+                white-space: pre-wrap !important;
+                word-wrap: break-word !important;
+                box-sizing: border-box !important;
+                page-break-inside: auto !important;
+                break-inside: auto !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                width: 100% !important;
+                padding: 8px !important;
+                line-height: 1.4 !important;
+                font-size: 9px !important;
+                font-family: Arial, sans-serif !important;
+                border: 1px solid #cbd5e0 !important;
+                background: #f7fafc !important;
+                display: block !important;
+            }
+            
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                width: 100% !important;
+                max-width: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                font-size: 10px !important;
+            }
+            
+            .page-container {
+                box-shadow: none;
+                width: 100% !important;
+            }
+            
+            .section {
+                page-break-inside: auto;
+                break-inside: auto;
+                margin-bottom: 6px !important;
+                height: auto !important;
+                max-height: none !important;
+                overflow: visible !important;
+            }
+            
+            .info-item {
+                width: 100% !important;
+                box-sizing: border-box !important;
+                height: auto !important;
+                max-height: none !important;
+                overflow: visible !important;
+            }
+            
+            .section-content {
+                width: 100% !important;
+                padding: 6px !important;
+                height: auto !important;
+                max-height: none !important;
+                overflow: visible !important;
+            }
+            
+            .row {
+                width: 100% !important;
+                gap: 6px !important;
+            }
+            
+            .row-clinical {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 8px !important;
+            }
+            
+            .row-2 { 
+                grid-template-columns: 1fr 1fr !important; 
+            }
+            .row-3 { 
+                grid-template-columns: 1fr 1fr 1fr !important; 
+            }
+            .row-4 { 
+                grid-template-columns: 1fr 1fr 1fr 1fr !important; 
+            }
+            .row-5 { 
+                grid-template-columns: 1fr 1fr 1fr 1fr 1fr !important; 
+            }
+            .row-mixed { 
+                grid-template-columns: 3fr 1.5fr 1.5fr !important; 
+            }
+            
+            .text-area, .hda-area {
+                height: auto !important;
+                min-height: fit-content !important;
+                max-height: none !important;
+                overflow: visible !important;
+                resize: none !important;
+                page-break-inside: auto;
+                white-space: pre-wrap !important;
+                word-wrap: break-word !important;
+                break-inside: auto;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            
+            .info-value {
+                width: 100% !important;
+                box-sizing: border-box !important;
+                min-height: 18px !important;
+            }
+            
+            .signature-area {
+                min-height: 35px !important;
+                break-inside: avoid;
+                width: 100% !important;
+            }
+            
+            .section.large-section {
+                break-inside: auto;
+                page-break-inside: auto;
+            }
+            
+            .hda-area {
+                min-height: 70px !important;
+                height: auto !important;
+                max-height: none !important;
+                padding: 8px !important;
+            }
+            
+            .clinical-field {
+                min-height: 60px !important;
+                height: auto !important;
+                max-height: none !important;
+                padding: 8px !important;
+            }
+            
+            .clinical-field-large {
+                min-height: 60px !important;
+                height: auto !important;
+                max-height: none !important;
+                padding: 8px !important;
+                overflow: visible !important;
+                page-break-inside: auto !important;
+            }
+            
+            .conduta-field {
+                min-height: 130px !important;
+                height: auto !important;
+                max-height: none !important;
+                padding: 10px !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+                break-inside: auto !important;
+                page-break-inside: auto !important;
+                overflow: visible !important;
+                resize: none !important;
+                white-space: pre-wrap !important;
+                word-wrap: break-word !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                display: block !important;
+                position: relative !important;
+            }
+            
+            .diagnostic-field {
+                min-height: 70px !important;
+                height: auto !important;
+                max-height: none !important;
+                padding: 8px !important;
+            }
+            
+            .section.allow-break .section-content {
+                padding: 20px !important;
+            }
+            
+            .row-clinical {
+                gap: 15px !important;
+                margin-bottom: 10px !important;
+            }
+            
+            .row-clinical-vertical {
+                min-height: 250px !important;
+                height: auto !important;
+                flex-shrink: 0 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 12px !important;
+            }
+            
+            .row-clinical-vertical .info-item:nth-child(1) {
+                min-height: 80px !important;
+                height: auto !important;
+                flex-shrink: 0 !important;
+                break-inside: avoid !important;
+                width: 100% !important;
+                display: block !important;
+            }
+            
+            .row-clinical-vertical .info-item:nth-child(1) .clinical-field-large {
+                min-height: 60px !important;
+                height: auto !important;
+                max-height: 150px !important;
+                overflow: hidden !important;
+            }
+            
+            .row-clinical-vertical .info-item:nth-child(2) {
+                height: 160px !important;
+                min-height: 160px !important;
+                max-height: 160px !important;
+                flex-shrink: 0 !important;
+                flex-grow: 0 !important;
+                flex-basis: 160px !important;
+                break-inside: avoid !important;
+                width: 100% !important;
+                display: block !important;
+                overflow: hidden !important;
+            }
+            
+            .row-clinical-vertical .info-item:nth-child(2) .info-label {
+                height: auto !important;
+                margin-bottom: 4px !important;
+                flex-shrink: 0 !important;
+            }
+            
+            .section {
+                margin-bottom: 8px !important;
+            }
+            
+            .section-content {
+                padding: 8px !important;
+            }
+            
+            .diagnostics-section {
+                padding: 6px !important;
+                margin-bottom: 4px !important;
+            }
+            
+            .diagnostics-section .row {
+                gap: 4px !important;
+                margin-bottom: 2px !important;
+            }
+            
+            .diagnostics-section .info-value {
+                min-height: 16px !important;
+                padding: 2px !important;
+            }
+            
+            .medical-stamp {
+                min-height: 70px !important;
+                padding: 8px !important;
+                break-inside: avoid !important;
+            }
+            
+            .hospital-address {
+                font-size: 6px !important;
+                color: #666 !important;
+                text-align: center !important;
+                margin-top: 5px !important;
+                line-height: 1.2 !important;
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }
+        }
+        
+        /* GARANTIR EXPANSÃO AUTOMÁTICA BASEADA NO CONTEÚDO */
+        textarea {
+            height: auto !important;
+            max-height: none !important;
+            min-height: 30px !important;
+            overflow: visible !important;
+            resize: none !important;
+            white-space: pre-wrap !important;
+            word-wrap: break-word !important;
+            word-break: break-word !important;
+            overflow-wrap: break-word !important;
+            box-sizing: border-box !important;
+            padding: 8px !important;
+            line-height: 1.4 !important;
+            font-family: Arial, sans-serif !important;
+            font-size: 9px !important;
+            border: 1px solid #cbd5e0 !important;
+            background: #f7fafc !important;
+            width: 100% !important;
+            display: block !important;
+            transition: height 0.1s ease !important;
+        }
+        
+        /* Alturas mínimas específicas para diferentes tipos */
+        textarea.hda-area {
+            min-height: 60px !important;
+        }
+        
+        textarea.conduta-field {
+            min-height: 110px !important;
+        }
+        
+        textarea.clinical-field-large {
+            min-height: 50px !important;
+        }
+        
+        textarea.clinical-field {
+            min-height: 50px !important;
+        }
+        
+        textarea.diagnostic-field {
+            min-height: 45px !important;
+        }
+    </style>
+    <script>
+        function adjustTextareaHeight(textarea) {
+            if (!textarea || textarea.tagName !== 'TEXTAREA') return;
+            
+            // Reset height to auto to get the correct scrollHeight
+            textarea.style.height = 'auto';
+            
+            // Get the content
+            const content = textarea.value || textarea.textContent || '';
+            
+            // Calculate based on content
+            const lines = content.split('\n').length;
+            const scrollHeight = textarea.scrollHeight;
+            
+            // Minimum height
+            let minHeight = 30;
+            if (textarea.classList.contains('hda-area')) minHeight = 60;
+            if (textarea.classList.contains('conduta-field')) minHeight = 110;
+            if (textarea.classList.contains('clinical-field-large')) minHeight = 50;
+            
+            // Calculate final height - use the larger value
+            const finalHeight = Math.max(minHeight, scrollHeight + 10, lines * 18 + 20);
+            
+            // Apply the height
+            textarea.style.height = finalHeight + 'px';
+            
+            // Force style properties
+            textarea.style.maxHeight = 'none';
+            textarea.style.overflow = 'visible';
+            textarea.style.resize = 'none';
+            textarea.style.boxSizing = 'border-box';
+            textarea.style.whiteSpace = 'pre-wrap';
+            textarea.style.wordWrap = 'break-word';
+            
+            console.log(`Textarea adjusted: ${textarea.className}, content lines: ${lines}, final height: ${finalHeight}px`);
+        }
+        
+        function adjustAllTextareas() {
+            const textareas = document.querySelectorAll('textarea');
+            textareas.forEach(textarea => {
+                adjustTextareaHeight(textarea);
+            });
+        }
+        
+        function forceFullExpansion(element) {
+            adjustTextareaHeight(element);
+        }
+        
+        function autoResizeElement(element) {
+            adjustTextareaHeight(element);
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, adjusting textareas...');
+            
+            // Aplicar ajuste imediatamente
+            adjustAllTextareas();
+            
+            // Reaplicar após delays para garantir renderização
+            setTimeout(() => {
+                console.log('First timeout - adjusting textareas...');
+                adjustAllTextareas();
+            }, 100);
+            
+            setTimeout(() => {
+                console.log('Second timeout - adjusting textareas...');
+                adjustAllTextareas();
+            }, 500);
+            
+            setTimeout(() => {
+                console.log('Third timeout - adjusting textareas...');
+                adjustAllTextareas();
+            }, 1000);
+            
+            // Observar mudanças no conteúdo
+            const textareas = document.querySelectorAll('textarea');
+            textareas.forEach(textarea => {
+                // Ajustar quando o conteúdo mudar
+                textarea.addEventListener('input', function() {
+                    adjustTextareaHeight(this);
+                });
+                
+                // Ajustar quando ganhar foco
+                textarea.addEventListener('focus', function() {
+                    adjustTextareaHeight(this);
+                });
+                
+                // Ajustar quando perder foco
+                textarea.addEventListener('blur', function() {
+                    adjustTextareaHeight(this);
+                });
+            });
+        });
+        
+        // Antes da impressão, garantir que todos estejam ajustados
+        window.addEventListener('beforeprint', function() {
+            console.log('Before print - adjusting all textareas...');
+            adjustAllTextareas();
+            
+            // Aplicar novamente após pequeno delay
+            setTimeout(() => {
+                adjustAllTextareas();
+            }, 10);
+        });
+        
+        // Após carregamento completo da página
+        window.addEventListener('load', function() {
+            console.log('Window loaded - final textarea adjustment...');
+            setTimeout(() => {
+                adjustAllTextareas();
+            }, 100);
+        });
+    </script>
+</head>
+<body>
+    <div class="page-container">
+        <div class="header">
+            <h1>{{ hospital_nome }}</h1>
+            <h2>FICHA DE ADMISSÃO HOSPITALAR</h2>
+        </div>
+
+        <!-- Dados do Paciente -->
+        <div class="section avoid-break">
+            <div class="section-title">DADOS DO PACIENTE</div>
+            <div class="section-content">
+                <div class="row row-mixed">
+                    <div class="info-item">
+                        <span class="info-label">Nome Completo</span>
+                        <span class="info-value dynamic-content">{{ paciente.nome or '' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">ID Atendimento</span>
+                        <span class="info-value highlight">{{ atendimento.id }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Leito</span>
+                        <span class="info-value highlight">{{ internacao.leito or '' }}</span>
+                    </div>
+                </div>
+                
+                <div class="row row-5">
+                    <div class="info-item">
+                        <span class="info-label">Data/Hora</span>
+                        <span class="info-value">
+                            {% if internacao.data_internacao %}
+                                {{ internacao.data_internacao.strftime('%d/%m/%Y %H:%M') }}
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Caráter</span>
+                        <span class="info-value">{{ internacao.carater_internacao or '' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Idade</span>
+                        <span class="info-value">{{ idade if idade else '' }}{% if idade %} anos{% endif %}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Sexo</span>
+                        <span class="info-value">{{ paciente.sexo or '' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Telefone</span>
+                        <span class="info-value">{{ paciente.telefone or '' }}</span>
+                    </div>
+                </div>
+                
+                <div class="row row-2">
+                    <div class="info-item">
+                        <span class="info-label">CPF</span>
+                        <span class="info-value">{{ paciente.cpf or '' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Cartão SUS</span>
+                        <span class="info-value">{{ paciente.cartao_sus or '' }}</span>
+                    </div>
+                </div>
+                
+                <div class="info-item full-width">
+                    <span class="info-label">Endereço</span>
+                    <span class="info-value dynamic-content">{{ paciente.endereco or '' }}{% if paciente.bairro %}, {{ paciente.bairro }}{% endif %}{% if paciente.municipio %}, {{ paciente.municipio }}{% endif %}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Justificativa e Diagnósticos Combinados -->
+        <div class="section allow-break">
+            <div class="section-title">JUSTIFICATIVA E DIAGNÓSTICOS</div>
+            <div class="section-content">
+                <div class="row row-1">
+                    <div class="info-item">
+                        <span class="info-label">História da Doença Atual (HDA)</span>
+                        <textarea class="text-area hda-area dynamic-content" readonly>{{ internacao.hda or 'Não informado' }}</textarea>
+                    </div>
+                </div>
+                
+                <div class="row-clinical-vertical">
+                    <div class="info-item">
+                        <span class="info-label">Anamnese e Exame Físico</span>
+                        <textarea class="text-area clinical-field-large dynamic-content" readonly>{{ internacao.folha_anamnese or '' }}</textarea>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Conduta Inicial</span>
+                        <textarea class="text-area conduta-field dynamic-content" readonly>{{ internacao.conduta or '' }}</textarea>
+                    </div>
+                </div>
+                
+                <div class="compact-section diagnostics-section avoid-break">
+                    <div class="compact-title">DIAGNÓSTICOS</div>
+                    
+                    <!-- Diagnóstico inicial em linha completa -->
+                    <div class="info-item full-width" style="margin-bottom: 4px;">
+                        <span class="info-label">Diagnóstico Inicial</span>
+                        <textarea class="text-area diagnostic-field dynamic-content" readonly>{{ internacao.diagnostico_inicial or '' }}</textarea>
+                    </div>
+                    
+                    <!-- CIDs em linha próxima -->
+                    <div class="row row-3" style="gap: 4px;">
+                        <div class="info-item">
+                            <span class="info-label">CID Principal</span>
+                            <span class="info-value">{{ internacao.cid_principal or '' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">CID Secundário</span>
+                            <span class="info-value">{{ internacao.cid_10_secundario or '' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">CID Causas Assoc.</span>
+                            <span class="info-value">{{ internacao.cid_10_causas_associadas or '' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Responsáveis -->
+        <div class="section avoid-break">
+            <div class="section-title">MÉDICO RESPONSÁVEL</div>
+            <div class="section-content">
+                <div class="medical-stamp">
+                    <div style="margin-top: 30px; border-top: 1px solid #999; padding-top: 8px; font-size: 8px; color: #666;">
+                        Carimbo e Assinatura
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="date-info avoid-break">
+            Impresso em: {{ data_impressao.strftime('%d/%m/%Y às %H:%M') }}
+        </div>
+        
+        <!-- Endereço do hospital -->
+        <div class="hospital-address">
+            RUA CRUZEIRO, S/N - COHAB, Massapê - CE, 62140-000
+        </div>
+    </div>
+</body>
+</html> 

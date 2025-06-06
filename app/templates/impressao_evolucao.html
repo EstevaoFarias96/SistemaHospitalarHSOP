@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evolução Médica - {{ paciente.nome }}</title>
+    
+    <!-- Font Awesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* Reset e configurações básicas */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Configuração para impressão A4 vertical */
+        @page {
+            size: A4;
+            margin: 1cm 1.5cm;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.3;
+            color: #333;
+            background: white;
+        }
+
+        /* Cabeçalho */
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #2c5aa0;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+
+        .hospital-name {
+            font-size: 16pt;
+            font-weight: bold;
+            color: #2c5aa0;
+            margin-bottom: 3px;
+        }
+
+        .evolucao-title {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #333;
+            margin-top: 4px;
+        }
+
+        /* Dados do paciente */
+        .patient-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 8px;
+            margin-bottom: 15px;
+        }
+
+        .patient-info h3 {
+            color: #2c5aa0;
+            font-size: 11pt;
+            margin-bottom: 6px;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 3px;
+        }
+
+        .patient-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            font-size: 9pt;
+        }
+
+        .patient-field {
+            display: flex;
+            align-items: center;
+        }
+
+        .patient-label {
+            font-weight: bold;
+            color: #495057;
+            min-width: 80px;
+            margin-right: 6px;
+            font-size: 8pt;
+        }
+
+        .patient-value {
+            color: #333;
+            flex: 1;
+            font-size: 9pt;
+        }
+
+        /* Seção HDA */
+        .hda-section {
+            margin-bottom: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .hda-header {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 6px 10px;
+            font-weight: bold;
+            font-size: 10pt;
+        }
+
+        .hda-content {
+            padding: 10px;
+            background: white;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 9pt;
+            line-height: 1.4;
+            border-left: 3px solid #28a745;
+        }
+
+        /* Seção de evolução */
+        .evolucao-section {
+            margin-bottom: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #2c5aa0, #4a6fa5);
+            color: white;
+            padding: 6px 10px;
+            font-weight: bold;
+            font-size: 10pt;
+        }
+
+        .section-content {
+            padding: 10px;
+            background: white;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 9pt;
+            line-height: 1.5;
+        }
+
+        /* Remove formatação HTML do Quill */
+        .section-content p {
+            margin-bottom: 8px;
+        }
+
+        .section-content strong, .section-content b {
+            font-weight: bold;
+        }
+
+        .section-content em, .section-content i {
+            font-style: italic;
+        }
+
+        .section-content ul, .section-content ol {
+            margin-left: 20px;
+            margin-bottom: 8px;
+        }
+
+        .section-content li {
+            margin-bottom: 4px;
+        }
+
+        /* Informações do médico */
+        .medico-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 8px;
+            margin-bottom: 15px;
+        }
+
+        .medico-info h4 {
+            color: #2c5aa0;
+            font-size: 10pt;
+            margin-bottom: 4px;
+        }
+
+        .medico-info .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 9pt;
+        }
+
+        /* Assinaturas - versão simplificada */
+        .assinatura-medico {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 12pt;
+        }
+
+        .nome-medico {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+
+        .numero-profissional {
+            font-size: 10pt;
+            color: #666;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 8pt;
+            color: #666;
+            border-top: 1px solid #dee2e6;
+            padding-top: 6px;
+        }
+
+        /* Impressão */
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            .no-print {
+                display: none;
+            }
+        }
+
+        /* Botão de impressão */
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12pt;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        .print-button:hover {
+            background: #218838;
+        }
+
+        /* Estilos específicos para o conteúdo HTML da evolução */
+        .section-content h1, .section-content h2, .section-content h3 {
+            margin-top: 12px;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .section-content h1 { font-size: 12pt; }
+        .section-content h2 { font-size: 11pt; }
+        .section-content h3 { font-size: 10pt; }
+
+        .section-content blockquote {
+            margin: 8px 0;
+            padding: 6px 12px;
+            border-left: 3px solid #dee2e6;
+            background: #f8f9fa;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <!-- Botão de impressão -->
+    <button class="print-button no-print" onclick="window.print()">
+        <i class="fas fa-print"></i> Imprimir
+    </button>
+
+    <!-- Cabeçalho -->
+    <div class="header">
+        <div class="hospital-name">HOSPITAL SENADOR OZIRES PONTES</div>
+        <div class="evolucao-title">EVOLUÇÃO MÉDICA</div>
+    </div>
+
+    <!-- Dados do Paciente -->
+    <div class="patient-info">
+        <h3>Informações do Paciente</h3>
+        <div class="patient-grid">
+            <div class="patient-field">
+                <span class="patient-label">Nome:</span>
+                <span class="patient-value">{{ paciente.nome or 'Não informado' }}</span>
+            </div>
+            <div class="patient-field">
+                <span class="patient-label">Cartão SUS:</span>
+                <span class="patient-value">{{ paciente.cartao_sus or 'Não informado' }}</span>
+            </div>
+            <div class="patient-field">
+                <span class="patient-label">Data Nasc.:</span>
+                <span class="patient-value">{{ paciente.data_nascimento.strftime('%d/%m/%Y') if paciente.data_nascimento else 'Não informado' }}</span>
+            </div>
+            <div class="patient-field">
+                <span class="patient-label">Sexo:</span>
+                <span class="patient-value">{{ paciente.sexo or 'Não informado' }}</span>
+            </div>
+            <div class="patient-field">
+                <span class="patient-label">Leito:</span>
+                <span class="patient-value">{{ internacao.leito or 'Não informado' }}</span>
+            </div>
+            <div class="patient-field">
+                <span class="patient-label">Data Admissão:</span>
+                <span class="patient-value">{{ internacao.data_internacao.strftime('%d/%m/%Y %H:%M') if internacao.data_internacao else 'Não informado' }}</span>
+            </div>
+            <div class="patient-field">
+                <span class="patient-label">Alergias:</span>
+                <span class="patient-value">{{ atendimento.alergias or 'Nenhuma alergia informada' }}</span>
+            </div>
+            <div class="patient-field">
+                <span class="patient-label">ID Atendimento:</span>
+                <span class="patient-value">{{ atendimento.id }}</span>
+            </div>
+            <div class="patient-field">
+                <span class="patient-label">CPF:</span>
+                <span class="patient-value">{{ paciente.cpf or 'Não informado' }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- HDA (História da Doença Atual) -->
+    {% if internacao.hda %}
+    <div class="hda-section">
+        <div class="hda-header">
+            <i class="fas fa-history"></i> HISTÓRIA DA DOENÇA ATUAL (HDA)
+        </div>
+        <div class="hda-content">{{ internacao.hda }}</div>
+    </div>
+    {% endif %}
+
+    <!-- Evolução Médica -->
+    <div class="evolucao-section">
+        <div class="section-header">
+            <i class="fas fa-notes-medical"></i> EVOLUÇÃO MÉDICA
+        </div>
+        <div class="section-content">{{ evolucao.evolucao|safe }}</div>
+    </div>
+
+    <!-- Assinatura do Médico -->
+    {% if medico %}
+    <div class="assinatura-medico">
+        <div class="nome-medico">{{ medico.nome }}</div>
+        {% if medico.numero_profissional %}
+        <div class="numero-profissional">{{ medico.numero_profissional }}</div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>Evolução registrada em {{ evolucao.data_evolucao.strftime('%d/%m/%Y às %H:%M') if evolucao.data_evolucao else 'Data não informada' }}</p>
+        <p>RUA CRUZEIRO, S/N - COHAB, Massapê - CE, 62140-000</p>
+    </div>
+
+    <script>
+        // Foco automático para impressão
+        window.onload = function() {
+            // Auto-focus para facilitar impressão via Ctrl+P
+            document.body.focus();
+        };
+    </script>
+</body>
+</html> 

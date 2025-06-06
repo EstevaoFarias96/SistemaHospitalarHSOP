@@ -1489,41 +1489,6 @@
             });
         });
         
-        // Handler para submissão de nova evolução de enfermagem
-        $('#formEvolucaoEnfermagem').submit(function(e) {
-            e.preventDefault();
-            
-            // Usar apenas o textarea simples
-            const evolucaoTexto = $('#texto_evolucao_enfermagem').val().trim();
-            if (!evolucaoTexto) {
-                alert('Por favor, preencha o texto da evolução.');
-                return;
-            }
-            
-            $.ajax({
-                url: '/api/enfermagem/evolucao',
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    atendimentos_clinica_id: internacaoId,
-                    funcionario_id: parseInt("{{ session.get('user_id', 0) }}", 10),
-                    texto: evolucaoTexto
-                }),
-                success: function(response) {
-                    alert('Evolução de enfermagem registrada com sucesso!');
-                    $('#modalEnfermagemEvolucao').modal('hide');
-                    // Limpar o textarea
-                    $('#texto_evolucao_enfermagem').val('');
-                    // Recarregar evoluções
-                    carregarEvolucoesEnfermagem();
-                },
-                error: function(xhr, status, error) {
-                    console.error('Erro ao registrar evolução:', xhr.responseText);
-                    alert('Erro ao registrar evolução: ' + error);
-                }
-            });
-        });
-        
         // Função para carregar evoluções de enfermagem
         function carregarEvolucoesEnfermagem() {
             $.ajax({

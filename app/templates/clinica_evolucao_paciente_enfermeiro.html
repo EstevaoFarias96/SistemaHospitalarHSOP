@@ -59,15 +59,235 @@
     <style>
         body {
             background-color: #f8f9fa;
+            display: flex;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
         }
+        
+        /* Variáveis de cores */
+        :root {
+            --primary-dark: #1a237e;
+            --primary-main: #283593;
+            --primary-light: #3949ab;
+            --accent: #1565c0;
+            --hover-light: rgba(255,255,255,0.08);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255,255,255,0.85);
+            --shadow-soft: 0 2px 4px rgba(0,0,0,0.08);
+            --shadow-strong: 0 4px 8px rgba(0,0,0,0.12);
+            --gradient-primary: linear-gradient(135deg, var(--primary-main), var(--primary-light));
+            --gradient-accent: linear-gradient(135deg, var(--accent), var(--primary-light));
+            --primary-main-rgb: 40, 53, 147;
+            --primary-light-rgb: 57, 73, 171;
+        }
+
+        /* Estilos globais para cards e headers */
+        .card {
+            border: none;
+            box-shadow: var(--shadow-soft);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-strong);
+        }
+
+        .card-header {
+            border-bottom: none;
+            background: var(--gradient-primary) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            border: none;
+            box-shadow: var(--shadow-soft);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--gradient-accent);
+            box-shadow: var(--shadow-strong);
+            transform: translateY(-1px);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f57c00, #ffb74d);
+            border: none;
+            color: var(--text-primary);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #ff9800, #ffa726);
+            color: var(--text-primary);
+            box-shadow: var(--shadow-strong);
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #218838);
+            border: none;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #34ce57, #28a745);
+            box-shadow: var(--shadow-strong);
+            transform: translateY(-1px);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+            border: none;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .btn-info:hover {
+            background: linear-gradient(135deg, #20c997, #17a2b8);
+            box-shadow: var(--shadow-strong);
+            transform: translateY(-1px);
+        }
+
+        .badge {
+            background: var(--gradient-primary);
+            border: none;
+            box-shadow: var(--shadow-soft);
+        }
+
+        /* Estilo do menu lateral */
+        .sidebar {
+            width: 60px;
+            height: 100vh;
+            background: linear-gradient(180deg, var(--primary-dark) 0%, var(--primary-main) 100%);
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding-top: 20px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            z-index: 1000;
+            box-shadow: var(--shadow-soft);
+        }
+        
+        .sidebar:hover {
+            width: 200px;
+            box-shadow: var(--shadow-strong);
+        }
+        
+        .nav-pills {
+            flex-direction: column;
+            padding: 0;
+            margin: 0;
+        }
+        
         .nav-pills .nav-link {
-            margin-right: 10px;
-            border-radius: 50rem;
-            padding: 0.5rem 1rem;
+            margin: 5px 10px;
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
         }
+        
+        .nav-pills .nav-link:hover {
+            background-color: var(--hover-light);
+            transform: translateX(5px);
+            color: var(--text-primary);
+            border-color: rgba(255,255,255,0.1);
+        }
+        
+        .nav-pills .nav-link i {
+            font-size: 1.2rem;
+            min-width: 30px;
+            text-align: center;
+            transition: transform 0.3s ease;
+            color: var(--text-primary);
+        }
+        
+        .nav-pills .nav-link:hover i {
+            transform: scale(1.1);
+        }
+        
+        .nav-pills .nav-link span {
+            margin-left: 10px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .sidebar:hover .nav-pills .nav-link span {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
         .nav-pills .nav-link.active {
-            background-color: #0d6efd;
+            background-color: var(--accent);
+            color: var(--text-primary);
+            box-shadow: 0 2px 4px rgba(21,101,192,0.3);
+            border-color: rgba(255,255,255,0.2);
         }
+        
+        .nav-pills .nav-link.active:hover {
+            transform: translateX(5px) scale(1.02);
+            background-color: var(--accent);
+        }
+        
+        /* Ajuste do conteúdo principal */
+        .main-content {
+            margin-left: 60px;
+            flex: 1;
+            padding: 20px;
+            transition: all 0.3s ease;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+        
+        .sidebar:hover + .main-content {
+            margin-left: 200px;
+        }
+
+        /* Estilos para as ações rápidas */
+        .quick-actions {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            background: linear-gradient(0deg, var(--primary-dark) 0%, transparent 100%);
+        }
+
+        .quick-actions .action-btn {
+            background-color: transparent;
+            border: none;
+            color: var(--text-secondary);
+            opacity: 0.9;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .quick-actions .action-btn:hover {
+            opacity: 1;
+            color: var(--text-primary);
+            background-color: var(--hover-light);
+            transform: translateX(5px);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .menu-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .nav-pills {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Resto dos estilos existentes */
         .content-section {
             display: none;
         }
@@ -137,39 +357,56 @@
             background-color: rgba(13, 110, 253, 0.05);
         }
         
-        /* Novos estilos para melhorar a distinção entre prescrições */
+        /* Estilos para prescrições */
         .prescricao-container {
-            border: 1px solid #dee2e6;
+            transition: all 0.3s ease;
             border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 15px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            border: 1px solid #e9ecef;
             background-color: #fff;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .prescricao-container:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-strong);
+        }
+
+        /* Novo estilo para prescrições do dia */
+        .prescricao-hoje {
+            border-left: 4px solid var(--primary-main);
+            background-color: rgba(var(--primary-main-rgb), 0.02);
             position: relative;
         }
-        
-        .prescricao-container:hover {
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+
+        .prescricao-hoje::before {
+            content: "Hoje";
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--primary-main);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
         }
-        
+
+        .prescricao-antiga {
+            border-left: 4px solid transparent;
+        }
+
         .prescricao-header {
-            background-color: #f1f8ff;
-            padding: 5px 10px;
-            margin: -12px -12px 10px -12px;
-            border-bottom: 1px solid #dee2e6;
-            border-radius: 8px 8px 0 0;
+            padding: 12px 15px;
+            background: var(--gradient-primary);
+            color: var(--text-primary);
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
-        
-        .prescricao-header .medico-info {
-            font-weight: bold;
-            color: #0d6efd;
-        }
-        
-        .prescricao-header .timestamp {
-            color: #6c757d;
-            font-size: 0.85rem;
+
+        .prescricao-body {
+            padding: 15px;
         }
         
         .prescricao-section {
@@ -558,350 +795,240 @@ if (!window.ATENDIMENTO_ID) {
 } else {
     console.log('[Debug] ID do atendimento disponível globalmente');
 }
+
+// Função para voltar para a página de pacientes internados
+function voltarParaPacientesInternados() {
+    console.log('🔄 Botão Voltar clicado - Redirecionando para /clinica/pacientes-internados');
+    try {
+        window.location.href = '/clinica/pacientes-internados';
+        console.log('✅ Redirecionamento iniciado com sucesso');
+    } catch (error) {
+        console.error('❌ Erro no redirecionamento:', error);
+        // Fallback usando window.location.replace
+        window.location.replace('/clinica/pacientes-internados');
+    }
+}
 </script>
 
-<div class="container mt-4 mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Evolução do Paciente - Enfermagem</h2>
-        <a href="/clinica/pacientes-internados" class="btn btn-outline-primary">
-            <i class="fas fa-arrow-left"></i> Voltar
-        </a>
-    </div>
-
-    <!-- Informações do Paciente -->
-    <div class="paciente-info row">
-        <div class="col-md-3 info-item"><strong>Nome:</strong> {{ paciente.nome }}</div>
-        <div class="col-md-3 info-item"><strong>CPF:</strong> {{ paciente.cpf }}</div>
-        <div class="col-md-3 info-item"><strong>Cartão SUS:</strong> {{ paciente.cartao_sus }}</div>
-        <div class="col-md-3 info-item"><strong>Sexo:</strong> {{ paciente.sexo }}</div>
-        <div class="col-md-3 info-item"><strong>Data de Nascimento:</strong> {{ paciente.data_nascimento.strftime('%d/%m/%Y') if paciente.data_nascimento else '-' }}</div>
-        <div class="col-md-3 info-item"><strong>Endereço:</strong> {{ paciente.endereco }}</div>
-        <div class="col-md-3 info-item"><strong>Município:</strong> {{ paciente.municipio }}</div>
-        <div class="col-md-3 info-item"><strong>Telefone:</strong> {{ paciente.telefone }}</div>
-        <div class="col-md-3 info-item"><strong>Nome Social:</strong> {{ paciente.nome_social }}</div>
-        <div class="col-md-3 info-item"><strong>Filiação:</strong> {{ paciente.filiacao }}</div>
-    </div>
-
-    <ul class="nav nav-pills mb-4" id="menuTabs">
-        <li class="nav-item">
-            <a class="nav-link" href="#" data-target="printSection"><i class="fas fa-print me-2"></i>Imprimir</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#" data-target="prescricaoSection"><i class="fas fa-pills me-2"></i>Prescrição</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#" data-target="evolucaoSection"><i class="fas fa-notes-medical me-2"></i>Evolução</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#" data-target="enfermagemSection"><i class="fas fa-user-nurse me-2"></i>Enfermagem</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#" data-target="examesSection"><i class="fas fa-vial me-2"></i>Exames Laboratoriais</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#" data-target="imagensSection"><i class="fas fa-image me-2"></i>Ver Imagens</a>
-        </li>
-    </ul>
-
-    <div id="printSection" class="content-section">
-        <div class="alert alert-secondary">Função de impressão será implementada futuramente.</div>
-    </div>
-
-    <div id="prescricaoSection" class="content-section">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0">Prescrições do Paciente</h5>
-            <!-- Removido botão de nova prescrição reservado ao médico -->
+<!-- Menu Lateral -->
+<div class="sidebar">
+    <nav class="nav nav-pills flex-column">
+        <!-- Menu Principal -->
+        <div class="menu-section">
+            <a class="nav-link action-btn" href="#" onclick="voltarParaPacientesInternados(); return false;">
+                <i class="fas fa-arrow-left"></i>
+                <span>Voltar</span>
+            </a>
+            <a class="nav-link" href="#" data-target="printSection">
+                <i class="fas fa-print"></i>
+                <span>Imprimir</span>
+            </a>
+            <a class="nav-link" href="#" data-target="prescricaoSection">
+                <i class="fas fa-pills"></i>
+                <span>Prescrição</span>
+            </a>
+            <a class="nav-link" href="#" data-target="evolucaoSection">
+                <i class="fas fa-notes-medical"></i>
+                <span>Evolução</span>
+            </a>
+            <a class="nav-link active" href="#" data-target="enfermagemSection">
+                <i class="fas fa-user-nurse"></i>
+                <span>Enfermagem</span>
+            </a>
+            <a class="nav-link" href="#" data-target="examesSection">
+                <i class="fas fa-vial"></i>
+                <span>Exames Lab.</span>
+            </a>
         </div>
-        
-        <div class="table-responsive mb-3">
-            <table class="table table-borderless">
-                <thead class="d-none">
-                    <tr>
-                        <th>Conteúdo</th>
-                    </tr>
-                </thead>
-                <tbody id="listaPrescricoes">
-                    <tr>
-                        <td class="text-center"><i class="fas fa-spinner fa-spin"></i> Carregando prescrições...</td>
-                    </tr>
-                </tbody>
-            </table>
+
+        <!-- Ações Rápidas -->
+        <div class="quick-actions">
         </div>
-    </div>
+    </nav>
+</div>
 
-    <!-- Modal Prescrição -->
-    <div class="modal fade" id="modalPrescricao" tabindex="-1" aria-labelledby="modalPrescricaoLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="modalPrescricaoLabel">Nova Prescrição</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="formPrescricao">
-                        <input type="hidden" id="prescricao_id" value="">
-                        
-                        <!-- Dieta -->
-                        <div class="card mb-3">
-                            <div class="card-header bg-light">
-                                <h6 class="mb-0">Dieta</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <label for="texto_dieta" class="form-label">Descrição da Dieta</label>
-                                    <textarea class="form-control" id="texto_dieta" rows="3" placeholder="Descreva a dieta recomendada para o paciente..."></textarea>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Medicamentos -->
-                        <div class="card mb-3">
-                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                                <h6 class="mb-0">Medicamentos</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-5 mb-3">
-                                        <label for="nome_medicamento" class="form-label">Nome do Medicamento</label>
-                                        <input type="text" class="form-control" id="nome_medicamento" list="listaMedicamentosDisponiveis">
-                                        <datalist id="listaMedicamentosDisponiveis"></datalist>
-                                        <div id="avisoAlergia" class="alerta-alergia">
-                                            <i class="fas fa-exclamation-triangle me-2"></i> Atenção: paciente pode ter alergia a este medicamento.
-                                        </div>
-                                    </div>
-                                    <div class="col-md-5 mb-3">
-                                        <label for="descricao_uso" class="form-label">Como tomar / Descrição de uso</label>
-                                        <input type="text" class="form-control" id="descricao_uso" placeholder="Ex: 1 comprimido a cada 8 horas">
-                                    </div>
-                                    <div class="col-md-2 mb-3">
-                                        <label for="aprazamento" class="form-label">Aprazamento</label>
-                                        <input type="datetime-local" class="form-control" id="aprazamento">
-                                    </div>
-                                </div>
-                                <div class="text-end mb-3">
-                                    <button type="button" class="btn btn-primary btn-sm" id="btnAdicionarMedicamento">
-                                        <i class="fas fa-plus-circle"></i> Adicionar Medicamento
-                                    </button>
-                                </div>
-                                
-                                <!-- Lista de medicamentos adicionados -->
-                                <div class="table-responsive mt-3">
-                                    <table class="table table-sm table-bordered" id="tabelaMedicamentosAdicionados">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Medicamento</th>
-                                                <th>Como tomar</th>
-                                                <th>Aprazamento</th>
-                                                <th>Ações</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr id="semMedicamentos">
-                                                <td colspan="4" class="text-center">Nenhum medicamento adicionado</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Procedimentos -->
-                        <div class="card mb-3">
-                            <div class="card-header bg-light">
-                                <h6 class="mb-0">Procedimentos</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <label for="texto_procedimento_medico" class="form-label">Procedimento Médico</label>
-                                    <textarea class="form-control" id="texto_procedimento_medico" rows="3" placeholder="Descreva o procedimento médico a ser realizado..."></textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="texto_procedimento_multi" class="form-label">Procedimento Multiprofissional</label>
-                                    <textarea class="form-control" id="texto_procedimento_multi" rows="3" placeholder="Descreva o procedimento multiprofissional a ser realizado..."></textarea>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="text-end mt-3">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary">Salvar Prescrição</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+<!-- Conteúdo Principal -->
+<div class="main-content">
+    <div class="container-fluid py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Evolução do Paciente - Enfermagem</h2>
         </div>
-    </div>
 
-    <div id="evolucaoSection" class="content-section">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Evolução e Conduta</h5>
-                <!-- Botão de Nova Evolução removido - apenas médicos podem adicionar evoluções -->
-            </div>
-            <div class="card-body">
-                <div class="mt-3 mb-3">
-                    <h6 class="fw-bold">Informações de Admissão</h6>
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            <label class="form-label fw-bold">HDA (História da Doença Atual)</label>
-                            <textarea class="form-control" rows="2" readonly>{{ internacao.hda or 'Não registrado.' }}</textarea>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="table-responsive mb-3">
-                    <table class="table table-striped table-medicamentos">
-                        <thead class="table-primary">
-                            <tr>
-                                <th scope="col" style="width: 12%">Data/Hora</th>
-                                <th scope="col" style="width: 13%">Médico</th>
-                                <th scope="col" style="width: 75%">Evolução</th>
-                            </tr>
-                        </thead>
-                        <tbody id="listaEvolucoes">
-                            <tr>
-                                <td colspan="3" class="text-center">Carregando evoluções...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <!-- Informações do Paciente -->
+        <div class="paciente-info row">
+            <div class="col-md-3 info-item"><strong>Nome:</strong> {{ paciente.nome }}</div>
+            <div class="col-md-3 info-item"><strong>CPF:</strong> {{ paciente.cpf }}</div>
+            <div class="col-md-3 info-item"><strong>Cartão SUS:</strong> {{ paciente.cartao_sus }}</div>
+            <div class="col-md-3 info-item"><strong>Sexo:</strong> {{ paciente.sexo }}</div>
+            <div class="col-md-3 info-item"><strong>Data de Nascimento:</strong> {{ paciente.data_nascimento.strftime('%d/%m/%Y') if paciente.data_nascimento else '-' }}</div>
+            <div class="col-md-3 info-item"><strong>Endereço:</strong> {{ paciente.endereco }}</div>
+            <div class="col-md-3 info-item"><strong>Município:</strong> {{ paciente.municipio }}</div>
+            <div class="col-md-3 info-item"><strong>Telefone:</strong> {{ paciente.telefone }}</div>
+            <div class="col-md-3 info-item"><strong>Nome Social:</strong> {{ paciente.nome_social }}</div>
+            <div class="col-md-3 info-item"><strong>Filiação:</strong> {{ paciente.filiacao }}</div>
         </div>
-    </div>
 
-    <!-- Modal Evolução - Removido pois apenas médicos podem adicionar evoluções -->
+        <div id="printSection" class="content-section">
+            <div class="alert alert-secondary">Função de impressão será implementada futuramente.</div>
+        </div>
 
-    <div id="enfermagemSection" class="content-section">
-        <!-- Admissão de Enfermagem -->
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Admissão de Enfermagem</h5>
-                {% if session.get('cargo')|lower|trim == 'enfermeiro' %}
-                <button class="btn btn-light btn-sm" id="btn-editar-admissao">
-                    <i class="fas fa-edit"></i> Editar Admissão
-                </button>
-                {% endif %}
-            </div>
-            <div class="card-body">
-                <div id="admissao-texto-container">
-                    <div class="texto-admissao">
-                        {% if internacao.admissao_enfermagem %}
-                            {{ internacao.admissao_enfermagem | safe }}
-                        {% else %}
-                            <div class="text-muted">Nenhuma admissão de enfermagem registrada para este paciente.</div>
-                        {% endif %}
-                    </div>
+        <div id="prescricaoSection" class="content-section">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Prescrições do Paciente</h5>
+                    <!-- Removido botão de nova prescrição reservado ao médico -->
                 </div>
-                
-                <div id="admissao-form-container" style="display: none;">
-                    <div class="mb-3">
-                        <input type="hidden" id="internacao_id" value="{{ internacao.id }}">
-                        <textarea class="form-control" id="admissao_enfermagem" rows="5" placeholder="Digite aqui a admissão de enfermagem...">{{ internacao.admissao_enfermagem or '' }}</textarea>
-                    </div>
-                    <div class="text-end">
-                        <button id="btn-cancelar-admissao" class="btn btn-secondary me-2">
-                            <i class="fas fa-times"></i> Cancelar
-                        </button>
-                        <button id="btn-salvar-admissao" class="btn btn-success">
-                            <i class="fas fa-save"></i> Salvar Admissão
-                        </button>
+                <div class="card-body">
+                    <div class="table-responsive mb-3">
+                        <table class="table table-borderless">
+                            <thead class="d-none">
+                                <tr>
+                                    <th>Conteúdo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaPrescricoes">
+                                <tr>
+                                    <td class="text-center"><i class="fas fa-spinner fa-spin"></i> Carregando prescrições...</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Modal para visualizar aprazamentos -->
-        <div class="modal fade modal-visualizar-aprazamento" id="modalVisualizarAprazamento" tabindex="-1" aria-labelledby="modalVisualizarAprazamentoTitulo" aria-hidden="true">
+        <!-- Modal Prescrição -->
+        <div class="modal fade" id="modalPrescricao" tabindex="-1" aria-labelledby="modalPrescricaoLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="modalVisualizarAprazamentoTitulo">Horários de Aprazamento</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="modalPrescricaoLabel">Nova Prescrição</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body" id="modalVisualizarAprazamentoBody">
-                        <p class="text-center">Aguardando dados...</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                        <button type="button" class="btn btn-primary" onclick="exportarCalendarioComoImagem()">
-                            <i class="fas fa-download"></i> Exportar
-                        </button>
+                    <div class="modal-body">
+                        <form id="formPrescricao">
+                            <input type="hidden" id="prescricao_id" value="">
+                            
+                            <!-- Dieta -->
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">Dieta</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="texto_dieta" class="form-label">Descrição da Dieta</label>
+                                        <textarea class="form-control" id="texto_dieta" rows="3" placeholder="Descreva a dieta recomendada para o paciente..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Medicamentos -->
+                            <div class="card mb-3">
+                                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">Medicamentos</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-5 mb-3">
+                                            <label for="nome_medicamento" class="form-label">Nome do Medicamento</label>
+                                            <input type="text" class="form-control" id="nome_medicamento" list="listaMedicamentosDisponiveis">
+                                            <datalist id="listaMedicamentosDisponiveis"></datalist>
+                                            <div id="avisoAlergia" class="alerta-alergia">
+                                                <i class="fas fa-exclamation-triangle me-2"></i> Atenção: paciente pode ter alergia a este medicamento.
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5 mb-3">
+                                            <label for="descricao_uso" class="form-label">Como tomar / Descrição de uso</label>
+                                            <input type="text" class="form-control" id="descricao_uso" placeholder="Ex: 1 comprimido a cada 8 horas">
+                                        </div>
+                                        <div class="col-md-2 mb-3">
+                                            <label for="aprazamento" class="form-label">Aprazamento</label>
+                                            <input type="datetime-local" class="form-control" id="aprazamento">
+                                        </div>
+                                    </div>
+                                    <div class="text-end mb-3">
+                                        <button type="button" class="btn btn-primary btn-sm" id="btnAdicionarMedicamento">
+                                            <i class="fas fa-plus-circle"></i> Adicionar Medicamento
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Lista de medicamentos adicionados -->
+                                    <div class="table-responsive mt-3">
+                                        <table class="table table-sm table-bordered" id="tabelaMedicamentosAdicionados">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Medicamento</th>
+                                                    <th>Como tomar</th>
+                                                    <th>Aprazamento</th>
+                                                    <th>Ações</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr id="semMedicamentos">
+                                                    <td colspan="4" class="text-center">Nenhum medicamento adicionado</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Procedimentos -->
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">Procedimentos</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="texto_procedimento_medico" class="form-label">Procedimento Médico</label>
+                                        <textarea class="form-control" id="texto_procedimento_medico" rows="3" placeholder="Descreva o procedimento médico a ser realizado..."></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="texto_procedimento_multi" class="form-label">Procedimento Multiprofissional</label>
+                                        <textarea class="form-control" id="texto_procedimento_multi" rows="3" placeholder="Descreva o procedimento multiprofissional a ser realizado..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-end mt-3">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Salvar Prescrição</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <!-- Evoluções de Enfermagem -->
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Evoluções de Enfermagem</h5>
-                <div>
-                    {% if session.get('cargo')|lower|trim == 'enfermeiro' %}
-                    <button class="btn btn-sm btn-light me-2" data-bs-toggle="modal" data-bs-target="#modalEnfermagemEvolucao">
-                        <i class="fas fa-plus-circle"></i> Nova Evolução
-                    </button>
-                    {% endif %}
-                    <button class="btn btn-sm btn-outline-light me-2" id="toggle-evolucoes-antigas">
-                        <i class="fas fa-eye-slash"></i> <span id="toggle-evolucoes-text">Ocultar Antigas</span>
-                    </button>
+
+        <div id="evolucaoSection" class="content-section">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Evolução e Conduta</h5>
+                    <!-- Botão de Nova Evolução removido - apenas médicos podem adicionar evoluções -->
                 </div>
-            </div>
-            <div class="card-body">
-                <!-- Seletor de data para filtrar evoluções -->
-                <div class="mb-3">
-                    <div class="row align-items-center">
-                        <div class="col-md-4">
-                            <label for="filtro-data" class="form-label">Filtrar por data:</label>
-                            <div class="input-group">
-                                <input type="date" id="filtro-data" class="form-control form-control-sm">
-                                <button class="btn btn-sm btn-outline-primary" id="btn-filtrar-data">
-                                    <i class="fas fa-filter"></i> Filtrar
-                                </button>
-                                <button class="btn btn-sm btn-outline-secondary" id="btn-limpar-filtro">
-                                    <i class="fas fa-times"></i> Limpar
-                                </button>
+                <div class="card-body">
+                    <div class="mt-3 mb-3">
+                        <h6 class="fw-bold">Informações de Admissão</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">HDA (História da Doença Atual)</label>
+                                <textarea class="form-control" rows="2" readonly>{{ internacao.hda or 'Não registrado.' }}</textarea>
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="mb-3" id="hoje-container">
-                    <h6 class="fw-bold text-success mb-2"><i class="fas fa-calendar-day me-1"></i> <span id="titulo-evolucoes-hoje">Evoluções de Hoje</span></h6>
-                    <div class="table-responsive">
+                    
+                    <div class="table-responsive mb-3">
                         <table class="table table-striped table-medicamentos">
-                            <thead class="table-info">
-                                <tr>
-                                    <th scope="col" style="width: 12%">Hora</th>
-                                    <th scope="col" style="width: 13%">Enfermeiro</th>
-                                    <th scope="col" style="width: 75%">Evolução</th>
-                                </tr>
-                            </thead>
-                            <tbody id="listaEvolucoesDoDia">
-                                <tr>
-                                    <td colspan="3" class="text-center">Carregando evoluções de hoje...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                
-                <div class="mb-3" id="antigas-container">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="fw-bold text-secondary mb-0"><i class="fas fa-history me-1"></i> Evoluções Anteriores</h6>
-                        <span class="badge bg-info" id="contador-evolucoes-antigas">0</span>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-striped table-medicamentos">
-                            <thead class="table-secondary">
+                            <thead class="table-primary">
                                 <tr>
                                     <th scope="col" style="width: 12%">Data/Hora</th>
-                                    <th scope="col" style="width: 13%">Enfermeiro</th>
+                                    <th scope="col" style="width: 13%">Médico</th>
                                     <th scope="col" style="width: 75%">Evolução</th>
                                 </tr>
                             </thead>
-                            <tbody id="listaEvolucoesAntigas">
+                            <tbody id="listaEvolucoes">
                                 <tr>
-                                    <td colspan="3" class="text-center">Carregando evoluções anteriores...</td>
+                                    <td colspan="3" class="text-center">Carregando evoluções...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -910,69 +1037,187 @@ if (!window.ATENDIMENTO_ID) {
             </div>
         </div>
 
-        <!-- SAE -->
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Sistematização da Assistência de Enfermagem (SAE)</h5>
-                {% if session.get('cargo')|lower|trim == 'enfermeiro' %}
-                <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalSAE">
-                    <i class="fas fa-plus-circle"></i> Nova SAE
-                </button>
-                {% endif %}
-            </div>
-            <div class="card-body">
+        <!-- Modal Evolução - Removido pois apenas médicos podem adicionar evoluções -->
 
-                <div id="listaSAE">
-                    <p class="text-center text-muted">Carregando dados da SAE...</p>
+        <div id="enfermagemSection" class="content-section active">
+            <!-- Admissão de Enfermagem -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Admissão de Enfermagem</h5>
+                    {% if session.get('cargo')|lower|trim == 'enfermeiro' %}
+                    <button class="btn btn-light btn-sm" id="btn-editar-admissao">
+                        <i class="fas fa-edit"></i> Editar Admissão
+                    </button>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div id="admissao-texto-container">
+                        <div class="texto-admissao">
+                            {% if internacao.admissao_enfermagem %}
+                                {{ internacao.admissao_enfermagem | safe }}
+                            {% else %}
+                                <div class="text-muted">Nenhuma admissão de enfermagem registrada para este paciente.</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div id="admissao-form-container" style="display: none;">
+                        <div class="mb-3">
+                            <input type="hidden" id="internacao_id" value="{{ internacao.id }}">
+                            <textarea class="form-control" id="admissao_enfermagem" rows="5" placeholder="Digite aqui a admissão de enfermagem...">{{ internacao.admissao_enfermagem or '' }}</textarea>
+                        </div>
+                        <div class="text-end">
+                            <button id="btn-cancelar-admissao" class="btn btn-secondary me-2">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                            <button id="btn-salvar-admissao" class="btn btn-success">
+                                <i class="fas fa-save"></i> Salvar Admissão
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evoluções de Enfermagem -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Evoluções de Enfermagem</h5>
+                    <div>
+                        {% if session.get('cargo')|lower|trim == 'enfermeiro' %}
+                        <button class="btn btn-sm btn-light me-2" data-bs-toggle="modal" data-bs-target="#modalEnfermagemEvolucao">
+                            <i class="fas fa-plus-circle"></i> Nova Evolução
+                        </button>
+                        {% endif %}
+                        <button class="btn btn-sm btn-outline-light me-2" id="toggle-evolucoes-antigas">
+                            <i class="fas fa-eye-slash"></i> <span id="toggle-evolucoes-text">Ocultar Antigas</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Seletor de data para filtrar evoluções -->
+                    <div class="mb-3">
+                        <div class="row align-items-center">
+                            <div class="col-md-4">
+                                <label for="filtro-data" class="form-label">Filtrar por data:</label>
+                                <div class="input-group">
+                                    <input type="date" id="filtro-data" class="form-control form-control-sm">
+                                    <button class="btn btn-sm btn-outline-primary" id="btn-filtrar-data">
+                                        <i class="fas fa-filter"></i> Filtrar
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary" id="btn-limpar-filtro">
+                                        <i class="fas fa-times"></i> Limpar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3" id="hoje-container">
+                        <h6 class="fw-bold text-success mb-2"><i class="fas fa-calendar-day me-1"></i> <span id="titulo-evolucoes-hoje">Evoluções de Hoje</span></h6>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-medicamentos">
+                                <thead class="table-info">
+                                    <tr>
+                                        <th scope="col" style="width: 12%">Hora</th>
+                                        <th scope="col" style="width: 13%">Enfermeiro</th>
+                                        <th scope="col" style="width: 75%">Evolução</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="listaEvolucoesDoDia">
+                                    <tr>
+                                        <td colspan="3" class="text-center">Carregando evoluções de hoje...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3" id="antigas-container">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="fw-bold text-secondary mb-0"><i class="fas fa-history me-1"></i> Evoluções Anteriores</h6>
+                            <span class="badge bg-info" id="contador-evolucoes-antigas">0</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-medicamentos">
+                                <thead class="table-secondary">
+                                    <tr>
+                                        <th scope="col" style="width: 12%">Data/Hora</th>
+                                        <th scope="col" style="width: 13%">Enfermeiro</th>
+                                        <th scope="col" style="width: 75%">Evolução</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="listaEvolucoesAntigas">
+                                    <tr>
+                                        <td colspan="3" class="text-center">Carregando evoluções anteriores...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SAE -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Sistematização da Assistência de Enfermagem (SAE)</h5>
+                    {% if session.get('cargo')|lower|trim == 'enfermeiro' %}
+                    <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalSAE">
+                        <i class="fas fa-plus-circle"></i> Nova SAE
+                    </button>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div id="listaSAE">
+                        <p class="text-center text-muted">Carregando dados da SAE...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prescrições de Enfermagem -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-warning text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Prescrições de Enfermagem</h5>
+                    {% if session.get('cargo')|lower|trim == 'enfermeiro' %}
+                    <button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#modalPrescricaoEnfermagem">
+                        <i class="fas fa-plus-circle"></i> Nova Prescrição
+                    </button>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-medicamentos">
+                            <thead class="table-warning">
+                                <tr>
+                                    <th scope="col" style="width: 15%">Data/Hora</th>
+                                    <th scope="col" style="width: 15%">Enfermeiro</th>
+                                    <th scope="col" style="width: 60%">Prescrição</th>
+                                    <th scope="col" style="width: 10%">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaPrescricoesEnfermagem">
+                                <tr>
+                                    <td colspan="4" class="text-center">Carregando prescrições...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Prescrições de Enfermagem -->
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-warning text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Prescrições de Enfermagem</h5>
-                {% if session.get('cargo')|lower|trim == 'enfermeiro' %}
-                <button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#modalPrescricaoEnfermagem">
-                    <i class="fas fa-plus-circle"></i> Nova Prescrição
-                </button>
-                {% endif %}
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped table-medicamentos">
-                        <thead class="table-warning">
-                            <tr>
-                                <th scope="col" style="width: 15%">Data/Hora</th>
-                                <th scope="col" style="width: 15%">Enfermeiro</th>
-                                <th scope="col" style="width: 60%">Prescrição</th>
-                                <th scope="col" style="width: 10%">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="listaPrescricoesEnfermagem">
-                            <tr>
-                                <td colspan="4" class="text-center">Carregando prescrições...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+        <div id="examesSection" class="content-section">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Exames Laboratoriais</h5>
+                </div>
+                <div class="card-body">
+                    <textarea class="form-control" rows="5" readonly>{{ internacao.exames_laboratoriais or 'Não registrado.' }}</textarea>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div id="examesSection" class="content-section">
-        <div class="card shadow-sm">
-            <div class="card-header bg-secondary text-white">
-                <h5 class="mb-0">Exames Laboratoriais</h5>
-            </div>
-            <div class="card-body">
-                <textarea class="form-control" rows="5" readonly>{{ internacao.exames_laboratoriais or 'Não registrado.' }}</textarea>
-            </div>
-        </div>
-    </div>
-
-    <div id="imagensSection" class="content-section">
-        <div class="alert alert-info">Visualização de imagens ainda não disponível.</div>
+        <!-- Remover seção imagensSection -->
     </div>
 </div>
 
@@ -1140,7 +1385,7 @@ if (!window.ATENDIMENTO_ID) {
             </div>
             <div class="modal-body p-3">
                 <form id="formSAE" class="row g-3">
-                    <input type="hidden" id="sae_paciente_id" value="{{ paciente.id }}">
+                    <input type="hidden" id="sae_paciente_id" value="{{ internacao.atendimento_id }}">
                     
                     <!-- Sinais Vitais -->
                     <div class="col-12">
@@ -1269,7 +1514,7 @@ if (!window.ATENDIMENTO_ID) {
                                         <label class="form-check-label small" for="sae_ventilacao_aa">AA</label>
                                     </div>
                                     <div class="mb-2">
-                                        <label class="form-label small">O2 POR:</label>
+                                        <label class="form-label small d-block">O2 POR:</label>
                                         <input type="text" class="form-control form-control-sm" id="sae_ventilacao_o2">
                                     </div>
                                 </div>
@@ -1650,29 +1895,24 @@ if (!window.ATENDIMENTO_ID) {
 <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 
 <script src="/static/js/aprazamento.js"></script>
-<script src="/static/js/calendario_aprazamento.js"></script>
 <script src="/static/js/calculo_horarios.js"></script>
-<script src="/static/js/sae.js"></script>
-<!-- Adicionar referência ao módulo de evoluções de enfermagem -->
-<script src="/static/js/evolucoes_enfermagem.js"></script>
 
-<!-- Adicionar script para manipulação de eventos de visualização de aprazamentos -->
-<script src="/static/js/visualizacao_aprazamento.js"></script>
+<!-- Adicionar referência ao módulo de evoluções de enfermagem -->
+
+<!-- Adicionar o novo módulo completo de enfermagem -->
+<script src="/static/js/enfermagem_completo.js"></script>
+
+<!-- Campo hidden para armazenar o cargo do usuário -->
+<input type="hidden" id="cargo_usuario" value="{{ session.get('cargo', '') }}">
 
 <script>
-    // Extrair ID da internação
+    // Extrair ID da internação - será atribuído ao carregar o documento
     const internacaoIdRaw = "{{ internacao.id }}";
     console.log('Valor raw de internacao.id:', internacaoIdRaw);
-    const internacaoId = parseInt(internacaoIdRaw, 10);
-    console.log('Valor de internacaoId após parse:', internacaoId, typeof internacaoId);
     
-    // Verificar se internacaoId é um número válido
-    if (isNaN(internacaoId)) {
-        console.error('Erro: internacaoId não é um número válido!');
-        alert('Erro ao carregar o ID da internação. Por favor, recarregue a página ou contate o suporte.');
-    } else {
-        console.log('internacaoId válido:', internacaoId);
-    }
+    // Declarar funcionarioId globalmente
+    const funcionarioId = "{{ session.get('user_id', 0) }}";
+    console.log('ID do funcionário:', funcionarioId);
     
     // Garantir que a função formatarAprazamentoLegivel esteja disponível
     if (typeof formatarAprazamentoLegivel !== 'function') {
@@ -1727,6 +1967,7 @@ if (!window.ATENDIMENTO_ID) {
         return observer;
     }
     
+
     // Função para garantir que não haja eventos depreciados no DOM
     function removerEventosDepreciados() {
         // Lista de eventos depreciados
@@ -1755,6 +1996,22 @@ if (!window.ATENDIMENTO_ID) {
     }
 
     $(document).ready(function() {
+        // Atribuir valor à variável global internacaoId declarada em enfermagem_completo.js
+        if (typeof internacaoId !== 'undefined') {
+            internacaoId = parseInt(internacaoIdRaw, 10);
+            console.log('Valor de internacaoId após parse:', internacaoId, typeof internacaoId);
+            
+            // Verificar se internacaoId é um número válido
+            if (isNaN(internacaoId)) {
+                console.error('Erro: internacaoId não é um número válido!');
+                alert('Erro ao carregar o ID da internação. Por favor, recarregue a página ou contate o suporte.');
+            } else {
+                console.log('internacaoId válido:', internacaoId);
+            }
+        } else {
+            console.error('Variável internacaoId não declarada! Verifique se enfermagem_completo.js foi carregado.');
+        }
+        
         // Debugar cargo do usuário
         console.log("Cargo do usuário na sessão:", "{{ session.get('cargo') }}");
         
@@ -1883,20 +2140,32 @@ if (!window.ATENDIMENTO_ID) {
         });
         
         // Configurar navegação das abas
-        document.querySelectorAll('#menuTabs .nav-link').forEach(link => {
+        document.querySelectorAll('.sidebar .nav-link').forEach(link => {
             link.addEventListener('click', function (e) {
                 e.preventDefault();
-                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-                this.classList.add('active');
+                // Remove active de todos os links (exceto action-btn)
+                document.querySelectorAll('.sidebar .nav-link').forEach(l => {
+                    if (!l.classList.contains('action-btn')) {
+                        l.classList.remove('active');
+                    }
+                });
+                // Adiciona active ao link clicado (se não for action-btn)
+                if (!this.classList.contains('action-btn')) {
+                    this.classList.add('active');
+                }
 
                 const target = this.getAttribute('data-target');
-                document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
-                if (target) document.getElementById(target).classList.add('active');
+                if (target) {
+                    // Esconde todas as seções
+                    document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+                    // Mostra a seção alvo
+                    document.getElementById(target).classList.add('active');
+                }
             });
         });
 
-        // Ativar a primeira aba por padrão
-        document.querySelector('#menuTabs .nav-link').click();
+        // Ativar a aba de enfermagem por padrão
+        document.querySelector('.sidebar .nav-link[data-target="enfermagemSection"]').click();
 
         // Carregar prescrições ao iniciar
         carregarPrescricoes();
@@ -1916,48 +2185,132 @@ if (!window.ATENDIMENTO_ID) {
         });
         
         // Handler para salvar admissão de enfermagem
+        // Usar variáveis globais já declaradas acima
+        // const internacaoId = $('#internacao_id').val(); // Removido - usar a global
+        // const funcionarioId = $('#usuario_id').val(); // Removido - usar a global
+
+        // Handler para salvar admissão de enfermagem
         $(document).on('submit', '#formEnfermagem', function(e) {
             e.preventDefault();
+
             const admissaoTexto = $('#admissao_enfermagem').val().trim();
-            
+
             if (!admissaoTexto) {
                 alert('Por favor, preencha a admissão de enfermagem.');
                 return;
             }
-            
+
+            if (!internacaoId || !funcionarioId) {
+                alert('Erro: internação ou enfermeiro não identificado.');
+                return;
+            }
+
+            $('#btn-salvar-admissao').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Salvando...');
+
             $.ajax({
                 url: '/api/enfermagem/admissao',
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({
-                    atendimentos_clinica_id: internacaoId,
-                    funcionario_id: parseInt("{{ session.get('user_id', 0) }}", 10),
-                    texto: admissaoTexto
+                    internacao_id: internacaoId,
+                    enfermeiro_id: funcionarioId,
+                    admissao_texto: admissaoTexto
                 }),
                 success: function(response) {
-                    // Restaurar o botão
                     $('#btn-salvar-admissao').prop('disabled', false).html('<i class="fas fa-save"></i> Salvar Admissão');
-                    
-                    // Atualizar a visualização do texto diretamente
                     $('.texto-admissao').html(admissaoTexto);
-                    
-                    // Esconder o formulário e mostrar o texto
                     $('#admissao-form-container').hide();
                     $('#admissao-texto-container').show();
-                    
-                    // Mostrar mensagem de sucesso
                     alert('Admissão de enfermagem registrada com sucesso!');
                 },
                 error: function(xhr, status, error) {
-                    // Restaurar o botão
                     $('#btn-salvar-admissao').prop('disabled', false).html('<i class="fas fa-save"></i> Salvar Admissão');
-                    
                     console.error('Erro ao salvar admissão de enfermagem:', xhr.responseText);
                     alert('Erro de comunicação ao tentar salvar admissão: ' + (xhr.responseJSON?.erro || error));
                 }
             });
         });
+
+
         
+
+
+        // Handler completo para registrar múltiplos aprazamentos
+       // Handler completo — versão corrigida (mantém minutos "HH:MM")
+        // Handler de envio do formulário de aprazamento (pronto para copiar)
+        $(document).on('submit', '#formAprazamento', function (e) {
+            e.preventDefault();
+
+            /* ------------------------------------------------------------------
+            1. Coleta de dados básicos
+            ------------------------------------------------------------------ */
+            const prescricao_id             = $('#aprazamento_prescricao_id').val();
+            const nome_medicamento          = $('#aprazamento_medicamento_nome').text();
+            const enfermeiro_responsavel_id = $(this).data('enfermeiro-id') || window.session?.user_id;
+
+            /* ------------------------------------------------------------------
+            2. Horários selecionados
+            ------------------------------------------------------------------ */
+            const horariosSelecionados = $('#horarios_multiplos_dias .horario-check:checked')
+                .map(function () { return $(this).val().trim(); })    // "DD/MM/YYYY:HH:MM"
+                .get();
+
+            if (horariosSelecionados.length === 0) {
+                alert('Selecione pelo menos um horário para aprazamento.');
+                return;
+            }
+
+            /* ------------------------------------------------------------------
+            3. Agrupa por data (preservando minutos)
+                { '23/05/2025': ['08:00','14:30'], ... }
+            ------------------------------------------------------------------ */
+            const horariosPorData = {};
+            horariosSelecionados.forEach(v => {
+                const idx  = v.indexOf(':');     // primeiro ":"
+                if (idx === -1) return;          // segurança
+                const data = v.slice(0, idx);    // "23/05/2025"
+                const hora = v.slice(idx + 1);   // "08:00", "14:30", etc.
+                (horariosPorData[data] = horariosPorData[data] || []).push(hora);
+            });
+
+            /* ------------------------------------------------------------------
+            4. Callback coletor – fecha modal quando todas as requisições ok
+            ------------------------------------------------------------------ */
+            const totalRequisicoes = horariosSelecionados.length;
+            let respostas = 0;
+            let erroDetectado = false;
+
+            function callbackColetor(response) {
+                respostas++;
+
+                if (!response.success && !erroDetectado) {
+                    erroDetectado = true;
+                    alert(response.message || 'Erro ao registrar aprazamento.');
+                }
+
+                if (respostas === totalRequisicoes && !erroDetectado) {
+                    $('#modalAprazamento').modal('hide');
+                    carregarPrescricoes();
+                }
+            }
+
+            /* ------------------------------------------------------------------
+            5. Envia 1 requisição por horário (1 horário → 1 Aprazamento)
+            ------------------------------------------------------------------ */
+            for (const [data, horas] of Object.entries(horariosPorData)) {
+                horas.forEach(hora => {
+                    registrarAprazamento({
+                        prescricao_id,
+                        nome_medicamento,
+                        data_hora_aprazamento: `${data} ${hora}`,  // "DD/MM/YYYY HH:MM"
+                        enfermeiro_responsavel_id
+                    }, callbackColetor);
+                });
+            }
+});
+
+
+
         // Função para carregar evoluções de enfermagem
         function carregarEvolucoesEnfermagem() {
             $.ajax({
@@ -2064,6 +2417,8 @@ if (!window.ATENDIMENTO_ID) {
                 $(this).find('i').removeClass('fa-eye').addClass('fa-eye-slash');
             }
         });
+        
+        // Agora as funções estão no módulo enfermagem_completo.js
         
         // Autocomplete de medicamentos
         $('#nome_medicamento').on('input', function() {
@@ -3034,20 +3389,33 @@ if (!window.ATENDIMENTO_ID) {
         });
 
         // Função para carregar prescrições de enfermagem
+        // Função para carregar prescrições de enfermagem
         function carregarPrescricoesEnfermagem() {
-            const internacaoId = $('#internacao_id_prescricao').val();
-            
+            // Usar a variável global internacaoId já declarada
+            // const internacaoId = $('#internacao_id_prescricao').val(); // Removido - usar a global
+
             $.ajax({
                 url: `/api/enfermagem/prescricao/${internacaoId}`,
                 method: 'GET',
                 success: function(response) {
                     const tbody = $('#listaPrescricoesEnfermagem');
                     tbody.empty();
-                    
+
                     if (response && response.length > 0) {
                         response.forEach(prescricao => {
-                            const dataFormatada = new Date(prescricao.data_prescricao).toLocaleString('pt-BR');
-                            
+                            let dataFormatada = '-';
+                            if (prescricao.data_prescricao) {
+                                let dataObj = new Date(prescricao.data_prescricao);
+                                dataObj.setDate(dataObj.getDate() + 1);
+                                dataFormatada = dataObj.toLocaleString('pt-BR', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                });
+                            }
+
                             let html = `
                                 <tr>
                                     <td>${dataFormatada}</td>
@@ -3058,7 +3426,7 @@ if (!window.ATENDIMENTO_ID) {
                                         </div>
                                     </td>
                                     <td>`;
-                            
+
                             if ("{{ session.get('cargo') }}".toLowerCase().trim() === "enfermeiro") {
                                 html += `
                                     <button class="btn btn-sm btn-outline-primary btn-editar-prescricao-enfermagem" 
@@ -3067,7 +3435,7 @@ if (!window.ATENDIMENTO_ID) {
                                         <i class="fas fa-edit"></i>
                                     </button>`;
                             }
-                            
+
                             html += `</td></tr>`;
                             tbody.append(html);
                         });
@@ -3084,61 +3452,72 @@ if (!window.ATENDIMENTO_ID) {
             });
         }
 
-        // Handler para submissão do formulário de prescrição
+        // Handler para submissão do formulário (único)
         $('#formPrescricaoEnfermagem').on('submit', function(e) {
             e.preventDefault();
-            
+
             const prescricaoId = $('#prescricao_enfermagem_id').val();
             const texto = $('#texto_prescricao_enfermagem').val().trim();
-            
+
             if (!texto) {
                 alert('Por favor, preencha o texto da prescrição.');
                 return;
             }
-            
+
             const dados = {
-                atendimentos_clinica_id: parseInt($('#internacao_id_prescricao').val()),
-                funcionario_id: parseInt($('#enfermeiro_id').val()),
                 texto: texto
             };
-            
-            const url = prescricaoId ? 
-                `/api/enfermagem/prescricao/${prescricaoId}` : 
-                '/api/enfermagem/prescricao';
-            
-            const method = prescricaoId ? 'PUT' : 'POST';
-            
-            $.ajax({
-                url: url,
-                method: method,
-                contentType: 'application/json',
-                data: JSON.stringify(dados),
-                success: function(response) {
-                    $('#modalPrescricaoEnfermagem').modal('hide');
-                    $('#formPrescricaoEnfermagem')[0].reset();
-                    $('#prescricao_enfermagem_id').val('');
-                    carregarPrescricoesEnfermagem();
-                    alert('Prescrição ' + (prescricaoId ? 'atualizada' : 'registrada') + ' com sucesso!');
-                },
-                error: function(xhr, status, error) {
-                    console.error('Erro ao ' + (prescricaoId ? 'atualizar' : 'registrar') + ' prescrição:', error);
-                    alert('Erro ao ' + (prescricaoId ? 'atualizar' : 'registrar') + ' prescrição. Por favor, tente novamente.');
-                }
-            });
+
+            const finalizar = () => {
+                $('#modalPrescricaoEnfermagem').modal('hide');
+                $('#formPrescricaoEnfermagem')[0].reset();
+                $('#prescricao_enfermagem_id').val('');
+                carregarPrescricoesEnfermagem();
+                alert('Prescrição ' + (prescricaoId ? 'atualizada' : 'registrada') + ' com sucesso!');
+            };
+
+            if (prescricaoId) {
+                // Atualização
+                $.ajax({
+                    url: `/api/enfermagem/prescricao/${prescricaoId}`,
+                    method: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dados),
+                    success: finalizar,
+                    error: function(xhr) {
+                        alert('Erro ao atualizar a prescrição: ' + (xhr.responseJSON?.erro || 'Erro desconhecido.'));
+                    }
+                });
+            } else {
+                // Inserção
+                dados.atendimentos_clinica_id = parseInt($('#internacao_id_prescricao').val());
+                dados.funcionario_id = parseInt($('#enfermeiro_id').val());
+
+                $.ajax({
+                    url: '/api/enfermagem/prescricao',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dados),
+                    success: finalizar,
+                    error: function(xhr) {
+                        alert('Erro ao registrar a prescrição: ' + (xhr.responseJSON?.erro || 'Erro desconhecido.'));
+                    }
+                });
+            }
         });
 
-        // Handler para edição de prescrição
+        // Handler para edição
         $(document).on('click', '.btn-editar-prescricao-enfermagem', function() {
             const id = $(this).data('id');
             const texto = $(this).data('texto');
-            
+
             $('#prescricao_enfermagem_id').val(id);
             $('#texto_prescricao_enfermagem').val(texto);
             $('#modalPrescricaoEnfermagemLabel').text('Editar Prescrição de Enfermagem');
             $('#modalPrescricaoEnfermagem').modal('show');
         });
 
-        // Resetar formulário ao abrir modal para nova prescrição
+        // Reset do modal ao abrir para nova prescrição
         $('#modalPrescricaoEnfermagem').on('show.bs.modal', function(e) {
             if (!$(e.relatedTarget).hasClass('btn-editar-prescricao-enfermagem')) {
                 $('#prescricao_enfermagem_id').val('');
@@ -3149,6 +3528,7 @@ if (!window.ATENDIMENTO_ID) {
 
         // Carregar prescrições ao iniciar
         carregarPrescricoesEnfermagem();
+
     });
 
 
@@ -3163,36 +3543,6 @@ if (!window.ATENDIMENTO_ID) {
         visualizarCalendarioAprazamento(prescricaoId, medicamentoIndex, medicamentoNome);
     }
 
-    function exportarCalendarioComoImagem() {
-        const element = document.getElementById('modalVisualizarAprazamentoBody');
-        
-        // Configurar opções do html2canvas
-        const options = {
-            scale: 2, // Melhor qualidade
-            useCORS: true,
-            backgroundColor: '#ffffff'
-        };
-        
-        // Mostrar indicador de carregamento
-        const loadingHtml = element.innerHTML;
-        element.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Gerando imagem...</div>';
-        
-        // Usar html2canvas para converter o conteúdo em imagem
-        html2canvas(element, options).then(canvas => {
-            // Restaurar conteúdo original
-            element.innerHTML = loadingHtml;
-            
-            // Criar link para download
-            const link = document.createElement('a');
-            link.download = 'aprazamentos.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-        }).catch(error => {
-            console.error('Erro ao gerar imagem:', error);
-            alert('Erro ao gerar imagem. Por favor, tente novamente.');
-            element.innerHTML = loadingHtml;
-        });
-    }
 
 </script>
 
@@ -3502,7 +3852,27 @@ $(document).on('click', '.btn-ver-aprazamentos', function() {
 });
 </script>
 
+<!-- Modal para visualizar aprazamentos -->
+<div class="modal fade modal-visualizar-aprazamento" id="modalVisualizarAprazamento" tabindex="-1" aria-labelledby="modalVisualizarAprazamentoTitulo" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalVisualizarAprazamentoTitulo">Horários de Aprazamento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body" id="modalVisualizarAprazamentoBody">
+                <p class="text-center">Aguardando dados...</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" onclick="exportarCalendarioComoImagem()">
+                    <i class="fas fa-download"></i> Exportar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
-
 

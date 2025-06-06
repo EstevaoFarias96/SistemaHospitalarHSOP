@@ -162,21 +162,12 @@ function fetchHistoricoInternacoes(filtroMes = null) {
                 data.internacoes.forEach(internacao => {
                     const row = document.createElement('tr');
 
-                    // Criar o botão de visualizar alta
-                    const btnVerAlta = document.createElement('button');
-                    btnVerAlta.className = 'btn btn-sm btn-info';
-                    btnVerAlta.innerHTML = '<i class="fas fa-file-medical"></i> Ver Alta';
-                    btnVerAlta.onclick = function() {
-                        visualizarRelatorioAlta(internacao.atendimento_id);
-                    };
-
-                    // Criar o botão de relatório completo
+                    // Usar o ID do atendimento na URL
                     const btnRelatorioCompleto = document.createElement('a');
-                    btnRelatorioCompleto.href = `/clinica/relatorio-paciente/${internacao.id}`;
-                    btnRelatorioCompleto.className = 'btn btn-sm btn-primary ms-1';
+                    btnRelatorioCompleto.href = `/clinica/historico-internacao/${internacao.atendimento_id}`;
+                    btnRelatorioCompleto.className = 'btn btn-sm btn-primary';
                     btnRelatorioCompleto.innerHTML = '<i class="fas fa-file-medical-alt"></i> Relatório Completo';
 
-                    // Adicionar conteúdo das colunas
                     row.innerHTML = `
                         <td>${internacao.nome_paciente}</td>
                         <td>${internacao.cpf}</td>
@@ -187,11 +178,7 @@ function fetchHistoricoInternacoes(filtroMes = null) {
                         <td></td>
                     `;
 
-                    // Adicionar os botões à célula de ações
-                    const tdAcoes = row.querySelector('td:last-child');
-                    tdAcoes.appendChild(btnVerAlta);
-                    tdAcoes.appendChild(btnRelatorioCompleto);
-
+                    row.querySelector('td:last-child').appendChild(btnRelatorioCompleto);
                     tableBody.appendChild(row);
                 });
             } else {
@@ -200,6 +187,8 @@ function fetchHistoricoInternacoes(filtroMes = null) {
         })
         .catch(error => console.error('Erro ao carregar histórico:', error));
 }
+
+
 
 function formatarData(dataString) {
     if (!dataString) return '-';

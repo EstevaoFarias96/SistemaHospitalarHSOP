@@ -34,27 +34,25 @@
 
     <div class="documento">
         <div><i class="fas fa-file-medical"></i> AIH</div>
-        <a href="/imprimir/aih" class="btn btn-primary btn-gerar">Gerar PDF</a>
+        <a href="{{ url_for('main.imprimir_aih', atendimento_id=atendimento.id) }}" class="btn btn-primary btn-gerar" target="_blank">
+            Gerar PDF
+        </a>
+
     </div>
 
-    <div class="documento">
-        <div><i class="fas fa-notes-medical"></i> Prescrição</div>
-        <a href="/imprimir/prescricao" class="btn btn-primary btn-gerar">Gerar PDF</a>
-    </div>
-
-    <div class="documento">
-        <div><i class="fas fa-baby"></i> Prescrição RN</div>
-        <a href="/imprimir/prescricao_rn" class="btn btn-primary btn-gerar">Gerar PDF</a>
-    </div>
 
     <div class="documento">
         <div><i class="fas fa-procedures"></i> SAE</div>
-        <a href="/imprimir/sae" class="btn btn-primary btn-gerar">Gerar PDF</a>
+        <a href="/imprimir/sae/{{ atendimento.id }}" class="btn btn-primary btn-gerar" target="_blank">
+            Gerar PDF
+        </a>
     </div>
 
     <div class="documento">
         <div><i class="fas fa-user-plus"></i> Ficha de Admissão</div>
-        <a href="/imprimir/ficha_admissao" class="btn btn-primary btn-gerar">Gerar PDF</a>
+        <a href="/imprimir/ficha_admissao/{{ atendimento.id }}" class="btn btn-primary btn-gerar" target="_blank">
+            Gerar PDF
+        </a>
     </div>
 
 </div>
@@ -64,3 +62,4 @@
 
 </body>
 </html>
+

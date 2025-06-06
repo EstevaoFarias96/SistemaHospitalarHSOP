@@ -10,15 +10,15 @@ app = create_app()
 with app.app_context():
     # Dados do médico para teste
     medico_teste = {
-        "nome": "Cleiton",
+        "nome": "Rogerio",
         "data_nascimento": datetime.strptime("1980-05-15", "%Y-%m-%d").date(),
-        "cpf": "000.000.000-03",
-        "email": "medico@hospital.com",
+        "cpf": "000.000.000-04",
+        "email": "enfermeiro1@hospital.com",
         "telefone": "(11) 98765-4321",
         "senha": "senha123",
-        "cargo": "Medico",  # Use um valor permitido
+        "cargo": "Enfermeiro",  # Use um valor permitido
         "tipo_contrato": "Efetivo",
-        "numero_profissional": "123"
+        "numero_profissional": "1234"
     }
 
     def registrar_medico_teste():

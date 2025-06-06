@@ -166,10 +166,14 @@ class PacientesInternadosManager {
 
             if (data.success) {
                 this.renderizarTabelaPacientes(data.pacientes);
+                return data.pacientes;
+            } else {
+                throw new Error(data.message || 'Erro ao carregar pacientes');
             }
         } catch (error) {
             console.error('Erro ao carregar pacientes:', error);
             this.mostrarNotificacao('Erro ao carregar pacientes', 'error');
+            throw error;
         }
     }
 
@@ -258,8 +262,35 @@ class PacientesInternadosManager {
             this.mostrarNotificacao('Erro ao carregar dados da internação', 'error');
         }
 
-        const modalAlta = new bootstrap.Modal(document.getElementById('modalRelatorioAlta'));
-        modalAlta.show();
+        // Abrir modal usando diferentes métodos
+        const modalElement = document.getElementById('modalRelatorioAlta');
+        
+        try {
+            // Método 1: Tentar usar Bootstrap 5
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                const modalAlta = new bootstrap.Modal(modalElement);
+                modalAlta.show();
+            } else {
+                throw new Error('bootstrap.Modal não disponível');
+            }
+        } catch (error) {
+            console.log('Tentando método alternativo para abrir modal:', error.message);
+            
+            // Método 2: Fallback usando jQuery (Bootstrap 4)
+            if (typeof $ !== 'undefined') {
+                $(modalElement).modal('show');
+            } else {
+                // Método 3: Abrir manualmente adicionando classes
+                modalElement.classList.add('show');
+                modalElement.style.display = 'block';
+                document.body.classList.add('modal-open');
+                
+                // Criar backdrop
+                const backdrop = document.createElement('div');
+                backdrop.className = 'modal-backdrop fade show';
+                document.body.appendChild(backdrop);
+            }
+        }
     }
 
     preencherFormularioAlta(dados) {
@@ -297,7 +328,14 @@ class PacientesInternadosManager {
             const data = await response.json();
 
             if (data.success) {
-                this.finalizarProcessoAlta();
+                // 1. Fechar modal imediatamente
+                this.fecharModal();
+                
+                // 2. Remover paciente da tabela imediatamente
+                this.removerPacienteDaTabela(internacaoId);
+                
+                // 3. Executar demais ações (notificação, atualização, etc.)
+                this.executarAcoesPosAlta();
             } else {
                 throw new Error(data.message || 'Erro ao registrar alta');
             }
@@ -306,6 +344,109 @@ class PacientesInternadosManager {
             this.mostrarNotificacao('Erro ao registrar alta', 'error');
         } finally {
             this.atualizarEstadoBotao(btnConfirmar, spinner, text, false);
+        }
+    }
+
+    fecharModal() {
+        // Tentar diferentes métodos para fechar o modal
+        const modalElement = document.getElementById('modalRelatorioAlta');
+        
+        try {
+            // Método 1: Tentar usar bootstrap.Modal.getInstance (Bootstrap 5)
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal && bootstrap.Modal.getInstance) {
+                const modalAlta = bootstrap.Modal.getInstance(modalElement);
+                if (modalAlta) {
+                    modalAlta.hide();
+                } else {
+                    throw new Error('getInstance retornou null');
+                }
+            } else {
+                throw new Error('bootstrap.Modal.getInstance não disponível');
+            }
+        } catch (error) {
+            console.log('Tentando método alternativo para fechar modal:', error.message);
+            
+            try {
+                // Método 2: Tentar criar nova instância e fechar
+                if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    const modalAlta = new bootstrap.Modal(modalElement);
+                    modalAlta.hide();
+                } else {
+                    throw new Error('bootstrap.Modal não disponível');
+                }
+            } catch (error2) {
+                console.log('Tentando método jQuery:', error2.message);
+                
+                // Método 3: Fallback usando jQuery (Bootstrap 4) ou DOM
+                if (typeof $ !== 'undefined') {
+                    $(modalElement).modal('hide');
+                } else {
+                    // Método 4: Fechar usando atributos data-bs-dismiss
+                    const closeButton = modalElement.querySelector('[data-bs-dismiss="modal"]') || 
+                                      modalElement.querySelector('[data-dismiss="modal"]');
+                    if (closeButton) {
+                        closeButton.click();
+                    } else {
+                        // Método 5: Remover classes manualmente
+                        modalElement.classList.remove('show');
+                        modalElement.style.display = 'none';
+                        const backdrop = document.querySelector('.modal-backdrop');
+                        if (backdrop) {
+                            backdrop.remove();
+                        }
+                        document.body.classList.remove('modal-open');
+                        document.body.style.overflow = '';
+                        document.body.style.paddingRight = '';
+                    }
+                }
+            }
+        }
+        
+        // Limpar o formulário
+        document.getElementById('formRelatorioAlta').reset();
+    }
+
+    executarAcoesPosAlta() {
+        // Mostrar notificação imediatamente
+        this.mostrarNotificacao('Alta registrada com sucesso!', 'success');
+        
+        // Adicionar indicador de carregamento
+        this.mostrarIndicadorCarregamento(true);
+        
+        // Atualizar a lista de pacientes após um pequeno delay
+        setTimeout(() => {
+            this.fetchPacientesInternados().then(() => {
+                this.mostrarIndicadorCarregamento(false);
+                // Opcional: scroll para o topo da tabela
+                document.querySelector('.table-responsive').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }).catch((error) => {
+                console.error('Erro ao atualizar lista:', error);
+                this.mostrarIndicadorCarregamento(false);
+                // Fallback: recarregar a página inteira
+                window.location.reload();
+            });
+        }, 500);
+    }
+
+    removerPacienteDaTabela(internacaoId) {
+        // Remover a linha do paciente da tabela com animação
+        const btnAlta = document.querySelector(`[data-internacao-id="${internacaoId}"]`);
+        if (btnAlta) {
+            const row = btnAlta.closest('tr');
+            if (row) {
+                // Adicionar animação de fade out
+                row.style.transition = 'opacity 0.5s ease-out';
+                row.style.opacity = '0.5';
+                row.classList.add('table-warning');
+                
+                // Remover após delay
+                setTimeout(() => {
+                    row.remove();
+                }, 500);
+            }
         }
     }
 
@@ -326,16 +467,78 @@ class PacientesInternadosManager {
         text.textContent = loading ? 'Salvando...' : 'Confirmar Alta';
     }
 
-    finalizarProcessoAlta() {
-        const modalAlta = bootstrap.Modal.getInstance(document.getElementById('modalRelatorioAlta'));
-        modalAlta.hide();
-        this.fetchPacientesInternados();
-        this.mostrarNotificacao('Alta registrada com sucesso!', 'success');
+    mostrarNotificacao(mensagem, tipo) {
+        // Remover notificação anterior se existir
+        const notificacaoAnterior = document.getElementById('notificacao-temp');
+        if (notificacaoAnterior) {
+            notificacaoAnterior.remove();
+        }
+
+        // Criar nova notificação
+        const alertContainer = document.createElement('div');
+        alertContainer.id = 'notificacao-temp';
+        alertContainer.style.position = 'fixed';
+        alertContainer.style.top = '20px';
+        alertContainer.style.right = '20px';
+        alertContainer.style.zIndex = '9999';
+        alertContainer.style.minWidth = '300px';
+
+        const alertClass = tipo === 'success' ? 'alert-success' : 'alert-danger';
+        const icon = tipo === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle';
+
+        alertContainer.innerHTML = `
+            <div class="alert ${alertClass} alert-dismissible fade show shadow" role="alert">
+                <i class="${icon} me-2"></i>
+                <strong>${mensagem}</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+            </div>
+        `;
+
+        document.body.appendChild(alertContainer);
+
+        // Auto-remover após 5 segundos
+        setTimeout(() => {
+            if (alertContainer && alertContainer.parentNode) {
+                alertContainer.style.transition = 'opacity 0.5s ease-out';
+                alertContainer.style.opacity = '0';
+                setTimeout(() => {
+                    if (alertContainer.parentNode) {
+                        alertContainer.remove();
+                    }
+                }, 500);
+            }
+        }, 5000);
     }
 
-    mostrarNotificacao(mensagem, tipo) {
-        // Implementar sistema de notificações se necessário
-        alert(mensagem);
+    mostrarIndicadorCarregamento(mostrar) {
+        const tableBody = document.getElementById('pacientesTable');
+        
+        if (mostrar) {
+            // Criar linha de carregamento
+            const loadingRow = document.createElement('tr');
+            loadingRow.id = 'loading-row';
+            loadingRow.innerHTML = `
+                <td colspan="7" class="text-center py-4">
+                    <div class="d-flex justify-content-center align-items-center">
+                        <div class="spinner-border text-primary me-3" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <span class="text-muted">Atualizando lista de pacientes...</span>
+                    </div>
+                </td>
+            `;
+            
+            // Adicionar overlay de carregamento
+            tableBody.innerHTML = '';
+            tableBody.appendChild(loadingRow);
+            
+        } else {
+            // Remover indicador de carregamento
+            const loadingRow = document.getElementById('loading-row');
+            if (loadingRow) {
+                loadingRow.remove();
+            }
+        }
     }
 }
 
