@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impressões de Enfermagem</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .header-container {
+            background: linear-gradient(135deg, #1a237e, #283593);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .paciente-info {
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        
+        .paciente-info .info-item {
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+        }
+        
+        .paciente-info .info-item strong {
+            color: #495057;
+            font-weight: 600;
+        }
+        
+        .impressao-section {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+        
+        .section-header {
+            background: linear-gradient(135deg, #007bff, #007bff);
+            color: white;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+        }
+        
+        .section-content {
+            padding: 1.5rem;
+        }
+        
+        .btn-impressao {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border: none;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-impressao:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            color: white;
+        }
+        
+        .btn-voltar {
+            background: linear-gradient(135deg, #6c757d, #5a6268);
+            border: none;
+            color: white;
+        }
+        
+        .btn-voltar:hover {
+            background: linear-gradient(135deg, #5a6268, #495057);
+            color: white;
+        }
+        
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            
+            body {
+                background: white !important;
+            }
+            
+            .impressao-section {
+                box-shadow: none !important;
+                border: 1px solid #dee2e6 !important;
+            }
+        }
+
+        /* Estilos personalizados para a modal de seleção de data */
+        .modal-content {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            border-bottom: none;
+        }
+
+        .list-group-item {
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .list-group-item:hover {
+            background-color: #f8f9fa;
+            transform: translateX(5px);
+            border-left: 3px solid #007bff;
+        }
+
+        .list-group-item:first-child {
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+        .list-group-item:last-child {
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+        }
+
+        /* Animação de hover para os botões de impressão */
+        .btn-impressao:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        /* Diferenciação visual para modals de prescrições */
+        #modalSelecaoDataPrescricoes .modal-header {
+            background: linear-gradient(135deg, #007bff, #0056b3) !important;
+        }
+
+        #modalSelecaoDataPrescricoes .list-group-item:hover {
+            border-left: 3px solid #007bff;
+        }
+
+        #modalSelecaoDataPrescricoes .badge {
+            background-color: #007bff !important;
+        }
+
+        /* Diferenciação visual para modals de evoluções */
+        #modalSelecaoData .modal-header {
+            background: linear-gradient(135deg, #2878a7, #2878a7) !important;
+        }
+
+        #modalSelecaoData .list-group-item:hover {
+            border-left: 3px solid #2878a7;
+        }
+
+        #modalSelecaoData .badge {
+            background-color: #2878a7 !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header-container no-print">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-2">
+                        <i class="fas fa-print me-3"></i>Impressões de Enfermagem
+                    </h1>
+                    <p class="mb-0 opacity-75">Sistema de relatórios e documentos para enfermagem</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button type="button" class="btn btn-voltar" onclick="voltarParaEvolucao()">
+                        <i class="fas fa-arrow-left me-2"></i>Voltar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Informações do Paciente -->
+        <div class="paciente-info">
+            <h5 class="mb-3 text-primary">
+                <i class="fas fa-user me-2"></i>Informações do Paciente
+            </h5>
+            <div class="row">
+                <div class="col-md-4 info-item"><strong>Nome:</strong> <span id="paciente-nome">{{ paciente.nome if paciente else 'Carregando...' }}</span></div>
+                <div class="col-md-4 info-item"><strong>CPF:</strong> <span id="paciente-cpf">{{ paciente.cpf if paciente else 'Carregando...' }}</span></div>
+                <div class="col-md-4 info-item"><strong>Cartão SUS:</strong> <span id="paciente-sus">{{ paciente.cartao_sus if paciente else 'Carregando...' }}</span></div>
+                <div class="col-md-4 info-item"><strong>Sexo:</strong> <span id="paciente-sexo">{{ paciente.sexo if paciente else 'Carregando...' }}</span></div>
+                <div class="col-md-4 info-item"><strong>Data de Nascimento:</strong> <span id="paciente-nascimento">{{ paciente.data_nascimento.strftime('%d/%m/%Y') if paciente and paciente.data_nascimento else 'Carregando...' }}</span></div>
+                <div class="col-md-4 info-item"><strong>Telefone:</strong> <span id="paciente-telefone">{{ paciente.telefone if paciente else 'Carregando...' }}</span></div>
+                <div class="col-md-6 info-item"><strong>Endereço:</strong> <span id="paciente-endereco">{{ paciente.endereco if paciente else 'Carregando...' }}</span></div>
+                <div class="col-md-3 info-item"><strong>Município:</strong> <span id="paciente-municipio">{{ paciente.municipio if paciente else 'Carregando...' }}</span></div>
+                <div class="col-md-3 info-item"><strong>Atendimento ID:</strong> <span id="atendimento-id">{{ atendimento_id if atendimento_id else 'Carregando...' }}</span></div>
+            </div>
+        </div>
+
+        <!-- Opções de Impressão -->
+        <div class="row">
+            <!-- Admissão de Enfermagem -->
+            <div class="col-md-6 mb-4">
+                <div class="impressao-section">
+                    <div class="section-header">
+                        <i class="fas fa-user-plus me-2"></i>Admissão de Enfermagem
+                    </div>
+                    <div class="section-content">
+                        <p class="text-muted mb-3">
+                            Relatório da admissão de enfermagem e avaliação inicial do paciente.
+                        </p>
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-impressao" onclick="imprimirAdmissao()">
+                                <i class="fas fa-file-plus me-2"></i>Imprimir Admissão
+                            </button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="visualizarAdmissao()">
+                                <i class="fas fa-eye me-2"></i>Visualizar antes de imprimir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SAE - Sistematização da Assistência de Enfermagem -->
+            <div class="col-md-6 mb-4">
+                <div class="impressao-section">
+                    <div class="section-header">
+                        <i class="fas fa-user-check me-2"></i>SAE - Sistematização da Assistência
+                    </div>
+                    <div class="section-content">
+                        <p class="text-muted mb-3">
+                            Relatório completo da Sistematização da Assistência de Enfermagem.
+                        </p>
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-impressao" onclick="imprimirSae()">
+                                <i class="fas fa-heartbeat me-2"></i>Imprimir SAE
+                            </button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="visualizarSae()">
+                                <i class="fas fa-eye me-2"></i>Visualizar antes de imprimir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evoluções de Enfermagem -->
+            <div class="col-md-6 mb-4">
+                <div class="impressao-section">
+                    <div class="section-header">
+                        <i class="fas fa-notes-medical me-2"></i>Evoluções de Enfermagem
+                    </div>
+                    <div class="section-content">
+                        <p class="text-muted mb-3">
+                            Relatório das evoluções de enfermagem registradas durante a internação.
+                        </p>
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-impressao" onclick="imprimirEvolucoes()">
+                                <i class="fas fa-file-medical-alt me-2"></i>Imprimir Evoluções
+                            </button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="visualizarEvolucoes()">
+                                <i class="fas fa-eye me-2"></i>Visualizar antes de imprimir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prescrições de Enfermagem -->
+            <div class="col-md-6 mb-4">
+                <div class="impressao-section">
+                    <div class="section-header">
+                        <i class="fas fa-clipboard-list me-2"></i>Prescrições de Enfermagem
+                    </div>
+                    <div class="section-content">
+                        <p class="text-muted mb-3">
+                            Relatório das prescrições de enfermagem e cuidados prescritos.
+                        </p>
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-impressao" onclick="imprimirPrescricoes()">
+                                <i class="fas fa-prescription me-2"></i>Imprimir Prescrições
+                            </button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="visualizarPrescricoes()">
+                                <i class="fas fa-eye me-2"></i>Visualizar antes de imprimir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ficha de Identificação do Paciente -->
+            <div class="col-md-6 mb-4">
+                <div class="impressao-section">
+                    <div class="section-header">
+                        <i class="fas fa-id-card me-2"></i>Ficha de Identificação do Paciente
+                    </div>
+                    <div class="section-content">
+                        <p class="text-muted mb-3">
+                            Ficha de identificação completa do paciente para uso na internação.
+                        </p>
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-impressao" onclick="imprimirFichaIdentificacao()">
+                                <i class="fas fa-id-card me-2"></i>Imprimir Ficha de Identificação
+                            </button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="visualizarFichaIdentificacao()">
+                                <i class="fas fa-eye me-2"></i>Visualizar antes de imprimir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        // Extrair o ID do atendimento da URL
+        const atendimentoId = window.location.pathname.split('/').pop();
+        console.log('ID do atendimento extraído:', atendimentoId);
+
+        // Função para voltar para a evolução do paciente
+        function voltarParaEvolucao() {
+            console.log('🔄 Voltando para evolução do paciente...');
+            try {
+                window.location.href = `/clinica/evolucao-paciente-enfermeiro/${atendimentoId}`;
+            } catch (error) {
+                console.error('❌ Erro no redirecionamento:', error);
+                window.history.back();
+            }
+        }
+
+        // Funções de impressão (serão implementadas futuramente)
+        function imprimirEvolucoes() {
+            console.log('🖨️ Imprimir evoluções de enfermagem');
+            // Buscar as datas disponíveis
+            carregarDatasEvolucoes();
+        }
+
+        function visualizarEvolucoes() {
+            console.log('👁️ Visualizar evoluções de enfermagem');
+            // Buscar as datas disponíveis
+            carregarDatasEvolucoes();
+        }
+
+        // Função para carregar as datas disponíveis das evoluções
+        function carregarDatasEvolucoes() {
+            console.log('📅 Carregando datas das evoluções...');
+            
+            $.ajax({
+                url: `/api/enfermagem/evolucoes/datas/${atendimentoId}`,
+                method: 'GET',
+                success: function(response) {
+                    if (response.success && response.datas && response.datas.length > 0) {
+                        mostrarModalSelecaoData(response.datas);
+                    } else {
+                        alert('Nenhuma evolução de enfermagem encontrada para este paciente.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('❌ Erro ao carregar datas das evoluções:', error);
+                    alert('Erro ao carregar as datas das evoluções. Tente novamente.');
+                }
+            });
+        }
+
+        // Função para mostrar a modal de seleção de data
+        function mostrarModalSelecaoData(datas) {
+            // Criar modal dinamicamente
+            let modalHtml = `
+                <div class="modal fade" id="modalSelecaoData" tabindex="-1" aria-labelledby="modalSelecaoDataLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header" style="background: linear-gradient(135deg, #28a745, #34ce57); color: white;">
+                                <h5 class="modal-title" id="modalSelecaoDataLabel">
+                                    <i class="fas fa-calendar-day me-2"></i>Selecionar Data das Evoluções
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-muted mb-3">
+                                    Selecione a data das evoluções de enfermagem que deseja imprimir:
+                                </p>
+                                <div class="list-group" id="listaDatas">
+                                    ${datas.map(data => `
+                                        <button type="button" 
+                                                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                                                onclick="imprimirEvolucaoData('${data.data}')">
+                                            <div>
+                                                <i class="fas fa-calendar-day text-primary me-2"></i>
+                                                <strong>${data.data_display}</strong>
+                                            </div>
+                                            <div>
+                                                <span class="badge bg-primary rounded-pill">${data.quantidade} evolução${data.quantidade > 1 ? 'ões' : 'ão'}</span>
+                                                <i class="fas fa-chevron-right text-muted ms-2"></i>
+                                            </div>
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fas fa-times me-2"></i>Cancelar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remover modal anterior se existir
+            $('#modalSelecaoData').remove();
+            
+            // Adicionar modal ao body
+            $('body').append(modalHtml);
+            
+            // Mostrar modal
+            const modal = new bootstrap.Modal(document.getElementById('modalSelecaoData'));
+            modal.show();
+        }
+
+        // Função para imprimir evoluções de uma data específica
+        function imprimirEvolucaoData(data) {
+            console.log('🖨️ Imprimindo evoluções da data:', data);
+            try {
+                const url = `/imprimir/evolucoes_enfermagem/${atendimentoId}?data=${data}`;
+                console.log('🔗 Abrindo URL de impressão:', url);
+                
+                // Fechar modal
+                $('#modalSelecaoData').modal('hide');
+                
+                // Abrir página de impressão
+                window.open(url, '_blank');
+            } catch (error) {
+                console.error('❌ Erro ao abrir impressão:', error);
+                alert('Erro ao abrir a página de impressão. Tente novamente.');
+            }
+        }
+
+        function imprimirPrescricoes() {
+            console.log('🖨️ Imprimir prescrições de enfermagem');
+            // Buscar as datas disponíveis
+            carregarDatasPrescricoes();
+        }
+
+        function visualizarPrescricoes() {
+            console.log('👁️ Visualizar prescrições de enfermagem');
+            // Buscar as datas disponíveis
+            carregarDatasPrescricoes();
+        }
+
+        // Função para carregar as datas disponíveis das prescrições
+        function carregarDatasPrescricoes() {
+            console.log('📅 Carregando datas das prescrições...');
+            
+            $.ajax({
+                url: `/api/enfermagem/prescricoes/datas/${atendimentoId}`,
+                method: 'GET',
+                success: function(response) {
+                    if (response.success && response.datas && response.datas.length > 0) {
+                        mostrarModalSelecaoDataPrescricoes(response.datas);
+                    } else {
+                        alert('Nenhuma prescrição de enfermagem encontrada para este paciente.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('❌ Erro ao carregar datas das prescrições:', error);
+                    alert('Erro ao carregar as datas das prescrições. Tente novamente.');
+                }
+            });
+        }
+
+        // Função para mostrar a modal de seleção de data para prescrições
+        function mostrarModalSelecaoDataPrescricoes(datas) {
+            // Criar modal dinamicamente
+            let modalHtml = `
+                <div class="modal fade" id="modalSelecaoDataPrescricoes" tabindex="-1" aria-labelledby="modalSelecaoDataPrescricoesLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header" style="background: linear-gradient(135deg, #007bff, #0056b3); color: white;">
+                                <h5 class="modal-title" id="modalSelecaoDataPrescricoesLabel">
+                                    <i class="fas fa-clipboard-list me-2"></i>Selecionar Data das Prescrições
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-muted mb-3">
+                                    Selecione a data das prescrições de enfermagem que deseja imprimir:
+                                </p>
+                                <div class="list-group" id="listaDatasPrescricoes">
+                                    ${datas.map(data => `
+                                        <button type="button" 
+                                                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                                                onclick="imprimirPrescricaoData('${data.data}')">
+                                            <div>
+                                                <i class="fas fa-clipboard-list text-primary me-2"></i>
+                                                <strong>${data.data_display}</strong>
+                                            </div>
+                                            <div>
+                                                <span class="badge bg-primary rounded-pill">${data.quantidade} prescrição${data.quantidade > 1 ? 'ões' : 'ão'}</span>
+                                                <i class="fas fa-chevron-right text-muted ms-2"></i>
+                                            </div>
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fas fa-times me-2"></i>Cancelar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remover modal anterior se existir
+            $('#modalSelecaoDataPrescricoes').remove();
+            
+            // Adicionar modal ao body
+            $('body').append(modalHtml);
+            
+            // Mostrar modal
+            const modal = new bootstrap.Modal(document.getElementById('modalSelecaoDataPrescricoes'));
+            modal.show();
+        }
+
+        // Função para imprimir prescrições de uma data específica
+        function imprimirPrescricaoData(data) {
+            console.log('🖨️ Imprimindo prescrições da data:', data);
+            try {
+                const url = `/imprimir/prescricoes_enfermagem/${atendimentoId}?data=${data}`;
+                console.log('🔗 Abrindo URL de impressão:', url);
+                
+                // Fechar modal
+                $('#modalSelecaoDataPrescricoes').modal('hide');
+                
+                // Abrir página de impressão
+                window.open(url, '_blank');
+            } catch (error) {
+                console.error('❌ Erro ao abrir impressão:', error);
+                alert('Erro ao abrir a página de impressão. Tente novamente.');
+            }
+        }
+
+        function imprimirSae() {
+            console.log('🖨️ Imprimir SAE de enfermagem');
+            try {
+                const url = `/imprimir/sae_enfermagem/${atendimentoId}`;
+                console.log('🔗 Abrindo URL de impressão:', url);
+                window.open(url, '_blank');
+            } catch (error) {
+                console.error('❌ Erro ao abrir impressão:', error);
+                alert('Erro ao abrir a página de impressão. Tente novamente.');
+            }
+        }
+
+        function visualizarSae() {
+            console.log('👁️ Visualizar SAE de enfermagem');
+            try {
+                const url = `/imprimir/sae_enfermagem/${atendimentoId}`;
+                console.log('🔗 Abrindo URL de visualização:', url);
+                window.open(url, '_blank');
+            } catch (error) {
+                console.error('❌ Erro ao abrir visualização:', error);
+                alert('Erro ao abrir a página de visualização. Tente novamente.');
+            }
+        }
+
+        function imprimirAdmissao() {
+            console.log('🖨️ Imprimir admissão de enfermagem');
+            try {
+                const url = `/imprimir/admissao_enfermagem/${atendimentoId}`;
+                console.log('🔗 Abrindo URL de impressão:', url);
+                window.open(url, '_blank');
+            } catch (error) {
+                console.error('❌ Erro ao abrir impressão:', error);
+                alert('Erro ao abrir a página de impressão. Tente novamente.');
+            }
+        }
+
+        function visualizarAdmissao() {
+            console.log('👁️ Visualizar admissão de enfermagem');
+            try {
+                const url = `/imprimir/admissao_enfermagem/${atendimentoId}`;
+                console.log('🔗 Abrindo URL de visualização:', url);
+                window.open(url, '_blank');
+            } catch (error) {
+                console.error('❌ Erro ao abrir visualização:', error);
+                alert('Erro ao abrir a página de visualização. Tente novamente.');
+            }
+        }
+
+        // Novas funções para os termos e ficha do acompanhante
+        function imprimirFichaIdentificacao() {
+            console.log('🖨️ Imprimir ficha de identificação do paciente');
+            try {
+                const url = `/imprimir/identificacao_paciente/${atendimentoId}`;
+                console.log('🔗 Abrindo URL de impressão:', url);
+                window.open(url, '_blank');
+            } catch (error) {
+                console.error('❌ Erro ao abrir impressão:', error);
+                alert('Erro ao abrir a página de impressão. Tente novamente.');
+            }
+        }
+
+        function visualizarFichaIdentificacao() {
+            console.log('👁️ Visualizar ficha de identificação do paciente');
+            try {
+                const url = `/imprimir/identificacao_paciente/${atendimentoId}`;
+                console.log('🔗 Abrindo URL de visualização:', url);
+                window.open(url, '_blank');
+            } catch (error) {
+                console.error('❌ Erro ao abrir visualização:', error);
+                alert('Erro ao abrir a página de visualização. Tente novamente.');
+            }
+        }
+
+        // Carregar informações do paciente se não estiverem disponíveis do backend
+        $(document).ready(function() {
+            console.log('📄 Página de impressões carregada para atendimento:', atendimentoId);
+            
+            // Se as informações do paciente não estão carregadas, buscar via AJAX
+            if ($('#paciente-nome').text().includes('Carregando')) {
+                carregarInformacoesPaciente();
+            }
+        });
+
+        function carregarInformacoesPaciente() {
+            console.log(' Carregando informações do paciente via AJAX...');
+            
+            $.ajax({
+                url: `/api/paciente-por-atendimento/${atendimentoId}`,
+                method: 'GET',
+                success: function(response) {
+                    if (response.success && response.paciente) {
+                        const p = response.paciente;
+                        $('#paciente-nome').text(p.nome || '-');
+                        $('#paciente-cpf').text(p.cpf || '-');
+                        $('#paciente-sus').text(p.cartao_sus || '-');
+                        $('#paciente-sexo').text(p.sexo || '-');
+                        $('#paciente-nascimento').text(p.data_nascimento ? new Date(p.data_nascimento).toLocaleDateString('pt-BR') : '-');
+                        $('#paciente-telefone').text(p.telefone || '-');
+                        $('#paciente-endereco').text(p.endereco || '-');
+                        $('#paciente-municipio').text(p.municipio || '-');
+                        $('#atendimento-id').text(atendimentoId);
+                        
+                        console.log('✅ Informações do paciente carregadas com sucesso');
+                    } else {
+                        console.error('❌ Erro ao carregar informações do paciente:', response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('❌ Erro na requisição AJAX:', error);
+                    $('.paciente-info').prepend('<div class="alert alert-warning">Não foi possível carregar todas as informações do paciente.</div>');
+                }
+            });
+        }
+    </script>
+</body>
+</html> 

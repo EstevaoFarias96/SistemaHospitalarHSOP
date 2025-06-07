@@ -321,16 +321,41 @@
       const senhaAtual = $('#senhaAtual').val();
       const novaSenha = $('#novaSenha').val();
       const confirmarNovaSenha = $('#confirmarNovaSenha').val();
+      
       if(novaSenha !== confirmarNovaSenha) {
         alert('A nova senha e a confirmação não conferem.');
         return;
       }
+      
+      if (!senhaAtual.trim() || !novaSenha.trim()) {
+        alert('Por favor, preencha todos os campos.');
+        return;
+      }
+      
       fetch('/api/recepcionista/mudar-senha', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ senha_atual: senhaAtual, nova_senha: novaSenha })
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ 
+          senha_atual: senhaAtual, 
+          nova_senha: novaSenha 
+        })
       })
-      .then(response => response.json())
+      .then(response => {
+        // Verificar se a resposta é válida
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('Resposta não é JSON válido');
+        }
+        
+        return response.json();
+      })
       .then(data => {
         if(data.success) {
           alert('Senha alterada com sucesso.');
@@ -342,7 +367,13 @@
       })
       .catch(error => {
         console.error('Erro:', error);
-        alert('Erro ao alterar a senha.');
+        
+        if (error.message.includes('JSON')) {
+          alert('Erro: Sessão expirada. Por favor, faça login novamente.');
+          window.location.href = '/logout';
+        } else {
+          alert('Erro ao alterar a senha: ' + error.message);
+        }
       });
     });
 

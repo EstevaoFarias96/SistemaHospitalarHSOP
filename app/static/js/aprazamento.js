@@ -2,33 +2,7 @@
 // Este arquivo contém funções de apoio para o processo de aprazamento
 // As funções principais estão em calculo_horarios.js e calendario_aprazamento.js
 
-// Função para validar o formato de aprazamento
-function validarFormatoAprazamento(texto) {
-    if (!texto) return false;
-    
-    // Tentar corrigir o formato antes da validação
-    texto = corrigirFormatoAprazamento(texto);
-    
-    // Remover espaços extras no início e fim
-    texto = texto.trim();
-    
-    // Verificar se está vazio após remover espaços
-    if (texto === '') return false;
-    
-    // Formato esperado: "DD/MM/YYYY: HH:MM, HH:MM; DD/MM/YYYY: HH:MM"
-    const padrao = /^\d{2}\/\d{2}\/\d{4}\s*:\s*\d{2}:\d{2}(?:\s*,\s*\d{2}:\d{2})*(?:\s*;\s*\d{2}\/\d{2}\/\d{4}\s*:\s*\d{2}:\d{2}(?:\s*,\s*\d{2}:\d{2})*)*$/;
-    
-    // Se não estiver no formato padrão, tentar verificar se é um formato parcial válido
-    if (!padrao.test(texto)) {
-        // Verificar se é apenas horários no formato "HH:MM, HH:MM"
-        const padraoApenasHorarios = /^\d{2}:\d{2}(?:\s*,\s*\d{2}:\d{2})*$/;
-        
-        // Se for formato de horários sem data, é considerado válido
-        return padraoApenasHorarios.test(texto);
-    }
-    
-    return true;
-}
+
 
 // Função para formatar aprazamento em formato mais legível
 function formatarAprazamentoLegivel(texto) {
@@ -74,7 +48,7 @@ function formatarAprazamentoLegivel(texto) {
         
         datasDias.push(`${dataTrimmed}: ${horarios}`);
     });
-    
+
     return datasDias.join(" | ");
 }
 
@@ -125,266 +99,352 @@ function inicializarCamposHoraInicial() {
     console.log('Campos de hora inicial configurados para:', horaFormatada);
 }
 
-// Função para processar os horários selecionados no formulário de múltiplos dias
-function processarHorariosSelecionados(form) {
-    console.log("Processando horários selecionados do formulário");
-    
-    // Inicializar contadores e objetos
-    let horariosInvalidos = 0;
-    const horariosPorData = {};
-    
-    // Obter inputs com name=horario e type=checkbox que estejam marcados
-    const horariosSelecionados = Array.from(form.querySelectorAll('input[name="horario"][type="checkbox"]:checked'));
-    console.log(`Total de horários selecionados: ${horariosSelecionados.length}`);
-    
-    if (horariosSelecionados.length === 0) {
-        console.warn("Nenhum horário selecionado");
-        return "";
+
+
+// Função centralizada para registro de aprazamento
+async function registrarAprazamento(payload, callback) {
+    console.group('registrarAprazamento');
+    console.log('Dados de entrada:', payload);
+
+    /* -------------------------------------------------------- */
+    /* 1. Validação mínima – só o que o backend realmente quer  */
+    /* -------------------------------------------------------- */
+    const obrig = ['prescricao_id', 'nome_medicamento',
+                   'data_hora_aprazamento', 'enfermeiro_responsavel_id'];
+    const faltando = obrig.filter(k => !payload[k]);
+    if (faltando.length) {
+        const msg = `Campos obrigatórios ausentes: ${faltando.join(', ')}`;
+        console.error(msg);
+        console.groupEnd();
+        if (typeof callback === 'function') callback({ success:false, message:msg });
+        return;
     }
-    
-    // Processar cada horário selecionado
-    for (const input of horariosSelecionados) {
-        const valor = input.value.trim();
-        console.log(`Processando valor: ${valor}`);
-        
-        // Validar formato esperado: DD/MM/YYYY:HH:MM
-        const regex = /^(\d{2})\/(\d{2})\/(\d{4}):(\d{2}):(\d{2})$/;
-        const match = valor.match(regex);
-        
-        if (!match) {
-            console.warn(`Formato inválido para o valor: ${valor}`);
-            horariosInvalidos++;
-            continue;
+
+    /* -------------------------------------------------------- */
+    /* 2. Chamada ao endpoint                                   */
+    /* -------------------------------------------------------- */
+    try {
+        const resp = await fetch('/api/aprazamentos', {
+            method : 'POST',
+            headers: { 'Content-Type':'application/json' },
+            body   : JSON.stringify(payload)
+        });
+        const json = await resp.json();
+        console.log('Resposta:', json);
+        console.groupEnd();
+        if (typeof callback === 'function') callback(json);
+    } catch (err) {
+        console.error('Erro de rede:', err);
+        console.groupEnd();
+        if (typeof callback === 'function') {
+            callback({ success:false,
+                       message:'Falha de comunicação com o servidor',
+                       error:err });
         }
-        
-        // Extrair componentes da data e hora
-        const [_, dia, mes, ano, hora, minuto] = match;
-        
-        // Validar componentes da data
-        const diaNum = parseInt(dia, 10);
-        const mesNum = parseInt(mes, 10);
-        const anoNum = parseInt(ano, 10);
-        
-        if (diaNum < 1 || diaNum > 31 || mesNum < 1 || mesNum > 12 || anoNum < 2000 || anoNum > 2100) {
-            console.warn(`Data inválida: ${dia}/${mes}/${ano}`);
-            horariosInvalidos++;
-            continue;
-        }
-        
-        // Validar componentes da hora
-        const horaNum = parseInt(hora, 10);
-        const minutoNum = parseInt(minuto, 10);
-        
-        if (horaNum < 0 || horaNum > 23 || minutoNum < 0 || minutoNum > 59) {
-            console.warn(`Horário inválido: ${hora}:${minuto}`);
-            horariosInvalidos++;
-            continue;
-        }
-        
-        // Formatar data e horário corretamente
-        const dataFormatada = `${dia}/${mes}/${ano}`;
-        const horaFormatada = `${hora}:${minuto}`;
-        
-        // Adicionar ao objeto horariosPorData
-        if (!horariosPorData[dataFormatada]) {
-            horariosPorData[dataFormatada] = [];
-        }
-        
-        horariosPorData[dataFormatada].push(horaFormatada);
     }
+}
+
+function converterDataHoraParaISO(dataBR, hora) {
+    // dataBR: "20/05/2025", hora: "15:45"
+    const [dia, mes, ano] = dataBR.split('/');
+    // Garante sempre dois dígitos para dia e mês
+    const diaPad = String(dia).padStart(2, '0');
+    const mesPad = String(mes).padStart(2, '0');
+    // Garante sempre HH:MM
+    let [h, m] = hora.split(':');
+    h = String(h).padStart(2, '0');
+    m = String(m || '00').padStart(2, '0');
+    // Retorna no formato ISO: YYYY-MM-DDTHH:MM:00
+    return `${ano}-${mesPad}-${diaPad}T${h}:${m}:00`;
+}
+
+/**
+ * Função para validar se um ID parece ser um ID válido (não uma data ou outro valor incorreto)
+ * @param {string|number} id - ID a ser validado
+ * @returns {boolean} - true se o ID for válido, false caso contrário
+ */
+function validarIdInternacao(id) {
+    if (!id) return false;
     
-    // Verificar se há horários válidos
-    if (Object.keys(horariosPorData).length === 0) {
-        console.warn("Nenhum horário válido processado");
-        return "";
-    }
+    // Converter para string para facilitar a validação
+    const idStr = String(id);
     
-    // Gerar string formatada para aprazamento
-    let resultado = "";
+    // Verificar casos básicos de invalidade
+    if (idStr === 'undefined' || idStr === 'null' || idStr === 'NaN') return false;
     
-    for (const data in horariosPorData) {
-        // Ordenar horários para melhor legibilidade
-        const horarios = horariosPorData[data].sort();
+    // Verificar se é um número e se tem comprimento razoável (geralmente menor que 10 dígitos)
+    if (isNaN(parseInt(idStr)) || idStr.length > 10) return false;
+    
+    // Verificar se não contém caracteres suspeitos como '/'
+    if (idStr.includes('/')) return false;
+    
+    return true;
+}
+
+function carregarPrescricoes(idInternacao = null, lastUpdate = false) {
+    // Se internacaoId não foi fornecido, tente diferentes fontes, em ordem de prioridade
+    // 1. O parâmetro passado diretamente
+    // 2. O ID global de atendimento (definido no HTML)
+    // 3. A variável internacaoId
+    
+    let id = idInternacao || window.ATENDIMENTO_ID || window.internacaoId;
+    
+    console.log('[Debug] carregarPrescricoes - fontes de ID:', { 
+        idInternacao, 
+        ATENDIMENTO_ID: window.ATENDIMENTO_ID, 
+        internacaoId: window.internacaoId,
+        idFinal: id 
+    });
+    
+    // Verificar se o ID contém apenas dígitos e não é muito longo (não é uma data ou outro valor incorreto)
+    if (!validarIdInternacao(id)) {
+        console.error(`[Debug] ID suspeito detectado: ${id} - parece ser inválido. Tentando fontes alternativas.`);
         
-        if (resultado) {
-            resultado += "; ";
+        // Tentar fontes alternativas em ordem específica
+        const fontes = [
+            { nome: 'DOM: internacao_id', valor: document.getElementById('internacao_id')?.value },
+            { nome: 'DOM: atendimento_id', valor: document.getElementById('atendimento_id')?.value },
+            { nome: 'URL path', valor: window.location.pathname.split('/').pop() }
+        ];
+        
+        // Procurar primeira fonte válida
+        for (const fonte of fontes) {
+            if (validarIdInternacao(fonte.valor)) {
+                id = fonte.valor;
+                console.log(`[Debug] ID recuperado de ${fonte.nome}: ${id}`);
+                break;
+            }
         }
         
-        resultado += `${data}: ${horarios.join(", ")}`;
-    }
-    
-    console.log(`Horários inválidos: ${horariosInvalidos}`);
-    console.log(`Resultado do processamento: ${resultado}`);
-    
-    // Verificação final do formato
-    if (!validarFormatoAprazamento(resultado)) {
-        console.warn("Formato final do resultado não está conforme esperado, tentando corrigir");
-        
-        // Tentar corrigir se possível
-        try {
-            const partes = resultado.split(";").map(parte => parte.trim());
-            const partesCorrigidas = [];
-            
-            for (const parte of partes) {
-                if (parte.includes(":")) {
-                    const [data, ...horariosParts] = parte.split(":");
-                    const dataLimpa = data.trim();
-                    // Juntar novamente os horários caso haja mais de um ":" 
-                    const horariosTexto = horariosParts.join(':').trim();
-                    const horariosLimpos = horariosTexto.split(",").map(h => h.trim()).join(", ");
-                    partesCorrigidas.push(`${dataLimpa}: ${horariosLimpos}`);
+        // Se ainda não for válido, procurar qualquer elemento com data-internacao-id no DOM
+        if (!validarIdInternacao(id)) {
+            const elementosComId = document.querySelectorAll('[data-internacao-id]');
+            for (const elem of elementosComId) {
+                const idCandidato = elem.dataset.internacaoId;
+                if (validarIdInternacao(idCandidato)) {
+                    id = idCandidato;
+                    console.log(`[Debug] ID recuperado de elemento com atributo data: ${id}`);
+                    break;
                 }
             }
+        }
+        
+        // Se ainda não encontrou ID válido
+        if (!validarIdInternacao(id)) {
+            console.error("[Debug] Não foi possível encontrar um ID válido após todas as tentativas");
+            $("#listaPrescricoes").html(`
+                <tr>
+                    <td class='text-center text-danger'>
+                        <div class="alert alert-danger">
+                            <strong>Erro:</strong> ID de internação inválido. 
+                            <hr>
+                            <small>Por favor, recarregue a página ou contate o suporte técnico.</small>
+                        </div>
+                    </td>
+                </tr>`);
+            return;
+        }
+    }
+    
+    console.log(`[Debug] Iniciando carregarPrescricoes com ID: ${id}, lastUpdate: ${lastUpdate}`);
+    
+    // Verificar se o ID é válido (verificação final)
+    if (!validarIdInternacao(id)) {
+        console.error("[Debug] ID de internação inválido ou não definido após todas as validações.");
+        $("#listaPrescricoes").html(`
+            <tr>
+                <td class='text-center text-danger'>
+                    <div class="alert alert-danger">
+                        <strong>Erro:</strong> ID de internação não definido. 
+                        <hr>
+                        <small>Verifique se o paciente está corretamente selecionado.</small>
+                    </div>
+                </td>
+            </tr>`);
+        return;
+    }
+    
+    // Garantir que a variável global esteja sempre atualizada para uso futuro
+    window.internacaoId = id;
+    
+    if (!lastUpdate) {
+        $("#listaPrescricoes").html("<tr><td class='text-center'><i class='fas fa-spinner fa-spin'></i> Carregando prescrições...</td></tr>");
+    }
+    
+    $.ajax({
+        url: "/api/prescricoes/" + id,
+        type: 'GET',
+        success: function(response) {
+            console.log("Resposta recebida:", response);
             
-            resultado = partesCorrigidas.join("; ");
-            console.log(`Resultado corrigido: ${resultado}`);
-        } catch (e) {
-            console.error("Erro ao tentar corrigir o formato:", e);
-        }
-    }
-    
-    return resultado;
-}
-
-// Função simplificada para processar horários, usada como fallback no helper
-function processarHorariosSelecionadosSimplificado() {
-    console.log("Usando função simplificada para processar horários selecionados");
-    
-    // Inicializar contadores e objetos
-    const horariosPorData = {};
-    
-    // Obter inputs com name=horario e type=checkbox que estejam marcados
-    const horariosSelecionados = Array.from(document.querySelectorAll('#horarios_multiplos_dias input[type="checkbox"]:checked'));
-    console.log(`Total de horários selecionados: ${horariosSelecionados.length}`);
-    
-    if (horariosSelecionados.length === 0) {
-        console.warn("Nenhum horário selecionado");
-        return "";
-    }
-    
-    // Processar cada horário selecionado
-    for (const input of horariosSelecionados) {
-        const valor = input.value.trim();
-        if (!valor) continue;
-        
-        // Valor esperado: DD/MM/YYYY:HH:MM
-        const partes = valor.split(':');
-        if (partes.length !== 2) continue;
-        
-        const data = partes[0];
-        const hora = partes[1];
-        
-        if (!data || !hora) continue;
-        
-        // Adicionar ao objeto horariosPorData
-        if (!horariosPorData[data]) {
-            horariosPorData[data] = [];
-        }
-        
-        horariosPorData[data].push(hora);
-    }
-    
-    // Verificar se há horários válidos
-    if (Object.keys(horariosPorData).length === 0) {
-        console.warn("Nenhum horário válido processado");
-        return "";
-    }
-    
-    // Gerar string formatada para aprazamento
-    let resultado = "";
-    
-    for (const data in horariosPorData) {
-        // Ordenar horários para melhor legibilidade
-        const horarios = horariosPorData[data].sort();
-        
-        if (resultado) {
-            resultado += "; ";
-        }
-        
-        resultado += `${data}: ${horarios.join(", ")}`;
-    }
-    
-    return resultado;
-}
-
-// Atualização da função para submissão do formulário de aprazamento no novo layout
-$(document).ready(function() {
-    // Configurar o comportamento do formulário de aprazamento quando for carregado
-    $('#formAprazamento').on('submit', function(e) {
-        e.preventDefault();
-        
-        const prescricaoId = $('#aprazamento_prescricao_id').val();
-        const medicamentoIndex = parseInt($('#aprazamento_medicamento_index').val(), 10);
-        const medicamentoNome = $('#aprazamento_medicamento_nome').text().trim();
-        const descricaoUso = ''; // Poderíamos implementar um campo para isso
-        
-        if (!prescricaoId || isNaN(medicamentoIndex)) {
-            alert('Erro na identificação da prescrição ou medicamento');
-            return;
-        }
-        
-        // Mostrar indicador de carregamento
-        const btnSubmit = $(this).find('button[type="submit"]');
-        const textoOriginal = btnSubmit.html();
-        btnSubmit.html('<i class="fas fa-spinner fa-spin"></i> Processando...');
-        btnSubmit.prop('disabled', true);
-        
-        // Verificar se existem horários calculados
-        if ($('#horarios_multiplos_dias .horario-check').length === 0) {
-            alert('Por favor, calcule os horários primeiro clicando no botão "Calcular Horários".');
-            btnSubmit.html(textoOriginal);
-            btnSubmit.prop('disabled', false);
-            return;
-        }
-        
-        // Processar os horários selecionados para múltiplos dias
-        const aprazamentoTexto = processarHorariosSelecionados();
-        
-        if (!aprazamentoTexto) {
-            alert('Selecione pelo menos um horário de administração.');
-            btnSubmit.html(textoOriginal);
-            btnSubmit.prop('disabled', false);
-            return;
-        }
-        
-        // Para depuração
-        console.log('Aprazamento processado:', aprazamentoTexto);
-        
-        // Usar a função de registro de aprazamento do calendario_aprazamento.js
-        if (typeof registrarAprazamento === 'function') {
-            registrarAprazamento({
-                prescricao_id: prescricaoId,
-                medicamento_nome: medicamentoNome,
-                descricao_uso: descricaoUso,
-                enfermeiro_id: parseInt($('#aprazamento_enfermeiro_id').val() || 0, 10),
-                aprazamento: aprazamentoTexto
-            }, function(response) {
-                // Restaurar botão
-                btnSubmit.html(textoOriginal);
-                btnSubmit.prop('disabled', false);
+            if (!response.success) {
+                $("#listaPrescricoes").html("<tr><td class='text-center text-warning'>Erro ao carregar prescrições: " + response.error + "</td></tr>");
+                console.error("Erro ao carregar prescrições:", response.error);
+                return;
+            }
+            
+            if (!response.prescricoes || response.prescricoes.length === 0) {
+                $("#listaPrescricoes").html("<tr><td class='text-center'>Nenhuma prescrição encontrada</td></tr>");
+                console.log("Nenhuma prescrição encontrada");
+                return;
+            }
+            
+            console.log(`${response.prescricoes.length} prescrições encontradas`);
+            
+            // Ordenar prescrições por data (mais recente primeiro)
+            var prescricoes = response.prescricoes.sort(function(a, b) {
+                return new Date(b.data_prescricao) - new Date(a.data_prescricao);
+            });
+            
+            // Agrupar prescrições por data
+            var prescricoesPorData = {};
+            prescricoes.forEach(function(p) {
+                // Extrair apenas a data (sem a hora)
+                var dataApenas = p.data_prescricao ? p.data_prescricao.split(' ')[0] : 'Sem data';
                 
-                if (response.success) {
-                    // Fechar modal
-                    $('#modalAprazamento').modal('hide');
+                if (!prescricoesPorData[dataApenas]) {
+                    prescricoesPorData[dataApenas] = [];
+                }
+                prescricoesPorData[dataApenas].push(p);
+            });
+            
+            var html = "<tr><td>";
+            
+            // Para cada data
+            Object.keys(prescricoesPorData).forEach(function(data) {
+                html += '<div class="card mb-3">' +
+                    '<div class="card-header bg-info text-white">' +
+                    '<h5 class="mb-0">Prescrições do dia ' + data + '</h5>' +
+                    '</div>' +
+                    '<div class="card-body">';
+                
+                // Para cada prescrição na data
+                prescricoesPorData[data].forEach(function(prescricao) {
+                    var horario = prescricao.data_prescricao ? prescricao.data_prescricao.split(' ')[1] : '';
                     
-                    // Recarregar lista de prescrições
-                    if (typeof carregarPrescricoes === 'function') {
-                        carregarPrescricoes();
+                    html += '<div class="prescricao-item mb-4" data-id="' + prescricao.id + '">' +
+                        '<h6 class="prescricao-horario text-secondary">' +
+                        '<i class="fas fa-clock mr-1"></i> ' + horario + ' - ' +
+                        '<span class="text-primary">' + (prescricao.medico_nome || 'Médico não informado') + '</span>';
+                    
+                    // Mostrar botão Editar apenas para médicos
+                    if (window.cargoUsuario && window.cargoUsuario.toLowerCase().trim() === "medico") {
+                        html += '<button class="btn btn-sm btn-outline-info float-right ml-2 btn-editar-prescricao" ' +
+                        'data-id="' + prescricao.id + '" style="float: right;">' +
+                        '<i class="fas fa-edit"></i> Editar' +
+                        '</button>';
                     }
                     
-                    // Mostrar mensagem de sucesso
-                    alert('Aprazamento registrado com sucesso!');
-                } else {
-                    alert('Erro ao registrar aprazamento: ' + (response.message || 'Erro desconhecido'));
-                }
+                    html += '</h6>';
+                        
+                    // Seção de Dieta
+                    if (prescricao.texto_dieta) {
+                        html += '<div class="mt-3 mb-2">' +
+                            '<h6><i class="fas fa-utensils text-success mr-1"></i> Dieta</h6>' +
+                            '<div class="card card-body bg-light">' + prescricao.texto_dieta + '</div>' +
+                            '</div>';
+                    }
+                    
+                    // Seção de Medicamentos
+                    if (prescricao.medicamentos && prescricao.medicamentos.length > 0) {
+                        html += '<div class="mt-3 mb-2">' +
+                            '<h6><i class="fas fa-pills text-danger mr-1"></i> Medicamentos</h6>' +
+                            '<div class="table-responsive">' +
+                            '<table class="table table-sm table-bordered table-striped">' +
+                            '<thead class="thead-light">' +
+                            '<tr>' +
+                            '<th>Medicamento</th>' +
+                            '<th>Uso</th>' +
+                            '<th>Aprazamento</th>' +
+                            '<th>Enfermeiro</th>' +
+                            '<th>Ações</th>' +
+                            '</tr>' +
+                            '</thead>' +
+                            '<tbody>';
+
+                        prescricao.medicamentos.forEach(function(medicamento) {
+                            html += '<tr>' +
+                                '<td>' + (medicamento.nome_medicamento || '') + '</td>' +
+                                '<td>' + (medicamento.descricao_uso || '') + '</td>' +
+                                '<td>';
+
+                                if (medicamento.aprazamentos_novos && medicamento.aprazamentos_novos.length > 0) {
+                                    html += '<div class="d-flex justify-content-center">' +
+                                        '<button type="button" class="btn btn-sm btn-outline-primary btn-ver-aprazamentos" ' +
+                                        'data-atendimento-id="' + window.ATENDIMENTO_ID + '" ' +
+                                        'data-medicamento-nome="' + medicamento.nome_medicamento.replace(/"/g, '&quot;') + '">' +
+                                        '<i class="fas fa-list"></i> Ver Horários' +
+                                        '</button>' +
+                                        '</div>';
+                                } else {
+                                    html += '<span class="text-muted">Não aprazado</span>';
+                                }
+
+                                html += '</td>' +
+                                    '<td>' + (medicamento.enfermeiro_nome || '') + '</td>' +
+                                    '<td>';
+
+                                if (window.cargoUsuario && window.cargoUsuario.toLowerCase().trim() === "enfermeiro") {
+                                    html += '<button class="btn btn-primary btn-sm btn-aprazamento" ' +
+                                        'data-prescricao-id="' + prescricao.id + '" ' +
+                                        'data-medicamento-index="' + prescricao.medicamentos.indexOf(medicamento) + '" ' +
+                                        'data-medicamento-nome="' + medicamento.nome_medicamento.replace(/"/g, '&quot;') + '">' +
+                                        '<i class="fas fa-clock"></i> Aprazar' +
+                                        '</button>';
+                                }
+
+                                html += '</td></tr>';
+                        });
+
+                        html += '</tbody></table></div></div>';
+                    }
+                    
+                    // Seção de Procedimentos Médicos
+                    if (prescricao.texto_procedimento_medico) {
+                        html += '<div class="mt-3">' +
+                            '<h6><i class="fas fa-user-md text-primary mr-1"></i> Procedimentos Médicos</h6>' +
+                            '<div class="card card-body bg-light">' + prescricao.texto_procedimento_medico + '</div>' +
+                            '</div>';
+                    }
+                    
+                    // Seção de Procedimentos Multidisciplinares
+                    if (prescricao.texto_procedimento_multi) {
+                        html += '<div class="mt-3">' +
+                            '<h6><i class="fas fa-users text-warning mr-1"></i> Procedimentos Multidisciplinares</h6>' +
+                            '<div class="card card-body bg-light">' + prescricao.texto_procedimento_multi + '</div>' +
+                            '</div>';
+                    }
+                    
+                    html += '</div>';
+                    
+                    // Adicionar divisor entre prescrições, exceto na última
+                    if (prescricoesPorData[data].indexOf(prescricao) < prescricoesPorData[data].length - 1) {
+                        html += '<hr class="my-3">';
+                    }
+                });
+                
+                html += '</div></div>';
             });
-        } else {
-            console.error('Função registrarAprazamento não encontrada');
-            alert('Erro: Função de registro de aprazamento não está disponível');
-            btnSubmit.html(textoOriginal);
-            btnSubmit.prop('disabled', false);
+            
+            html += "</td></tr>";
+            $("#listaPrescricoes").html(html);
+        },
+        error: function(xhr, status, error) {
+            console.error("Erro na requisição AJAX:", xhr.responseText);
+            $("#listaPrescricoes").html("<tr><td class='text-center text-danger'>Erro ao carregar prescrições: " + error + "</td></tr>");
+            
+            // Tentar novamente automaticamente apenas uma vez se for erro 404 ou 500
+            if ((xhr.status === 404 || xhr.status === 500) && !lastUpdate) {
+                console.log("Tentando carregar prescrições novamente após erro " + xhr.status);
+                setTimeout(function() {
+                    carregarPrescricoes(id, true);
+                }, 2000);
+            }
         }
     });
+}
+
+
 
     $(document).on('click', '.btn-visualizar-aprazamento', function () {
         const prescricaoId = $(this).data('prescricao-id');  // opcional
@@ -471,7 +531,7 @@ $(document).ready(function() {
     $(document).on('click', '#btn_desmarcar_todos', function() {
         $('#horarios_multiplos_dias .horario-check').prop('checked', false);
     });
-});
+
 
 // Exportação para uso em outros módulos
 // Usado quando o sistema é construído com webpack ou similar
@@ -653,251 +713,7 @@ function inicializarModalCalendarioAprazamento(textoAprazamento = '', titulo = '
     }
 }
 
-/**
- * Gera o texto de aprazamento para intervalos de horários no mesmo dia
- */
-function gerarAprazamentoIntervaloMesmoDia() {
-    try {
-        const data = $('#data-aprazamento').val();
-        const horaInicio = $('#hora-inicio').val();
-        const horaFim = $('#hora-fim').val();
-        const intervalo = parseInt($('#intervalo-horas').val());
-        
-        if (!data || !horaInicio || !horaFim || !intervalo) {
-            console.error('Dados incompletos para gerar aprazamento');
-            return;
-        }
-        
-        // Parsing das horas
-        const inicio = moment(horaInicio, 'HH:mm');
-        const fim = moment(horaFim, 'HH:mm');
-        
-        // Verificar se a hora de fim é maior que a hora de início
-        if (fim.isBefore(inicio)) {
-            alert('A hora de fim deve ser maior que a hora de início.');
-            return;
-        }
-        
-        // Gerar os horários com o intervalo especificado
-        let horarios = [];
-        let atual = inicio.clone();
-        
-        while (atual.isSameOrBefore(fim)) {
-            horarios.push(atual.format('HH:mm'));
-            atual.add(intervalo, 'hours');
-        }
-        
-        // Formatar a saída
-        let resultado = `${moment(data).format('DD/MM/YYYY')}: ${horarios.join(', ')}`;
-        
-        // Aplicar formatação simplificada
-        resultado = formatarAprazamentoSimplificado(resultado);
-        
-        console.log('Aprazamento gerado:', resultado);
-        $('#texto-aprazamento').val(resultado);
-        
-        // Visualizar no calendário
-        $('#texto-aprazamento-modal').val(resultado);
-        visualizarCalendarioAprazamento('texto-aprazamento-modal', 'calendario-aprazamento-conteudo');
-        
-        // Abrir o modal
-        const modal = new bootstrap.Modal(document.getElementById('modal-calendario-aprazamento'));
-        modal.show();
-    } catch (e) {
-        console.error('Erro ao gerar aprazamento:', e);
-        alert('Erro ao gerar aprazamento. Verifique os dados e tente novamente.');
-    }
-}
 
-/**
- * Gera o texto de aprazamento para múltiplos dias
- */
-function gerarAprazamentoMultiplosDias() {
-    const dataInicio = $('#aprazamento_data_inicio').val();
-    const dataFim = $('#aprazamento_data_fim').val();
-    const horaInicial = $('#aprazamento_hora_inicial_multiplos').val();
-    
-    if (!dataInicio || !dataFim || !horaInicial) {
-        alert('Por favor, preencha todos os campos: data de início, data de fim e hora inicial.');
-        return;
-    }
-    
-    // Verificar se a data de fim é posterior à data de início
-    const dataInicioObj = new Date(dataInicio);
-    const dataFimObj = new Date(dataFim);
-    
-    if (dataFimObj < dataInicioObj) {
-        alert('A data de fim deve ser igual ou posterior à data de início.');
-        return;
-    }
-    
-    // Obter intervalo de horas
-    let intervaloHoras;
-    
-    if ($('#aprazamento_multiplos_intervalo').val() === 'custom') {
-        intervaloHoras = parseFloat($('#aprazamento_multiplos_intervalo_custom').val());
-        
-        if (!intervaloHoras || intervaloHoras <= 0) {
-            alert('O intervalo personalizado deve ser um valor válido maior que zero.');
-            return;
-        }
-    } else {
-        intervaloHoras = parseFloat($('#aprazamento_multiplos_intervalo').val());
-    }
-    
-    // Verificar quais dias da semana estão selecionados
-    const diasSelecionados = {
-        0: $('#dia_dom').prop('checked'), // Domingo
-        1: $('#dia_seg').prop('checked'), // Segunda
-        2: $('#dia_ter').prop('checked'), // Terça
-        3: $('#dia_qua').prop('checked'), // Quarta
-        4: $('#dia_qui').prop('checked'), // Quinta
-        5: $('#dia_sex').prop('checked'), // Sexta
-        6: $('#dia_sab').prop('checked')  // Sábado
-    };
-    
-    // Se nenhum dia da semana estiver selecionado, alertar o usuário
-    if (!Object.values(diasSelecionados).some(v => v)) {
-        alert('Selecione pelo menos um dia da semana para o aprazamento.');
-        return;
-    }
-    
-    // Calcular as datas e horários de administração
-    const horarios = [];
-    const [hora, minuto] = horaInicial.split(':').map(Number);
-    
-    // Loop através dos dias
-    let dataAtual = new Date(dataInicioObj);
-    while (dataAtual <= dataFimObj) {
-        // Verificar se o dia da semana está selecionado
-        const diaSemana = dataAtual.getDay(); // 0 = Domingo, 1 = Segunda, etc.
-        
-        if (diasSelecionados[diaSemana]) {
-            // Calcular horários para este dia
-            const dia = String(dataAtual.getDate()).padStart(2, '0');
-            const mes = String(dataAtual.getMonth() + 1).padStart(2, '0');
-            const ano = dataAtual.getFullYear();
-            const dataFormatada = `${dia}/${mes}/${ano}`;
-            
-            let horaAtual = new Date(dataAtual);
-            horaAtual.setHours(hora, minuto, 0, 0);
-            
-            // Loop de horários dentro do dia
-            let horasAdicionadas = 0;
-            while (horasAdicionadas < 24) {
-                const horaFormatada = `${String(horaAtual.getHours()).padStart(2, '0')}:${String(horaAtual.getMinutes()).padStart(2, '0')}`;
-                
-                // Adicionar o horário formatado
-                horarios.push({
-                    data: dataFormatada,
-                    hora: horaFormatada,
-                    valor: `${dataFormatada}:${horaFormatada}`
-                });
-                
-                // Avançar para o próximo horário
-                horaAtual.setTime(horaAtual.getTime() + (intervaloHoras * 60 * 60 * 1000));
-                horasAdicionadas += intervaloHoras;
-                
-                // Se o próximo horário é no dia seguinte, parar o loop
-                if (horaAtual.getDate() !== dataAtual.getDate()) {
-                    break;
-                }
-            }
-        }
-        
-        // Avançar para o próximo dia
-        dataAtual.setDate(dataAtual.getDate() + 1);
-    }
-    
-    // Ordenar os horários por data e hora
-    horarios.sort((a, b) => {
-        // Primeiro ordenar por data (convertendo DD/MM/YYYY para objeto Date)
-        const partsA = a.data.split('/');
-        const partsB = b.data.split('/');
-        const dateA = new Date(partsA[2], partsA[1] - 1, partsA[0]);
-        const dateB = new Date(partsB[2], partsB[1] - 1, partsB[0]);
-        
-        const dateComparison = dateA - dateB;
-        if (dateComparison !== 0) {
-            return dateComparison;
-        }
-        
-        // Se a data for a mesma, ordenar por hora
-        return a.hora.localeCompare(b.hora);
-    });
-    
-    // Gerar o HTML com os horários calculados
-    let dataAnterior = null;
-    let html = '';
-    
-    // Agrupar horários por data
-    const horariosPorData = {};
-    
-    horarios.forEach(item => {
-        if (!horariosPorData[item.data]) {
-            horariosPorData[item.data] = [];
-        }
-        horariosPorData[item.data].push(item);
-    });
-    
-    // Gerar HTML para cada data
-    Object.keys(horariosPorData).sort().forEach(data => {
-        const horariosData = horariosPorData[data];
-        
-        html += `
-            <div class="mb-2 px-1">
-                <div class="d-flex align-items-center mb-1">
-                    <div class="small fw-bold me-2">${data}</div>
-                    <div class="flex-grow-1" style="height: 1px; background-color: #dee2e6;"></div>
-                    <div class="ms-2">
-                        <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1 selecionar-dia" data-data="${data}">
-                            <i class="fas fa-check-square" style="font-size: 10px;"></i>
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1 desmarcar-dia" data-data="${data}">
-                            <i class="fas fa-square" style="font-size: 10px;"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="d-flex flex-wrap gap-1">
-        `;
-        
-        horariosData.forEach(item => {
-            html += `
-                <div class="form-check form-check-inline m-0 me-1" style="min-width: 55px;">
-                    <input class="form-check-input horario-check" type="checkbox" 
-                          id="hora_${item.valor.replace(/[/:]/g, '_')}" 
-                          value="${item.valor}" data-data="${data}" checked>
-                    <label class="form-check-label small" for="hora_${item.valor.replace(/[/:]/g, '_')}">
-                        ${item.hora}
-                    </label>
-                </div>
-            `;
-        });
-        
-        html += `
-                </div>
-            </div>
-        `;
-    });
-    
-    // Atualizar o elemento com os horários calculados
-    if (horarios.length === 0) {
-        $('#horarios_multiplos_dias').html('<p class="text-muted small text-center mb-0">Nenhum horário disponível para os dias selecionados.</p>');
-    } else {
-        $('#horarios_multiplos_dias').html(html);
-        
-        // Adicionar eventos para os botões de selecionar/desmarcar por dia
-        $('.selecionar-dia').on('click', function() {
-            const data = $(this).data('data');
-            $(`.horario-check[data-data="${data}"]`).prop('checked', true);
-        });
-        
-        $('.desmarcar-dia').on('click', function() {
-            const data = $(this).data('data');
-            $(`.horario-check[data-data="${data}"]`).prop('checked', false);
-        });
-    }
-}
 
 // Evento para abrir o modal de visualização do aprazamento ao clicar no botão
 $(document).on('click', '.btn-ver-aprazamento', function () {

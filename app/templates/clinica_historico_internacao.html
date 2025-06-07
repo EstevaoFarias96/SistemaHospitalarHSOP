@@ -1,24 +1,66 @@
 {% extends "base.html" %}
 
 {% block content %}
+<style>
+    .btn-group .btn {
+        margin-right: 2px;
+    }
+    
+    .modal-xl {
+        max-width: 95%;
+    }
+    
+    .card {
+        transition: transform 0.2s ease-in-out;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .text-justify {
+        text-align: justify;
+    }
+    
+    .table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        border-bottom: 2px solid #dee2e6;
+    }
+    
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .btn-outline-primary:hover,
+    .btn-success:hover {
+        transform: scale(1.05);
+        transition: transform 0.1s ease-in-out;
+    }
+    
+    .modal-header.bg-primary {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+    }
+    
+    .card-header.bg-light {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+    }
+    
+    .fs-5 {
+        font-size: 1.25rem !important;
+    }
+</style>
+
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Histórico de Internações</h2>
-        <a href="/clinica" class="btn btn-outline-primary">
-            <i class="fas fa-arrow-left"></i> Voltar
-        </a>
     </div>
     
     <div class="card shadow-sm">
         <div class="card-body">
             <div class="row mb-3">
                 <div class="col">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white">
-                            <i class="fas fa-search text-primary"></i>
-                        </span>
-                        <input type="text" id="searchInput" class="form-control" placeholder="Buscar paciente...">
-                    </div>
+                    <!-- Removido campo de busca -->
                 </div>
             </div>
             
@@ -37,7 +79,7 @@
                             <th>Data de Internação</th>
                             <th>Data de Alta</th>
                             <th>Diagnóstico</th>
-                            <th>Ações</th>
+                            <th class="text-center">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="historicoTableBody">
@@ -92,6 +134,127 @@
     </div>
 </div>
 
+<!-- Modal de Informações de Alta -->
+<div class="modal fade" id="modalInformacoesAlta" tabindex="-1" aria-labelledby="modalInformacoesAltaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalInformacoesAltaLabel">
+                    <i class="fas fa-user-check me-2"></i>Informações de Alta do Paciente
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <h6 class="text-primary mb-2">
+                            <i class="fas fa-user me-2"></i>Dados do Paciente
+                        </h6>
+                        <div class="d-flex gap-4">
+                            <strong>Nome:</strong> <span id="altaNomePaciente"></span>
+                            <strong>CPF:</strong> <span id="altaCpfPaciente"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <h6 class="text-success mb-2">
+                            <i class="fas fa-calendar-check me-2"></i>Data de Alta
+                        </h6>
+                        <strong id="altaDataAlta" class="text-success fs-5"></strong>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-header bg-light border-0">
+                                <h6 class="mb-0 text-primary">
+                                    <i class="fas fa-stethoscope me-2"></i>Diagnóstico de Alta
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <p id="altaDiagnosticoAlta" class="mb-0 text-justify"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-header bg-light border-0">
+                                <h6 class="mb-0 text-primary">
+                                    <i class="fas fa-clipboard-list me-2"></i>Relatório de Alta
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <p id="altaRelatorioAlta" class="mb-0 text-justify"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-header bg-light border-0">
+                                <h6 class="mb-0 text-primary">
+                                    <i class="fas fa-history me-2"></i>Histórico da Internação
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <p id="altaHistoricoInternacao" class="mb-0 text-justify"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-header bg-light border-0">
+                                <h6 class="mb-0 text-primary">
+                                    <i class="fas fa-procedures me-2"></i>Conduta Final
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <p id="altaCondutaFinal" class="mb-0 text-justify"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-header bg-light border-0">
+                                <h6 class="mb-0 text-primary">
+                                    <i class="fas fa-pills me-2"></i>Medicação de Alta
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <p id="altaMedicacaoAlta" class="mb-0 text-justify"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-header bg-light border-0">
+                                <h6 class="mb-0 text-primary">
+                                    <i class="fas fa-heart me-2"></i>Cuidados Gerais
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <p id="altaCuidadosGerais" class="mb-0 text-justify"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Fechar
+                </button>
+                <button type="button" class="btn btn-primary" onclick="imprimirInformacoesAlta()">
+                    <i class="fas fa-print me-2"></i>Imprimir
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Mostrar mensagem de carregamento
@@ -101,17 +264,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Carregar histórico ao iniciar a página
     carregarHistorico();
-
-    // Configurar busca
-    document.getElementById('searchInput').addEventListener('input', function(e) {
-        const searchTerm = e.target.value.toLowerCase();
-        const rows = document.querySelectorAll('#historicoTableBody tr');
-        
-        rows.forEach(row => {
-            const text = row.textContent.toLowerCase();
-            row.style.display = text.includes(searchTerm) ? '' : 'none';
-        });
-    });
 });
 
 function carregarHistorico() {
@@ -133,8 +285,20 @@ function carregarHistorico() {
                 if (data.internacoes && data.internacoes.length > 0) {
                     statusMessage.style.display = 'none';
                     
+                    console.log('Carregando', data.internacoes.length, 'internações:', data.internacoes);
+                    
                     data.internacoes.forEach(internacao => {
                         const row = document.createElement('tr');
+                        
+                        // Escapar dados para evitar problemas de HTML injection
+                        const internacaoEscapada = {
+                            ...internacao,
+                            nome_paciente: internacao.nome_paciente || '',
+                            cpf: internacao.cpf || '',
+                            diagnostico: internacao.diagnostico || '',
+                            relatorio_alta: internacao.relatorio_alta || ''
+                        };
+                        
                         row.innerHTML = `
                             <td>${internacao.nome_paciente}</td>
                             <td>${internacao.cpf}</td>
@@ -143,16 +307,27 @@ function carregarHistorico() {
                             <td>${formatarData(internacao.data_internacao)}</td>
                             <td>${formatarData(internacao.data_alta)}</td>
                             <td>${internacao.diagnostico || '-'}</td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary" onclick="verDetalhes(${JSON.stringify(internacao).replace(/"/g, '&quot;')})">
-                                    <i class="fas fa-eye"></i> Ver Detalhes
-                                </button>
-                                <a href="/clinica/relatorio-paciente/${internacao.id}" class="btn btn-sm btn-primary ms-1">
-                                    <i class="fas fa-file-medical-alt"></i> Ver Relatório
-                                </a>
+                            <td class="text-center">
+                                <div class="btn-group-vertical gap-1" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="verDetalhes(internacaoData_${internacao.id})" title="Ver Detalhes Gerais">
+                                        <i class="fas fa-eye me-1"></i>Detalhes
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-success" onclick="verInformacoesAlta('${internacao.atendimento_id}')" title="Ver Informações de Alta">
+                                        <i class="fas fa-user-check me-1"></i>Informações de Alta
+                                    </button>
+                                </div>
                             </td>
                         `;
+                        
+                        // Armazenar dados da internação no elemento para acesso posterior
+                        row.querySelector('.btn-outline-primary').internacaoData = internacaoEscapada;
+                        
                         tbody.appendChild(row);
+                        
+                        // Criar variável global para cada internação
+                        window[`internacaoData_${internacao.id}`] = internacaoEscapada;
+                        
+                        console.log(`Linha criada para internação ID ${internacao.id}, atendimento ${internacao.atendimento_id}`);
                     });
                 } else {
                     statusMessage.className = 'alert alert-info mb-3';
@@ -168,9 +343,6 @@ function carregarHistorico() {
             console.error('Erro na requisição:', error);
             statusMessage.className = 'alert alert-danger mb-3';
             statusMessage.textContent = 'Erro ao carregar histórico de internações: ' + error.message;
-            
-            // Adicionar botão para tentar novamente
-            statusMessage.innerHTML += '<br><button class="btn btn-sm btn-outline-primary mt-2" onclick="carregarHistorico()">Tentar novamente</button>';
         });
 }
 
@@ -181,6 +353,16 @@ function formatarData(dataString) {
 }
 
 function verDetalhes(internacao) {
+    // Se internacao for uma string (nome da variável), buscar a variável global
+    if (typeof internacao === 'string') {
+        internacao = window[internacao];
+    }
+    
+    if (!internacao) {
+        alert('Erro: Dados da internação não encontrados.');
+        return;
+    }
+    
     document.getElementById('relatorioAlta').textContent = internacao.relatorio_alta || 'Não informado';
     document.getElementById('evolucao').textContent = internacao.evolucao || 'Não informado';
     document.getElementById('parametros').textContent = internacao.parametros || 'Não informado';
@@ -189,6 +371,147 @@ function verDetalhes(internacao) {
     
     const modal = new bootstrap.Modal(document.getElementById('modalDetalhes'));
     modal.show();
+}
+
+function verInformacoesAlta(atendimentoId) {
+    // Mostrar loading
+    const modal = new bootstrap.Modal(document.getElementById('modalInformacoesAlta'));
+    modal.show();
+    
+    // Limpar dados anteriores e mostrar loading
+    document.getElementById('altaNomePaciente').textContent = 'Carregando...';
+    document.getElementById('altaCpfPaciente').textContent = '';
+    document.getElementById('altaDataAlta').textContent = '';
+    document.getElementById('altaDiagnosticoAlta').textContent = 'Carregando informações...';
+    document.getElementById('altaRelatorioAlta').textContent = 'Carregando informações...';
+    document.getElementById('altaHistoricoInternacao').textContent = 'Carregando informações...';
+    document.getElementById('altaCondutaFinal').textContent = 'Carregando informações...';
+    document.getElementById('altaMedicacaoAlta').textContent = 'Carregando informações...';
+    document.getElementById('altaCuidadosGerais').textContent = 'Carregando informações...';
+    
+    // Buscar dados de alta
+    fetch(`/api/internacao/${atendimentoId}/alta`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Preencher dados do paciente
+                document.getElementById('altaNomePaciente').textContent = data.nome_paciente;
+                document.getElementById('altaCpfPaciente').textContent = data.cpf_paciente;
+                document.getElementById('altaDataAlta').textContent = data.data_alta;
+                
+                // Preencher informações de alta
+                document.getElementById('altaDiagnosticoAlta').textContent = data.diagnostico_alta;
+                document.getElementById('altaRelatorioAlta').textContent = data.relatorio_alta;
+                document.getElementById('altaHistoricoInternacao').textContent = data.historico_internacao;
+                document.getElementById('altaCondutaFinal').textContent = data.conduta_final;
+                document.getElementById('altaMedicacaoAlta').textContent = data.medicacao_alta;
+                document.getElementById('altaCuidadosGerais').textContent = data.cuidados_gerais;
+            } else {
+                // Mostrar erro
+                alert('Erro ao carregar informações de alta: ' + (data.message || 'Erro desconhecido'));
+                modal.hide();
+            }
+        })
+        .catch(error => {
+            console.error('Erro na requisição:', error);
+            alert('Erro ao carregar informações de alta: ' + error.message);
+            modal.hide();
+        });
+}
+
+function imprimirInformacoesAlta() {
+    // Criar uma nova janela para impressão
+    const printWindow = window.open('', '_blank');
+    
+    // Obter dados do modal
+    const nomePaciente = document.getElementById('altaNomePaciente').textContent;
+    const cpfPaciente = document.getElementById('altaCpfPaciente').textContent;
+    const dataAlta = document.getElementById('altaDataAlta').textContent;
+    const diagnosticoAlta = document.getElementById('altaDiagnosticoAlta').textContent;
+    const relatorioAlta = document.getElementById('altaRelatorioAlta').textContent;
+    const historicoInternacao = document.getElementById('altaHistoricoInternacao').textContent;
+    const condutaFinal = document.getElementById('altaCondutaFinal').textContent;
+    const medicacaoAlta = document.getElementById('altaMedicacaoAlta').textContent;
+    const cuidadosGerais = document.getElementById('altaCuidadosGerais').textContent;
+    
+    // HTML para impressão
+    const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Informações de Alta - ${nomePaciente}</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
+                .header { text-align: center; border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 20px; }
+                .patient-info { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+                .section { margin-bottom: 20px; }
+                .section h3 { color: #007bff; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+                .section p { margin: 10px 0; text-align: justify; line-height: 1.5; }
+                .date-alta { color: #28a745; font-weight: bold; font-size: 1.1em; }
+                @media print {
+                    .no-print { display: none; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>INFORMAÇÕES DE ALTA HOSPITALAR</h1>
+                <p>Relatório completo das informações de alta do paciente</p>
+            </div>
+            
+            <div class="patient-info">
+                <h2>Dados do Paciente</h2>
+                <p><strong>Nome:</strong> ${nomePaciente}</p>
+                <p><strong>CPF:</strong> ${cpfPaciente}</p>
+                <p><strong>Data de Alta:</strong> <span class="date-alta">${dataAlta}</span></p>
+            </div>
+            
+            <div class="section">
+                <h3>Diagnóstico de Alta</h3>
+                <p>${diagnosticoAlta}</p>
+            </div>
+            
+            <div class="section">
+                <h3>Relatório de Alta</h3>
+                <p>${relatorioAlta}</p>
+            </div>
+            
+            <div class="section">
+                <h3>Histórico da Internação</h3>
+                <p>${historicoInternacao}</p>
+            </div>
+            
+            <div class="section">
+                <h3>Conduta Final</h3>
+                <p>${condutaFinal}</p>
+            </div>
+            
+            <div class="section">
+                <h3>Medicação de Alta</h3>
+                <p>${medicacaoAlta}</p>
+            </div>
+            
+            <div class="section">
+                <h3>Cuidados Gerais</h3>
+                <p>${cuidadosGerais}</p>
+            </div>
+            
+            <div style="margin-top: 50px; text-align: center; font-size: 0.9em; color: #666;">
+                <p>Documento gerado em ${new Date().toLocaleString('pt-BR')}</p>
+            </div>
+        </body>
+        </html>
+    `;
+    
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
 }
 </script>
 {% endblock %} 

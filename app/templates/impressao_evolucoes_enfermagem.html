@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evoluções de Enfermagem - {{ paciente.nome }}</title>
+    
+    <style>
+        /* Reset e configurações básicas */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Configuração para impressão A4 */
+        @page {
+            size: A4;
+            margin: 1cm;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #333;
+            background: white;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Cabeçalho */
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .hospital-name {
+            font-size: 18pt;
+            font-weight: 600;
+            color: #2563eb;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .evolucoes-title {
+            font-size: 14pt;
+            font-weight: 500;
+            color: #1e40af;
+            margin-top: 8px;
+        }
+
+        /* Dados do paciente */
+        .patient-info {
+            background: white;
+            border: 2px solid #dbeafe;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .patient-info h3 {
+            color: #2563eb;
+            font-size: 12pt;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .patient-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            font-size: 10pt;
+        }
+
+        .patient-field {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .patient-label {
+            font-weight: 600;
+            color: #1e40af;
+            min-width: 120px;
+            margin-right: 10px;
+        }
+
+        .patient-value {
+            color: #374151;
+            flex: 1;
+        }
+
+        /* Período selecionado */
+        .periodo-info {
+            background: #eff6ff;
+            border: 1px solid #93c5fd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .periodo-info h4 {
+            color: #2563eb;
+            font-size: 12pt;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .periodo-info p {
+            color: #6b7280;
+            font-size: 10pt;
+            margin: 0;
+        }
+
+        /* Seção de evoluções */
+        .evolucao-section {
+            margin-bottom: 30px;
+            border: 2px solid #dbeafe;
+            border-radius: 8px;
+            overflow: hidden;
+            page-break-inside: avoid;
+        }
+
+        .section-header {
+            background: #2563eb;
+            color: white;
+            padding: 15px 20px;
+            font-weight: 600;
+            font-size: 12pt;
+        }
+
+        .section-content {
+            padding: 20px;
+            background: white;
+        }
+
+        .evolucao-item {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 6px;
+            border-left: 4px solid #3b82f6;
+            margin-bottom: 20px;
+            page-break-inside: avoid;
+        }
+
+        .evolucao-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .evolucao-info {
+            margin-bottom: 12px;
+            font-size: 10pt;
+            color: #64748b;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .evolucao-info strong {
+            color: #1e40af;
+            font-weight: 600;
+        }
+
+        .evolucao-content {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 11pt;
+            line-height: 1.6;
+            min-height: 60px;
+            color: #374151;
+        }
+
+        /* Assinaturas */
+        .assinaturas {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .assinatura-box {
+            text-align: center;
+            padding: 30px;
+            border: 2px solid #dbeafe;
+            border-radius: 8px;
+            background: white;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-width: 400px;
+        }
+
+        .assinatura-title {
+            font-weight: 600;
+            color: #2563eb;
+            margin-bottom: 15px;
+            font-size: 11pt;
+        }
+
+        .assinatura-info {
+            font-size: 9pt;
+            color: #6b7280;
+            line-height: 1.8;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 9pt;
+            color: #9ca3af;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 15px;
+        }
+
+        /* Quando não há evoluções */
+        .no-evolucoes {
+            text-align: center;
+            padding: 60px 20px;
+            color: #9ca3af;
+            font-style: italic;
+            font-size: 12pt;
+        }
+
+        /* Impressão */
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                padding: 0;
+                max-width: none;
+            }
+            
+            .patient-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Cabeçalho -->
+    <div class="header">
+        <div class="hospital-name">HOSPITAL SENADOR OZIRES PONTES</div>
+        <div class="evolucoes-title">EVOLUÇÕES DE ENFERMAGEM</div>
+    </div>
+
+    <!-- Dados do Paciente -->
+    <div class="patient-info">
+        <h3>Informações do Paciente</h3>
+        <div class="patient-grid">
+            <div class="patient-field">
+                <span class="patient-label">Nome:</span>
+                <span class="patient-value">{{ paciente.nome or 'Não informado' }}</span>
+            </div>
+            <div class="patient-field">
+                <span class="patient-label">Cartão SUS:</span>
+                <span class="patient-value">{{ paciente.cartao_sus or 'Não informado' }}</span>
+            </div>
+            <div class="patient-field">
+                <span class="patient-label">Data Nascimento:</span>
+                <span class="patient-value">{{ paciente.data_nascimento.strftime('%d/%m/%Y') if paciente.data_nascimento else 'Não informado' }}</span>
+            </div>
+            <div class="patient-field">
+                <span class="patient-label">Sexo:</span>
+                <span class="patient-value">{{ paciente.sexo or 'Não informado' }}</span>
+            </div>
+            <div class="patient-field">
+                <span class="patient-label">Leito:</span>
+                <span class="patient-value">{{ internacao.leito or 'Não informado' }}</span>
+            </div>
+            <div class="patient-field">
+                <span class="patient-label">Data Internação:</span>
+                <span class="patient-value">{{ internacao.data_internacao.strftime('%d/%m/%Y %H:%M') if internacao.data_internacao else 'Não informado' }}</span>
+            </div>
+            <div class="patient-field">
+                <span class="patient-label">ID Atendimento:</span>
+                <span class="patient-value">{{ atendimento.id }}</span>
+            </div>
+            <div class="patient-field">
+                <span class="patient-label">Médico Responsável:</span>
+                <span class="patient-value">{{ internacao.medico_responsavel or 'Não informado' }}</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Evoluções de Enfermagem -->
+    <div class="evolucao-section">
+        <div class="section-header">
+            EVOLUÇÕES DE ENFERMAGEM
+        </div>
+        <div class="section-content">
+            {% if evolucoes %}
+                {% for evolucao in evolucoes %}
+                <div class="evolucao-item">
+                    <div class="evolucao-info">
+                        <strong>Data/Hora:</strong> 
+                        {{ evolucao.data_evolucao.strftime('%d/%m/%Y às %H:%M') if evolucao.data_evolucao else 'Data não registrada' }}
+                        {% if evolucao.enfermeiro_nome %}
+                            | <strong>Enfermeiro(a):</strong> {{ evolucao.enfermeiro_nome }}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="evolucao-content">{{ evolucao.texto or 'Evolução não registrada' }}</div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-evolucoes">
+                    <p>Nenhuma evolução de enfermagem encontrada para o período selecionado.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Assinaturas -->
+    <div class="assinaturas">
+        <div class="assinatura-box">
+            <div class="assinatura-title">ENFERMEIRO(A) RESPONSÁVEL</div>
+            <div class="assinatura-info">
+                Nome: _________________________________<br>
+                Número Profissional: ____________________<br>
+                Data: _____ / _____ / _____
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>Evoluções de enfermagem - Relatório gerado em {{ data_geracao.strftime('%d/%m/%Y às %H:%M') if data_geracao else 'Data não informada' }}</p>
+        <p>RUA CRUZEIRO, S/N - COHAB, Massapê - CE, 62140-000</p>
+    </div>
+</body>
+</html> 
