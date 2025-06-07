@@ -354,6 +354,13 @@
                     </select>
                   </div>
                 </div>
+                <div class="form-row">
+                  <div class="form-group col-md-12">
+                    <label for="alergias">Alergias</label>
+                    <textarea class="form-control" id="alergias" name="alergias" rows="3" placeholder="Descreva alergias conhecidas do paciente (medicamentos, alimentos, etc.)"></textarea>
+                    <small class="text-muted">Informe todas as alergias conhecidas para evitar complicações durante o tratamento</small>
+                  </div>
+                </div>
                 <p class="text-muted mt-2"><small>* Campos obrigatórios</small></p>
                 <div class="d-flex justify-content-end">
                   <button type="submit" class="btn btn-primary">Próximo <i class="fas fa-arrow-right ml-1"></i></button>
@@ -607,6 +614,7 @@
         $('#bairro').val(paciente.bairro || '');
         $('#municipio').val(paciente.municipio || '');
         $('#cor').val(paciente.cor || '');
+        $('#alergias').val(paciente.alergias || '');
         
         // Armazenar dados para uso posterior
         const dadosPaciente = {
@@ -620,8 +628,8 @@
           endereco: paciente.endereco || '',
           municipio: paciente.municipio || '',
           bairro: paciente.bairro || '',
-          leito: '', // Será preenchido quando selecionar o leito
           cor: paciente.cor || '',
+          alergias: paciente.alergias || '',
           paciente_id: paciente.id // ID do paciente existente
         };
         
@@ -655,6 +663,91 @@
       $('#dadosPacienteForm').submit(function(e) {
         e.preventDefault();
         
+        const cpfValue = $('#cpf').val().replace(/\D/g, ''); // Remove formatação
+        const cnsValue = $('#cartaoSus').val().trim();
+        
+        // Verificar duplicatas antes de prosseguir
+        verificarDuplicatas(cpfValue, cnsValue).then(function(duplicataEncontrada) {
+          if (duplicataEncontrada) {
+            return; // Para a execução se encontrou duplicata
+          }
+          
+          // Se não há duplicata, continuar com o processo normal
+          prosseguirComDadosPaciente();
+        });
+      });
+      
+      // Função para verificar duplicatas
+      function verificarDuplicatas(cpf, cns) {
+        return new Promise(function(resolve) {
+          // Se já existe um paciente encontrado pela pesquisa, não verificar duplicatas
+          const pacienteEncontrado = sessionStorage.getItem('pacienteEncontrado');
+          if (pacienteEncontrado) {
+            resolve(false);
+            return;
+          }
+          
+          const parametrosVerificacao = {};
+          
+          if (cpf) {
+            parametrosVerificacao.cpf = cpf;
+          }
+          
+          if (cns) {
+            parametrosVerificacao.cartao_sus = cns;
+          }
+          
+          // Se não há CPF nem CNS para verificar
+          if (!cpf && !cns) {
+            resolve(false);
+            return;
+          }
+          
+          fetch('/api/pacientes/verificar-duplicatas', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(parametrosVerificacao)
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success && data.duplicata_encontrada) {
+              let mensagem = 'ATENÇÃO: Já existe um paciente cadastrado com ';
+              
+              if (data.campo_duplicado === 'cpf') {
+                mensagem += `o CPF informado (${formatarCPF(cpf)}).`;
+              } else if (data.campo_duplicado === 'cartao_sus') {
+                mensagem += `o Cartão SUS informado (${cns}).`;
+              }
+              
+              mensagem += '\n\nPaciente encontrado:\n';
+              mensagem += `Nome: ${data.paciente_existente.nome}\n`;
+              mensagem += `CPF: ${formatarCPF(data.paciente_existente.cpf)}`;
+              
+              if (data.paciente_existente.cartao_sus) {
+                mensagem += `\nCartão SUS: ${data.paciente_existente.cartao_sus}`;
+              }
+              
+              mensagem += '\n\nDeseja continuar mesmo assim ou revisar os dados informados?';
+              
+              const continuar = confirm(mensagem);
+              if (!continuar) {
+                resolve(true); // Indica que encontrou duplicata e usuário não quer continuar
+                return;
+              }
+            }
+            
+            resolve(false); // Não há duplicata ou usuário escolheu continuar
+          })
+          .catch(error => {
+            console.error('Erro ao verificar duplicatas:', error);
+            // Em caso de erro, permitir continuar
+            resolve(false);
+          });
+        });
+      }
+      
+      // Função para prosseguir com os dados do paciente
+      function prosseguirComDadosPaciente() {
         // Coletar dados do paciente
         const dadosPaciente = {
           nome: $('#nome').val(),
@@ -667,7 +760,8 @@
           endereco: $('#endereco').val(),
           municipio: $('#municipio').val(),
           bairro: $('#bairro').val(),
-          cor: $('#cor').val()
+          cor: $('#cor').val(),
+          alergias: $('#alergias').val()
         };
         
         // Se já existem dados de paciente encontrado, manter o ID
@@ -685,7 +779,7 @@
         // Habilitar e mostrar a próxima aba
         $('#relatorio-internacao-tab').removeClass('disabled');
         $('#relatorio-internacao-tab').tab('show');
-      });
+      }
       
       // Função para gerar ID de atendimento aleatório
       function gerarAtendimentoId() {

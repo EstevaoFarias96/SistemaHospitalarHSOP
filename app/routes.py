@@ -1647,7 +1647,8 @@ def buscar_evolucoes_enfermagem_por_internacao(internacao_id):
                 EvolucaoEnfermagem.atendimentos_clinica_id,
                 EvolucaoEnfermagem.data_evolucao,
                 EvolucaoEnfermagem.texto,
-                Funcionario.nome.label('enfermeiro_nome')
+                Funcionario.nome.label('enfermeiro_nome'),
+                Funcionario.numero_profissional.label('enfermeiro_coren')
             )\
             .order_by(EvolucaoEnfermagem.data_evolucao.desc())\
             .all()
@@ -1659,7 +1660,8 @@ def buscar_evolucoes_enfermagem_por_internacao(internacao_id):
                 'atendimentos_clinica_id': ev.atendimentos_clinica_id,
                 'data_evolucao': ev.data_evolucao.isoformat() if ev.data_evolucao else None,
                 'texto': ev.texto,
-                'enfermeiro_nome': ev.enfermeiro_nome
+                'enfermeiro_nome': ev.enfermeiro_nome,
+                'enfermeiro_coren': ev.enfermeiro_coren
             })
         
         return jsonify(resultado), 200
@@ -1683,7 +1685,8 @@ def buscar_prescricoes_enfermagem_por_internacao(internacao_id):
                 PrescricaoEnfermagem.atendimentos_clinica_id,
                 PrescricaoEnfermagem.data_prescricao,
                 PrescricaoEnfermagem.texto,
-                Funcionario.nome.label('enfermeiro_nome')
+                Funcionario.nome.label('enfermeiro_nome'),
+                Funcionario.numero_profissional.label('enfermeiro_coren')
             )\
             .order_by(PrescricaoEnfermagem.data_prescricao.desc())\
             .all()
@@ -1695,7 +1698,8 @@ def buscar_prescricoes_enfermagem_por_internacao(internacao_id):
                 'atendimentos_clinica_id': presc.atendimentos_clinica_id,
                 'data_prescricao': presc.data_prescricao.isoformat() if presc.data_prescricao else None,
                 'texto': presc.texto,
-                'enfermeiro_nome': presc.enfermeiro_nome
+                'enfermeiro_nome': presc.enfermeiro_nome,
+                'enfermeiro_coren': presc.enfermeiro_coren
             })
         
         return jsonify(resultado), 200
@@ -1786,7 +1790,8 @@ def medico_visualizar_prescricoes_enfermagem(internacao_id):
                 PrescricaoEnfermagem.atendimentos_clinica_id,
                 PrescricaoEnfermagem.data_prescricao,
                 PrescricaoEnfermagem.texto,
-                Funcionario.nome.label('enfermeiro_nome')
+                Funcionario.nome.label('enfermeiro_nome'),
+                Funcionario.numero_profissional.label('enfermeiro_coren')
             )\
             .order_by(PrescricaoEnfermagem.data_prescricao.desc())\
             .all()
@@ -1798,7 +1803,8 @@ def medico_visualizar_prescricoes_enfermagem(internacao_id):
                 'atendimentos_clinica_id': presc.atendimentos_clinica_id,
                 'data_prescricao': presc.data_prescricao.isoformat() if presc.data_prescricao else None,
                 'texto': presc.texto,
-                'enfermeiro_nome': presc.enfermeiro_nome
+                'enfermeiro_nome': presc.enfermeiro_nome,
+                'enfermeiro_coren': presc.enfermeiro_coren
             })
         
         return jsonify({
@@ -1957,7 +1963,6 @@ def registrar_alta_paciente(internacao_id):
             if leito:
                 if leito.ocupacao_atual > 0:
                     leito.ocupacao_atual -= 1
-
                 if leito.status == 'Ocupado' and leito.ocupacao_atual < leito.capacidade_maxima:
                     leito.status = 'Disponível'
 
@@ -1980,7 +1985,6 @@ def registrar_alta_paciente(internacao_id):
             'success': False,
             'message': 'Erro interno do servidor ao registrar alta.'
         }), 500
-
 # API para registrar paciente e internação
 @bp.route('/api/internar-paciente', methods=['POST'])
 @login_required
@@ -2073,7 +2077,8 @@ def internar_paciente():
             data_atendimento=date.today(),
             hora_atendimento=time(agora.hour, agora.minute, agora.second),
             status='Internado',
-            horario_internacao=agora
+            horario_internacao=agora,
+            alergias=dados.get('alergias', '')
         )
         db.session.add(atendimento)
         db.session.flush()
@@ -5162,3 +5167,610 @@ def imprimir_ficha_admissao(atendimento_id):
     except Exception as e:
         logging.error(f"Erro ao gerar impressão de ficha de admissão: {str(e)}")
         abort(500, f'Erro interno: {str(e)}')
+
+@bp.route('/imprimir/identificacao_paciente/<string:atendimento_id>')
+@login_required
+def imprimir_identificacao_paciente(atendimento_id):
+    """
+    Gera uma página HTML para impressão de identificação do paciente
+    Formatada para uso em pulseiras, adesivos ou etiquetas de identificação
+    Focada nos dados do paciente, leito, diagnóstico e informações para enfermeiros e técnicos
+    """
+    try:
+        from datetime import datetime
+        
+        # Buscar o atendimento
+        atendimento = Atendimento.query.filter_by(id=atendimento_id).first()
+        if not atendimento:
+            abort(404, 'Atendimento não encontrado.')
+
+        # Buscar a internação relacionada ao atendimento
+        internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
+        if not internacao:
+            abort(404, 'Internação não encontrada para este atendimento.')
+
+        # Buscar o paciente
+        paciente = atendimento.paciente
+        if not paciente:
+            abort(404, 'Paciente não encontrado.')
+
+        # Buscar o médico responsável
+        medico = None
+        if internacao.medico_id:
+            medico = Funcionario.query.get(internacao.medico_id)
+        elif atendimento.medico_id:
+            medico = Funcionario.query.get(atendimento.medico_id)
+
+        # Buscar enfermeiro responsável
+        enfermeiro = None
+        if internacao.enfermeiro_id:
+            enfermeiro = Funcionario.query.get(internacao.enfermeiro_id)
+        elif atendimento.enfermeiro_id:
+            enfermeiro = Funcionario.query.get(atendimento.enfermeiro_id)
+
+        # Calcular idade do paciente
+        idade = None
+        if paciente.data_nascimento:
+            hoje = datetime.now().date()
+            idade = hoje.year - paciente.data_nascimento.year
+            if hoje.month < paciente.data_nascimento.month or (hoje.month == paciente.data_nascimento.month and hoje.day < paciente.data_nascimento.day):
+                idade -= 1
+
+        # Data atual para o rodapé
+        data_impressao = datetime.now()
+
+        # Buscar prescrições médicas ativas para alertas
+        prescricoes = PrescricaoClinica.query.filter_by(atendimentos_clinica_id=internacao.id).order_by(
+            PrescricaoClinica.horario_prescricao.desc()
+        ).limit(3).all()
+
+        # Renderizar template HTML para impressão
+        return render_template('imprimir_identificacao_paciente.html',
+                             internacao=internacao,
+                             atendimento=atendimento,
+                             paciente=paciente,
+                             medico=medico,
+                             enfermeiro=enfermeiro,
+                             idade=idade,
+                             data_impressao=data_impressao,
+                             prescricoes=prescricoes,
+                             hospital_nome='Hospital Sistema HSOP')
+
+    except Exception as e:
+        logging.error(f"Erro ao gerar impressão de identificação do paciente: {str(e)}")
+        abort(500, f'Erro interno: {str(e)}')
+
+# API para verificar duplicatas de pacientes
+@bp.route('/api/pacientes/verificar-duplicatas', methods=['POST'])
+@login_required
+def verificar_duplicatas_pacientes():
+    """
+    Verifica se já existe um paciente com o mesmo CPF ou Cartão SUS.
+    """
+    try:
+        current_user = get_current_user()
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
+            return jsonify({
+                'success': False,
+                'message': 'Acesso não autorizado'
+            }), 403
+
+        dados = request.get_json()
+        
+        if not dados:
+            return jsonify({
+                'success': False,
+                'message': 'Dados não fornecidos'
+            }), 400
+
+        cpf = dados.get('cpf', '').strip()
+        cartao_sus = dados.get('cartao_sus', '').strip()
+
+        if not cpf and not cartao_sus:
+            return jsonify({
+                'success': True,
+                'duplicata_encontrada': False,
+                'message': 'Nenhum documento fornecido para verificação'
+            })
+
+        paciente_encontrado = None
+        campo_duplicado = None
+
+        # Verificar duplicata por CPF
+        if cpf:
+            paciente_encontrado = Paciente.query.filter_by(cpf=cpf).first()
+            if paciente_encontrado:
+                campo_duplicado = 'cpf'
+
+        # Se não encontrou por CPF, verificar por Cartão SUS
+        if not paciente_encontrado and cartao_sus:
+            paciente_encontrado = Paciente.query.filter_by(cartao_sus=cartao_sus).first()
+            if paciente_encontrado:
+                campo_duplicado = 'cartao_sus'
+
+        if paciente_encontrado:
+            return jsonify({
+                'success': True,
+                'duplicata_encontrada': True,
+                'campo_duplicado': campo_duplicado,
+                'paciente_existente': {
+                    'id': paciente_encontrado.id,
+                    'nome': paciente_encontrado.nome,
+                    'cpf': paciente_encontrado.cpf,
+                    'cartao_sus': paciente_encontrado.cartao_sus,
+                    'data_nascimento': paciente_encontrado.data_nascimento.isoformat() if paciente_encontrado.data_nascimento else None,
+                    'sexo': paciente_encontrado.sexo
+                }
+            })
+
+        return jsonify({
+            'success': True,
+            'duplicata_encontrada': False,
+            'message': 'Nenhuma duplicata encontrada'
+        })
+
+    except Exception as e:
+        logging.error(f'Erro ao verificar duplicatas: {str(e)}')
+        logging.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'message': f'Erro interno do servidor: {str(e)}'
+        }), 500
+
+
+        return render_template('clinica_evolucao_paciente_enfermeiro.html', 
+                            paciente=paciente, 
+                            internacao=internacao)
+        
+    except Exception as e:
+        logging.error(f"Erro ao acessar evolução do paciente (enfermeiro): {str(e)}")
+        logging.error(traceback.format_exc())
+        flash('Erro ao acessar a evolução do paciente. Por favor, tente novamente.', 'danger')
+        return redirect(url_for('main.pacientes_internados'))
+
+@bp.route('/clinica/impressoes-enfermagem/<string:atendimento_id>')
+@login_required
+def impressoes_enfermagem(atendimento_id):
+    try:
+        # Buscar dados do paciente e internação
+        internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
+        if not internacao:
+            flash('Internação não encontrada.', 'danger')
+            return redirect(url_for('main.pacientes_internados'))
+        
+        paciente = Paciente.query.get(internacao.paciente_id)
+        if not paciente:
+            flash('Paciente não encontrado.', 'danger')
+            return redirect(url_for('main.pacientes_internados'))
+        
+        return render_template('impressoes_enfermagem.html', 
+                            paciente=paciente, 
+                            internacao=internacao,
+                            atendimento_id=atendimento_id)
+        
+    except Exception as e:
+        logging.error(f"Erro ao acessar impressões de enfermagem: {str(e)}")
+        logging.error(traceback.format_exc())
+        flash('Erro ao acessar as impressões de enfermagem. Por favor, tente novamente.', 'danger')
+        return redirect(url_for('main.pacientes_internados'))
+
+@bp.route('/imprimir/admissao_enfermagem/<string:atendimento_id>')
+@login_required
+def imprimir_admissao_enfermagem(atendimento_id):
+    """
+    Imprime a admissão de enfermagem do paciente
+    """
+    try:
+        # Buscar o atendimento
+        atendimento = Atendimento.query.get(atendimento_id)
+        if not atendimento:
+            flash('Atendimento não encontrado.', 'danger')
+            return redirect(url_for('main.pacientes_internados'))
+
+        # Buscar a internação
+        internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
+        if not internacao:
+            flash('Internação não encontrada.', 'danger')
+            return redirect(url_for('main.pacientes_internados'))
+        
+        # Buscar o paciente
+        paciente = Paciente.query.get(internacao.paciente_id)
+        if not paciente:
+            flash('Paciente não encontrado.', 'danger')
+            return redirect(url_for('main.pacientes_internados'))
+        
+        # Buscar a admissão de enfermagem mais recente
+        admissao = AdmissaoEnfermagem.query.filter_by(
+            internacao_id=internacao.id
+        ).order_by(
+            AdmissaoEnfermagem.data_hora.desc()
+        ).first()
+        
+        # Buscar dados do enfermeiro responsável pela admissão
+        enfermeiro = None
+        if admissao and admissao.enfermeiro_id:
+            enfermeiro = Funcionario.query.get(admissao.enfermeiro_id)
+        
+        # Se não houver admissão na tabela específica, verificar campo legado
+        texto_admissao = None
+        data_admissao = None
+        
+        if admissao:
+            texto_admissao = admissao.admissao_texto
+            data_admissao = admissao.data_hora
+        elif internacao.admissao_enfermagem:
+            texto_admissao = internacao.admissao_enfermagem
+            data_admissao = internacao.data_internacao
+        
+        if not texto_admissao:
+            flash('Nenhuma admissão de enfermagem encontrada para este paciente.', 'warning')
+            return redirect(url_for('main.pacientes_internados'))
+        
+        return render_template('impressao_admissao_enfermagem.html',
+                             paciente=paciente,
+                             internacao=internacao,
+                             atendimento=atendimento,
+                             admissao=admissao,
+                             texto_admissao=texto_admissao,
+                             data_admissao=data_admissao,
+                             enfermeiro=enfermeiro,
+                             atendimento_id=atendimento_id)
+        
+    except Exception as e:
+        logging.error(f"Erro ao imprimir admissão de enfermagem: {str(e)}")
+        logging.error(traceback.format_exc())
+        flash('Erro ao gerar impressão da admissão de enfermagem. Por favor, tente novamente.', 'danger')
+        return redirect(url_for('main.pacientes_internados'))
+
+@bp.route('/imprimir/sae_enfermagem/<string:atendimento_id>')
+@login_required
+def imprimir_sae_enfermagem(atendimento_id):
+    """
+    Imprime a SAE (Sistematização da Assistência de Enfermagem) do paciente
+    """
+    try:
+        # Buscar o atendimento
+        atendimento = Atendimento.query.get(atendimento_id)
+        if not atendimento:
+            flash('Atendimento não encontrado.', 'danger')
+            return redirect(url_for('main.pacientes_internados'))
+
+        # Buscar a internação
+        internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
+        if not internacao:
+            flash('Internação não encontrada.', 'danger')
+            return redirect(url_for('main.pacientes_internados'))
+        
+        # Buscar o paciente
+        paciente = Paciente.query.get(internacao.paciente_id)
+        if not paciente:
+            flash('Paciente não encontrado.', 'danger')
+            return redirect(url_for('main.pacientes_internados'))
+        
+        # Buscar a SAE mais recente deste paciente
+        from app.models import InternacaoSae
+        sae = InternacaoSae.query.filter_by(
+            paciente_id=internacao.paciente_id  # CORRIGIDO: usar paciente_id da internação
+        ).order_by(
+            InternacaoSae.data_registro.desc()
+        ).first()
+        
+        # Buscar dados do enfermeiro responsável pela SAE
+        enfermeiro = None
+        if sae and sae.enfermeiro_id:
+            enfermeiro = Funcionario.query.get(sae.enfermeiro_id)
+        
+        if not sae:
+            flash('Nenhuma SAE encontrada para este paciente.', 'warning')
+            return redirect(url_for('main.pacientes_internados'))
+        
+        return render_template('impressao_sae_enfermagem.html',
+                             paciente=paciente,
+                             internacao=internacao,
+                             atendimento=atendimento,
+                             sae=sae,
+                             enfermeiro=enfermeiro,
+                             atendimento_id=atendimento_id)
+        
+    except Exception as e:
+        logging.error(f"Erro ao imprimir SAE de enfermagem: {str(e)}")
+        logging.error(traceback.format_exc())
+        flash('Erro ao gerar impressão da SAE. Por favor, tente novamente.', 'danger')
+        return redirect(url_for('main.pacientes_internados'))
+
+# API para listar datas disponíveis das evoluções de enfermagem
+@bp.route('/api/enfermagem/evolucoes/datas/<string:atendimento_id>', methods=['GET'])
+@login_required
+def listar_datas_evolucoes_enfermagem(atendimento_id):
+    """
+    Lista as datas disponíveis das evoluções de enfermagem para um atendimento específico.
+    """
+    try:
+        # Verificar se o usuário é enfermeiro ou médico
+        current_user = get_current_user()
+        if current_user.cargo.lower() not in ['enfermeiro', 'medico']:
+            return jsonify({
+                'success': False,
+                'message': 'Acesso permitido apenas para enfermeiros e médicos'
+            }), 403
+
+        # Buscar a internação
+        internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
+        if not internacao:
+            return jsonify({
+                'success': False,
+                'message': 'Internação não encontrada'
+            }), 404
+
+        # Buscar as datas das evoluções
+        evolucoes = EvolucaoEnfermagem.query\
+            .filter_by(atendimentos_clinica_id=internacao.id)\
+            .order_by(EvolucaoEnfermagem.data_evolucao.desc())\
+            .all()
+
+        # Agrupar por data
+        datas_disponiveis = {}
+        for evolucao in evolucoes:
+            if evolucao.data_evolucao:
+                data_str = evolucao.data_evolucao.strftime('%Y-%m-%d')
+                data_display = evolucao.data_evolucao.strftime('%d/%m/%Y')
+                
+                if data_str not in datas_disponiveis:
+                    datas_disponiveis[data_str] = {
+                        'data': data_str,
+                        'data_display': data_display,
+                        'quantidade': 0
+                    }
+                datas_disponiveis[data_str]['quantidade'] += 1
+
+        # Converter para lista ordenada
+        datas_lista = list(datas_disponiveis.values())
+        datas_lista.sort(key=lambda x: x['data'], reverse=True)
+
+        return jsonify({
+            'success': True,
+            'datas': datas_lista
+        }), 200
+
+    except Exception as e:
+        logging.error(f'Erro ao listar datas das evoluções de enfermagem: {str(e)}')
+        logging.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'message': f'Erro interno do servidor: {str(e)}'
+        }), 500
+
+# Rota para imprimir evoluções de enfermagem de uma data específica
+@bp.route('/imprimir/evolucoes_enfermagem/<string:atendimento_id>')
+@login_required
+def imprimir_evolucoes_enfermagem(atendimento_id):
+    """
+    Imprime as evoluções de enfermagem de uma data específica
+    """
+    try:
+        # Pegar a data da query string
+        data_selecionada_str = request.args.get('data')
+        if not data_selecionada_str:
+            flash('Data não especificada para impressão.', 'warning')
+            return redirect(url_for('main.impressoes_enfermagem', atendimento_id=atendimento_id))
+
+        # Converter a data
+        try:
+            data_selecionada = datetime.strptime(data_selecionada_str, '%Y-%m-%d').date()
+        except ValueError:
+            flash('Formato de data inválido.', 'danger')
+            return redirect(url_for('main.impressoes_enfermagem', atendimento_id=atendimento_id))
+
+        # Buscar o atendimento
+        atendimento = Atendimento.query.get(atendimento_id)
+        if not atendimento:
+            flash('Atendimento não encontrado.', 'danger')
+            return redirect(url_for('main.pacientes_internados'))
+
+        # Buscar a internação
+        internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
+        if not internacao:
+            flash('Internação não encontrada.', 'danger')
+            return redirect(url_for('main.pacientes_internados'))
+        
+        # Buscar o paciente
+        paciente = Paciente.query.get(internacao.paciente_id)
+        if not paciente:
+            flash('Paciente não encontrado.', 'danger')
+            return redirect(url_for('main.pacientes_internados'))
+        
+        # Buscar as evoluções da data selecionada
+        inicio_dia = datetime.combine(data_selecionada, datetime.min.time())
+        fim_dia = datetime.combine(data_selecionada, datetime.max.time())
+        
+        evolucoes = EvolucaoEnfermagem.query\
+            .filter_by(atendimentos_clinica_id=internacao.id)\
+            .filter(EvolucaoEnfermagem.data_evolucao >= inicio_dia)\
+            .filter(EvolucaoEnfermagem.data_evolucao <= fim_dia)\
+            .join(Funcionario, EvolucaoEnfermagem.funcionario_id == Funcionario.id)\
+            .add_columns(
+                EvolucaoEnfermagem.id,
+                EvolucaoEnfermagem.data_evolucao,
+                EvolucaoEnfermagem.texto,
+                Funcionario.nome.label('enfermeiro_nome')
+            )\
+            .order_by(EvolucaoEnfermagem.data_evolucao.asc())\
+            .all()
+        
+        if not evolucoes:
+            flash(f'Nenhuma evolução de enfermagem encontrada para o dia {data_selecionada.strftime("%d/%m/%Y")}.', 'warning')
+            return redirect(url_for('main.impressoes_enfermagem', atendimento_id=atendimento_id))
+        
+        # Preparar dados das evoluções
+        evolucoes_dados = []
+        for evolucao in evolucoes:
+            evolucoes_dados.append({
+                'id': evolucao.id,
+                'data_evolucao': evolucao.data_evolucao,
+                'texto': evolucao.texto,
+                'enfermeiro_nome': evolucao.enfermeiro_nome,
+                'enfermeiro_coren': evolucao.enfermeiro_coren
+            })
+        
+        return render_template('impressao_evolucoes_enfermagem.html',
+                             paciente=paciente,
+                             internacao=internacao,
+                             atendimento=atendimento,
+                             evolucoes=evolucoes_dados,
+                             data_selecionada=data_selecionada,
+                             data_geracao=datetime.now(),
+                             atendimento_id=atendimento_id)
+        
+    except Exception as e:
+        logging.error(f"Erro ao imprimir evoluções de enfermagem: {str(e)}")
+        logging.error(traceback.format_exc())
+        flash('Erro ao gerar impressão das evoluções de enfermagem. Por favor, tente novamente.', 'danger')
+        return redirect(url_for('main.impressoes_enfermagem', atendimento_id=atendimento_id))
+
+# API para listar datas disponíveis das prescrições de enfermagem
+@bp.route('/api/enfermagem/prescricoes/datas/<string:atendimento_id>', methods=['GET'])
+@login_required
+def listar_datas_prescricoes_enfermagem(atendimento_id):
+    """
+    Lista as datas disponíveis das prescrições de enfermagem para um atendimento específico.
+    """
+    try:
+        # Verificar se o usuário é enfermeiro ou médico
+        current_user = get_current_user()
+        if current_user.cargo.lower() not in ['enfermeiro', 'medico']:
+            return jsonify({
+                'success': False,
+                'message': 'Acesso permitido apenas para enfermeiros e médicos'
+            }), 403
+
+        # Buscar a internação
+        internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
+        if not internacao:
+            return jsonify({
+                'success': False,
+                'message': 'Internação não encontrada'
+            }), 404
+
+        # Buscar as datas das prescrições
+        prescricoes = PrescricaoEnfermagem.query\
+            .filter_by(atendimentos_clinica_id=internacao.id)\
+            .order_by(PrescricaoEnfermagem.data_prescricao.desc())\
+            .all()
+
+        # Agrupar por data
+        datas_disponiveis = {}
+        for prescricao in prescricoes:
+            if prescricao.data_prescricao:
+                data_str = prescricao.data_prescricao.strftime('%Y-%m-%d')
+                data_display = prescricao.data_prescricao.strftime('%d/%m/%Y')
+                
+                if data_str not in datas_disponiveis:
+                    datas_disponiveis[data_str] = {
+                        'data': data_str,
+                        'data_display': data_display,
+                        'quantidade': 0
+                    }
+                datas_disponiveis[data_str]['quantidade'] += 1
+
+        # Converter para lista ordenada
+        datas_lista = list(datas_disponiveis.values())
+        datas_lista.sort(key=lambda x: x['data'], reverse=True)
+
+        return jsonify({
+            'success': True,
+            'datas': datas_lista
+        }), 200
+
+    except Exception as e:
+        logging.error(f'Erro ao listar datas das prescrições de enfermagem: {str(e)}')
+        logging.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'message': f'Erro interno do servidor: {str(e)}'
+        }), 500
+
+# Rota para imprimir prescrições de enfermagem de uma data específica
+@bp.route('/imprimir/prescricoes_enfermagem/<string:atendimento_id>')
+@login_required
+def imprimir_prescricoes_enfermagem(atendimento_id):
+    """
+    Imprime as prescrições de enfermagem de uma data específica
+    """
+    try:
+        # Pegar a data da query string
+        data_selecionada_str = request.args.get('data')
+        if not data_selecionada_str:
+            flash('Data não especificada para impressão.', 'warning')
+            return redirect(url_for('main.impressoes_enfermagem', atendimento_id=atendimento_id))
+
+        # Converter a data
+        try:
+            data_selecionada = datetime.strptime(data_selecionada_str, '%Y-%m-%d').date()
+        except ValueError:
+            flash('Formato de data inválido.', 'danger')
+            return redirect(url_for('main.impressoes_enfermagem', atendimento_id=atendimento_id))
+
+        # Buscar o atendimento
+        atendimento = Atendimento.query.get(atendimento_id)
+        if not atendimento:
+            flash('Atendimento não encontrado.', 'danger')
+            return redirect(url_for('main.pacientes_internados'))
+
+        # Buscar a internação
+        internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
+        if not internacao:
+            flash('Internação não encontrada.', 'danger')
+            return redirect(url_for('main.pacientes_internados'))
+        
+        # Buscar o paciente
+        paciente = Paciente.query.get(internacao.paciente_id)
+        if not paciente:
+            flash('Paciente não encontrado.', 'danger')
+            return redirect(url_for('main.pacientes_internados'))
+        
+        # Buscar as prescrições da data selecionada
+        inicio_dia = datetime.combine(data_selecionada, datetime.min.time())
+        fim_dia = datetime.combine(data_selecionada, datetime.max.time())
+        
+        prescricoes = PrescricaoEnfermagem.query\
+            .filter_by(atendimentos_clinica_id=internacao.id)\
+            .filter(PrescricaoEnfermagem.data_prescricao >= inicio_dia)\
+            .filter(PrescricaoEnfermagem.data_prescricao <= fim_dia)\
+            .join(Funcionario, PrescricaoEnfermagem.funcionario_id == Funcionario.id)\
+            .add_columns(
+                PrescricaoEnfermagem.id,
+                PrescricaoEnfermagem.data_prescricao,
+                PrescricaoEnfermagem.texto,
+                Funcionario.nome.label('enfermeiro_nome')
+            )\
+            .order_by(PrescricaoEnfermagem.data_prescricao.asc())\
+            .all()
+        
+        if not prescricoes:
+            flash(f'Nenhuma prescrição de enfermagem encontrada para o dia {data_selecionada.strftime("%d/%m/%Y")}.', 'warning')
+            return redirect(url_for('main.impressoes_enfermagem', atendimento_id=atendimento_id))
+        
+        # Preparar dados das prescrições
+        prescricoes_dados = []
+        for prescricao in prescricoes:
+            prescricoes_dados.append({
+                'id': prescricao.id,
+                'data_prescricao': prescricao.data_prescricao,
+                'texto': prescricao.texto,
+                'enfermeiro_nome': prescricao.enfermeiro_nome
+            })
+        
+        return render_template('impressao_prescricoes_enfermagem.html',
+                             paciente=paciente,
+                             internacao=internacao,
+                             atendimento=atendimento,
+                             prescricoes=prescricoes_dados,
+                             data_selecionada=data_selecionada,
+                             data_geracao=datetime.now(),
+                             atendimento_id=atendimento_id)
+        
+    except Exception as e:
+        logging.error(f"Erro ao imprimir prescrições de enfermagem: {str(e)}")
+        logging.error(traceback.format_exc())
+        flash('Erro ao gerar impressão das prescrições de enfermagem. Por favor, tente novamente.', 'danger')
+        return redirect(url_for('main.impressoes_enfermagem', atendimento_id=atendimento_id))

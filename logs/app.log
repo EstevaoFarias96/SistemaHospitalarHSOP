@@ -12434,3 +12434,466 @@ werkzeug.exceptions.InternalServerError: 500 Internal Server Error: Erro interno
 2025-06-06 10:40:19,211 [INFO] __init__:62 - LoginManager inicializado com sucesso
 2025-06-06 10:40:19,308 [INFO] __init__:81 - Blueprints registrados com sucesso
 2025-06-06 10:40:19,322 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 11:29:18,992 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 11:29:18,992 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 11:29:19,013 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 11:29:19,013 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 11:29:19,152 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 11:29:19,171 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 11:29:19,406 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 11:29:19,406 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 11:29:19,427 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 11:29:19,427 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 11:29:19,540 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 11:29:19,554 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 11:30:41,866 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 11:30:41,866 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 11:30:41,887 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 11:30:41,887 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 11:30:42,015 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 11:30:42,028 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 16:48:34,177 [ERROR] __init__:128 - Erro 500: 500 Internal Server Error: Erro interno: Encountered unknown tag 'break'. Jinja was looking for the following tags: 'elif' or 'else' or 'endif'. The innermost block that needs to be closed is 'if'.
+2025-06-06 16:48:34,181 [ERROR] __init__:129 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/routes.py", line 5223, in imprimir_identificacao_paciente
+    return render_template('imprimir_identificacao_paciente.html',
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/jinja2/environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/jinja2/loaders.py", line 138, in load
+    code = environment.compile(source, name, filename)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/jinja2/environment.py", line 771, in compile
+    self.handle_exception(source=source_hint)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/estevaofilho/HSOP/app/templates/imprimir_identificacao_paciente.html", line 332, in template
+    {% break %}
+jinja2.exceptions.TemplateSyntaxError: Encountered unknown tag 'break'. Jinja was looking for the following tags: 'elif' or 'else' or 'endif'. The innermost block that needs to be closed is 'if'.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/estevaofilho/HSOP/app/routes.py", line 32, in decorated_function
+    return f(*args, **kwargs)
+  File "/home/estevaofilho/HSOP/app/routes.py", line 5236, in imprimir_identificacao_paciente
+    abort(500, f'Erro interno: {str(e)}')
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/helpers.py", line 284, in abort
+    current_app.aborter(code, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.InternalServerError: 500 Internal Server Error: Erro interno: Encountered unknown tag 'break'. Jinja was looking for the following tags: 'elif' or 'else' or 'endif'. The innermost block that needs to be closed is 'if'.
+
+2025-06-06 16:48:34,864 [ERROR] __init__:128 - Erro 500: 500 Internal Server Error: Erro interno: Encountered unknown tag 'break'. Jinja was looking for the following tags: 'elif' or 'else' or 'endif'. The innermost block that needs to be closed is 'if'.
+2025-06-06 16:48:34,864 [ERROR] __init__:129 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/routes.py", line 5223, in imprimir_identificacao_paciente
+    return render_template('imprimir_identificacao_paciente.html',
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/jinja2/environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/jinja2/loaders.py", line 138, in load
+    code = environment.compile(source, name, filename)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/jinja2/environment.py", line 771, in compile
+    self.handle_exception(source=source_hint)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/estevaofilho/HSOP/app/templates/imprimir_identificacao_paciente.html", line 332, in template
+    {% break %}
+jinja2.exceptions.TemplateSyntaxError: Encountered unknown tag 'break'. Jinja was looking for the following tags: 'elif' or 'else' or 'endif'. The innermost block that needs to be closed is 'if'.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/estevaofilho/HSOP/app/routes.py", line 32, in decorated_function
+    return f(*args, **kwargs)
+  File "/home/estevaofilho/HSOP/app/routes.py", line 5236, in imprimir_identificacao_paciente
+    abort(500, f'Erro interno: {str(e)}')
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/helpers.py", line 284, in abort
+    current_app.aborter(code, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.InternalServerError: 500 Internal Server Error: Erro interno: Encountered unknown tag 'break'. Jinja was looking for the following tags: 'elif' or 'else' or 'endif'. The innermost block that needs to be closed is 'if'.
+
+2025-06-06 16:48:35,076 [ERROR] __init__:128 - Erro 500: 500 Internal Server Error: Erro interno: Encountered unknown tag 'break'. Jinja was looking for the following tags: 'elif' or 'else' or 'endif'. The innermost block that needs to be closed is 'if'.
+2025-06-06 16:48:35,076 [ERROR] __init__:129 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/routes.py", line 5223, in imprimir_identificacao_paciente
+    return render_template('imprimir_identificacao_paciente.html',
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/jinja2/environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/jinja2/loaders.py", line 138, in load
+    code = environment.compile(source, name, filename)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/jinja2/environment.py", line 771, in compile
+    self.handle_exception(source=source_hint)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/estevaofilho/HSOP/app/templates/imprimir_identificacao_paciente.html", line 332, in template
+    {% break %}
+jinja2.exceptions.TemplateSyntaxError: Encountered unknown tag 'break'. Jinja was looking for the following tags: 'elif' or 'else' or 'endif'. The innermost block that needs to be closed is 'if'.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/estevaofilho/HSOP/app/routes.py", line 32, in decorated_function
+    return f(*args, **kwargs)
+  File "/home/estevaofilho/HSOP/app/routes.py", line 5236, in imprimir_identificacao_paciente
+    abort(500, f'Erro interno: {str(e)}')
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/helpers.py", line 284, in abort
+    current_app.aborter(code, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.InternalServerError: 500 Internal Server Error: Erro interno: Encountered unknown tag 'break'. Jinja was looking for the following tags: 'elif' or 'else' or 'endif'. The innermost block that needs to be closed is 'if'.
+
+2025-06-06 16:48:35,256 [ERROR] __init__:128 - Erro 500: 500 Internal Server Error: Erro interno: Encountered unknown tag 'break'. Jinja was looking for the following tags: 'elif' or 'else' or 'endif'. The innermost block that needs to be closed is 'if'.
+2025-06-06 16:48:35,256 [ERROR] __init__:129 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/routes.py", line 5223, in imprimir_identificacao_paciente
+    return render_template('imprimir_identificacao_paciente.html',
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/templating.py", line 149, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1087, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/jinja2/environment.py", line 1016, in get_template
+    return self._load_template(name, globals)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/jinja2/environment.py", line 975, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/jinja2/loaders.py", line 138, in load
+    code = environment.compile(source, name, filename)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/jinja2/environment.py", line 771, in compile
+    self.handle_exception(source=source_hint)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/estevaofilho/HSOP/app/templates/imprimir_identificacao_paciente.html", line 332, in template
+    {% break %}
+jinja2.exceptions.TemplateSyntaxError: Encountered unknown tag 'break'. Jinja was looking for the following tags: 'elif' or 'else' or 'endif'. The innermost block that needs to be closed is 'if'.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/estevaofilho/HSOP/app/routes.py", line 32, in decorated_function
+    return f(*args, **kwargs)
+  File "/home/estevaofilho/HSOP/app/routes.py", line 5236, in imprimir_identificacao_paciente
+    abort(500, f'Erro interno: {str(e)}')
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/helpers.py", line 284, in abort
+    current_app.aborter(code, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.InternalServerError: 500 Internal Server Error: Erro interno: Encountered unknown tag 'break'. Jinja was looking for the following tags: 'elif' or 'else' or 'endif'. The innermost block that needs to be closed is 'if'.
+
+2025-06-06 19:08:01,307 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 19:08:01,307 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 19:08:01,329 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 19:08:01,329 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 19:08:01,462 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 19:08:01,478 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 19:19:34,238 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 19:19:34,238 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 19:19:34,257 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 19:19:34,257 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 19:19:34,379 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 19:19:34,392 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 19:22:35,836 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 19:22:35,836 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 19:22:35,857 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 19:22:35,857 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 19:22:35,975 [ERROR] __init__:83 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.imprimir_evolucao_html
+2025-06-06 19:22:35,978 [ERROR] __init__:84 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 79, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.imprimir_evolucao_html
+
+2025-06-06 19:22:35,990 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 19:23:11,659 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 19:23:11,659 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 19:23:11,678 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 19:23:11,678 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 19:23:11,801 [ERROR] __init__:83 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.imprimir_evolucao_html
+2025-06-06 19:23:11,801 [ERROR] __init__:84 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 79, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.imprimir_evolucao_html
+
+2025-06-06 19:23:11,814 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 19:27:38,299 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 19:27:38,299 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 19:27:38,318 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 19:27:38,318 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 19:27:38,443 [ERROR] __init__:83 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.imprimir_evolucao_html
+2025-06-06 19:27:38,443 [ERROR] __init__:84 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 79, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.imprimir_evolucao_html
+
+2025-06-06 19:27:38,457 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 19:28:48,418 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 19:28:48,418 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 19:28:48,437 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 19:28:48,437 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 19:28:48,468 [ERROR] __init__:83 - Erro ao registrar blueprint: expected 'except' or 'finally' block (routes.py, line 1966)
+2025-06-06 19:28:48,468 [ERROR] __init__:84 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 78, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/app/routes.py", line 1966
+    leito.ocupacao_atual -= 1
+                             ^
+SyntaxError: expected 'except' or 'finally' block
+
+2025-06-06 19:28:48,482 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 19:30:24,820 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 19:30:24,820 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 19:30:24,840 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 19:30:24,840 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 19:30:24,936 [ERROR] __init__:83 - Erro ao registrar blueprint: cannot import name 'internacoes_especiais_bp' from 'app.routes' (/home/estevaofilho/HSOP/app/routes.py)
+2025-06-06 19:30:24,937 [ERROR] __init__:84 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 78, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+ImportError: cannot import name 'internacoes_especiais_bp' from 'app.routes' (/home/estevaofilho/HSOP/app/routes.py)
+
+2025-06-06 19:30:24,951 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 19:30:32,290 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 19:30:32,290 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 19:30:32,310 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 19:30:32,310 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 19:30:32,436 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 19:30:32,454 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 20:36:09,947 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 20:36:09,947 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 20:36:09,966 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 20:36:09,966 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 20:36:10,004 [ERROR] __init__:83 - Erro ao registrar blueprint: expected 'except' or 'finally' block (routes.py, line 3218)
+2025-06-06 20:36:10,004 [ERROR] __init__:84 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 78, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/app/routes.py", line 3218
+    }), 403
+           ^
+SyntaxError: expected 'except' or 'finally' block
+
+2025-06-06 20:36:10,016 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 20:36:38,603 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 20:36:38,603 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 20:36:38,623 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 20:36:38,624 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 20:36:38,748 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 20:36:38,761 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 20:37:11,414 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 20:37:11,414 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 20:37:11,432 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 20:37:11,432 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 20:37:11,478 [ERROR] __init__:83 - Erro ao registrar blueprint: invalid syntax (routes.py, line 5351)
+2025-06-06 20:37:11,479 [ERROR] __init__:84 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 78, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/app/routes.py", line 5351
+    @bp.route('/clinica/evolucao-paciente-medico/<string:atendimento_id>')
+SyntaxError: invalid syntax
+
+2025-06-06 20:37:11,490 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 20:39:46,557 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 20:39:46,557 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 20:39:46,577 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 20:39:46,577 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 20:39:46,695 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 20:39:46,710 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 20:47:20,399 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 20:47:20,399 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 20:47:20,417 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 20:47:20,417 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 20:47:20,534 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 20:47:20,552 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 20:47:45,080 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 20:47:45,080 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 20:47:45,100 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 20:47:45,101 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 20:47:45,225 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 20:47:45,238 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 21:01:00,130 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 21:01:00,130 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 21:01:00,148 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 21:01:00,148 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 21:01:00,271 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 21:01:00,284 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 21:05:26,652 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 21:05:26,652 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 21:05:26,671 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 21:05:26,671 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 21:05:26,799 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 21:05:26,811 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 21:07:09,236 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 21:07:09,236 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 21:07:09,254 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 21:07:09,254 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 21:07:09,355 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 21:07:09,367 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 21:07:09,543 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 21:07:09,543 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 21:07:09,562 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 21:07:09,562 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 21:07:09,670 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 21:07:09,686 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 21:08:13,654 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 21:08:13,654 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 21:08:13,674 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 21:08:13,674 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 21:08:13,797 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 21:08:13,811 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 21:09:38,017 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 21:09:38,017 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 21:09:38,037 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 21:09:38,037 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 21:09:38,159 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 21:09:38,169 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 21:15:22,401 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 21:15:22,401 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 21:15:22,421 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 21:15:22,421 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 21:15:22,554 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 21:15:22,567 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 21:16:22,519 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 21:16:22,519 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 21:16:22,537 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 21:16:22,537 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 21:16:22,665 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 21:16:22,680 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 21:18:46,654 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 21:18:46,654 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 21:18:46,673 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 21:18:46,673 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 21:18:46,805 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 21:18:46,816 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 21:32:01,919 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 21:32:01,919 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 21:32:01,938 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 21:32:01,938 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 21:32:02,060 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 21:32:02,076 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 21:33:53,675 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 21:33:53,675 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 21:33:53,694 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 21:33:53,694 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 21:33:53,818 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 21:33:53,829 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 21:37:30,607 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 21:37:30,607 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 21:37:30,626 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 21:37:30,626 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 21:37:30,751 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 21:37:30,763 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 21:41:19,727 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 21:41:19,727 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 21:41:19,745 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 21:41:19,745 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 21:41:19,869 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 21:41:19,882 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 21:41:21,141 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 21:41:21,141 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 21:41:21,163 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 21:41:21,163 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 21:41:21,294 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 21:41:21,307 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 21:45:49,819 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 21:45:49,819 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 21:45:49,839 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 21:45:49,839 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 21:45:49,962 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 21:45:49,975 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 21:46:33,742 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 21:46:33,742 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 21:46:33,764 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 21:46:33,764 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 21:46:33,905 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 21:46:33,922 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 21:47:00,446 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 21:47:00,446 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 21:47:00,466 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 21:47:00,467 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 21:47:00,601 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 21:47:00,613 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 21:47:52,431 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 21:47:52,431 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 21:47:52,450 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 21:47:52,450 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 21:47:52,579 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 21:47:52,591 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 21:47:53,872 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 21:47:53,872 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 21:47:53,892 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 21:47:53,892 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 21:47:54,021 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 21:47:54,035 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 22:16:48,769 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 22:16:48,769 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 22:16:48,789 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 22:16:48,789 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 22:16:48,915 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 22:16:48,926 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas

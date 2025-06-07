@@ -808,6 +808,26 @@ function voltarParaPacientesInternados() {
         window.location.replace('/clinica/pacientes-internados');
     }
 }
+
+// Função para abrir a página de impressões de enfermagem
+function abrirImpressoesEnfermagem() {
+    console.log('🖨️ Botão Impressões de Enfermagem clicado - Redirecionando para impressões');
+    try {
+        const atendimentoId = window.ATENDIMENTO_ID;
+        if (!atendimentoId) {
+            console.error('❌ Erro: ID do atendimento não encontrado');
+            alert('Erro: ID do atendimento não encontrado. Por favor, recarregue a página.');
+            return;
+        }
+        
+        const url = `/clinica/impressoes-enfermagem/${atendimentoId}`;
+        console.log('✅ Redirecionando para:', url);
+        window.location.href = url;
+    } catch (error) {
+        console.error('❌ Erro no redirecionamento:', error);
+        alert('Erro ao abrir as impressões de enfermagem. Por favor, tente novamente.');
+    }
+}
 </script>
 
 <!-- Menu Lateral -->
@@ -869,7 +889,39 @@ function voltarParaPacientesInternados() {
         </div>
 
         <div id="printSection" class="content-section">
-            <div class="alert alert-secondary">Função de impressão será implementada futuramente.</div>
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Opções de Impressão</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-user-nurse fa-3x text-primary mb-3"></i>
+                                    <h6 class="card-title">Relatórios de Enfermagem</h6>
+                                    <p class="card-text">Imprimir evoluções, prescrições e SAE de enfermagem</p>
+                                    <button type="button" class="btn btn-primary" onclick="abrirImpressoesEnfermagem()">
+                                        <i class="fas fa-print me-2"></i>Acessar Impressões
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-file-medical fa-3x text-info mb-3"></i>
+                                    <h6 class="card-title">Outras Opções</h6>
+                                    <p class="card-text">Outras funcionalidades de impressão serão implementadas</p>
+                                    <button type="button" class="btn btn-outline-secondary" disabled>
+                                        <i class="fas fa-cogs me-2"></i>Em Desenvolvimento
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div id="prescricaoSection" class="content-section">
@@ -3388,146 +3440,22 @@ function voltarParaPacientesInternados() {
             }
         });
 
-        // Função para carregar prescrições de enfermagem
-        // Função para carregar prescrições de enfermagem
-        function carregarPrescricoesEnfermagem() {
-            // Usar a variável global internacaoId já declarada
-            // const internacaoId = $('#internacao_id_prescricao').val(); // Removido - usar a global
-
-            $.ajax({
-                url: `/api/enfermagem/prescricao/${internacaoId}`,
-                method: 'GET',
-                success: function(response) {
-                    const tbody = $('#listaPrescricoesEnfermagem');
-                    tbody.empty();
-
-                    if (response && response.length > 0) {
-                        response.forEach(prescricao => {
-                            let dataFormatada = '-';
-                            if (prescricao.data_prescricao) {
-                                let dataObj = new Date(prescricao.data_prescricao);
-                                dataObj.setDate(dataObj.getDate() + 1);
-                                dataFormatada = dataObj.toLocaleString('pt-BR', {
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    year: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                });
-                            }
-
-                            let html = `
-                                <tr>
-                                    <td>${dataFormatada}</td>
-                                    <td>${prescricao.enfermeiro_nome || 'Não informado'}</td>
-                                    <td>
-                                        <div class="texto-evolucao">
-                                            ${prescricao.texto || '---'}
-                                        </div>
-                                    </td>
-                                    <td>`;
-
-                            if ("{{ session.get('cargo') }}".toLowerCase().trim() === "enfermeiro") {
-                                html += `
-                                    <button class="btn btn-sm btn-outline-primary btn-editar-prescricao-enfermagem" 
-                                            data-id="${prescricao.id}" 
-                                            data-texto="${prescricao.texto.replace(/"/g, '&quot;')}">
-                                        <i class="fas fa-edit"></i>
-                                    </button>`;
-                            }
-
-                            html += `</td></tr>`;
-                            tbody.append(html);
-                        });
-                    } else {
-                        tbody.html('<tr><td colspan="4" class="text-center">Nenhuma prescrição registrada.</td></tr>');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Erro ao carregar prescrições:', error);
-                    $('#listaPrescricoesEnfermagem').html(
-                        '<tr><td colspan="4" class="text-center text-danger">Erro ao carregar prescrições.</td></tr>'
-                    );
-                }
-            });
+        // Verificar se o formulário já tem um handler de submit para evitar duplicações
+        if ($._data($('#formPrescricaoEnfermagem')[0], 'events') === undefined ||
+            !$._data($('#formPrescricaoEnfermagem')[0], 'events').submit) {
+            
+            console.log('[clinica_evolucao_paciente_enfermeiro.html] Não há handler de submit configurado para #formPrescricaoEnfermagem. O módulo enfermagem_completo.js deve configurar.');
+        } else {
+            console.log('[clinica_evolucao_paciente_enfermeiro.html] Handler de submit já configurado para #formPrescricaoEnfermagem pelo módulo enfermagem_completo.js.');
         }
 
-        // Handler para submissão do formulário (único)
-        $('#formPrescricaoEnfermagem').on('submit', function(e) {
-            e.preventDefault();
-
-            const prescricaoId = $('#prescricao_enfermagem_id').val();
-            const texto = $('#texto_prescricao_enfermagem').val().trim();
-
-            if (!texto) {
-                alert('Por favor, preencha o texto da prescrição.');
-                return;
-            }
-
-            const dados = {
-                texto: texto
-            };
-
-            const finalizar = () => {
-                $('#modalPrescricaoEnfermagem').modal('hide');
-                $('#formPrescricaoEnfermagem')[0].reset();
-                $('#prescricao_enfermagem_id').val('');
-                carregarPrescricoesEnfermagem();
-                alert('Prescrição ' + (prescricaoId ? 'atualizada' : 'registrada') + ' com sucesso!');
-            };
-
-            if (prescricaoId) {
-                // Atualização
-                $.ajax({
-                    url: `/api/enfermagem/prescricao/${prescricaoId}`,
-                    method: 'PUT',
-                    contentType: 'application/json',
-                    data: JSON.stringify(dados),
-                    success: finalizar,
-                    error: function(xhr) {
-                        alert('Erro ao atualizar a prescrição: ' + (xhr.responseJSON?.erro || 'Erro desconhecido.'));
-                    }
-                });
-            } else {
-                // Inserção
-                dados.atendimentos_clinica_id = parseInt($('#internacao_id_prescricao').val());
-                dados.funcionario_id = parseInt($('#enfermeiro_id').val());
-
-                $.ajax({
-                    url: '/api/enfermagem/prescricao',
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify(dados),
-                    success: finalizar,
-                    error: function(xhr) {
-                        alert('Erro ao registrar a prescrição: ' + (xhr.responseJSON?.erro || 'Erro desconhecido.'));
-                    }
-                });
-            }
-        });
-
-        // Handler para edição
-        $(document).on('click', '.btn-editar-prescricao-enfermagem', function() {
-            const id = $(this).data('id');
-            const texto = $(this).data('texto');
-
-            $('#prescricao_enfermagem_id').val(id);
-            $('#texto_prescricao_enfermagem').val(texto);
-            $('#modalPrescricaoEnfermagemLabel').text('Editar Prescrição de Enfermagem');
-            $('#modalPrescricaoEnfermagem').modal('show');
-        });
-
-        // Reset do modal ao abrir para nova prescrição
-        $('#modalPrescricaoEnfermagem').on('show.bs.modal', function(e) {
-            if (!$(e.relatedTarget).hasClass('btn-editar-prescricao-enfermagem')) {
-                $('#prescricao_enfermagem_id').val('');
-                $('#texto_prescricao_enfermagem').val('');
-                $('#modalPrescricaoEnfermagemLabel').text('Nova Prescrição de Enfermagem');
-            }
-        });
-
-        // Carregar prescrições ao iniciar
-        carregarPrescricoesEnfermagem();
+        // Carregar prescrições ao iniciar usando a função do módulo externo
+        if (typeof carregarPrescricoesEnfermagem === 'function') {
+            console.log('Carregando prescrições de enfermagem usando função do módulo externo');
+            carregarPrescricoesEnfermagem();
+        } else {
+            console.error('Função carregarPrescricoesEnfermagem não encontrada no módulo enfermagem_completo.js');
+        }
 
     });
 

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Identificação do Paciente - {{ paciente.nome }}</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 1cm;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.2;
+            color: #000;
+            background: white;
+        }
+        
+        .identification-card {
+            border: 2px solid #000;
+            padding: 10px;
+            background: white;
+            height: calc(100vh - 2cm);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .hospital-header {
+            text-align: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .hospital-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 3px;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            color: #000;
+            font-weight: bold;
+        }
+        
+        .main-content {
+            display: block;
+            flex: 1;
+        }
+        
+        .left-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+        }
+        
+        .right-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .patient-name {
+            font-size: 28px;
+            font-weight: bold;
+            color: #000;
+            text-transform: uppercase;
+            border: 2px solid #000;
+            padding: 8px;
+            background: white;
+            text-align: center;
+        }
+        
+        .critical-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        
+        .info-box {
+            border: 1px solid #000;
+            padding: 6px;
+            background: white;
+        }
+        
+        .info-label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #000;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+            display: block;
+        }
+        
+        .info-value {
+            font-size: 14px;
+            font-weight: bold;
+            color: #000;
+            word-wrap: break-word;
+        }
+        
+        .allergies-section {
+            background: white;
+            border: 2px solid #000;
+            padding: 12px;
+            flex: 1;
+        }
+        
+        .allergies-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .alert-icon {
+            font-size: 18px;
+        }
+        
+        .allergies-content {
+            font-size: 12px;
+            color: #000;
+            font-weight: bold;
+        }
+        
+        .medical-team {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .team-member {
+            border: 1px solid #000;
+            padding: 6px;
+            background: white;
+        }
+        
+        .medical-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .prescriptions-alert {
+            background: white;
+            border: 2px solid #000;
+            padding: 15px;
+            height: calc(100% - 40px);
+            overflow-y: auto;
+        }
+        
+        .prescriptions-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 12px;
+        }
+        
+        .prescription-item {
+            font-size: 11px;
+            color: #000;
+            margin-bottom: 8px;
+            padding: 8px;
+            background: white;
+            border-left: 2px solid #000;
+        }
+        
+        .diagnostico-section {
+            border: 1px solid #000;
+            padding: 6px;
+            background: white;
+        }
+        
+        .risks-section {
+            border: 2px solid #000;
+            padding: 12px;
+            background: white;
+        }
+        
+        .risks-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .risks-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .risk-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .checkbox {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #000;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        
+        .footer-info {
+            border-top: 2px solid #000;
+            padding-top: 8px;
+            margin-top: 10px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            font-size: 12px;
+        }
+        
+        .print-date {
+            text-align: right;
+            color: #000;
+        }
+        
+        .leito-destaque {
+            background: white;
+            border: 3px solid #000;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .leito-label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 5px;
+        }
+        
+        .leito-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #000;
+        }
+        
+        .leito-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .leito-box {
+            border: 2px solid #000;
+            padding: 6px;
+            text-align: center;
+            background: white;
+        }
+        
+        .allergies-compact {
+            background: white;
+            border: 2px solid #000;
+            padding: 8px;
+            margin-top: 8px;
+        }
+        
+        .risks-compact {
+            border: 2px solid #000;
+            padding: 8px;
+            background: white;
+            margin-top: 8px;
+        }
+        
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+            }
+            
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="identification-card">
+        <div class="hospital-header">
+            <div class="hospital-name">{{ hospital_nome }}</div>
+            <div class="card-title">IDENTIFICAÇÃO DO PACIENTE</div>
+        </div>
+        
+        <div class="main-content">
+            <div class="left-section">
+                <div class="patient-name">{{ paciente.nome }}</div>
+                
+                <div class="critical-info">
+                    <div class="info-box">
+                        <span class="info-label">Atendimento ID</span>
+                        <div class="info-value">{{ atendimento.id }}</div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <span class="info-label">Idade / Sexo</span>
+                        <div class="info-value">
+                            {% if idade %}{{ idade }} anos{% else %}N/I{% endif %} / {{ paciente.sexo or 'N/I' }}
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <span class="info-label">Nome da Mãe</span>
+                        <div class="info-value">{{ paciente.filiacao or 'N/I' }}</div>
+                    </div>
+                </div>
+                
+                <div class="medical-info">
+                    <div class="info-box">
+                        <span class="info-label">Tipo de Internação</span>
+                        <div class="info-value" style="font-size: 11px;">{{ internacao.carater_internacao or 'N/I' }}</div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <span class="info-label">Antibiótico</span>
+                        <div class="info-value" style="font-size: 11px;">{{ internacao.antibiotico or 'N/I' }}</div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <span class="info-label">Dieta</span>
+                        <div class="info-value" style="font-size: 11px;">
+                            {% set dieta_encontrada = false %}
+                            {% if prescricoes %}
+                                {% for prescricao in prescricoes %}
+                                    {% if prescricao.texto_dieta and not dieta_encontrada %}
+                                        {{ prescricao.texto_dieta }}
+                                        {% set dieta_encontrada = true %}
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                            {% if not dieta_encontrada %}N/I{% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                {% if internacao.diagnostico or internacao.diagnostico_inicial %}
+                <div class="diagnostico-section">
+                    <span class="info-label">Diagnóstico Principal</span>
+                    <div class="info-value" style="font-size: 11px;">
+                        {{ internacao.diagnostico or internacao.diagnostico_inicial or 'Não informado' }}
+                        {% if internacao.cid_principal %}
+                            <br><strong>CID:</strong> {{ internacao.cid_principal }}
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="leito-info">
+                    <div class="leito-box">
+                        <div class="info-label">LEITO</div>
+                        <div class="info-value" style="font-size: 18px;">{{ internacao.leito or 'N/D' }}</div>
+                    </div>
+                    
+                    <div class="leito-box">
+                        <div class="info-label">Data Internação</div>
+                        <div class="info-value" style="font-size: 10px;">
+                            {% if internacao.data_internacao %}
+                                {{ internacao.data_internacao.strftime('%d/%m/%Y') }}
+                            {% else %}
+                                {{ atendimento.data_atendimento.strftime('%d/%m/%Y') if atendimento.data_atendimento else 'N/I' }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="leito-box">
+                        <div class="info-label">Atendimento</div>
+                        <div class="info-value" style="font-size: 14px;">{{ atendimento.id }}</div>
+                    </div>
+                </div>
+                
+                {% if atendimento.alergias or paciente.cartao_sus %}
+                <div class="allergies-compact">
+                    <div class="allergies-title" style="font-size: 12px; margin-bottom: 8px;">
+                        <span class="alert-icon">⚠️</span>
+                        ALERGIAS / INFORMAÇÕES
+                    </div>
+                    <div class="allergies-content" style="font-size: 11px;">
+                        {% if atendimento.alergias %}
+                            {{ atendimento.alergias }}
+                        {% else %}
+                            Não há alergias registradas
+                        {% endif %}
+                        {% if paciente.cartao_sus %}
+                            <br><strong>Cartão SUS:</strong> {{ paciente.cartao_sus }}
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="risks-compact">
+                    <div class="risks-title" style="font-size: 12px; margin-bottom: 8px;">RISCOS</div>
+                    <div class="risks-grid" style="grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                        <div class="risk-item" style="font-size: 11px;">
+                            <span class="checkbox" style="width: 14px; height: 14px;"></span>
+                            QUEDA
+                        </div>
+                        <div class="risk-item" style="font-size: 11px;">
+                            <span class="checkbox" style="width: 14px; height: 14px;"></span>
+                            BRONCOASPIRAÇÃO
+                        </div>
+                        <div class="risk-item" style="font-size: 11px;">
+                            <span class="checkbox" style="width: 14px; height: 14px;"></span>
+                            LPP
+                        </div>
+                        <div class="risk-item" style="font-size: 11px;">
+                            <span class="checkbox" style="width: 14px; height: 14px;"></span>
+                            FLEBITE
+                        </div>
+                        <div class="risk-item" style="font-size: 11px;">
+                            <span class="checkbox" style="width: 14px; height: 14px;"></span>
+                            OUTROS
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-info">
+            <div>
+                <div class="info-label">Data de Internação</div>
+                <div class="info-value" style="font-size: 11px;">
+                    {% if internacao.data_internacao %}
+                        {{ internacao.data_internacao.strftime('%d/%m/%Y %H:%M') }}
+                    {% else %}
+                        {{ atendimento.data_atendimento.strftime('%d/%m/%Y') if atendimento.data_atendimento else 'N/I' }}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div style="text-align: center;">
+                <div class="info-label">Atendimento</div>
+                <div class="info-value" style="font-size: 11px;">{{ atendimento.id }}</div>
+            </div>
+            
+            <div class="print-date">
+                Impresso em:<br>
+                {{ data_impressao.strftime('%d/%m/%Y %H:%M') }}
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Auto-print quando a página carregar
+        window.onload = function() {
+            // Pequeno delay para garantir que o CSS seja carregado
+            setTimeout(function() {
+                window.print();
+            }, 500);
+        };
+    </script>
+</body>
+</html> 

@@ -26,17 +26,17 @@ function verInformacoesAlta(atendimentoId) {
         .then(data => {
             if (data.success) {
                 // Preencher dados do paciente
-                document.getElementById('altaNomePaciente').textContent = data.nome_paciente;
-                document.getElementById('altaCpfPaciente').textContent = data.cpf_paciente;
-                document.getElementById('altaDataAlta').textContent = data.data_alta;
+                document.getElementById('altaNomePaciente').textContent = data.nome_paciente || 'Não informado';
+                document.getElementById('altaCpfPaciente').textContent = data.cpf_paciente || 'Não informado';
+                document.getElementById('altaDataAlta').textContent = data.data_alta || 'Não informado';
                 
                 // Preencher informações de alta
-                document.getElementById('altaDiagnosticoAlta').textContent = data.diagnostico_alta;
-                document.getElementById('altaRelatorioAlta').textContent = data.relatorio_alta;
-                document.getElementById('altaHistoricoInternacao').textContent = data.historico_internacao;
-                document.getElementById('altaCondutaFinal').textContent = data.conduta_final;
-                document.getElementById('altaMedicacaoAlta').textContent = data.medicacao_alta;
-                document.getElementById('altaCuidadosGerais').textContent = data.cuidados_gerais;
+                document.getElementById('altaDiagnosticoAlta').textContent = data.diagnostico_alta || 'Não informado';
+                document.getElementById('altaRelatorioAlta').textContent = data.relatorio_alta || 'Não informado';
+                document.getElementById('altaHistoricoInternacao').textContent = data.historico_internacao || 'Não informado';
+                document.getElementById('altaCondutaFinal').textContent = data.conduta_final || 'Não informado';
+                document.getElementById('altaMedicacaoAlta').textContent = data.medicacao_alta || 'Não informado';
+                document.getElementById('altaCuidadosGerais').textContent = data.cuidados_gerais || 'Não informado';
             } else {
                 // Mostrar erro
                 alert('Erro ao carregar informações de alta: ' + (data.message || 'Erro desconhecido'));
@@ -45,17 +45,20 @@ function verInformacoesAlta(atendimentoId) {
         })
         .catch(error => {
             console.error('Erro na requisição:', error);
-            alert('Erro ao carregar informações de alta: ' + error.message);
+            alert('Erro ao carregar informações de alta. Verifique se o paciente possui dados de alta registrados.');
             modal.hide();
         });
 }
 
 function imprimirInformacoesAlta() {
-    // Criar uma nova janela para impressão
-    const printWindow = window.open('', '_blank');
-    
-    // Obter dados do modal
+    // Verificar se há dados carregados
     const nomePaciente = document.getElementById('altaNomePaciente').textContent;
+    if (!nomePaciente || nomePaciente === 'Carregando...') {
+        alert('Aguarde o carregamento completo das informações antes de imprimir.');
+        return;
+    }
+
+    // Obter dados do modal
     const cpfPaciente = document.getElementById('altaCpfPaciente').textContent;
     const dataAlta = document.getElementById('altaDataAlta').textContent;
     const diagnosticoAlta = document.getElementById('altaDiagnosticoAlta').textContent;
@@ -65,77 +68,384 @@ function imprimirInformacoesAlta() {
     const medicacaoAlta = document.getElementById('altaMedicacaoAlta').textContent;
     const cuidadosGerais = document.getElementById('altaCuidadosGerais').textContent;
     
-    // HTML para impressão
+    // Função para tratar conteúdo vazio
+    const tratarConteudo = (texto) => {
+        return texto && texto.trim() !== '' && texto !== 'Não informado' ? texto : 'Não informado';
+    };
+
+    // Criar nova janela para impressão
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    
+    // HTML otimizado para impressão A4 - cores uniformes azul claro e branco
     const htmlContent = `
         <!DOCTYPE html>
-        <html>
+        <html lang="pt-BR">
         <head>
-            <title>Informações de Alta - ${nomePaciente}</title>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Relatório de Alta - ${nomePaciente}</title>
+            
+            <!-- Font Awesome para ícones -->
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+            
             <style>
-                body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
-                .header { text-align: center; border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 20px; }
-                .patient-info { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
-                .section { margin-bottom: 20px; }
-                .section h3 { color: #007bff; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
-                .section p { margin: 10px 0; text-align: justify; line-height: 1.5; }
-                .date-alta { color: #28a745; font-weight: bold; font-size: 1.1em; }
+                /* Reset e configurações básicas */
+                * {
+                    margin: 0;
+                    padding: 0;
+                    box-sizing: border-box;
+                }
+
+                /* Configuração para impressão A4 vertical - margens reduzidas */
+                @page {
+                    size: A4;
+                    margin: 0.8cm 1.2cm;
+                }
+
+                body {
+                    font-family: Arial, sans-serif;
+                    font-size: 9pt;
+                    line-height: 1.2;
+                    color: #333;
+                    background: white;
+                }
+
+                /* Cabeçalho - compacto */
+                .header {
+                    text-align: center;
+                    border-bottom: 2px solid #4a90e2;
+                    padding-bottom: 6px;
+                    margin-bottom: 10px;
+                }
+
+                .hospital-name {
+                    font-size: 14pt;
+                    font-weight: bold;
+                    color: #4a90e2;
+                    margin-bottom: 2px;
+                }
+
+                .relatorio-title {
+                    font-size: 12pt;
+                    font-weight: bold;
+                    color: #333;
+                    margin-top: 2px;
+                }
+
+                /* Dados do paciente - compacto */
+                .patient-info {
+                    background: #f0f6ff;
+                    border: 1px solid #b8d4f0;
+                    border-radius: 3px;
+                    padding: 6px;
+                    margin-bottom: 10px;
+                }
+
+                .patient-info h3 {
+                    color: #4a90e2;
+                    font-size: 10pt;
+                    margin-bottom: 4px;
+                    border-bottom: 1px solid #b8d4f0;
+                    padding-bottom: 2px;
+                }
+
+                .patient-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr 1fr;
+                    gap: 6px;
+                    font-size: 8pt;
+                }
+
+                .patient-field {
+                    display: flex;
+                    align-items: center;
+                }
+
+                .patient-label {
+                    font-weight: bold;
+                    color: #4a90e2;
+                    min-width: 70px;
+                    margin-right: 4px;
+                    font-size: 7pt;
+                }
+
+                .patient-value {
+                    color: #333;
+                    flex: 1;
+                    font-size: 8pt;
+                }
+
+                .data-alta-destaque {
+                    color: #4a90e2;
+                    font-weight: bold;
+                    font-size: 9pt;
+                }
+
+                /* Seções de informações - layout em grid para otimizar espaço */
+                .sections-container {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 8px;
+                    margin-bottom: 10px;
+                }
+
+                .info-section {
+                    border: 1px solid #b8d4f0;
+                    border-radius: 3px;
+                    overflow: hidden;
+                    page-break-inside: avoid;
+                    background: white;
+                }
+
+                .section-header {
+                    background: #e6f1ff;
+                    color: #4a90e2;
+                    padding: 4px 8px;
+                    font-weight: bold;
+                    font-size: 9pt;
+                    border-bottom: 1px solid #b8d4f0;
+                    display: flex;
+                    align-items: center;
+                }
+
+                .section-header i {
+                    margin-right: 4px;
+                    font-size: 8pt;
+                }
+
+                .section-content {
+                    padding: 6px 8px;
+                    background: white;
+                    white-space: pre-wrap;
+                    word-wrap: break-word;
+                    font-size: 8pt;
+                    line-height: 1.2;
+                    min-height: 30px;
+                    max-height: 100px;
+                    overflow-y: auto;
+                }
+
+                /* Seções que ocupam largura total */
+                .full-width {
+                    grid-column: 1 / -1;
+                }
+
+                .full-width .section-content {
+                    max-height: 60px;
+                }
+
+                /* Assinatura médica - compacta */
+                .assinatura-area {
+                    margin-top: 15px;
+                    text-align: center;
+                    font-size: 9pt;
+                    page-break-inside: avoid;
+                }
+
+                .linha-assinatura {
+                    width: 250px;
+                    border-top: 1px solid #4a90e2;
+                    margin: 12px auto 4px auto;
+                }
+
+                .texto-assinatura {
+                    font-weight: bold;
+                    color: #4a90e2;
+                }
+
+                /* Footer - compacto */
+                .footer {
+                    margin-top: 10px;
+                    text-align: center;
+                    font-size: 7pt;
+                    color: #666;
+                    border-top: 1px solid #b8d4f0;
+                    padding-top: 4px;
+                    page-break-inside: avoid;
+                }
+
+                /* Impressão */
                 @media print {
-                    .no-print { display: none; }
+                    body {
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
+                    }
+                    
+                    .no-print {
+                        display: none;
+                    }
+                    
+                    .info-section {
+                        page-break-inside: avoid;
+                    }
+                }
+
+                /* Botão de impressão */
+                .print-button {
+                    position: fixed;
+                    top: 15px;
+                    right: 15px;
+                    background: #4a90e2;
+                    color: white;
+                    border: none;
+                    padding: 8px 15px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 10pt;
+                    font-weight: bold;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                    z-index: 1000;
+                }
+
+                .print-button:hover {
+                    background: #357abd;
+                }
+
+                /* Estilos específicos para seções menores */
+                .diagnostico-section,
+                .medicacao-section {
+                    grid-row: span 1;
+                }
+
+                .relatorio-section,
+                .historico-section {
+                    grid-row: span 1;
+                }
+
+                /* Responsivo para conteúdo muito grande */
+                @media print {
+                    .section-content {
+                        max-height: none !important;
+                        overflow: visible !important;
+                    }
                 }
             </style>
         </head>
         <body>
+            <!-- Botão de impressão -->
+            <button class="print-button no-print" onclick="window.print()">
+                <i class="fas fa-print"></i> Imprimir
+            </button>
+
+            <!-- Cabeçalho -->
             <div class="header">
-                <h1>INFORMAÇÕES DE ALTA HOSPITALAR</h1>
-                <p>Relatório completo das informações de alta do paciente</p>
+                <div class="hospital-name">HOSPITAL SENADOR OZIRES PONTES</div>
+                <div class="relatorio-title">RELATÓRIO DE ALTA HOSPITALAR</div>
             </div>
-            
+
+            <!-- Dados do Paciente -->
             <div class="patient-info">
-                <h2>Dados do Paciente</h2>
-                <p><strong>Nome:</strong> ${nomePaciente}</p>
-                <p><strong>CPF:</strong> ${cpfPaciente}</p>
-                <p><strong>Data de Alta:</strong> <span class="date-alta">${dataAlta}</span></p>
+                <h3><i class="fas fa-user"></i> Informações do Paciente</h3>
+                <div class="patient-grid">
+                    <div class="patient-field">
+                        <span class="patient-label">Nome:</span>
+                        <span class="patient-value">${nomePaciente}</span>
+                    </div>
+                    <div class="patient-field">
+                        <span class="patient-label">CPF:</span>
+                        <span class="patient-value">${cpfPaciente}</span>
+                    </div>
+                    <div class="patient-field">
+                        <span class="patient-label">Data de Alta:</span>
+                        <span class="patient-value data-alta-destaque">${dataAlta}</span>
+                    </div>
+                </div>
             </div>
-            
-            <div class="section">
-                <h3>Diagnóstico de Alta</h3>
-                <p>${diagnosticoAlta}</p>
+
+            <!-- Container das seções em grid -->
+            <div class="sections-container">
+                <!-- Diagnóstico de Alta -->
+                <div class="info-section diagnostico-section">
+                    <div class="section-header">
+                        <i class="fas fa-stethoscope"></i>
+                        DIAGNÓSTICO DE ALTA
+                    </div>
+                    <div class="section-content">${tratarConteudo(diagnosticoAlta)}</div>
+                </div>
+
+                <!-- Medicação de Alta -->
+                <div class="info-section medicacao-section">
+                    <div class="section-header">
+                        <i class="fas fa-pills"></i>
+                        MEDICAÇÃO DE ALTA
+                    </div>
+                    <div class="section-content">${tratarConteudo(medicacaoAlta)}</div>
+                </div>
+
+                <!-- Conduta Final -->
+                <div class="info-section conduta-section">
+                    <div class="section-header">
+                        <i class="fas fa-procedures"></i>
+                        CONDUTA FINAL
+                    </div>
+                    <div class="section-content">${tratarConteudo(condutaFinal)}</div>
+                </div>
+
+                <!-- Cuidados Gerais -->
+                <div class="info-section cuidados-section">
+                    <div class="section-header">
+                        <i class="fas fa-heart"></i>
+                        CUIDADOS GERAIS
+                    </div>
+                    <div class="section-content">${tratarConteudo(cuidadosGerais)}</div>
+                </div>
+
+                <!-- Relatório de Alta - largura total -->
+                <div class="info-section relatorio-section full-width">
+                    <div class="section-header">
+                        <i class="fas fa-clipboard-list"></i>
+                        RELATÓRIO DE ALTA
+                    </div>
+                    <div class="section-content">${tratarConteudo(relatorioAlta)}</div>
+                </div>
+
+                <!-- Histórico da Internação - largura total -->
+                <div class="info-section historico-section full-width">
+                    <div class="section-header">
+                        <i class="fas fa-history"></i>
+                        HISTÓRICO DA INTERNAÇÃO
+                    </div>
+                    <div class="section-content">${tratarConteudo(historicoInternacao)}</div>
+                </div>
             </div>
-            
-            <div class="section">
-                <h3>Relatório de Alta</h3>
-                <p>${relatorioAlta}</p>
+
+            <!-- Área de Assinatura -->
+            <div class="assinatura-area">
+                <div class="linha-assinatura"></div>
+                <div class="texto-assinatura">Assinatura do Médico Responsável</div>
             </div>
-            
-            <div class="section">
-                <h3>Histórico da Internação</h3>
-                <p>${historicoInternacao}</p>
+
+            <!-- Footer -->
+            <div class="footer">
+                <p><strong>Documento gerado em:</strong> ${new Date().toLocaleString('pt-BR')} | <strong>HSOP - Sistema Hospitalar</strong></p>
+                <p>RUA CRUZEIRO, S/N - COHAB, Massapê - CE, 62140-000</p>
             </div>
-            
-            <div class="section">
-                <h3>Conduta Final</h3>
-                <p>${condutaFinal}</p>
-            </div>
-            
-            <div class="section">
-                <h3>Medicação de Alta</h3>
-                <p>${medicacaoAlta}</p>
-            </div>
-            
-            <div class="section">
-                <h3>Cuidados Gerais</h3>
-                <p>${cuidadosGerais}</p>
-            </div>
-            
-            <div style="margin-top: 50px; text-align: center; font-size: 0.9em; color: #666;">
-                <p>Documento gerado em ${new Date().toLocaleString('pt-BR')}</p>
-            </div>
+
+            <script>
+                // Auto-impressão e fechamento
+                window.onload = function() {
+                    // Auto-focus para facilitar impressão via Ctrl+P
+                    document.body.focus();
+                    
+                    // Auto-imprimir após um pequeno delay
+                    setTimeout(function() {
+                        window.print();
+                    }, 500);
+                };
+                
+                // Fechar janela após impressão
+                window.onafterprint = function() {
+                    window.close();
+                };
+            </script>
         </body>
         </html>
     `;
     
+    // Escrever conteúdo na janela de impressão
     printWindow.document.write(htmlContent);
     printWindow.document.close();
+    
+    // Focar na janela de impressão
     printWindow.focus();
-    printWindow.print();
 } 
