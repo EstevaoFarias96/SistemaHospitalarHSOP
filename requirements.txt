@@ -1,8 +1,8 @@
 Flask==3.1.1
 Flask-Login==0.6.3
 Flask-SQLAlchemy==3.1.1
-SQLAlchemy==2.0.41
 gunicorn
+SQLAlchemy==2.0.41
 psycopg2-binary==2.9.9
 python-docx==1.1.2
 docxtpl==0.20.0
