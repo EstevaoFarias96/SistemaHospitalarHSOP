@@ -47,12 +47,9 @@ def create_app():
     # Configurações principais
     try:
         app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'uma_chave_secreta_muito_segura')
-
-raw_db_url = os.environ.get('DATABASE_URL', 'postgresql://hsop:senha123@localhost:5432/hospital_db')
+        raw_db_url = os.environ.get('DATABASE_URL', 'postgresql://hsop:senha123@localhost:5432/hospital_db')
         app.config['SQLALCHEMY_DATABASE_URI'] = raw_db_url.replace("postgres://", "postgresql://", 1)
-
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
         
         logger.info("Configurações básicas definidas")
 
