@@ -51,7 +51,17 @@ def create_app():
     # Configurações principais
     try:
         app.config.from_object(Config)
-
+        
+        # Debug das configurações
+        logger.info(f"SECRET_KEY configurada: {'✓' if app.config.get('SECRET_KEY') else '✗'}")
+        logger.info(f"SQLALCHEMY_DATABASE_URI configurada: {'✓' if app.config.get('SQLALCHEMY_DATABASE_URI') else '✗'}")
+        
+        if app.config.get('SQLALCHEMY_DATABASE_URI'):
+            db_uri = app.config.get('SQLALCHEMY_DATABASE_URI')
+            # Mostrar apenas o início da URI para debug
+            logger.info(f"Banco de dados: {db_uri.split('@')[0] if '@' in db_uri else db_uri}")
+        else:
+            raise ValueError("SQLALCHEMY_DATABASE_URI não foi configurada")
         
         logger.info("Configurações básicas definidas")
 
@@ -74,6 +84,7 @@ def create_app():
     except Exception as e:
         logger.error(f"Erro durante configuração inicial: {str(e)}")
         logger.error(traceback.format_exc())
+        # Não re-raise a exceção para permitir que a app continue
 
     # Registrar Blueprints
     try:
