@@ -12897,3 +12897,15 @@ SyntaxError: invalid syntax
 2025-06-06 22:16:48,789 [INFO] __init__:62 - LoginManager inicializado com sucesso
 2025-06-06 22:16:48,915 [INFO] __init__:81 - Blueprints registrados com sucesso
 2025-06-06 22:16:48,926 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 22:33:42,387 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 22:33:42,389 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 22:33:42,408 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 22:33:42,408 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 22:33:42,528 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 22:33:42,540 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
+2025-06-06 22:33:42,717 [INFO] __init__:41 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-06 22:33:42,717 [INFO] __init__:53 - Configurações básicas definidas
+2025-06-06 22:33:42,734 [INFO] __init__:57 - Banco de dados inicializado com sucesso
+2025-06-06 22:33:42,735 [INFO] __init__:62 - LoginManager inicializado com sucesso
+2025-06-06 22:33:42,835 [INFO] __init__:81 - Blueprints registrados com sucesso
+2025-06-06 22:33:42,845 [INFO] __init__:90 - Tabelas do banco de dados criadas/verificadas
