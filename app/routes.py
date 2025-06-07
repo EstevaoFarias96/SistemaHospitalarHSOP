@@ -4065,70 +4065,6 @@ def obter_hda(internacao_id):
             'error': 'Erro interno do servidor'
         }), 500
 
-@bp.route('/api/paciente/<int:paciente_id>/historico-internamentos', methods=['GET'])
-@login_required
-def obter_historico_internamentos(paciente_id):
-    """
-    Endpoint para buscar o histórico de internamentos de um paciente específico.
-    Retorna apenas data de internação, diagnóstico, data de alta e informações do médico.
-    """
-    try:
-        # Buscar o atendimento atual (para excluir da listagem)
-        atendimento_atual = request.args.get('atendimento_atual')
-        
-        # Query base para buscar internações do paciente
-        query = db.session.query(
-            Internacao.id,
-            Internacao.atendimento_id,
-            Internacao.data_internacao,
-            Internacao.data_alta,
-            Internacao.diagnostico_inicial,
-            Internacao.diagnostico,
-            Internacao.leito,
-            Funcionario.nome.label('medico_nome')
-        ).join(
-            Funcionario, Internacao.medico_id == Funcionario.id
-        ).filter(
-            Internacao.paciente_id == paciente_id
-        )
-        
-        # Excluir o atendimento atual se fornecido
-        if atendimento_atual:
-            query = query.filter(Internacao.atendimento_id != atendimento_atual)
-        
-        # Ordenar por data de internação decrescente (mais recente primeiro)
-        internamentos = query.order_by(Internacao.data_internacao.desc()).all()
-        
-        # Converter para formato JSON
-        historico = []
-        for internamento in internamentos:
-            historico.append({
-                'id': internamento.id,
-                'atendimento_id': internamento.atendimento_id,
-                'data_internacao': internamento.data_internacao.isoformat() if internamento.data_internacao else None,
-                'data_alta': internamento.data_alta.isoformat() if internamento.data_alta else None,
-                'diagnostico_inicial': internamento.diagnostico_inicial,
-                'diagnostico': internamento.diagnostico,
-                'leito': internamento.leito,
-                'medico_nome': internamento.medico_nome
-            })
-        
-        print(f"Histórico de internamentos encontrado para paciente {paciente_id}: {len(historico)} registros")
-        
-        return jsonify({
-            'success': True,
-            'internamentos': historico,
-            'total': len(historico)
-        })
-    
-    except Exception as e:
-        print(f"Erro ao buscar histórico de internamentos: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': 'Erro interno do servidor',
-            'message': str(e)
-        }), 500
-
 @bp.route('/imprimir/aih/<string:atendimento_id>')
 @login_required
 def imprimir_aih(atendimento_id):
@@ -4143,10 +4079,10 @@ def imprimir_aih(atendimento_id):
         return abort(404, description="Internação não encontrada")
 
     # Verifica se o usuário logado é médico
-    if current_user.cargo.lower() == 'medico':
-        medico = current_user
-    else:
+    if current_user.cargo.lower() != 'medico':
         return abort(403, description="Somente médicos podem imprimir AIH.")
+    
+    medico = current_user
 
     # Carrega template .docx
     caminho_template = os.path.join(current_app.root_path, 'static', 'impressos', 'AIH.docx')
@@ -4176,22 +4112,27 @@ def imprimir_aih(atendimento_id):
         'funcionario_nome': medico.nome
     }
 
-    # Salva DOCX temporário
     with NamedTemporaryFile(delete=False, suffix=".docx") as tmp_docx:
         doc.render(contexto)
         doc.save(tmp_docx.name)
 
-        # Converte para PDF com LibreOffice
-        output_dir = os.path.dirname(tmp_docx.name)
-        subprocess.run([
-            'libreoffice', '--headless', '--convert-to', 'pdf', '--outdir', output_dir, tmp_docx.name
-        ], check=True)
+        # Converte o conteúdo do .docx para HTML (simples)
+        from docx import Document
+        document = Document(tmp_docx.name)
+        html_content = "<html><body>"
+        for para in document.paragraphs:
+            html_content += f"<p>{para.text}</p>"
+        html_content += "</body></html>"
 
-        pdf_path = tmp_docx.name.replace(".docx", ".pdf")
+        # Gera PDF a partir do HTML
+        with NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
+            wkhtml_path = os.path.join(current_app.root_path, 'bin', 'wkhtmltopdf')
+            config = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
+            pdfkit.from_string(html_content, tmp_pdf.name, configuration=config)
 
-    # Retorna o PDF no navegador
+
     return send_file(
-        pdf_path,
+        tmp_pdf.name,
         mimetype='application/pdf',
         download_name=f"AIH_{paciente.nome.replace(' ', '_')}_{atendimento.id}.pdf",
         as_attachment=False
