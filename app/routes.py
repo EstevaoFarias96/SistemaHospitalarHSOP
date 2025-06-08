@@ -4097,42 +4097,14 @@ def imprimir_aih(atendimento_id):
             logging.error(f"Erro ao carregar template HTML: {str(e)}")
             return abort(500, description=f"Erro ao carregar template: {str(e)}")
 
-        # Função para converter imagem para base64
-        def imagem_para_base64(caminho_imagem):
-            try:
-                with open(caminho_imagem, 'rb') as img_file:
-                    img_data = img_file.read()
-                    img_base64 = base64.b64encode(img_data).decode('utf-8')
-                    # Detecta o tipo de imagem pela extensão
-                    if caminho_imagem.lower().endswith('.png'):
-                        return f"data:image/png;base64,{img_base64}"
-                    elif caminho_imagem.lower().endswith(('.jpg', '.jpeg')):
-                        return f"data:image/jpeg;base64,{img_base64}"
-                    else:
-                        return f"data:image/png;base64,{img_base64}"
-            except Exception as e:
-                logging.error(f"Erro ao carregar imagem {caminho_imagem}: {e}")
-                return ""
-
-        # Converte as imagens para base64
-        try:
-            caminho_imagem1 = os.path.join(current_app.root_path, 'static', 'Imagens', 'Imagem1.png')
-            caminho_sus = os.path.join(current_app.root_path, 'static', 'Imagens', 'sus.png')
-            
-            img1_base64 = imagem_para_base64(caminho_imagem1)
-            sus_base64 = imagem_para_base64(caminho_sus)
-
-            # Substitui as URLs das imagens pelas versões base64
-            template_content = template_content.replace('/static/Imagens/Imagem1.png', img1_base64)
-            template_content = template_content.replace('/static/Imagens/sus.png', sus_base64)
-        except Exception as e:
-            logging.error(f"Erro ao processar imagens: {str(e)}")
-            return abort(500, description=f"Erro ao processar imagens: {str(e)}")
+        # Remove as tags de imagem do template para evitar erros
+        template_content = template_content.replace('<img src="/static/Imagens/Imagem1.png" alt="Logo" class="header-logo left">', '')
+        template_content = template_content.replace('<img src="/static/Imagens/sus.png" alt="SUS" class="header-logo right">', '')
 
         # Contexto com as variáveis para substituição
         try:
             contexto = {
-                'paciente_nome': paciente.nome,
+                'paciente_nome': paciente.nome or '',
                 'id_atendimento': atendimento.id,
                 'paciente_cartao_sus': paciente.cartao_sus or '',
                 'paciente_data_nascimento': paciente.data_nascimento.strftime('%d/%m/%Y') if paciente.data_nascimento else '',
@@ -4151,7 +4123,7 @@ def imprimir_aih(atendimento_id):
                 'cid_causas_associadas': internacao.cid_10_causas_associadas or '',
                 'leito': internacao.leito or '',
                 'carater_de_internacao': internacao.carater_internacao or '',
-                'funcionario_nome': medico.nome
+                'funcionario_nome': medico.nome or ''
             }
         except Exception as e:
             logging.error(f"Erro ao montar contexto: {str(e)}")
