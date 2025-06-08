@@ -4084,52 +4084,74 @@ def imprimir_aih(atendimento_id):
     
     medico = current_user
 
-    # Carrega template .docx
-    caminho_template = os.path.join(current_app.root_path, 'static', 'impressos', 'AIH.docx')
-    doc = DocxTemplate(caminho_template)
+    # Carrega template HTML
+    caminho_template = os.path.join(current_app.root_path, 'static', 'impressos', 'AIH.html')
+    
+    with open(caminho_template, 'r', encoding='utf-8') as f:
+        template_content = f.read()
 
-    # Preenche variáveis do template
+    # Função para converter imagem para base64
+    import base64
+    def imagem_para_base64(caminho_imagem):
+        try:
+            with open(caminho_imagem, 'rb') as img_file:
+                img_data = img_file.read()
+                img_base64 = base64.b64encode(img_data).decode('utf-8')
+                # Detecta o tipo de imagem pela extensão
+                if caminho_imagem.lower().endswith('.png'):
+                    return f"data:image/png;base64,{img_base64}"
+                elif caminho_imagem.lower().endswith(('.jpg', '.jpeg')):
+                    return f"data:image/jpeg;base64,{img_base64}"
+                else:
+                    return f"data:image/png;base64,{img_base64}"
+        except Exception as e:
+            print(f"Erro ao carregar imagem {caminho_imagem}: {e}")
+            return ""
+
+    # Converte as imagens para base64
+    caminho_imagem1 = os.path.join(current_app.root_path, 'static', 'Imagens', 'Imagem1.png')
+    caminho_sus = os.path.join(current_app.root_path, 'static', 'Imagens', 'sus.png')
+    
+    img1_base64 = imagem_para_base64(caminho_imagem1)
+    sus_base64 = imagem_para_base64(caminho_sus)
+
+    # Substitui as URLs das imagens pelas versões base64
+    template_content = template_content.replace('/static/Imagens/Imagem1.png', img1_base64)
+    template_content = template_content.replace('/static/Imagens/sus.png', sus_base64)
+
+    # Contexto com as variáveis para substituição
     contexto = {
         'paciente_nome': paciente.nome,
         'id_atendimento': atendimento.id,
-        'paciente_cartao_sus': paciente.cartao_sus,
+        'paciente_cartao_sus': paciente.cartao_sus or '',
         'paciente_data_nascimento': paciente.data_nascimento.strftime('%d/%m/%Y') if paciente.data_nascimento else '',
-        'paciente_sexo': paciente.sexo,
-        'paciente_nome_filiacao': paciente.filiacao,
-        'paciente_telefone': paciente.telefone,
-        'paciente_cor': paciente.cor,
-        'paciente_endereço': paciente.endereco,
-        'municipio_residencia': paciente.municipio,
-        'sinais_e_sintomas': internacao.justificativa_internacao_sinais_e_sintomas,
-        'justificativa_de_internação': internacao.justificativa_internacao_condicoes,
-        'exames': internacao.justificativa_internacao_principais_resultados_diagnostico,
-        'diagnostico_inicial': internacao.diagnostico_inicial,
-        'cid_principal': internacao.cid_principal,
-        'cid_secundario': internacao.cid_10_secundario,
-        'cid_causas_associadas': internacao.cid_10_causas_associadas,
-        'leito': internacao.leito,
-        'carater_de_internação': internacao.carater_internacao,
+        'paciente_sexo': paciente.sexo or '',
+        'paciente_nome_filiacao': paciente.filiacao or '',
+        'paciente_telefone': paciente.telefone or '',
+        'paciente_cor': paciente.cor or '',
+        'paciente_endereco': paciente.endereco or '',
+        'municipio_residencia': paciente.municipio or '',
+        'sinais_e_sintomas': internacao.justificativa_internacao_sinais_e_sintomas or '',
+        'justificativa_de_internacao': internacao.justificativa_internacao_condicoes or '',
+        'exames': internacao.justificativa_internacao_principais_resultados_diagnostico or '',
+        'diagnostico_inicial': internacao.diagnostico_inicial or '',
+        'cid_principal': internacao.cid_principal or '',
+        'cid_secundario': internacao.cid_10_secundario or '',
+        'cid_causas_associadas': internacao.cid_10_causas_associadas or '',
+        'leito': internacao.leito or '',
+        'carater_de_internacao': internacao.carater_internacao or '',
         'funcionario_nome': medico.nome
     }
 
-    with NamedTemporaryFile(delete=False, suffix=".docx") as tmp_docx:
-        doc.render(contexto)
-        doc.save(tmp_docx.name)
+    # Renderiza o template HTML com Jinja2
+    from flask import render_template_string
+    html_content = render_template_string(template_content, **contexto)
 
-        # Converte o conteúdo do .docx para HTML (simples)
-        from docx import Document
-        document = Document(tmp_docx.name)
-        html_content = "<html><body>"
-        for para in document.paragraphs:
-            html_content += f"<p>{para.text}</p>"
-        html_content += "</body></html>"
-
-        # Gera PDF a partir do HTML
-        with NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
-            wkhtml_path = os.path.join(current_app.root_path, 'bin', 'wkhtmltopdf')
-            config = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
-            pdfkit.from_string(html_content, tmp_pdf.name, configuration=config)
-
+    # Gera PDF a partir do HTML
+    with NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
+        wkhtml_path = os.path.join(current_app.root_path, 'bin', 'wkhtmltopdf')
+        config = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
+        pdfkit.from_string(html_content, tmp_pdf.name, configuration=config)
 
     return send_file(
         tmp_pdf.name,
