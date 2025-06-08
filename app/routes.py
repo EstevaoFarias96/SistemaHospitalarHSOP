@@ -5533,7 +5533,8 @@ def imprimir_evolucoes_enfermagem(atendimento_id):
                 EvolucaoEnfermagem.id,
                 EvolucaoEnfermagem.data_evolucao,
                 EvolucaoEnfermagem.texto,
-                Funcionario.nome.label('enfermeiro_nome')
+                Funcionario.nome.label('enfermeiro_nome'),
+                Funcionario.numero_profissional.label('enfermeiro_coren')
             )\
             .order_by(EvolucaoEnfermagem.data_evolucao.asc())\
             .all()
