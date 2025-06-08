@@ -1,0 +1,9 @@
+
+# Ignorar arquivos compilados e temporários
+*.pyc
+__pycache__/
+*.db
+*.deb
+wkhtmltopdf-extracted/
+logs/
+
