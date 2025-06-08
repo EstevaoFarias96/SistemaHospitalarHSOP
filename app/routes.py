@@ -10,6 +10,7 @@ import chardet
 import os
 import random
 import subprocess
+import base64
 from tempfile import NamedTemporaryFile
 from docxtpl import DocxTemplate
 from docx import Document
@@ -4068,97 +4069,122 @@ def obter_hda(internacao_id):
 @bp.route('/imprimir/aih/<string:atendimento_id>')
 @login_required
 def imprimir_aih(atendimento_id):
-    # Busca o atendimento
-    atendimento = Atendimento.query.filter_by(id=atendimento_id).first()
-    if not atendimento:
-        return abort(404, description="Atendimento não encontrado")
+    try:
+        # Busca o atendimento
+        atendimento = Atendimento.query.filter_by(id=atendimento_id).first()
+        if not atendimento:
+            return abort(404, description="Atendimento não encontrado")
 
-    paciente = atendimento.paciente
-    internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
-    if not internacao:
-        return abort(404, description="Internação não encontrada")
+        paciente = atendimento.paciente
+        internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
+        if not internacao:
+            return abort(404, description="Internação não encontrada")
 
-    # Verifica se o usuário logado é médico
-    if current_user.cargo.lower() != 'medico':
-        return abort(403, description="Somente médicos podem imprimir AIH.")
-    
-    medico = current_user
+        # Verifica se o usuário logado é médico
+        current_user = get_current_user()
+        if not current_user or current_user.cargo.lower() != 'medico':
+            return abort(403, description="Somente médicos podem imprimir AIH.")
+        
+        medico = current_user
 
-    # Carrega template HTML
-    caminho_template = os.path.join(current_app.root_path, 'static', 'impressos', 'AIH.html')
-    
-    with open(caminho_template, 'r', encoding='utf-8') as f:
-        template_content = f.read()
-
-    # Função para converter imagem para base64
-    import base64
-    def imagem_para_base64(caminho_imagem):
+        # Carrega template HTML
+        caminho_template = os.path.join(current_app.root_path, 'static', 'impressos', 'AIH.html')
+        
         try:
-            with open(caminho_imagem, 'rb') as img_file:
-                img_data = img_file.read()
-                img_base64 = base64.b64encode(img_data).decode('utf-8')
-                # Detecta o tipo de imagem pela extensão
-                if caminho_imagem.lower().endswith('.png'):
-                    return f"data:image/png;base64,{img_base64}"
-                elif caminho_imagem.lower().endswith(('.jpg', '.jpeg')):
-                    return f"data:image/jpeg;base64,{img_base64}"
-                else:
-                    return f"data:image/png;base64,{img_base64}"
+            with open(caminho_template, 'r', encoding='utf-8') as f:
+                template_content = f.read()
         except Exception as e:
-            print(f"Erro ao carregar imagem {caminho_imagem}: {e}")
-            return ""
+            logging.error(f"Erro ao carregar template HTML: {str(e)}")
+            return abort(500, description=f"Erro ao carregar template: {str(e)}")
 
-    # Converte as imagens para base64
-    caminho_imagem1 = os.path.join(current_app.root_path, 'static', 'Imagens', 'Imagem1.png')
-    caminho_sus = os.path.join(current_app.root_path, 'static', 'Imagens', 'sus.png')
-    
-    img1_base64 = imagem_para_base64(caminho_imagem1)
-    sus_base64 = imagem_para_base64(caminho_sus)
+        # Função para converter imagem para base64
+        def imagem_para_base64(caminho_imagem):
+            try:
+                with open(caminho_imagem, 'rb') as img_file:
+                    img_data = img_file.read()
+                    img_base64 = base64.b64encode(img_data).decode('utf-8')
+                    # Detecta o tipo de imagem pela extensão
+                    if caminho_imagem.lower().endswith('.png'):
+                        return f"data:image/png;base64,{img_base64}"
+                    elif caminho_imagem.lower().endswith(('.jpg', '.jpeg')):
+                        return f"data:image/jpeg;base64,{img_base64}"
+                    else:
+                        return f"data:image/png;base64,{img_base64}"
+            except Exception as e:
+                logging.error(f"Erro ao carregar imagem {caminho_imagem}: {e}")
+                return ""
 
-    # Substitui as URLs das imagens pelas versões base64
-    template_content = template_content.replace('/static/Imagens/Imagem1.png', img1_base64)
-    template_content = template_content.replace('/static/Imagens/sus.png', sus_base64)
+        # Converte as imagens para base64
+        try:
+            caminho_imagem1 = os.path.join(current_app.root_path, 'static', 'Imagens', 'Imagem1.png')
+            caminho_sus = os.path.join(current_app.root_path, 'static', 'Imagens', 'sus.png')
+            
+            img1_base64 = imagem_para_base64(caminho_imagem1)
+            sus_base64 = imagem_para_base64(caminho_sus)
 
-    # Contexto com as variáveis para substituição
-    contexto = {
-        'paciente_nome': paciente.nome,
-        'id_atendimento': atendimento.id,
-        'paciente_cartao_sus': paciente.cartao_sus or '',
-        'paciente_data_nascimento': paciente.data_nascimento.strftime('%d/%m/%Y') if paciente.data_nascimento else '',
-        'paciente_sexo': paciente.sexo or '',
-        'paciente_nome_filiacao': paciente.filiacao or '',
-        'paciente_telefone': paciente.telefone or '',
-        'paciente_cor': paciente.cor or '',
-        'paciente_endereco': paciente.endereco or '',
-        'municipio_residencia': paciente.municipio or '',
-        'sinais_e_sintomas': internacao.justificativa_internacao_sinais_e_sintomas or '',
-        'justificativa_de_internacao': internacao.justificativa_internacao_condicoes or '',
-        'exames': internacao.justificativa_internacao_principais_resultados_diagnostico or '',
-        'diagnostico_inicial': internacao.diagnostico_inicial or '',
-        'cid_principal': internacao.cid_principal or '',
-        'cid_secundario': internacao.cid_10_secundario or '',
-        'cid_causas_associadas': internacao.cid_10_causas_associadas or '',
-        'leito': internacao.leito or '',
-        'carater_de_internacao': internacao.carater_internacao or '',
-        'funcionario_nome': medico.nome
-    }
+            # Substitui as URLs das imagens pelas versões base64
+            template_content = template_content.replace('/static/Imagens/Imagem1.png', img1_base64)
+            template_content = template_content.replace('/static/Imagens/sus.png', sus_base64)
+        except Exception as e:
+            logging.error(f"Erro ao processar imagens: {str(e)}")
+            return abort(500, description=f"Erro ao processar imagens: {str(e)}")
 
-    # Renderiza o template HTML com Jinja2
-    from flask import render_template_string
-    html_content = render_template_string(template_content, **contexto)
+        # Contexto com as variáveis para substituição
+        try:
+            contexto = {
+                'paciente_nome': paciente.nome,
+                'id_atendimento': atendimento.id,
+                'paciente_cartao_sus': paciente.cartao_sus or '',
+                'paciente_data_nascimento': paciente.data_nascimento.strftime('%d/%m/%Y') if paciente.data_nascimento else '',
+                'paciente_sexo': paciente.sexo or '',
+                'paciente_nome_filiacao': paciente.filiacao or '',
+                'paciente_telefone': paciente.telefone or '',
+                'paciente_cor': paciente.cor or '',
+                'paciente_endereco': paciente.endereco or '',
+                'municipio_residencia': paciente.municipio or '',
+                'sinais_e_sintomas': internacao.justificativa_internacao_sinais_e_sintomas or '',
+                'justificativa_de_internacao': internacao.justificativa_internacao_condicoes or '',
+                'exames': internacao.justificativa_internacao_principais_resultados_diagnostico or '',
+                'diagnostico_inicial': internacao.diagnostico_inicial or '',
+                'cid_principal': internacao.cid_principal or '',
+                'cid_secundario': internacao.cid_10_secundario or '',
+                'cid_causas_associadas': internacao.cid_10_causas_associadas or '',
+                'leito': internacao.leito or '',
+                'carater_de_internacao': internacao.carater_internacao or '',
+                'funcionario_nome': medico.nome
+            }
+        except Exception as e:
+            logging.error(f"Erro ao montar contexto: {str(e)}")
+            return abort(500, description=f"Erro ao montar contexto: {str(e)}")
 
-    # Gera PDF a partir do HTML
-    with NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
-        wkhtml_path = os.path.join(current_app.root_path, 'bin', 'wkhtmltopdf')
-        config = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
-        pdfkit.from_string(html_content, tmp_pdf.name, configuration=config)
+        # Renderiza o template HTML com Jinja2
+        try:
+            html_content = render_template_string(template_content, **contexto)
+        except Exception as e:
+            logging.error(f"Erro ao renderizar template: {str(e)}")
+            return abort(500, description=f"Erro ao renderizar template: {str(e)}")
 
-    return send_file(
-        tmp_pdf.name,
-        mimetype='application/pdf',
-        download_name=f"AIH_{paciente.nome.replace(' ', '_')}_{atendimento.id}.pdf",
-        as_attachment=False
-    )
+        # Gera PDF a partir do HTML
+        try:
+            with NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
+                wkhtml_path = os.path.join(current_app.root_path, 'bin', 'wkhtmltopdf')
+                config = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
+                pdfkit.from_string(html_content, tmp_pdf.name, configuration=config)
+
+            return send_file(
+                tmp_pdf.name,
+                mimetype='application/pdf',
+                download_name=f"AIH_{paciente.nome.replace(' ', '_')}_{atendimento.id}.pdf",
+                as_attachment=False
+            )
+        except Exception as e:
+            logging.error(f"Erro ao gerar PDF: {str(e)}")
+            return abort(500, description=f"Erro ao gerar PDF: {str(e)}")
+
+    except Exception as e:
+        logging.error(f"Erro geral no endpoint imprimir_aih: {str(e)}")
+        logging.error(traceback.format_exc())
+        return abort(500, description=f"Erro interno: {str(e)}")
 
 @bp.route('/api/leitos', methods=['GET'])
 def listar_leitos():
