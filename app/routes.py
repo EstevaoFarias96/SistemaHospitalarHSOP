@@ -5715,3 +5715,73 @@ def imprimir_prescricoes_enfermagem(atendimento_id):
         logging.error(traceback.format_exc())
         flash('Erro ao gerar impressão das prescrições de enfermagem. Por favor, tente novamente.', 'danger')
         return redirect(url_for('main.impressoes_enfermagem', atendimento_id=atendimento_id))
+
+@bp.route('/api/paciente/<int:paciente_id>/historico-internamentos', methods=['GET'])
+@login_required
+def obter_historico_internamentos_paciente(paciente_id):
+    """
+    Busca o histórico de internações de um paciente específico.
+    Exclui a internação atual se fornecida via query parameter.
+    """
+    try:
+        current_user = get_current_user()
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
+            return jsonify({
+                'success': False,
+                'message': 'Acesso permitido apenas para médicos e enfermeiros'
+            }), 403
+        
+        # Verificar se o paciente existe
+        paciente = Paciente.query.get(paciente_id)
+        if not paciente:
+            return jsonify({
+                'success': False,
+                'message': 'Paciente não encontrado'
+            }), 404
+        
+        # Obter atendimento atual para excluir da listagem
+        atendimento_atual = request.args.get('atendimento_atual')
+        
+        # Buscar todas as internações do paciente
+        query = Internacao.query.filter_by(paciente_id=paciente_id)
+        
+        # Excluir internação atual se fornecido
+        if atendimento_atual:
+            query = query.filter(Internacao.atendimento_id != atendimento_atual)
+        
+        # Ordenar por data de internação (mais recente primeiro)
+        internacoes = query.order_by(Internacao.data_internacao.desc()).all()
+        
+        # Formatar resposta
+        internamentos = []
+        for internacao in internacoes:
+            # Buscar dados do médico responsável
+            medico = None
+            if internacao.medico_id:
+                medico = Funcionario.query.get(internacao.medico_id)
+            
+            internamentos.append({
+                'id': internacao.id,
+                'atendimento_id': internacao.atendimento_id,
+                'data_internacao': internacao.data_internacao.isoformat() if internacao.data_internacao else None,
+                'data_alta': internacao.data_alta.isoformat() if internacao.data_alta else None,
+                'diagnostico': internacao.diagnostico,
+                'diagnostico_inicial': internacao.diagnostico_inicial,
+                'leito': internacao.leito,
+                'medico_nome': medico.nome if medico else None,
+                'cid_principal': internacao.cid_principal,
+                'carater_internacao': internacao.carater_internacao
+            })
+        
+        return jsonify({
+            'success': True,
+            'internamentos': internamentos
+        })
+        
+    except Exception as e:
+        logging.error(f"Erro ao obter histórico de internamentos do paciente {paciente_id}: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'error': 'Erro interno do servidor'
+        }), 500
