@@ -4097,10 +4097,6 @@ def imprimir_aih(atendimento_id):
             logging.error(f"Erro ao carregar template HTML: {str(e)}")
             return abort(500, description=f"Erro ao carregar template: {str(e)}")
 
-        # Remove as tags de imagem do template para evitar erros
-        template_content = template_content.replace('<img src="/static/Imagens/Imagem1.png" alt="Logo" class="header-logo left">', '')
-        template_content = template_content.replace('<img src="/static/Imagens/sus.png" alt="SUS" class="header-logo right">', '')
-
         # Contexto com as variáveis para substituição
         try:
             contexto = {
@@ -4129,29 +4125,13 @@ def imprimir_aih(atendimento_id):
             logging.error(f"Erro ao montar contexto: {str(e)}")
             return abort(500, description=f"Erro ao montar contexto: {str(e)}")
 
-        # Renderiza o template HTML com Jinja2
+        # Renderiza e retorna o template HTML
         try:
             html_content = render_template_string(template_content, **contexto)
+            return html_content
         except Exception as e:
             logging.error(f"Erro ao renderizar template: {str(e)}")
             return abort(500, description=f"Erro ao renderizar template: {str(e)}")
-
-        # Gera PDF a partir do HTML
-        try:
-            with NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_pdf:
-                wkhtml_path = os.path.join(current_app.root_path, 'bin', 'wkhtmltopdf')
-                config = pdfkit.configuration(wkhtmltopdf=wkhtml_path)
-                pdfkit.from_string(html_content, tmp_pdf.name, configuration=config)
-
-            return send_file(
-                tmp_pdf.name,
-                mimetype='application/pdf',
-                download_name=f"AIH_{paciente.nome.replace(' ', '_')}_{atendimento.id}.pdf",
-                as_attachment=False
-            )
-        except Exception as e:
-            logging.error(f"Erro ao gerar PDF: {str(e)}")
-            return abort(500, description=f"Erro ao gerar PDF: {str(e)}")
 
     except Exception as e:
         logging.error(f"Erro geral no endpoint imprimir_aih: {str(e)}")
