@@ -4,9 +4,9 @@ import traceback
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import login_required, current_user, LoginManager
+
+# Importa a classe Config já selecionada (Prod ou Dev) dentro do config.py
 from app.config import Config
-
-
 
 # Criar instâncias globais
 db = SQLAlchemy()
@@ -50,19 +50,16 @@ def create_app():
 
     # Configurações principais
     try:
-        app.config.from_object(Config)
-        
         # Debug das configurações
         logger.info(f"SECRET_KEY configurada: {'✓' if app.config.get('SECRET_KEY') else '✗'}")
         logger.info(f"SQLALCHEMY_DATABASE_URI configurada: {'✓' if app.config.get('SQLALCHEMY_DATABASE_URI') else '✗'}")
-        
+
         if app.config.get('SQLALCHEMY_DATABASE_URI'):
             db_uri = app.config.get('SQLALCHEMY_DATABASE_URI')
-            # Mostrar apenas o início da URI para debug
             logger.info(f"Banco de dados: {db_uri.split('@')[0] if '@' in db_uri else db_uri}")
         else:
             raise ValueError("SQLALCHEMY_DATABASE_URI não foi configurada")
-        
+
         logger.info("Configurações básicas definidas")
 
         # Inicializar Banco de Dados
@@ -70,7 +67,7 @@ def create_app():
         logger.info("Banco de dados inicializado com sucesso")
 
         # Inicializar LoginManager
-        login_manager.login_view = 'main.login'  # corrigir o login_view para incluir o nome do blueprint
+        login_manager.login_view = 'main.login'
         login_manager.init_app(app)
         logger.info("LoginManager inicializado com sucesso")
 
@@ -84,11 +81,9 @@ def create_app():
     except Exception as e:
         logger.error(f"Erro durante configuração inicial: {str(e)}")
         logger.error(traceback.format_exc())
-        # Não re-raise a exceção para permitir que a app continue
 
     # Registrar Blueprints
     try:
-        # Importar aqui para evitar circular imports
         from app.routes import bp as main_bp, internacoes_especiais_bp
         app.register_blueprint(main_bp)
         app.register_blueprint(internacoes_especiais_bp)
@@ -125,7 +120,7 @@ def create_app():
                     db_status = False
                     error_msg = str(e)
                     db_info = {'error': error_msg}
-                
+
                 return jsonify({
                     'status': 'online',
                     'database_connected': db_status,

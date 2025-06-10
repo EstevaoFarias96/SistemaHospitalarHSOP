@@ -5533,7 +5533,8 @@ def imprimir_evolucoes_enfermagem(atendimento_id):
                 EvolucaoEnfermagem.id,
                 EvolucaoEnfermagem.data_evolucao,
                 EvolucaoEnfermagem.texto,
-                Funcionario.nome.label('enfermeiro_nome')
+                Funcionario.nome.label('enfermeiro_nome'),
+                Funcionario.numero_profissional.label('enfermeiro_coren')
             )\
             .order_by(EvolucaoEnfermagem.data_evolucao.asc())\
             .all()
@@ -5682,8 +5683,8 @@ def imprimir_prescricoes_enfermagem(atendimento_id):
                 PrescricaoEnfermagem.id,
                 PrescricaoEnfermagem.data_prescricao,
                 PrescricaoEnfermagem.texto,
-                Funcionario.nome.label('enfermeiro_nome')
-            )\
+                Funcionario.nome.label('enfermeiro_nome'),
+                Funcionario.numero_profissional.label('enfermeiro_coren')            )\
             .order_by(PrescricaoEnfermagem.data_prescricao.asc())\
             .all()
         
@@ -5698,7 +5699,8 @@ def imprimir_prescricoes_enfermagem(atendimento_id):
                 'id': prescricao.id,
                 'data_prescricao': prescricao.data_prescricao,
                 'texto': prescricao.texto,
-                'enfermeiro_nome': prescricao.enfermeiro_nome
+                'enfermeiro_nome': prescricao.enfermeiro_nome,
+                'enfermeiro_coren': prescricao.enfermeiro_coren
             })
         
         return render_template('impressao_prescricoes_enfermagem.html',
@@ -5781,6 +5783,49 @@ def obter_historico_internamentos_paciente(paciente_id):
     except Exception as e:
         logging.error(f"Erro ao obter histórico de internamentos do paciente {paciente_id}: {str(e)}")
         logging.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'error': 'Erro interno do servidor'
+        }), 500
+
+@bp.route('/api/prescricoes/<int:prescricao_id>/base', methods=['GET'])
+@login_required
+def buscar_prescricao_base(prescricao_id):
+    """
+    Buscar dados de uma prescrição específica para usar como base para nova prescrição
+    """
+    try:
+        prescricao = PrescricaoClinica.query.get(prescricao_id)
+        
+        if not prescricao:
+            return jsonify({
+                'success': False,
+                'error': 'Prescrição não encontrada'
+            }), 404
+        
+        # Verificar se o usuário tem acesso à prescrição
+        if prescricao.internacao.paciente_id != prescricao.internacao.paciente_id:
+            return jsonify({
+                'success': False,
+                'error': 'Acesso negado'
+            }), 403
+        
+        # Preparar dados da prescrição para ser base
+        prescricao_base = {
+            'id': prescricao.id,
+            'texto_dieta': prescricao.texto_dieta,
+            'texto_procedimento_medico': prescricao.texto_procedimento_medico,
+            'texto_procedimento_multi': prescricao.texto_procedimento_multi,
+            'medicamentos': prescricao.medicamentos_json if prescricao.medicamentos_json else []
+        }
+        
+        return jsonify({
+            'success': True,
+            'prescricao_base': prescricao_base
+        })
+        
+    except Exception as e:
+        current_app.logger.error(f"Erro ao buscar prescrição base: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Erro interno do servidor'

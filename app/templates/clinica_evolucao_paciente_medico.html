@@ -52,6 +52,10 @@
             padding: 0;
         }
         
+        .sidebar:hover + .main-content {
+            margin-left: 200px;
+        }
+        
         /* Variáveis de cores */
         :root {
             --primary-dark: #1a237e;
@@ -65,6 +69,8 @@
             --shadow-strong: 0 4px 8px rgba(0,0,0,0.12);
             --gradient-primary: linear-gradient(135deg, var(--primary-main), var(--primary-light));
             --gradient-accent: linear-gradient(135deg, var(--accent), var(--primary-light));
+            --primary-main-rgb: 40, 53, 147;
+            --primary-light-rgb: 57, 73, 171;
         }
 
         /* Estilos globais para cards e headers */
@@ -167,105 +173,6 @@
 
         .prescricao-body {
             padding: 15px;
-        }
-
-        /* Variáveis RGB para transparência */
-        :root {
-            --primary-main-rgb: 40, 53, 147;
-            --primary-light-rgb: 57, 73, 171;
-        }
-
-        /* Estilo do menu lateral */
-        .sidebar {
-            width: 60px;
-            height: 100vh;
-            background: linear-gradient(180deg, var(--primary-dark) 0%, var(--primary-main) 100%);
-            position: fixed;
-            left: 0;
-            top: 0;
-            padding-top: 20px;
-            transition: all 0.3s ease;
-            overflow: hidden;
-            z-index: 1000;
-            box-shadow: var(--shadow-soft);
-        }
-        
-        .sidebar:hover {
-            width: 200px;
-            box-shadow: var(--shadow-strong);
-        }
-        
-        .nav-pills {
-            flex-direction: column;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .nav-pills .nav-link {
-            margin: 5px 10px;
-            border-radius: 8px;
-            padding: 12px;
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            transition: all 0.3s ease;
-        }
-        
-        .nav-pills .nav-link:hover {
-            background-color: var(--hover-light);
-            transform: translateX(5px);
-            color: var(--text-primary);
-            border-color: rgba(255,255,255,0.1);
-        }
-        
-        .nav-pills .nav-link i {
-            font-size: 1.2rem;
-            min-width: 30px;
-            text-align: center;
-            transition: transform 0.3s ease;
-            color: var(--text-primary);
-        }
-        
-        .nav-pills .nav-link:hover i {
-            transform: scale(1.1);
-        }
-        
-        .nav-pills .nav-link span {
-            margin-left: 10px;
-            opacity: 0;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-        
-        .sidebar:hover .nav-pills .nav-link span {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        
-        .nav-pills .nav-link.active {
-            background-color: var(--accent);
-            color: var(--text-primary);
-            box-shadow: 0 2px 4px rgba(21,101,192,0.3);
-            border-color: rgba(255,255,255,0.2);
-        }
-        
-        .nav-pills .nav-link.active:hover {
-            transform: translateX(5px) scale(1.02);
-            background-color: var(--accent);
-        }
-        
-        /* Ajuste do conteúdo principal */
-        .main-content {
-            margin-left: 60px;
-            flex: 1;
-            padding: 20px;
-            transition: all 0.3s ease;
-            min-height: 100vh;
-            background-color: #f8f9fa;
-        }
-        
-        .sidebar:hover + .main-content {
-            margin-left: 200px;
         }
 
         /* Estilos para as ações rápidas */
@@ -948,6 +855,167 @@
 
         .btn-print-discreto i {
             font-size: 0.9rem;
+        }
+
+        /* Estilos para botões de ação das prescrições */
+        .prescricao-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-action-discreto {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-primary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-action-discreto:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: var(--text-primary);
+            transform: translateY(-1px);
+        }
+
+        .btn-print-discreto {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-primary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-print-discreto:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: var(--text-primary);
+            transform: translateY(-1px);
+        }
+
+        /* Variáveis RGB para transparência */
+        :root {
+            --primary-main-rgb: 40, 53, 147;
+            --primary-light-rgb: 57, 73, 171;
+        }
+
+        /* Estilos específicos para informações do médico e timestamp */
+        .medico-info {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .medico-nome {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .timestamp {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.9rem;
+            font-weight: 400;
+            margin-left: 4px;
+        }
+
+        /* Estilo do menu lateral */
+        .sidebar {
+            width: 60px;
+            height: 100vh;
+            background: linear-gradient(180deg, var(--primary-dark) 0%, var(--primary-main) 100%);
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding-top: 20px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            z-index: 1000;
+            box-shadow: var(--shadow-soft);
+        }
+        
+        .sidebar:hover {
+            width: 200px;
+            box-shadow: var(--shadow-strong);
+        }
+        
+        .nav-pills {
+            flex-direction: column;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .nav-pills .nav-link {
+            margin: 5px 10px;
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-pills .nav-link:hover {
+            background-color: var(--hover-light);
+            transform: translateX(5px);
+            color: var(--text-primary);
+            border-color: rgba(255,255,255,0.1);
+        }
+        
+        .nav-pills .nav-link i {
+            font-size: 1.2rem;
+            min-width: 30px;
+            text-align: center;
+            transition: transform 0.3s ease;
+            color: var(--text-primary);
+        }
+        
+        .nav-pills .nav-link:hover i {
+            transform: scale(1.1);
+        }
+        
+        .nav-pills .nav-link span {
+            margin-left: 10px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .sidebar:hover .nav-pills .nav-link span {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .nav-pills .nav-link.active {
+            background-color: var(--accent);
+            color: var(--text-primary);
+            box-shadow: 0 2px 4px rgba(21,101,192,0.3);
+            border-color: rgba(255,255,255,0.2);
+        }
+        
+        .nav-pills .nav-link.active:hover {
+            transform: translateX(5px) scale(1.02);
+            background-color: var(--accent);
+        }
+        
+        /* Ajuste do conteúdo principal */
+        .main-content {
+            margin-left: 60px;
+            flex: 1;
+            padding: 20px;
+            transition: all 0.3s ease;
         }
     </style>
 </head>
@@ -2470,9 +2538,27 @@ if (!window.ATENDIMENTO_ID) {
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title">Nova Prescrição Médica</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-light" data-bs-toggle="collapse" data-bs-target="#ajudaPrescricao" aria-expanded="false">
+                        <i class="fas fa-question-circle"></i> Ajuda
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
             </div>
             <div class="modal-body">
+                <!-- Seção de Ajuda Colapsável -->
+                <div class="collapse" id="ajudaPrescricao">
+                    <div class="card card-body mb-3 bg-light">
+                        <h6 class="fw-bold mb-2"><i class="fas fa-lightbulb text-warning me-1"></i> Como usar as prescrições:</h6>
+                        <ul class="mb-2 small">
+                            <li><strong>Nova Prescrição:</strong> Crie uma prescrição do zero preenchendo os campos</li>
+                            <li><strong>Baseada em Anterior:</strong> Clique no ícone <i class="fas fa-copy text-primary"></i> de qualquer prescrição para usar como base</li>
+                            <li><strong>Modificação:</strong> Quando baseada, você pode adicionar/remover medicamentos e editar campos</li>
+                            <li><strong>Teclas rápidas:</strong> Use Enter para navegar entre campos de medicamentos</li>
+                        </ul>
+                    </div>
+                </div>
+                
                 <form id="formPrescricao">
                     <div class="mb-3">
                         <label class="form-label">Dieta</label>
@@ -2545,6 +2631,12 @@ $('#btn-nova-prescricao').on('click', function() {
     $('#formPrescricao')[0].reset();
     window.medicamentosAdicionados = [];
     atualizarTabelaMedicamentos();
+    
+    // Restaurar título original do modal
+    $('#modalNovaPrescricao .modal-title').text('Nova Prescrição Médica');
+    
+    // Remover indicador de prescrição baseada se existir
+    $('#indicador-prescricao-base').remove();
     
     // Abrir o modal
     $('#modalNovaPrescricao').modal('show');

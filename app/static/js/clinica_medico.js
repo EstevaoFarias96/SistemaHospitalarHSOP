@@ -1759,9 +1759,16 @@ function renderizarPrescricao(prescricao) {
     let html = `
         <div class="prescricao-container">
             <div class="prescricao-header">
-                <div class="medico-info">Dr(a). ${prescricao.medico_nome}</div>
-                <div class="timestamp-with-print">
-                    <span class="timestamp">${prescricao.data_prescricao}</span>
+                <div class="medico-info" style="display: flex; align-items: center; flex-wrap: wrap;">
+                    <span class="medico-nome" style="font-weight: 600; color: var(--text-primary);">Dr(a). ${prescricao.medico_nome}</span>
+                    <span class="timestamp" style="color: rgba(255, 255, 255, 0.85); font-size: 0.9rem; font-weight: 400; margin-left: 8px;"> - ${prescricao.data_prescricao}</span>
+                </div>
+                <div class="prescricao-actions">
+                    <button type="button" class="btn-action-discreto" 
+                            onclick="criarPrescricaoBaseada(${prescricao.id})" 
+                            title="Criar nova prescrição baseada nesta">
+                        <i class="fas fa-copy"></i>
+                    </button>
                     <button type="button" class="btn-print-discreto" 
                             onclick="imprimirPrescricao(${prescricao.id})" 
                             title="Imprimir Prescrição">
@@ -1823,6 +1830,212 @@ function renderizarPrescricao(prescricao) {
         </div>
     `;
     return html;
+}
+
+// Função auxiliar para gerenciar modal de loading
+function mostrarLoadingModal(mensagem = 'Carregando...') {
+    // Remover modal existente
+    $('#loadingModal').remove();
+    
+    const loadingModal = `
+        <div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-body text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                        <p class="mt-2 mb-0">${mensagem}</p>
+                        <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="fecharLoadingModal()">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    $('body').append(loadingModal);
+    const modalInstance = new bootstrap.Modal(document.getElementById('loadingModal'));
+    modalInstance.show();
+    
+    // Timeout de segurança - fechar automaticamente após 15 segundos
+    setTimeout(() => {
+        if (document.getElementById('loadingModal')) {
+            console.warn('Modal de loading fechado por timeout de segurança');
+            fecharLoadingModal();
+        }
+    }, 15000);
+    
+    return modalInstance;
+}
+
+function fecharLoadingModal() {
+    // Forçar fechamento e remoção do modal
+    const modalElement = document.getElementById('loadingModal');
+    if (modalElement) {
+        const modalInstance = bootstrap.Modal.getInstance(modalElement);
+        if (modalInstance) {
+            modalInstance.hide();
+        }
+    }
+    
+    // Garantir remoção após um breve delay
+    setTimeout(() => {
+        $('#loadingModal').remove();
+        $('.modal-backdrop').remove(); // Remover backdrop se ficou "orfão"
+        $('body').removeClass('modal-open'); // Remover classe que pode travar o scroll
+        
+        // Garantir que o body não tenha overflow hidden
+        $('body').css('overflow', '');
+    }, 200);
+}
+
+// Listener global para limpeza de modais
+$(document).ready(function() {
+    // Limpar qualquer modal de loading órfão quando qualquer modal for fechado
+    $(document).on('hidden.bs.modal', function (e) {
+        // Se não há mais modais abertos, limpar tudo
+        if ($('.modal.show').length === 0) {
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open').css('overflow', '');
+        }
+    });
+    
+    // Limpar loading modal especificamente
+    $(document).on('hidden.bs.modal', '#loadingModal', function () {
+        $('#loadingModal').remove();
+        $('.modal-backdrop').remove();
+        $('body').removeClass('modal-open').css('overflow', '');
+    });
+});
+
+// Função para criar prescrição baseada em outra
+function criarPrescricaoBaseada(prescricaoId) {
+    console.log('Iniciando criação de prescrição baseada. ID:', prescricaoId);
+    
+    // Mostrar modal de loading
+    const modalInstance = mostrarLoadingModal('Carregando prescrição base...');
+    
+    // Buscar dados da prescrição base
+    $.ajax({
+        url: `/api/prescricoes/${prescricaoId}/base`,
+        method: 'GET',
+        timeout: 10000, // 10 segundos de timeout
+        success: function(response) {
+            console.log('Resposta da API recebida:', response);
+            
+            if (response.success && response.prescricao_base) {
+                const prescricaoBase = response.prescricao_base;
+                console.log('Dados da prescrição base:', prescricaoBase);
+                
+                // Limpar o formulário primeiro
+                $('#formPrescricao')[0].reset();
+                window.medicamentosAdicionados = [];
+                
+                // Preencher campos com dados da prescrição base
+                $('#texto_dieta').val(prescricaoBase.texto_dieta || '');
+                $('#texto_procedimento_medico').val(prescricaoBase.texto_procedimento_medico || '');
+                $('#texto_procedimento_multi').val(prescricaoBase.texto_procedimento_multi || '');
+                
+                // Carregar medicamentos
+                if (prescricaoBase.medicamentos && prescricaoBase.medicamentos.length > 0) {
+                    window.medicamentosAdicionados = [...prescricaoBase.medicamentos];
+                    atualizarTabelaMedicamentos();
+                    console.log('Medicamentos carregados:', window.medicamentosAdicionados.length);
+                }
+                
+                console.log('Fechando modal de loading...');
+                
+                // Fechar modal de loading
+                fecharLoadingModal();
+                
+                // Aguardar e preparar modal de prescrição
+                setTimeout(() => {
+                    console.log('Preparando modal de nova prescrição...');
+                    
+                    // Alterar título do modal
+                    $('#modalNovaPrescricao .modal-title').html(`
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-copy me-2 text-warning"></i>
+                            Nova Prescrição (Baseada em Prescrição Anterior)
+                        </div>
+                    `);
+                    
+                    // Adicionar indicador visual
+                    let indicadorBase = $('#indicador-prescricao-base');
+                    if (indicadorBase.length === 0) {
+                        const indicadorHtml = `
+                            <div id="indicador-prescricao-base" class="alert alert-info d-flex align-items-center mb-3" role="alert">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <div>
+                                    <strong>Prescrição Baseada:</strong> Os dados foram carregados de uma prescrição anterior. 
+                                    Você pode modificar, adicionar ou remover itens conforme necessário.
+                                </div>
+                            </div>
+                        `;
+                        $('#modalNovaPrescricao .modal-body').prepend(indicadorHtml);
+                    } else {
+                        indicadorBase.show();
+                    }
+                    
+                    console.log('Abrindo modal de nova prescrição...');
+                    
+                    // Mostrar modal de nova prescrição
+                    $('#modalNovaPrescricao').modal('show');
+                    
+                    // Mostrar notificação de sucesso
+                    mostrarNotificacaoSucesso('Prescrição carregada como base. Modifique conforme necessário.');
+                    
+                    console.log('Processo concluído com sucesso!');
+                    
+                }, 100);
+                
+            } else {
+                console.error('Erro na resposta da API:', response);
+                fecharLoadingModal();
+                mostrarMensagemErro('Erro ao carregar prescrição base: ' + (response.error || 'Erro desconhecido'));
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Erro na requisição AJAX:', {xhr, status, error});
+            fecharLoadingModal();
+            
+            if (status === 'timeout') {
+                mostrarMensagemErro('Tempo esgotado ao carregar prescrição. Tente novamente.');
+            } else {
+                mostrarMensagemErro('Erro ao carregar prescrição base. Tente novamente.');
+            }
+        }
+    });
+}
+
+// Função para mostrar notificação de sucesso mais discreta
+function mostrarNotificacaoSucesso(mensagem) {
+    const toastHtml = `
+        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+            <div id="toastSucesso" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <i class="fas fa-check-circle text-success me-2"></i>
+                    <strong class="me-auto">Sucesso</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    ${mensagem}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remover toast anterior se existir
+    $('.toast-container').remove();
+    
+    // Adicionar novo toast
+    $('body').append(toastHtml);
+    
+    // Mostrar toast
+    const toast = new bootstrap.Toast(document.getElementById('toastSucesso'));
+    toast.show();
 }
 
 // Função para carregar prescrições
