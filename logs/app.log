@@ -16711,3 +16711,957 @@ AssertionError: View function mapping is overwriting an existing endpoint functi
 AssertionError: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
 
 2025-06-12 11:09:17,002 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 12:46:48,694 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 12:46:48,694 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 12:46:48,694 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 12:46:48,694 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 12:46:48,694 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 12:46:48,712 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 12:46:48,712 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 12:46:48,831 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+2025-06-12 12:46:48,831 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+
+2025-06-12 12:46:48,843 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 12:46:49,014 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 12:46:49,014 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 12:46:49,014 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 12:46:49,014 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 12:46:49,014 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 12:46:49,032 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 12:46:49,032 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 12:46:49,134 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+2025-06-12 12:46:49,135 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+
+2025-06-12 12:46:49,149 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 13:03:39,459 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 13:03:39,459 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 13:03:39,459 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 13:03:39,459 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 13:03:39,459 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 13:03:39,477 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 13:03:39,477 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 13:03:39,582 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+2025-06-12 13:03:39,583 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+
+2025-06-12 13:03:39,596 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 13:03:39,768 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 13:03:39,768 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 13:03:39,768 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 13:03:39,768 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 13:03:39,768 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 13:03:39,787 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 13:03:39,787 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 13:03:39,896 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+2025-06-12 13:03:39,896 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+
+2025-06-12 13:03:39,913 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 13:30:41,569 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 13:30:41,569 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 13:30:41,569 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 13:30:41,569 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 13:30:41,569 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 13:30:41,588 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 13:30:41,588 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 13:30:41,711 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+2025-06-12 13:30:41,712 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+
+2025-06-12 13:30:41,723 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 13:31:46,624 [ERROR] __init__:137 - Erro 500: 500 Internal Server Error: Erro interno: 403 Forbidden: Somente médicos podem imprimir AIH.
+2025-06-12 13:31:46,624 [ERROR] __init__:138 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/routes.py", line 3968, in imprimir_aih
+    return abort(403, description="Somente médicos podem imprimir AIH.")
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/helpers.py", line 284, in abort
+    current_app.aborter(code, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.Forbidden: 403 Forbidden: Somente médicos podem imprimir AIH.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/estevaofilho/HSOP/app/routes.py", line 36, in decorated_function
+    return f(*args, **kwargs)
+  File "/home/estevaofilho/HSOP/app/routes.py", line 4021, in imprimir_aih
+    return abort(500, description=f"Erro interno: {str(e)}")
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/helpers.py", line 284, in abort
+    current_app.aborter(code, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.InternalServerError: 500 Internal Server Error: Erro interno: 403 Forbidden: Somente médicos podem imprimir AIH.
+
+2025-06-12 13:32:41,300 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 13:32:41,300 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 13:32:41,300 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 13:32:41,300 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 13:32:41,300 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 13:32:41,320 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 13:32:41,320 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 13:32:41,448 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+2025-06-12 13:32:41,449 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+
+2025-06-12 13:32:41,463 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 13:33:03,514 [ERROR] __init__:137 - Erro 500: 500 Internal Server Error: Erro interno: 403 Forbidden: Somente médicos podem imprimir AIH.
+2025-06-12 13:33:03,514 [ERROR] __init__:138 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/routes.py", line 3968, in imprimir_aih
+    return abort(403, description="Somente médicos podem imprimir AIH.")
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/helpers.py", line 284, in abort
+    current_app.aborter(code, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.Forbidden: 403 Forbidden: Somente médicos podem imprimir AIH.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/estevaofilho/HSOP/app/routes.py", line 36, in decorated_function
+    return f(*args, **kwargs)
+  File "/home/estevaofilho/HSOP/app/routes.py", line 4021, in imprimir_aih
+    return abort(500, description=f"Erro interno: {str(e)}")
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/helpers.py", line 284, in abort
+    current_app.aborter(code, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.InternalServerError: 500 Internal Server Error: Erro interno: 403 Forbidden: Somente médicos podem imprimir AIH.
+
+2025-06-12 13:42:19,720 [ERROR] __init__:137 - Erro 500: 500 Internal Server Error: Erro interno: 403 Forbidden: Somente médicos podem imprimir AIH.
+2025-06-12 13:42:19,720 [ERROR] __init__:138 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/routes.py", line 3968, in imprimir_aih
+    return abort(403, description="Somente médicos podem imprimir AIH.")
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/helpers.py", line 284, in abort
+    current_app.aborter(code, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.Forbidden: 403 Forbidden: Somente médicos podem imprimir AIH.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/estevaofilho/HSOP/app/routes.py", line 36, in decorated_function
+    return f(*args, **kwargs)
+  File "/home/estevaofilho/HSOP/app/routes.py", line 4021, in imprimir_aih
+    return abort(500, description=f"Erro interno: {str(e)}")
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/helpers.py", line 284, in abort
+    current_app.aborter(code, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.InternalServerError: 500 Internal Server Error: Erro interno: 403 Forbidden: Somente médicos podem imprimir AIH.
+
+2025-06-12 13:43:28,820 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 13:43:28,820 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 13:43:28,820 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 13:43:28,820 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 13:43:28,820 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 13:43:28,843 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 13:43:28,844 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 13:43:28,973 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+2025-06-12 13:43:28,973 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+
+2025-06-12 13:43:28,986 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 13:53:19,435 [ERROR] __init__:137 - Erro 500: 500 Internal Server Error: Erro interno do servidor: Package not found at 'app/static/impressos/prescricao.docx'
+2025-06-12 13:53:19,442 [ERROR] __init__:138 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/routes.py", line 4685, in imprimir_prescricao_por_atendimento
+    doc = Document('app/static/impressos/prescricao.docx')
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/api.py", line 27, in Document
+    document_part = cast("DocumentPart", Package.open(docx).main_document_part)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/opc/package.py", line 127, in open
+    pkg_reader = PackageReader.from_file(pkg_file)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/opc/pkgreader.py", line 22, in from_file
+    phys_reader = PhysPkgReader(pkg_file)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/opc/phys_pkg.py", line 21, in __new__
+    raise PackageNotFoundError("Package not found at '%s'" % pkg_file)
+docx.opc.exceptions.PackageNotFoundError: Package not found at 'app/static/impressos/prescricao.docx'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/estevaofilho/HSOP/app/routes.py", line 4768, in imprimir_prescricao_por_atendimento
+    return abort(500, f'Erro interno do servidor: {str(e)}')
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/helpers.py", line 284, in abort
+    current_app.aborter(code, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.InternalServerError: 500 Internal Server Error: Erro interno do servidor: Package not found at 'app/static/impressos/prescricao.docx'
+
+2025-06-12 13:53:25,057 [ERROR] __init__:137 - Erro 500: 500 Internal Server Error: Erro interno do servidor: Package not found at 'app/static/impressos/prescricao.docx'
+2025-06-12 13:53:25,057 [ERROR] __init__:138 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/routes.py", line 4685, in imprimir_prescricao_por_atendimento
+    doc = Document('app/static/impressos/prescricao.docx')
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/api.py", line 27, in Document
+    document_part = cast("DocumentPart", Package.open(docx).main_document_part)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/opc/package.py", line 127, in open
+    pkg_reader = PackageReader.from_file(pkg_file)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/opc/pkgreader.py", line 22, in from_file
+    phys_reader = PhysPkgReader(pkg_file)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/opc/phys_pkg.py", line 21, in __new__
+    raise PackageNotFoundError("Package not found at '%s'" % pkg_file)
+docx.opc.exceptions.PackageNotFoundError: Package not found at 'app/static/impressos/prescricao.docx'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/estevaofilho/HSOP/app/routes.py", line 4768, in imprimir_prescricao_por_atendimento
+    return abort(500, f'Erro interno do servidor: {str(e)}')
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/helpers.py", line 284, in abort
+    current_app.aborter(code, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.InternalServerError: 500 Internal Server Error: Erro interno do servidor: Package not found at 'app/static/impressos/prescricao.docx'
+
+2025-06-12 13:54:20,381 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 13:54:20,381 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 13:54:20,381 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 13:54:20,381 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 13:54:20,381 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 13:54:20,399 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 13:54:20,399 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 13:54:20,521 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+2025-06-12 13:54:20,521 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+
+2025-06-12 13:54:20,532 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 13:54:22,804 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 13:54:22,804 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 13:54:22,804 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 13:54:22,804 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 13:54:22,804 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 13:54:22,823 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 13:54:22,823 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 13:54:22,952 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+2025-06-12 13:54:22,952 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+
+2025-06-12 13:54:22,964 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 13:54:25,640 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 13:54:25,640 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 13:54:25,640 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 13:54:25,640 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 13:54:25,640 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 13:54:25,658 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 13:54:25,658 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 13:54:25,764 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+2025-06-12 13:54:25,764 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+
+2025-06-12 13:54:25,777 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 13:54:25,955 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 13:54:25,955 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 13:54:25,955 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 13:54:25,955 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 13:54:25,955 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 13:54:25,974 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 13:54:25,974 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 13:54:26,083 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+2025-06-12 13:54:26,084 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+
+2025-06-12 13:54:26,095 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 13:54:27,435 [ERROR] __init__:137 - Erro 500: 500 Internal Server Error: Erro interno do servidor: Package not found at 'app/static/impressos/prescricao.docx'
+2025-06-12 13:54:27,436 [ERROR] __init__:138 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/routes.py", line 4685, in imprimir_prescricao_por_atendimento
+    doc = Document('app/static/impressos/prescricao.docx')
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/api.py", line 27, in Document
+    document_part = cast("DocumentPart", Package.open(docx).main_document_part)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/opc/package.py", line 127, in open
+    pkg_reader = PackageReader.from_file(pkg_file)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/opc/pkgreader.py", line 22, in from_file
+    phys_reader = PhysPkgReader(pkg_file)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/opc/phys_pkg.py", line 21, in __new__
+    raise PackageNotFoundError("Package not found at '%s'" % pkg_file)
+docx.opc.exceptions.PackageNotFoundError: Package not found at 'app/static/impressos/prescricao.docx'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/estevaofilho/HSOP/app/routes.py", line 4768, in imprimir_prescricao_por_atendimento
+    return abort(500, f'Erro interno do servidor: {str(e)}')
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/helpers.py", line 284, in abort
+    current_app.aborter(code, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.InternalServerError: 500 Internal Server Error: Erro interno do servidor: Package not found at 'app/static/impressos/prescricao.docx'
+
+2025-06-12 13:54:34,445 [ERROR] __init__:137 - Erro 500: 500 Internal Server Error: Erro interno do servidor: Package not found at 'app/static/impressos/prescricao.docx'
+2025-06-12 13:54:34,445 [ERROR] __init__:138 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/routes.py", line 4685, in imprimir_prescricao_por_atendimento
+    doc = Document('app/static/impressos/prescricao.docx')
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/api.py", line 27, in Document
+    document_part = cast("DocumentPart", Package.open(docx).main_document_part)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/opc/package.py", line 127, in open
+    pkg_reader = PackageReader.from_file(pkg_file)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/opc/pkgreader.py", line 22, in from_file
+    phys_reader = PhysPkgReader(pkg_file)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/opc/phys_pkg.py", line 21, in __new__
+    raise PackageNotFoundError("Package not found at '%s'" % pkg_file)
+docx.opc.exceptions.PackageNotFoundError: Package not found at 'app/static/impressos/prescricao.docx'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/estevaofilho/HSOP/app/routes.py", line 4768, in imprimir_prescricao_por_atendimento
+    return abort(500, f'Erro interno do servidor: {str(e)}')
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/helpers.py", line 284, in abort
+    current_app.aborter(code, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.InternalServerError: 500 Internal Server Error: Erro interno do servidor: Package not found at 'app/static/impressos/prescricao.docx'
+
+2025-06-12 13:58:59,869 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 13:58:59,870 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 13:58:59,870 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 13:58:59,870 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 13:58:59,870 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 13:58:59,889 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 13:58:59,889 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 13:59:00,015 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+2025-06-12 13:59:00,016 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+
+2025-06-12 13:59:00,032 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 14:04:55,340 [ERROR] __init__:137 - Erro 500: 500 Internal Server Error: Erro interno do servidor: Package not found at 'app/static/impressos/prescricao.docx'
+2025-06-12 14:04:55,341 [ERROR] __init__:138 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/routes.py", line 4685, in imprimir_prescricao_por_atendimento
+    doc = Document('app/static/impressos/prescricao.docx')
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/api.py", line 27, in Document
+    document_part = cast("DocumentPart", Package.open(docx).main_document_part)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/opc/package.py", line 127, in open
+    pkg_reader = PackageReader.from_file(pkg_file)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/opc/pkgreader.py", line 22, in from_file
+    phys_reader = PhysPkgReader(pkg_file)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/opc/phys_pkg.py", line 21, in __new__
+    raise PackageNotFoundError("Package not found at '%s'" % pkg_file)
+docx.opc.exceptions.PackageNotFoundError: Package not found at 'app/static/impressos/prescricao.docx'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/estevaofilho/HSOP/app/routes.py", line 4768, in imprimir_prescricao_por_atendimento
+    return abort(500, f'Erro interno do servidor: {str(e)}')
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/helpers.py", line 284, in abort
+    current_app.aborter(code, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.InternalServerError: 500 Internal Server Error: Erro interno do servidor: Package not found at 'app/static/impressos/prescricao.docx'
+
+2025-06-12 14:05:13,326 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 14:05:13,326 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 14:05:13,326 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 14:05:13,327 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 14:05:13,327 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 14:05:13,346 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 14:05:13,346 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 14:05:13,452 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+2025-06-12 14:05:13,452 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+
+2025-06-12 14:05:13,469 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 14:05:13,643 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 14:05:13,643 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 14:05:13,643 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 14:05:13,643 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 14:05:13,643 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 14:05:13,662 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 14:05:13,662 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 14:05:13,768 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+2025-06-12 14:05:13,768 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.imprimir_prescricao
+
+2025-06-12 14:05:13,780 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 14:11:48,927 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 14:11:48,927 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 14:11:48,927 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 14:11:48,927 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 14:11:48,927 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 14:11:48,946 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 14:11:48,946 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 14:11:49,074 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.imprimir_evolucao_html
+2025-06-12 14:11:49,075 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.imprimir_evolucao_html
+
+2025-06-12 14:11:49,088 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 14:11:56,670 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 14:11:56,670 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 14:11:56,670 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 14:11:56,670 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 14:11:56,670 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 14:11:56,690 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 14:11:56,690 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 14:11:56,795 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.imprimir_evolucao_html
+2025-06-12 14:11:56,796 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.imprimir_evolucao_html
+
+2025-06-12 14:11:56,808 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 14:11:56,987 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 14:11:56,987 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 14:11:56,987 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 14:11:56,987 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 14:11:56,987 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 14:11:57,006 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 14:11:57,006 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 14:11:57,116 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.imprimir_evolucao_html
+2025-06-12 14:11:57,117 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.imprimir_evolucao_html
+
+2025-06-12 14:11:57,130 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 14:12:35,958 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 14:12:35,958 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 14:12:35,958 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 14:12:35,958 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 14:12:35,958 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 14:12:35,978 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 14:12:35,978 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 14:12:36,105 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.imprimir_sae
+2025-06-12 14:12:36,105 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.imprimir_sae
+
+2025-06-12 14:12:36,117 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 14:12:36,294 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 14:12:36,294 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 14:12:36,294 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 14:12:36,294 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 14:12:36,294 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 14:12:36,313 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 14:12:36,313 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 14:12:36,422 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.imprimir_sae
+2025-06-12 14:12:36,423 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.imprimir_sae
+
+2025-06-12 14:12:36,437 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 14:13:08,081 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 14:13:08,081 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 14:13:08,081 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 14:13:08,081 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 14:13:08,081 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 14:13:08,101 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 14:13:08,102 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 14:13:08,228 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.imprimir_ficha_admissao
+2025-06-12 14:13:08,228 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.imprimir_ficha_admissao
+
+2025-06-12 14:13:08,241 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 14:13:18,612 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 14:13:18,612 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 14:13:18,612 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 14:13:18,612 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 14:13:18,612 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 14:13:18,630 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 14:13:18,630 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 14:13:18,750 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.imprimir_identificacao_paciente
+2025-06-12 14:13:18,750 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.imprimir_identificacao_paciente
+
+2025-06-12 14:13:18,763 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 14:13:29,122 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 14:13:29,122 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 14:13:29,122 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 14:13:29,122 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 14:13:29,123 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 14:13:29,142 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 14:13:29,142 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 14:13:29,271 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.evolucao_paciente_medico
+2025-06-12 14:13:29,271 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.evolucao_paciente_medico
+
+2025-06-12 14:13:29,286 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 14:13:37,632 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 14:13:37,632 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 14:13:37,632 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 14:13:37,632 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 14:13:37,632 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 14:13:37,650 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 14:13:37,650 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 14:13:37,776 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-12 14:13:37,787 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 14:13:45,739 [ERROR] __init__:137 - Erro 500: 500 Internal Server Error: Erro interno do servidor: Package not found at 'app/static/impressos/prescricao.docx'
+2025-06-12 14:13:45,740 [ERROR] __init__:138 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/routes.py", line 4685, in imprimir_prescricao_por_atendimento
+    doc = Document('app/static/impressos/prescricao.docx')
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/api.py", line 27, in Document
+    document_part = cast("DocumentPart", Package.open(docx).main_document_part)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/opc/package.py", line 127, in open
+    pkg_reader = PackageReader.from_file(pkg_file)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/opc/pkgreader.py", line 22, in from_file
+    phys_reader = PhysPkgReader(pkg_file)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/opc/phys_pkg.py", line 21, in __new__
+    raise PackageNotFoundError("Package not found at '%s'" % pkg_file)
+docx.opc.exceptions.PackageNotFoundError: Package not found at 'app/static/impressos/prescricao.docx'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/estevaofilho/HSOP/app/routes.py", line 4768, in imprimir_prescricao_por_atendimento
+    return abort(500, f'Erro interno do servidor: {str(e)}')
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/helpers.py", line 284, in abort
+    current_app.aborter(code, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.InternalServerError: 500 Internal Server Error: Erro interno do servidor: Package not found at 'app/static/impressos/prescricao.docx'
+
+2025-06-12 14:18:23,416 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 14:18:23,416 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 14:18:23,416 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 14:18:23,416 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 14:18:23,416 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 14:18:23,436 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 14:18:23,436 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 14:18:23,544 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-12 14:18:23,555 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 14:23:39,059 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 14:23:39,059 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 14:23:39,059 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 14:23:39,059 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 14:23:39,059 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 14:23:39,077 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 14:23:39,077 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 14:23:39,180 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-12 14:23:39,191 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 14:23:39,368 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 14:23:39,368 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 14:23:39,368 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 14:23:39,368 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 14:23:39,368 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 14:23:39,386 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 14:23:39,386 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 14:23:39,493 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-12 14:23:39,509 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 14:23:43,689 [ERROR] __init__:137 - Erro 500: 500 Internal Server Error: Erro interno do servidor: Package not found at 'app/static/impressos/prescricao.docx'
+2025-06-12 14:23:43,690 [ERROR] __init__:138 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/routes.py", line 4685, in imprimir_prescricao_por_atendimento
+    doc = Document('app/static/impressos/prescricao.docx')
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/api.py", line 27, in Document
+    document_part = cast("DocumentPart", Package.open(docx).main_document_part)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/opc/package.py", line 127, in open
+    pkg_reader = PackageReader.from_file(pkg_file)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/opc/pkgreader.py", line 22, in from_file
+    phys_reader = PhysPkgReader(pkg_file)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/docx/opc/phys_pkg.py", line 21, in __new__
+    raise PackageNotFoundError("Package not found at '%s'" % pkg_file)
+docx.opc.exceptions.PackageNotFoundError: Package not found at 'app/static/impressos/prescricao.docx'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/estevaofilho/HSOP/app/routes.py", line 4768, in imprimir_prescricao_por_atendimento
+    return abort(500, f'Erro interno do servidor: {str(e)}')
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/helpers.py", line 284, in abort
+    current_app.aborter(code, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.InternalServerError: 500 Internal Server Error: Erro interno do servidor: Package not found at 'app/static/impressos/prescricao.docx'
+
+2025-06-12 15:00:13,602 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 15:00:13,602 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 15:00:13,602 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 15:00:13,602 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 15:00:13,602 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 15:00:13,622 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 15:00:13,622 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 15:00:13,752 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-12 15:00:13,766 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-12 15:01:18,817 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-12 15:01:18,817 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-12 15:01:18,817 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-12 15:01:18,817 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-12 15:01:18,817 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-12 15:01:18,836 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-12 15:01:18,836 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-12 15:01:18,958 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-12 15:01:18,969 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
