@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Alta Hospitalar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            border: 1px solid #ddd;
+            padding: 30px;
+            border-radius: 8px;
+            background-color: #fff;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #0d6efd;
+            padding-bottom: 15px;
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0d6efd;
+            margin: 0;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #0d6efd;
+            border-bottom: 1px solid #0d6efd;
+            padding-bottom: 5px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        .info-item {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .info-item strong {
+            display: block;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+        }
+        .signature-line {
+            border-top: 1px solid #333;
+            width: 300px;
+            margin: 60px auto 0;
+            padding-top: 5px;
+        }
+        @media print {
+            body { -webkit-print-color-adjust: exact; }
+            .no-print { display: none; }
+            .container {
+                border: none;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>{{ hospital_nome|default('Relatório de Alta Hospitalar') }}</h1>
+        </div>
+
+        <div class="text-end mb-4 no-print">
+            <button onclick="window.print()" class="btn btn-primary">
+                <i class="fas fa-print"></i> Imprimir
+            </button>
+        </div>
+
+        <h2 class="section-title">Identificação do Paciente</h2>
+        <div class="info-grid">
+            <div class="info-item">
+                <strong>Nome Completo:</strong> {{ paciente.nome }}
+            </div>
+            <div class="info-item">
+                <strong>Data de Nascimento:</strong> {{ paciente.data_nascimento.strftime('%d/%m/%Y') if paciente.data_nascimento else 'N/A' }} ({{ idade }} anos)
+            </div>
+            <div class="info-item">
+                <strong>CPF:</strong> {{ paciente.cpf or 'N/A' }}
+            </div>
+             <div class="info-item">
+                <strong>Atendimento:</strong> {{ internacao.atendimento_id }}
+            </div>
+        </div>
+
+        <h2 class="section-title">Informações da Internação</h2>
+        <div class="info-grid">
+            <div class="info-item">
+                <strong>Data da Admissão:</strong> {{ internacao.data_internacao.strftime('%d/%m/%Y %H:%M') if internacao.data_internacao else 'N/A' }}
+            </div>
+            <div class="info-item">
+                <strong>Data da Alta:</strong> {{ internacao.data_alta.strftime('%d/%m/%Y %H:%M') if internacao.data_alta else 'N/A' }}
+            </div>
+            <div class="info-item">
+                <strong>Leito:</strong> {{ internacao.leito or 'N/A' }}
+            </div>
+            <div class="info-item">
+                <strong>Médico da Alta:</strong> {{ medico.nome if medico else 'N/A' }}
+            </div>
+        </div>
+        
+        <h2 class="section-title">Resumo Clínico</h2>
+        <div class="card">
+            <div class="card-body">
+                <strong>Diagnóstico Principal:</strong>
+                <p>{{ internacao.diagnostico or 'Não informado' }}</p>
+
+                <strong>Diagnóstico Inicial:</strong>
+                <p>{{ internacao.diagnostico_inicial or 'Não informado' }}</p>
+                
+                <strong>HDA (História da Doença Atual):</strong>
+                <p>{{ internacao.hda or 'Não informada' }}</p>
+
+                <strong>Conduta Realizada:</strong>
+                <p>{{ internacao.conduta or 'Não informada' }}</p>
+            </div>
+        </div>
+
+        <h2 class="section-title">Informações de Alta</h2>
+        <div class="card">
+            <div class="card-body">
+                <strong>Relatório de Alta:</strong>
+                <p>{{ internacao.relatorio_alta or 'Não informado' }}</p>
+                
+                <strong>Histórico da Internação:</strong>
+                <p>{{ internacao.historico_internacao or 'Não informado' }}</p>
+
+                <strong>Cuidados Gerais:</strong>
+                <p>{{ internacao.cuidados_gerais or 'Não informado' }}</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="signature-line">
+                Dr(a). {{ medico.nome if medico else '_____________________________' }}<br>
+                CRM: {{ medico.numero_profissional if medico else '_____________________________' }}
+            </div>
+            <p class="mt-3 text-muted"><small>Impresso em: {{ data_impressao.strftime('%d/%m/%Y %H:%M:%S') }}</small></p>
+        </div>
+    </div>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</body>
+</html> 

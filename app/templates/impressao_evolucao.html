@@ -84,7 +84,7 @@
         .patient-label {
             font-weight: bold;
             color: #495057;
-            min-width: 80px;
+            min-width: 90px;
             margin-right: 6px;
             font-size: 8pt;
         }
@@ -269,6 +269,28 @@
             background: #f8f9fa;
             font-style: italic;
         }
+
+        /* Grid para diagnóstico e CID lado a lado */
+        .diagnostico-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        /* Seções com mais espaço */
+        .section-large {
+            min-height: 100px;
+            padding: 12px;
+            line-height: 1.5;
+        }
+
+        /* Seções com menos espaço */
+        .section-small {
+            min-height: 30px;
+            padding: 6px;
+            line-height: 1.3;
+        }
     </style>
 </head>
 <body>
@@ -312,16 +334,16 @@
                 <span class="patient-value">{{ internacao.data_internacao.strftime('%d/%m/%Y %H:%M') if internacao.data_internacao else 'Não informado' }}</span>
             </div>
             <div class="patient-field">
+                <span class="patient-label">Data Evolução:</span>
+                <span class="patient-value">{{ evolucao.data_evolucao.strftime('%d/%m/%Y %H:%M') if evolucao.data_evolucao else 'Não informado' }}</span>
+            </div>
+            <div class="patient-field">
                 <span class="patient-label">Alergias:</span>
                 <span class="patient-value">{{ atendimento.alergias or 'Nenhuma alergia informada' }}</span>
             </div>
             <div class="patient-field">
                 <span class="patient-label">ID Atendimento:</span>
                 <span class="patient-value">{{ atendimento.id }}</span>
-            </div>
-            <div class="patient-field">
-                <span class="patient-label">CPF:</span>
-                <span class="patient-value">{{ paciente.cpf or 'Não informado' }}</span>
             </div>
         </div>
     </div>
@@ -335,6 +357,47 @@
         <div class="hda-content">{{ internacao.hda }}</div>
     </div>
     {% endif %}
+
+    <!-- Anamnese e Exame Físico -->
+    {% if internacao.folha_anamnese %}
+    <div class="evolucao-section">
+        <div class="section-header">
+            <i class="fas fa-stethoscope"></i> ANAMNESE E EXAME FÍSICO
+        </div>
+        <div class="section-content section-large">{{ internacao.folha_anamnese|safe }}</div>
+    </div>
+    {% endif %}
+
+    <!-- Conduta Médica -->
+    {% if internacao.conduta %}
+    <div class="evolucao-section">
+        <div class="section-header">
+            <i class="fas fa-user-md"></i> CONDUTA MÉDICA
+        </div>
+        <div class="section-content section-large">{{ internacao.conduta|safe }}</div>
+    </div>
+    {% endif %}
+
+    <!-- Diagnóstico e CID -->
+    <div class="diagnostico-grid">
+        {% if internacao.diagnostico %}
+        <div class="evolucao-section">
+            <div class="section-header">
+                <i class="fas fa-diagnoses"></i> DIAGNÓSTICO ATUAL
+            </div>
+            <div class="section-content section-small">{{ internacao.diagnostico|safe }}</div>
+        </div>
+        {% endif %}
+
+        {% if internacao.cid_principal %}
+        <div class="evolucao-section">
+            <div class="section-header">
+                <i class="fas fa-code"></i> CID PRINCIPAL
+            </div>
+            <div class="section-content section-small">{{ internacao.cid_principal|safe }}</div>
+        </div>
+        {% endif %}
+    </div>
 
     <!-- Evolução Médica -->
     <div class="evolucao-section">

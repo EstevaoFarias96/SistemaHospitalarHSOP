@@ -1,25 +1,20 @@
-#!/usr/bin/env python
-# Script para corrigir o arquivo routes.py, removendo imports duplicados de 're'
+#!/usr/bin/env python3
 
-import re
+# Script para remover funções duplicadas do routes.py
 
-# Ler o conteúdo do arquivo
-with open('app/routes.py', 'r', encoding='utf-8') as f:
-    content = f.read()
+print("Removendo funções duplicadas...")
 
-# Remover qualquer import duplicado de re dentro de função ou em outros locais
-corrected_content = re.sub(r'(\s+)import\s+re', '', content)
+with open('app/routes.py', 'r') as f:
+    lines = f.readlines()
 
-# Garantir que há o import correto no topo
-if 'import re' not in corrected_content:
-    # Adicionar após import traceback
-    corrected_content = corrected_content.replace(
-        'import traceback', 
-        'import traceback\nimport re'
-    )
+print(f"Total de linhas: {len(lines)}")
 
-# Escrever o arquivo corrigido
-with open('app/routes.py', 'w', encoding='utf-8') as f:
-    f.write(corrected_content)
+# Remover linhas das funções duplicadas (aproximadamente 5089-5592)
+# As linhas Python são baseadas em 0, então 5088 corresponde à linha 5089
+filtered_lines = lines[:5088] + lines[5593:]
 
-print("Arquivo routes.py corrigido!") 
+with open('app/routes.py', 'w') as f:
+    f.writelines(filtered_lines)
+
+print(f"Arquivo corrigido! Agora tem {len(filtered_lines)} linhas")
+print("Funções duplicadas removidas com sucesso") 

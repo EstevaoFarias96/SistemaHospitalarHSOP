@@ -31,4 +31,8 @@ class ConfigDev:
 # === ATIVAR UMA DAS CONFIGURAÇÕES ABAIXO ===
 # Config = ConfigProd  # Produção (Render, Railway, etc.)
 
+<<<<<<< HEAD
 Config = ConfigProd    # Desenvolvimento/teste local
+=======
+Config = ConfigDev   # Desenvolvimento/teste local
+>>>>>>> 6d41904 (Remover botão de imprimir alta e outras atualizações)

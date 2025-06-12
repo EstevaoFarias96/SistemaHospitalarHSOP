@@ -138,4 +138,7 @@ def create_app():
         logger.error(traceback.format_exc())
         return jsonify({'error': 'Erro interno do servidor'}), 500
 
+    # Importar rotas extras
+    from . import routes_extra
+
     return app

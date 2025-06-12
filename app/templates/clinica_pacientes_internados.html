@@ -92,11 +92,14 @@ function carregarPacientes() {
                             <td>${paciente.leito || '-'}</td>
                             <td>${paciente.diagnostico || '-'}</td>
                             <td>
-                                <a href="/clinica/evolucao/${paciente.atendimento_id}" class="btn btn-sm btn-outline-primary me-2">
-                                    <i class="fas fa-clipboard-list"></i> Evoluir
+                                <a href="/clinica/evolucao-paciente-medico/${paciente.atendimento_id}" class="btn btn-sm btn-outline-primary me-2" title="Evoluir Paciente">
+                                    <i class="fas fa-notes-medical"></i>
                                 </a>
-                                <button class="btn btn-sm btn-outline-success" onclick="registrarAlta(${paciente.id}, '${paciente.atendimento_id}')">
-                                    <i class="fas fa-check-circle"></i> Alta
+                                <button class="btn btn-sm btn-outline-info" onclick="imprimirAlta('${paciente.atendimento_id}')" title="Imprimir Relatório de Alta">
+                                    <i class="fas fa-print"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-success" onclick="registrarAlta('${paciente.atendimento_id}')" title="Registrar Alta">
+                                    <i class="fas fa-check-circle"></i>
                                 </button>
                             </td>
                         `;
@@ -140,10 +143,14 @@ function formatarData(dataString) {
     }
 }
 
-function registrarAlta(pacienteId, atendimentoId) {
-    if (confirm('Tem certeza que deseja dar alta para este paciente?')) {
-        window.location.href = `/clinica/paciente/${pacienteId}/atendimento/${atendimentoId}/alta`;
-    }
+function registrarAlta(atendimentoId) {
+    // Redireciona para a página de registro de alta
+    window.location.href = `/clinica/internacao/${atendimentoId}/alta`;
+}
+
+function imprimirAlta(atendimentoId) {
+    // Abre a página de impressão em uma nova aba
+    window.open(`/imprimir/alta/${atendimentoId}`, '_blank');
 }
 </script>
 {% endblock %}

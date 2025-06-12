@@ -42,6 +42,7 @@
                             <th>Data de Nascimento</th>
                             <th>Leito</th>
                             <th>Data de Internação</th>
+                            <th>Data de Alta</th>
                             <th>Diagnóstico</th>
                             <th class="text-center">Ações</th>
                         </tr>
@@ -116,6 +117,124 @@
     </div>
 </div>
 
+<!-- Modal de Informações de Alta -->
+<div class="modal fade" id="modalInformacoesAlta" tabindex="-1" aria-labelledby="modalInformacoesAltaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalInformacoesAltaLabel">
+                    <i class="fas fa-user-check me-2"></i>Informações de Alta do Paciente
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <h6 class="text-primary mb-2">
+                            <i class="fas fa-user me-2"></i>Dados do Paciente
+                        </h6>
+                        <div class="d-flex gap-4">
+                            <strong>Nome:</strong> <span id="altaNomePaciente"></span>
+                            <strong>CPF:</strong> <span id="altaCpfPaciente"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <h6 class="text-success mb-2">
+                            <i class="fas fa-calendar-check me-2"></i>Data de Alta
+                        </h6>
+                        <strong id="altaDataAlta" class="text-success fs-5"></strong>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-header bg-light border-0">
+                                <h6 class="mb-0 text-primary">
+                                    <i class="fas fa-stethoscope me-2"></i>Diagnóstico de Alta
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <p id="altaDiagnosticoAlta" class="mb-0 text-justify"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-header bg-light border-0">
+                                <h6 class="mb-0 text-primary">
+                                    <i class="fas fa-clipboard-list me-2"></i>Relatório de Alta
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <p id="altaRelatorioAlta" class="mb-0 text-justify"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-header bg-light border-0">
+                                <h6 class="mb-0 text-primary">
+                                    <i class="fas fa-history me-2"></i>Histórico da Internação
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <p id="altaHistoricoInternacao" class="mb-0 text-justify"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-header bg-light border-0">
+                                <h6 class="mb-0 text-primary">
+                                    <i class="fas fa-procedures me-2"></i>Conduta Final
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <p id="altaCondutaFinal" class="mb-0 text-justify"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-header bg-light border-0">
+                                <h6 class="mb-0 text-primary">
+                                    <i class="fas fa-pills me-2"></i>Medicação de Alta
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <p id="altaMedicacaoAlta" class="mb-0 text-justify"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-header bg-light border-0">
+                                <h6 class="mb-0 text-primary">
+                                    <i class="fas fa-heart me-2"></i>Cuidados Gerais
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <p id="altaCuidadosGerais" class="mb-0 text-justify"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Scripts -->
 <script>
 // Configurações e Constantes
@@ -123,7 +242,8 @@ const CONFIG = {
     API_ENDPOINTS: {
         PACIENTES: '/api/pacientes/internados',
         INTERNACAO: (id) => `/api/internacao/${id}`,
-        ALTA: (id) => `/api/internacao/${id}/alta`
+        ALTA: (id) => `/api/internacao/${id}/alta`,
+        FECHAR_PRONTUARIO: (id) => `/api/internacao/${id}/fechar-prontuario`
     },
     ROTAS: {
         ENFERMEIRO: '/enfermeiro',
@@ -149,6 +269,14 @@ class PacientesInternadosManager {
 
         // Evento do botão confirmar alta
         document.getElementById('btnConfirmarAlta').addEventListener('click', () => this.salvarRelatorioAlta());
+
+        // Event listeners para botões de fechar prontuário
+        document.querySelectorAll('.btn-fechar-prontuario').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const internacaoId = btn.getAttribute('data-internacao-id');
+                this.confirmarFecharProntuario(internacaoId);
+            });
+        });
     }
 
     navegarVoltar() {
@@ -195,20 +323,40 @@ class PacientesInternadosManager {
             ? `/clinica/evolucao-paciente-enfermeiro/${paciente.atendimento_id}`
             : `/clinica/evolucao-paciente-medico/${paciente.atendimento_id}`;
 
+        // Determinar o status do paciente e a classe CSS
+        let statusClass = '';
+        if (paciente.tem_alta) {
+            statusClass = 'table-secondary'; // Cinza para pacientes com alta
+        }
+
         let acoesHTML = `
             <div class="d-flex justify-content-center gap-2">
                 <a href="${evolucaoLink}" class="btn btn-sm btn-primary">
                     <i class="fas fa-notes-medical"></i> Evoluir
                 </a>`;
 
-        if (this.cargoUsuario === 'medico') {
+        // Só mostrar botão de alta para médicos e pacientes SEM alta
+        if (this.cargoUsuario === 'medico' && !paciente.tem_alta) {
             acoesHTML += `
                 <button class="btn btn-sm btn-success btn-alta" data-internacao-id="${paciente.atendimento_id}">
                     <i class="fas fa-clipboard-check"></i> Alta
                 </button>`;
         }
 
+        // Mostrar botão "Fechar Prontuário" para médicos e enfermeiros em pacientes COM alta
+        if (paciente.tem_alta && (this.cargoUsuario === 'medico' || this.cargoUsuario === 'enfermeiro')) {
+            acoesHTML += `
+                <button class="btn btn-sm btn-danger btn-fechar-prontuario" data-internacao-id="${paciente.atendimento_id}">
+                    <i class="fas fa-folder-minus"></i> Fechar Prontuário
+                </button>`;
+        }
+
         acoesHTML += '</div>';
+
+        // Adicionar a classe de status à linha
+        if (statusClass) {
+            row.className = statusClass;
+        }
 
         row.innerHTML = `
             <td>${paciente.nome}</td>
@@ -216,6 +364,7 @@ class PacientesInternadosManager {
             <td>${this.formatarData(paciente.data_nascimento)}</td>
             <td>${paciente.leito}</td>
             <td>${this.formatarData(paciente.data_internacao)}</td>
+            <td>${paciente.tem_alta ? this.formatarData(paciente.data_alta) : '<span class="badge bg-warning text-dark">Ativo</span>'}</td>
             <td>${paciente.diagnostico || '-'}</td>
             <td>${acoesHTML}</td>
         `;
@@ -224,10 +373,19 @@ class PacientesInternadosManager {
     }
 
     initializeAltaButtons() {
+        // Event listeners para botões de alta
         document.querySelectorAll('.btn-alta').forEach(btn => {
             btn.addEventListener('click', () => {
                 const internacaoId = btn.getAttribute('data-internacao-id');
                 this.abrirModalAlta(internacaoId);
+            });
+        });
+
+        // Event listeners para botões de fechar prontuário
+        document.querySelectorAll('.btn-fechar-prontuario').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const internacaoId = btn.getAttribute('data-internacao-id');
+                this.confirmarFecharProntuario(internacaoId);
             });
         });
     }
@@ -331,10 +489,10 @@ class PacientesInternadosManager {
                 // 1. Fechar modal imediatamente
                 this.fecharModal();
                 
-                // 2. Remover paciente da tabela imediatamente
-                this.removerPacienteDaTabela(internacaoId);
+                // 2. Atualizar a linha do paciente na tabela
+                this.atualizarLinhaPaciente(internacaoId);
                 
-                // 3. Executar demais ações (notificação, atualização, etc.)
+                // 3. Executar demais ações (notificação, etc.)
                 this.executarAcoesPosAlta();
             } else {
                 throw new Error(data.message || 'Erro ao registrar alta');
@@ -410,42 +568,102 @@ class PacientesInternadosManager {
         // Mostrar notificação imediatamente
         this.mostrarNotificacao('Alta registrada com sucesso!', 'success');
         
-        // Adicionar indicador de carregamento
-        this.mostrarIndicadorCarregamento(true);
-        
-        // Atualizar a lista de pacientes após um pequeno delay
-        setTimeout(() => {
-            this.fetchPacientesInternados().then(() => {
-                this.mostrarIndicadorCarregamento(false);
-                // Opcional: scroll para o topo da tabela
-                document.querySelector('.table-responsive').scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'start' 
-                });
-            }).catch((error) => {
-                console.error('Erro ao atualizar lista:', error);
-                this.mostrarIndicadorCarregamento(false);
-                // Fallback: recarregar a página inteira
-                window.location.reload();
-            });
-        }, 500);
+        // Opcional: scroll para o topo da tabela
+        document.querySelector('.table-responsive').scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+        });
     }
 
-    removerPacienteDaTabela(internacaoId) {
-        // Remover a linha do paciente da tabela com animação
+    atualizarLinhaPaciente(internacaoId) {
+        // Encontrar a linha do paciente
         const btnAlta = document.querySelector(`[data-internacao-id="${internacaoId}"]`);
         if (btnAlta) {
             const row = btnAlta.closest('tr');
             if (row) {
+                // Atualizar classe visual
+                row.classList.add('table-secondary');
+                
+                // Atualizar coluna de data de alta
+                const cellDataAlta = row.cells[5]; // Coluna de data de alta (índice 5)
+                cellDataAlta.innerHTML = `<span class="badge bg-success">Alta hoje</span>`;
+                
+                // Remover botão de alta e adicionar botão "Fechar Prontuário"
+                const acoesCell = row.cells[7]; // Coluna de ações (índice 7)
+                const actionsDiv = acoesCell.querySelector('.d-flex');
+                
+                // Remover botão de alta
+                btnAlta.remove();
+                
+                // Adicionar botão "Fechar Prontuário" (disponível para médicos e enfermeiros)
+                if (this.cargoUsuario === 'medico' || this.cargoUsuario === 'enfermeiro') {
+                    const btnFecharProntuario = document.createElement('button');
+                    btnFecharProntuario.className = 'btn btn-sm btn-danger btn-fechar-prontuario';
+                    btnFecharProntuario.setAttribute('data-internacao-id', internacaoId);
+                    btnFecharProntuario.innerHTML = '<i class="fas fa-folder-minus"></i> Fechar Prontuário';
+                    
+                    // Adicionar event listener
+                    btnFecharProntuario.addEventListener('click', () => {
+                        this.confirmarFecharProntuario(internacaoId);
+                    });
+                    
+                    actionsDiv.appendChild(btnFecharProntuario);
+                }
+                
+                // Animação de sucesso
+                row.style.transition = 'all 0.5s ease-out';
+                row.style.backgroundColor = '#d4edda';
+                setTimeout(() => {
+                    row.style.backgroundColor = '';
+                }, 2000);
+            }
+        }
+    }
+
+    confirmarFecharProntuario(internacaoId) {
+        // Mostrar confirmação antes de fechar o prontuário
+        if (confirm('Tem certeza que deseja fechar este prontuário?\n\nApós fechado, o paciente será removido da lista e não poderá mais ser editado.')) {
+            this.fecharProntuario(internacaoId);
+        }
+    }
+
+    async fecharProntuario(internacaoId) {
+        try {
+            const response = await fetch(CONFIG.API_ENDPOINTS.FECHAR_PRONTUARIO(internacaoId), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Remover o paciente da tabela com animação
+                this.removerPacienteDaTabela(internacaoId);
+                this.mostrarNotificacao('Prontuário fechado com sucesso!', 'success');
+            } else {
+                throw new Error(data.message || 'Erro ao fechar prontuário');
+            }
+        } catch (error) {
+            console.error('Erro ao fechar prontuário:', error);
+            this.mostrarNotificacao('Erro ao fechar prontuário: ' + error.message, 'error');
+        }
+    }
+
+    removerPacienteDaTabela(internacaoId) {
+        // Remover a linha do paciente da tabela com animação
+        const btnFechar = document.querySelector(`[data-internacao-id="${internacaoId}"].btn-fechar-prontuario`);
+        if (btnFechar) {
+            const row = btnFechar.closest('tr');
+            if (row) {
                 // Adicionar animação de fade out
-                row.style.transition = 'opacity 0.5s ease-out';
-                row.style.opacity = '0.5';
-                row.classList.add('table-warning');
+                row.style.transition = 'opacity 0.8s ease-out, transform 0.8s ease-out';
+                row.style.opacity = '0';
+                row.style.transform = 'translateX(-20px)';
                 
                 // Remover após delay
                 setTimeout(() => {
                     row.remove();
-                }, 500);
+                }, 800);
             }
         }
     }
@@ -510,35 +728,8 @@ class PacientesInternadosManager {
         }, 5000);
     }
 
-    mostrarIndicadorCarregamento(mostrar) {
-        const tableBody = document.getElementById('pacientesTable');
-        
-        if (mostrar) {
-            // Criar linha de carregamento
-            const loadingRow = document.createElement('tr');
-            loadingRow.id = 'loading-row';
-            loadingRow.innerHTML = `
-                <td colspan="7" class="text-center py-4">
-                    <div class="d-flex justify-content-center align-items-center">
-                        <div class="spinner-border text-primary me-3" role="status">
-                            <span class="visually-hidden">Carregando...</span>
-                        </div>
-                        <span class="text-muted">Atualizando lista de pacientes...</span>
-                    </div>
-                </td>
-            `;
-            
-            // Adicionar overlay de carregamento
-            tableBody.innerHTML = '';
-            tableBody.appendChild(loadingRow);
-            
-        } else {
-            // Remover indicador de carregamento
-            const loadingRow = document.getElementById('loading-row');
-            if (loadingRow) {
-                loadingRow.remove();
-            }
-        }
+    async abrirModalImprimirAlta(internacaoId) {
+        // Função removida: não faz mais nada
     }
 }
 
