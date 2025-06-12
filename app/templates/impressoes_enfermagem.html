@@ -319,6 +319,44 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Ficha de Admissão Hospitalar -->
+            <div class="col-md-6 mb-4">
+                <div class="impressao-section">
+                    <div class="section-header">
+                        <i class="fas fa-file-medical me-2"></i>Ficha de Admissão Hospitalar
+                    </div>
+                    <div class="section-content">
+                        <p class="text-muted mb-3">
+                            Ficha de admissão hospitalar detalhada do paciente, incluindo dados clínicos iniciais.
+                        </p>
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-impressao" onclick="imprimirFichaAdmissao()">
+                                <i class="fas fa-file-medical me-2"></i>Imprimir Ficha de Admissão
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Impressão da Última Evolução -->
+            <div class="col-md-6 mb-4">
+                <div class="impressao-section">
+                    <div class="section-header">
+                        <i class="fas fa-user-edit me-2"></i>Última Evolução Registrada
+                    </div>
+                    <div class="section-content">
+                        <p class="text-muted mb-3">
+                            Imprima a última evolução registrada para este atendimento.
+                        </p>
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-impressao" onclick="imprimirUltimaEvolucao()">
+                                <i class="fas fa-file-medical me-2"></i>Imprimir Última Evolução
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -626,6 +664,40 @@
                 console.error('❌ Erro ao abrir visualização:', error);
                 alert('Erro ao abrir a página de visualização. Tente novamente.');
             }
+        }
+
+        // Função para imprimir a ficha de admissão hospitalar
+        function imprimirFichaAdmissao() {
+            console.log('🖨️ Imprimir ficha de admissão hospitalar');
+            try {
+                const url = `/imprimir/ficha_admissao/${atendimentoId}`;
+                console.log('🔗 Abrindo URL de impressão:', url);
+                window.open(url, '_blank');
+            } catch (error) {
+                console.error('❌ Erro ao abrir impressão:', error);
+                alert('Erro ao abrir a página de impressão. Tente novamente.');
+            }
+        }
+
+        // Função para imprimir a última evolução registrada
+        function imprimirUltimaEvolucao() {
+            console.log('🖨️ Imprimir última evolução registrada');
+            $.ajax({
+                url: `/api/ultima-evolucao-id/${atendimentoId}`,
+                method: 'GET',
+                success: function(response) {
+                    if (response.success && response.evolucao_id) {
+                        const url = `/api/imprimir-evolucao-html/${response.evolucao_id}`;
+                        window.open(url, '_blank');
+                    } else {
+                        alert('Nenhuma evolução encontrada para este atendimento.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('❌ Erro ao buscar última evolução:', error);
+                    alert('Erro ao buscar a última evolução. Tente novamente.');
+                }
+            });
         }
 
         // Carregar informações do paciente se não estiverem disponíveis do backend

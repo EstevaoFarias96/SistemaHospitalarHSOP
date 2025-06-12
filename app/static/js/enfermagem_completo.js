@@ -221,41 +221,53 @@ function carregarSAE(atendimentoId) {
         console.error('ID do atendimento não definido');
         return;
     }
-    
+
     console.log('Carregando SAE para atendimento:', atendimentoId);
-    
+
+    // Buscar o paciente_id real via internação
     $.ajax({
-        url: `/api/enfermagem/sae/atendimento/${atendimentoId}`,
+        url: `/api/internacao/${atendimentoId}`,
         method: 'GET',
         success: function(response) {
-            console.log('SAE recebida:', response);
-            
-            if (response.success && response.sae) {
-                renderizarSAE(response.sae);
-            } else {
-                $('#listaSAE').html(`
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i> Nenhuma SAE registrada para este paciente.
-                    </div>
-                `);
+            if (!response.success || !response.internacao) {
+                console.error('Resposta inválida da API de internação:', response);
+                $('#listaSAE').html('<div class="alert alert-danger">Erro ao buscar dados da internação.</div>');
+                return;
             }
+            const pacienteId = response.internacao.paciente_id;
+            if (!pacienteId) {
+                $('#listaSAE').html('<div class="alert alert-danger">Paciente não encontrado na internação.</div>');
+                return;
+            }
+            // Buscar o histórico de SAEs do paciente
+            $.ajax({
+                url: `/api/enfermagem/sae/historico/${pacienteId}`,
+                method: 'GET',
+                success: function(resp) {
+                    if (resp.success && Array.isArray(resp.sae) && resp.sae.length > 0) {
+                        // Sempre exibe a mais recente
+                        renderizarSAE(resp.sae[0]);
+                    } else {
+                        $('#listaSAE').html(`
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> Nenhuma SAE registrada para este paciente.
+                            </div>
+                        `);
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Erro ao carregar histórico de SAE:', xhr);
+                    $('#listaSAE').html(`
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i> Erro ao carregar SAE.
+                        </div>
+                    `);
+                }
+            });
         },
         error: function(xhr) {
-            console.error('Erro ao carregar SAE:', xhr);
-            
-            if (xhr.status === 404) {
-                $('#listaSAE').html(`
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i> Nenhuma SAE registrada para este paciente.
-                    </div>
-                `);
-            } else {
-                $('#listaSAE').html(`
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-triangle"></i> Erro ao carregar SAE.
-                    </div>
-                `);
-            }
+            console.error('Erro ao buscar dados da internação:', xhr);
+            $('#listaSAE').html('<div class="alert alert-danger">Erro ao buscar dados da internação.</div>');
         }
     });
 }

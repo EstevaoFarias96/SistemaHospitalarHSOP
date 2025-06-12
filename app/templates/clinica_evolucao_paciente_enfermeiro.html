@@ -925,29 +925,38 @@ function abrirImpressoesEnfermagem() {
         </div>
 
         <div id="prescricaoSection" class="content-section">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Prescrições do Paciente</h5>
-                    <!-- Removido botão de nova prescrição reservado ao médico -->
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive mb-3">
-                        <table class="table table-borderless">
-                            <thead class="d-none">
-                                <tr>
-                                    <th>Conteúdo</th>
-                                </tr>
-                            </thead>
-                            <tbody id="listaPrescricoes">
-                                <tr>
-                                    <td class="text-center"><i class="fas fa-spinner fa-spin"></i> Carregando prescrições...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Prescrições do Paciente</h5>
+                <button class="btn btn-outline-primary btn-sm" onclick="imprimirPrescricaoMedica()" title="Imprimir Prescrição Médica">
+                    <i class="fas fa-print me-2"></i>Imprimir Prescrição
+                </button>
+            </div>
+            <div class="table-responsive mb-3">
+                <table class="table table-borderless">
+                    <thead class="d-none">
+                        <tr>
+                            <th>Conteúdo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaPrescricoes">
+                        <tr>
+                            <td class="text-center"><i class="fas fa-spinner fa-spin"></i> Carregando prescrições...</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
+        <script>
+        function imprimirPrescricaoMedica() {
+            const atendimentoId = "{{ internacao.atendimento_id }}";
+            if (!atendimentoId) {
+                alert('Erro: ID do atendimento não encontrado.');
+                return;
+            }
+            const url = `/imprimir/prescricao/${atendimentoId}`;
+            window.open(url, '_blank', 'width=900,height=700,scrollbars=yes,resizable=yes');
+        }
+        </script>
 
         <!-- Modal Prescrição -->
         <div class="modal fade" id="modalPrescricao" tabindex="-1" aria-labelledby="modalPrescricaoLabel" aria-hidden="true">

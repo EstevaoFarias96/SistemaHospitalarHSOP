@@ -2750,6 +2750,320 @@
             return false;
         });
     });
+</script>
+<!-- Modal Nova Prescrição -->
+<div class="modal fade" id="modalNovaPrescricao" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Nova Prescrição Médica</h5>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-light" data-bs-toggle="collapse" data-bs-target="#ajudaPrescricao" aria-expanded="false">
+                        <i class="fas fa-question-circle"></i> Ajuda
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <!-- Seção de Ajuda Colapsável -->
+                <div class="collapse" id="ajudaPrescricao">
+                    <div class="card card-body mb-3 bg-light">
+                        <h6 class="fw-bold mb-2"><i class="fas fa-lightbulb text-warning me-1"></i> Como usar as prescrições:</h6>
+                        <ul class="mb-2 small">
+                            <li><strong>Nova Prescrição:</strong> Crie uma prescrição do zero preenchendo os campos</li>
+                            <li><strong>Baseada em Anterior:</strong> Clique no ícone <i class="fas fa-copy text-primary"></i> de qualquer prescrição para usar como base</li>
+                            <li><strong>Modificação:</strong> Quando baseada, você pode adicionar/remover medicamentos e editar campos</li>
+                            <li><strong>Teclas rápidas:</strong> Use Enter para navegar entre campos de medicamentos</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <form id="formPrescricao">
+                    <div class="mb-3">
+                        <label class="form-label">Dieta</label>
+                        <textarea class="form-control" id="texto_dieta" rows="2" placeholder="Descreva a dieta do paciente..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Medicamentos</label>
+                        <div class="card mb-2">
+                            <div class="card-body">
+                                <div class="row g-2">
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" id="nome_medicamento" placeholder="Nome do medicamento">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control" id="descricao_uso" placeholder="Descrição/Posologia">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="button" class="btn btn-success w-100" id="btn_adicionar_medicamento">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm" id="tabela_medicamentos">
+                                <thead>
+                                    <tr>
+                                        <th>Medicamento</th>
+                                        <th>Descrição/Posologia</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr id="sem_medicamentos">
+                                        <td colspan="3" class="text-center text-muted">Nenhum medicamento adicionado</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Procedimentos Médicos</label>
+                        <textarea class="form-control" id="texto_procedimento_medico" rows="3" placeholder="Descreva os procedimentos médicos..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Procedimentos Multiprofissionais</label>
+                        <textarea class="form-control" id="texto_procedimento_multi" rows="3" placeholder="Descreva os procedimentos multiprofissionais..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btn_salvar_prescricao">Salvar Prescrição</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // Variáveis globais
+    window.medicamentosAdicionados = window.medicamentosAdicionados || [];
+    
+    // Evento para abrir o modal de nova prescrição
+    $('#btn-nova-prescricao').on('click', function() {
+        // Limpar o formulário
+        $('#formPrescricao')[0].reset();
+        window.medicamentosAdicionados = [];
+        atualizarTabelaMedicamentos();
+        
+        // Restaurar título original do modal
+        $('#modalNovaPrescricao .modal-title').text('Nova Prescrição Médica');
+        
+        // Remover indicador de prescrição baseada se existir
+        $('#indicador-prescricao-base').remove();
+        
+        // Abrir o modal
+        $('#modalNovaPrescricao').modal('show');
+    });
+    
+    
+    // Evento para adicionar medicamento
+    $('#btn_adicionar_medicamento').on('click', function(e) {
+        e.preventDefault(); // Previne o comportamento padrão do botão
+        e.stopPropagation(); // Impede a propagação do evento
+        
+        const nome_medicamento = $('#nome_medicamento').val().trim();
+        const descricao_uso = $('#descricao_uso').val().trim();
+        
+        if (!nome_medicamento || !descricao_uso) {
+            alert('Por favor, preencha o nome do medicamento e a descrição de uso.');
+            return;
+        }
+        
+        window.medicamentosAdicionados.push({
+            nome_medicamento: nome_medicamento,
+            descricao_uso: descricao_uso
+        });
+        
+        // Limpar campos
+        $('#nome_medicamento').val('');
+        $('#descricao_uso').val('');
+        
+        // Atualizar tabela
+        atualizarTabelaMedicamentos();
+        
+        // Focar no campo de nome do medicamento
+        $('#nome_medicamento').focus();
+    });
+    
+    // Evento para salvar prescrição
+    $('#btn_salvar_prescricao').on('click', function(e) {
+        e.preventDefault(); // Previne o comportamento padrão do botão
+        
+        const texto_dieta = $('#texto_dieta').val().trim();
+        const texto_procedimento_medico = $('#texto_procedimento_medico').val().trim();
+        const texto_procedimento_multi = $('#texto_procedimento_multi').val().trim();
+        
+        // Verificar se ao menos algo foi preenchido
+        if (!texto_dieta && !texto_procedimento_medico && !texto_procedimento_multi && window.medicamentosAdicionados.length === 0) {
+            alert('Por favor, preencha pelo menos um dos campos da prescrição ou adicione ao menos um medicamento.');
+            return;
+        }
+        
+        // Preparar dados para envio
+        const dados = {
+            atendimentos_clinica_id: internacaoId,
+            texto_dieta: texto_dieta || null,
+            texto_procedimento_medico: texto_procedimento_medico || null,
+            texto_procedimento_multi: texto_procedimento_multi || null,
+            medicamentos: window.medicamentosAdicionados
+        };
+        
+        // Mostrar indicador de carregamento
+        const btnSalvar = $(this);
+        const textoOriginal = btnSalvar.html();
+        btnSalvar.html('<i class="fas fa-spinner fa-spin"></i> Salvando...').prop('disabled', true);
+        
+        // Enviar requisição
+        $.ajax({
+            url: '/api/prescricoes',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(dados),
+            success: async function(response) {
+                if (response.success) {
+                    try {
+                        // Limpar o formulário
+                        $('#formPrescricao')[0].reset();
+                        window.medicamentosAdicionados = [];
+                        atualizarTabelaMedicamentos();
+                        
+                        // Fechar modal
+                        $('#modalNovaPrescricao').modal('hide');
+                        
+                        // Forçar atualização das prescrições
+                        await carregarPrescricoes();
+                        
+                        // Mostrar mensagem de sucesso
+                        const alertHtml = `
+                            <div class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3" role="alert" style="z-index: 1060">
+                                Prescrição registrada com sucesso!
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        `;
+                        $('body').append(alertHtml);
+                        
+                        // Remover o alerta após 3 segundos
+                        setTimeout(function() {
+                            $('.alert').alert('close');
+                        }, 3000);
+                        
+                        // Forçar atualização da visualização
+                        $('#prescricaoSection').show();
+                        $('#listaPrescricoesDoDia').html('<tr><td colspan="3" class="text-center"><i class="fas fa-spinner fa-spin"></i> Atualizando prescrições...</td></tr>');
+                        
+                        // Recarregar prescrições novamente após um pequeno delay
+                        setTimeout(async function() {
+                            await carregarPrescricoes();
+                        }, 500);
+                        
+                    } catch (error) {
+                        console.error('Erro ao atualizar prescrições:', error);
+                    }
+                } else {
+                    alert('Erro ao registrar prescrição: ' + (response.message || 'Erro desconhecido'));
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Erro ao registrar prescrição:', xhr.responseText);
+                alert('Erro ao registrar prescrição: ' + (xhr.responseJSON?.error || error));
+            },
+            complete: function() {
+                // Restaurar botão
+                btnSalvar.html(textoOriginal).prop('disabled', false);
+            }
+        });
+    });
+    
+    // Adicionar evento de tecla para os campos de medicamento
+    
+    // Adicionar evento de tecla para os campos de medicamento
+    $('#nome_medicamento, #descricao_uso').on('keypress', function(e) {
+        // Se pressionar Enter
+        if (e.which === 13) {
+            e.preventDefault(); // Previne o comportamento padrão
+            // Se estiver no campo nome, vai para descrição
+            if ($(this).attr('id') === 'nome_medicamento') {
+                $('#descricao_uso').focus();
+            } else {
+                // Se estiver na descrição, aciona o botão adicionar
+                $('#btn_adicionar_medicamento').click();
+            }
+        }
+    });
+    
+    // Prevenir submissão do formulário ao pressionar Enter
+    $('#formPrescricao').on('submit', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    
+    // Evento para salvar exames laboratoriais
+    $('#formExames').on('submit', function(e) {
+        e.preventDefault();
+        
+        const textoExames = $('#textoExames').val().trim();
+        
+        // Mostrar indicador de carregamento
+        const btnSubmit = $(this).find('button[type="submit"]');
+        const textoOriginal = btnSubmit.html();
+        btnSubmit.html('<i class="fas fa-spinner fa-spin"></i> Salvando...').prop('disabled', true);
+        
+        // Enviar requisição para atualizar exames
+        $.ajax({
+            url: `/api/internacao/${internacaoId}/atualizar`,
+            method: 'PUT',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                exames_laboratoriais: textoExames
+            }),
+            success: function(response) {
+                if (response.success) {
+                    // Atualizar o texto na tela
+                    $('#examesLaboratoriaisTexto').html(textoExames || 'Não registrado.');
+                    
+                    // Fechar o modal
+                    $('#modalEditarExames').modal('hide');
+                    
+                    // Mostrar mensagem de sucesso
+                    const alertHtml = `
+                        <div class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3" role="alert" style="z-index: 1060">
+                            Exames laboratoriais atualizados com sucesso!
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    `;
+                    $('body').append(alertHtml);
+                    
+                    // Remover o alerta após 3 segundos
+                    setTimeout(function() {
+                        $('.alert').alert('close');
+                    }, 3000);
+                } else {
+                    alert('Erro ao atualizar exames: ' + (response.message || 'Erro desconhecido'));
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Erro ao atualizar exames:', xhr.responseText);
+                alert('Erro ao atualizar exames: ' + (xhr.responseJSON?.error || error));
+            },
+            complete: function() {
+                // Restaurar botão
+                btnSubmit.html(textoOriginal).prop('disabled', false);
+            }
+        });
+    });
+</script>
+ 
+<script>
+
+
+
 
     // Função para carregar histórico de internamentos
     function carregarHistoricoInternamentos() {
