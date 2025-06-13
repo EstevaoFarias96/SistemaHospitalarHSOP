@@ -49,15 +49,15 @@ app = create_app()
 
 def registrar_medico_teste():
     medico_teste = {
-    "nome": "Tallys de Souza Furtado",
-    "data_nascimento": datetime.strptime("1997-11-07", "%Y-%m-%d").date(),
-    "cpf": "048.388.003-55",
-    "email": "tallysfurtado@gmail.com",
-    "telefone": "88996342305",
-    "senha": "212104",
+    "nome": "Francisco Anderson Vasconcelos de Sales",
+    "data_nascimento": datetime.strptime("1990-02-15", "%Y-%m-%d").date(),
+    "cpf": "036.382.153-85",
+    "email": "80medanderson@gmail.com",
+    "telefone": "88997193094",
+    "senha": "150290",
     "cargo": "Medico",
     "tipo_contrato": "Efetivo",
-    "numero_profissional": "22178"
+    "numero_profissional": "22174"
 }
 
     if Funcionario.query.filter_by(cpf=medico_teste["cpf"]).first():

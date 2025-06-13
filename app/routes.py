@@ -521,7 +521,7 @@ def listar_prescricoes(internacao_id):
                 'message': 'Internação não encontrada'
             }), 404
 
-        prescricoes = PrescricaoClinica.query.filter_by(atendimentos_clinica_id=internacao_id).all()
+        prescricoes = PrescricaoClinica.query.filter_by(atendimentos_clinica_id=internacao_id).order_by(PrescricaoClinica.horario_prescricao.desc()).all()
 
         # ------- Função para corrigir o formato do aprazamento -------
         from datetime import date
@@ -586,10 +586,10 @@ def listar_prescricoes(internacao_id):
                         
                         aprazamentos_novos.append({
                             'id': apz.id,
-                            'data_hora': apz.data_hora_aprazamento.strftime('%d/%m/%Y %H:%M'),
+                            'data_hora': apz.data_hora_aprazamento.isoformat(),
                             'realizado': apz.realizado,
                             'enfermeiro_nome': enfermeiro_resp.nome if enfermeiro_resp else None,
-                            'data_realizacao': apz.data_realizacao.strftime('%d/%m/%Y %H:%M') if apz.data_realizacao else None
+                            'data_realizacao': apz.data_realizacao.isoformat() if apz.data_realizacao else None
                         })
                 
                 medicamentos_formatados.append({
@@ -620,16 +620,16 @@ def listar_prescricoes(internacao_id):
                         'id': apz.id,
                         'nome_medicamento': apz.nome_medicamento,
                         'descricao_uso': apz.descricao_uso,
-                        'data_hora': apz.data_hora_aprazamento.strftime('%d/%m/%Y %H:%M'),
+                        'data_hora': apz.data_hora_aprazamento.isoformat(),
                         'realizado': apz.realizado,
                         'enfermeiro_nome': enfermeiro_resp.nome if enfermeiro_resp else None,
-                        'data_realizacao': apz.data_realizacao.strftime('%d/%m/%Y %H:%M') if apz.data_realizacao else None
+                        'data_realizacao': apz.data_realizacao.isoformat() if apz.data_realizacao else None
                     })
 
             # ----- MONTAR RESULTADO -----
             resultado.append({
                 'id': prescricao.id,
-                'data_prescricao': prescricao.horario_prescricao.strftime('%d/%m/%Y %H:%M') if prescricao.horario_prescricao else None,
+                'data_prescricao': prescricao.horario_prescricao.isoformat() if prescricao.horario_prescricao else None,
                 'medico_nome': medico.nome if medico else 'Não informado',
                 'enfermeiro_nome': enfermeiro.nome if enfermeiro else None,
                 'texto_dieta': prescricao.texto_dieta,
@@ -999,7 +999,7 @@ def get_evolucoes(internacao_id):
         for ev in evolucoes:
             evolucao_dict = {
                 'id': ev.id,
-                'data_evolucao': ev.data_evolucao.strftime('%d/%m/%Y %H:%M') if ev.data_evolucao else '',
+                'data_evolucao': ev.data_evolucao.isoformat() if ev.data_evolucao else '',
                 'evolucao': ev.evolucao or '',
                 'nome_medico': ev.nome_medico or ''
             }
@@ -6052,4 +6052,19 @@ def buscar_informacoes_alta_para_impressao(atendimento_id):
             'success': False,
             'message': f'Erro ao buscar informações de alta: {str(e)}'
         }), 500
+
+@bp.route('/clinica/receituario/<int:receituario_id>/imprimir_html')
+def imprimir_receita_comum(receituario_id):
+    receituario = ReceituarioClinica.query.get(receituario_id)
+    if not receituario or receituario.tipo_receita != 'normal':
+        return '<h3>Receita não encontrada ou não é do tipo comum.</h3>', 404
+    atendimento = receituario.atendimento
+    paciente = atendimento.paciente
+    medico = receituario.medico
+    return render_template(
+        'imprimir_receita_comum.html',
+        paciente=paciente,
+        medico=medico,
+        receituario=receituario
+    )
 

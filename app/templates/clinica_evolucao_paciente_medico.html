@@ -149,7 +149,7 @@
         }
 
         .prescricao-hoje::before {
-            content: "Hoje";
+            
             position: absolute;
             top: 0.5rem;
             right: 0.5rem;
@@ -886,6 +886,17 @@
             border-color: rgba(255, 255, 255, 0.3);
             color: var(--text-primary);
             transform: translateY(-1px);
+        }
+
+        .btn-verde {
+            background-color: #28a745 !important;
+            color: white !important;
+            border-color: #28a745 !important;
+        }
+
+        .btn-verde:hover {
+            background-color: #218838 !important;
+            border-color: #1e7e34 !important;
         }
 
         .btn-print-discreto {
@@ -2171,8 +2182,9 @@
     let quill;
     let medicamentosAdicionados = [];
     
-    // Extrair e validar o ID da internação
+    // Extrair e validar o ID da internação - declaração local e global
     const internacaoId = parseInt("{{ internacao.id }}", 10);
+    window.internacaoId = internacaoId; // Também disponibilizar globalmente
     console.log('ID da internação:', internacaoId);
     
     // Verificar se internacaoId é um número válido

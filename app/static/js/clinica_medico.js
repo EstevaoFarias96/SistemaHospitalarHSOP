@@ -1468,9 +1468,10 @@ function renderizarReceitas(receitas, containerId, ehHoje) {
                             <button class="btn btn-sm btn-outline-primary me-1" onclick="visualizarReceita(${receita.id})">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button class="btn btn-sm btn-outline-success" onclick="gerarPDFReceita(${receita.id})">
+                            <button class="btn btn-sm btn-outline-success me-1" onclick="gerarPDFReceita(${receita.id})">
                                 <i class="fas fa-file-pdf"></i>
                             </button>
+                            ${receita.tipo_receita === 'normal' ? `<button class='btn btn-sm btn-outline-dark' title='Imprimir (2 cópias)' onclick='imprimirReceitaComum(${receita.id})'><i class="fas fa-print"></i></button>` : ''}
                         </div>
                     </div>
                 </div>
@@ -1756,12 +1757,36 @@ function limparFormularioPrescricao() {
 
 // Renderizador de prescrição
 function renderizarPrescricao(prescricao) {
+    // Determinar a melhor data disponível
+    const dataOriginal = prescricao.horario_prescricao || prescricao.data_prescricao || prescricao.created_at;
+    const dataPrescricao = new Date(dataOriginal);
+    const hoje = new Date();
+    const ehHoje = dataPrescricao.toDateString() === hoje.toDateString();
+    
+    // Formatar data/hora de forma mais clara
+    let dataFormatada;
+    if (ehHoje) {
+        dataFormatada = `Hoje, ${dataPrescricao.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+    } else {
+        dataFormatada = dataPrescricao.toLocaleString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+    
+    // Classe CSS adicional para prescrições de hoje
+    const classeContainer = ehHoje ? 'prescricao-container prescricao-hoje' : 'prescricao-container prescricao-antiga';
+    
     let html = `
-        <div class="prescricao-container">
+        <div class="${classeContainer}">
             <div class="prescricao-header">
                 <div class="medico-info" style="display: flex; align-items: center; flex-wrap: wrap;">
-                    <span class="medico-nome" style="font-weight: 600; color: var(--text-primary);">Dr(a). ${prescricao.medico_nome}</span>
-                    <span class="timestamp" style="color: rgba(255, 255, 255, 0.85); font-size: 0.9rem; font-weight: 400; margin-left: 8px;"> - ${prescricao.data_prescricao}</span>
+                    <span class="medico-nome" style="font-weight: 600; color: var(--text-primary);">Dr(a). ${prescricao.medico_nome || 'Médico não informado'}</span>
+                    <span class="timestamp" style="color: rgba(255, 255, 255, 0.85); font-size: 0.9rem; font-weight: 400; margin-left: 8px;"> - ${dataFormatada}</span>
+                    ${ehHoje ? '<span class="badge bg-success ms-2" style="font-size: 0.7rem;">HOJE</span>' : ''}
                 </div>
                 <div class="prescricao-actions">
                     <button type="button" class="btn-action-discreto" 
@@ -2041,14 +2066,23 @@ function mostrarNotificacaoSucesso(mensagem) {
 // Função para carregar prescrições
 async function carregarPrescricoes() {
     try {
+        const internacaoId = window.internacaoId || parseInt(document.getElementById('atendimento_id').value, 10);
         console.log('Carregando prescrições para internacaoId:', internacaoId);
+        
+        if (!internacaoId || isNaN(internacaoId)) {
+            console.error('ID de internação inválido:', internacaoId);
+            $('#listaPrescricoes').html('<div class="alert alert-danger">Erro: ID de internação inválido</div>');
+            return;
+        }
+        
         // Mostrar indicador de carregamento
         $('#listaPrescricoes').html('<div class="text-center p-3"><i class="fas fa-spinner fa-spin me-2"></i> Carregando prescrições...</div>');
         
         // Adicionar um pequeno atraso para garantir que o DOM esteja pronto
         await new Promise(resolve => setTimeout(resolve, 300));
         
-        const response = await fetch(`/api/prescricoes/${internacaoId}`);
+        const url = `/api/prescricoes/${internacaoId}`;
+        const response = await fetch(url);
         const data = await response.json();
         
         if (!response.ok) {
@@ -2062,12 +2096,24 @@ async function carregarPrescricoes() {
         
         // Ordenar prescrições por data (mais recentes primeiro)
         data.prescricoes.sort((a, b) => {
-            const dataA = new Date(a.data_prescricao);
-            const dataB = new Date(b.data_prescricao);
-            return dataB - dataA;
+            // Tentar diferentes campos de data para garantir ordenação correta
+            const dataA = new Date(a.horario_prescricao || a.data_prescricao || a.created_at);
+            const dataB = new Date(b.horario_prescricao || b.data_prescricao || b.created_at);
+            
+            // Se as datas são válidas, ordernar do mais recente para o mais antigo
+            if (!isNaN(dataA.getTime()) && !isNaN(dataB.getTime())) {
+                return dataB.getTime() - dataA.getTime();
+            }
+            
+            // Se uma das datas é inválida, colocar a válida primeiro
+            if (!isNaN(dataA.getTime()) && isNaN(dataB.getTime())) return -1;
+            if (isNaN(dataA.getTime()) && !isNaN(dataB.getTime())) return 1;
+            
+            // Se ambas são inválidas, manter ordem original (por ID decrescente)
+            return b.id - a.id;
         });
         
-        console.log(`Renderizando ${data.prescricoes.length} prescrições`);
+        console.log(`Renderizando ${data.prescricoes.length} prescrições ordenadas por data`);
         
         // Renderizar todas as prescrições em ordem cronológica
         const htmlPrescricoes = data.prescricoes.map(prescricao => renderizarPrescricao(prescricao)).join('');
@@ -2332,6 +2378,7 @@ function inicializarModuloPrescrições() {
 
 // Função para carregar evoluções da internação
 function carregarEvolucoes() {
+    const internacaoId = window.internacaoId || parseInt(document.getElementById('atendimento_id').value, 10);
     console.log('Carregando evoluções para internacaoId:', internacaoId);
     
     if (!internacaoId || isNaN(internacaoId)) {
@@ -2350,22 +2397,21 @@ function carregarEvolucoes() {
             
             if (response.success && response.evolucoes && response.evolucoes.length > 0) {
                 response.evolucoes.forEach(ev => {
+                    // Permitir renderização de HTML
                     const evolucaoHtml = ev.evolucao || '---';
-                    
-                    // Criar um container para a evolução com estilo seguro
+                    const dataFormatada = new Date(ev.data_evolucao).toLocaleString('pt-BR');
+
                     tabela.append(`
                         <tr>
-                            <td>${ev.data_evolucao || '---'}</td>
+                            <td>${dataFormatada}</td>
                             <td>${ev.nome_medico || '---'}</td>
                             <td>
-                                <div class="texto-evolucao">
+                                <div class="texto-evolucao" data-evolucao-id="${ev.id}">
                                     ${evolucaoHtml}
                                 </div>
                             </td>
                             <td>
-                                <button type="button" class="btn-print-discreto" 
-                                        onclick="imprimirEvolucao(${ev.id})" 
-                                        title="Imprimir Evolução">
+                                <button class="btn btn-sm btn-print-discreto btn-verde" onclick="imprimirEvolucao(${ev.id})" title="Imprimir Evolução">
                                     <i class="fas fa-print"></i>
                                 </button>
                             </td>
@@ -2429,6 +2475,7 @@ $(document).on('submit', '#formEvolucao', function(e) {
     btnSubmit.prop('disabled', true);
     
     // Preparar dados para envio
+    const internacaoId = window.internacaoId || parseInt(document.getElementById('atendimento_id').value, 10);
     const dados = {
         atendimentos_clinica_id: internacaoId,
         funcionario_id: parseInt($('#user_id').val() || '0', 10),
@@ -2485,6 +2532,14 @@ $(document).on('submit', '#formEvolucao', function(e) {
 
 // Funções para carregar dados de enfermagem
 function carregarEvolucoesEnfermagem() {
+    const internacaoId = window.internacaoId || parseInt(document.getElementById('atendimento_id').value, 10);
+    
+    if (!internacaoId || isNaN(internacaoId)) {
+        console.error('ID de internação inválido ao carregar evoluções de enfermagem:', internacaoId);
+        $('#listaEvolucoesDoDia').html('<tr><td colspan="3" class="text-center text-danger">Erro: ID de internação inválido</td></tr>');
+        return;
+    }
+    
     $.ajax({
         url: `/api/enfermagem/evolucao/${internacaoId}`,
         method: 'GET',
@@ -2582,6 +2637,14 @@ function carregarEvolucoesEnfermagem() {
 }
 
 function carregarPrescricoesEnfermagem() {
+    const internacaoId = window.internacaoId || parseInt(document.getElementById('atendimento_id').value, 10);
+    
+    if (!internacaoId || isNaN(internacaoId)) {
+        console.error('ID de internação inválido ao carregar prescrições de enfermagem:', internacaoId);
+        $('#listaPrescricoesEnfermagemDoDia').html('<div class="alert alert-danger">Erro: ID de internação inválido</div>');
+        return;
+    }
+    
     $.ajax({
         url: `/api/enfermagem/prescricao/${internacaoId}`,
         method: 'GET',
@@ -2697,6 +2760,7 @@ function filtrarEvolucoesEnfermagemPorData(dataFiltro) {
         return;
     }
     
+    const internacaoId = window.internacaoId || parseInt(document.getElementById('atendimento_id').value, 10);
     jQuery('#titulo-evolucoes-hoje').text(`Evoluções de ${dataFiltro.split('-').reverse().join('/')}`);
     jQuery('#listaEvolucoesDoDia').html('<tr><td colspan="3" class="text-center">Carregando evoluções...</td></tr>');
     jQuery('#listaEvolucoesAntigas').html('<tr><td colspan="3" class="text-center">Dados não disponíveis com filtro ativo</td></tr>');
@@ -2759,6 +2823,7 @@ function filtrarPrescricoesEnfermagemPorData(dataFiltro) {
         return;
     }
     
+    const internacaoId = window.internacaoId || parseInt(document.getElementById('atendimento_id').value, 10);
     jQuery('#titulo-prescricoes-hoje').text(`Prescrições de ${dataFiltro.split('-').reverse().join('/')}`);
     jQuery('#listaPrescricoesDoDia').html('<tr><td colspan="3" class="text-center">Carregando prescrições...</td></tr>');
     jQuery('#listaPrescricoesAntigas').html('<tr><td colspan="3" class="text-center">Dados não disponíveis com filtro ativo</td></tr>');
@@ -3536,3 +3601,8 @@ function imprimirEvolucao(evolucaoId) {
         }, 1000); // Aguarda 1 segundo para garantir que a página carregou completamente
     };
 }
+
+// Adicionar função global para imprimir receita comum
+window.imprimirReceitaComum = function(receitaId) {
+    window.open(`/clinica/receituario/${receitaId}/imprimir_html`, '_blank');
+};
