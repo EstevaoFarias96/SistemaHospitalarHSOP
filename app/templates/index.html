@@ -38,52 +38,58 @@
         </div>
       </form>
     </main>
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <script>
       $(document).ready(function() {
+        $('#cpf').mask('000.000.000-00', {
+          reverse: true,
+          clearIfNotMatch: true
+        });
+
         $('#loginForm').on('submit', function(e) {
-          e.preventDefault();
-          $.ajax({
-            url: '/login',
-            type: 'POST',
-            data: $(this).serialize(),
-            success: function(response) {
-              if (!response.success) {
-                $('#error-message').removeClass('hidden');
-              } else {
-                switch (response.cargo.toLowerCase()) {
-                  case 'medico':
-                    window.location.href = '/medico';
-                    break;
-                  case 'enfermeiro':
-                    window.location.href = '/enfermeiro';
-                    break;
-                  case 'nutricionista':
-                    window.location.href = '/nutricionista';
-                    break;
-                  case 'assistente_social':
-                    window.location.href = '/assistente_social';
-                    break;
-                  case 'recepcionista':
-                    window.location.href = '/recepcionista';
-                    break;
-                  case 'administrador':
-                    window.location.href = '/administrador';
-                    break;
-                  case 'fisioterapeuta':
-                    window.location.href = '/fisioterapeuta';
-                    break;
-                  default:
-                    alert('Cargo não reconhecido.');
-                }
+        e.preventDefault();
+        $.ajax({
+          url: '/login',
+          type: 'POST',
+          data: $(this).serialize(),
+          success: function(response) {
+            if (!response.success) {
+              $('#error-message').removeClass('hidden');
+            } else {
+              switch (response.cargo.toLowerCase()) {
+                case 'medico':
+                  window.location.href = '/medico';
+                  break;
+                case 'enfermeiro':
+                  window.location.href = '/enfermeiro';
+                  break;
+                case 'nutricionista':
+                  window.location.href = '/nutricionista';
+                  break;
+                case 'assistente_social':
+                  window.location.href = '/assistente_social';
+                  break;
+                case 'recepcionista':
+                  window.location.href = '/recepcionista';
+                  break;
+                case 'administrador':
+                  window.location.href = '/administrador';
+                  break;
+                case 'fisioterapeuta':
+                  window.location.href = '/fisioterapeuta';
+                  break;
+                default:
+                  alert('Cargo não reconhecido.');
               }
-            },
-            error: function() {
-              alert('Erro ao processar o login.');
             }
-          });
+          },
+          error: function() {
+            alert('Erro ao processar o login.');
+          }
         });
       });
+    });
     </script>
   </body>
 </html>
