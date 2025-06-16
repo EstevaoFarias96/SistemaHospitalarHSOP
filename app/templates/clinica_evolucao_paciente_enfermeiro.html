@@ -782,6 +782,39 @@
             overflow-y: auto;
         }
     </style>
+    <script>
+        // Ajuste global de fuso-horário
+        // Este patch garante que qualquer chamada a toLocaleString / toLocaleTimeString / toLocaleDateString
+        // utilize, por padrão, o fuso horário do Brasil (America/Sao_Paulo). Assim evitamos exibição em GMT
+        // quando o cliente estiver com time-zone diferente.
+        (function() {
+            const TZ_BR = 'America/Sao_Paulo';
+            const DEFAULT_LOCALE = 'pt-BR';
+            ['toLocaleString', 'toLocaleTimeString', 'toLocaleDateString'].forEach(function(methodName) {
+                const original = Date.prototype[methodName];
+                Date.prototype[methodName] = function(localeOrOptions, maybeOptions) {
+                    let locales = localeOrOptions;
+                    let options = maybeOptions;
+
+                    // Se o primeiro parâmetro for um objeto, significa que o chamador passou apenas as opções.
+                    if (typeof localeOrOptions === 'object' && localeOrOptions !== null) {
+                        options = localeOrOptions;
+                        locales = undefined;
+                    }
+
+                    locales = locales || DEFAULT_LOCALE;
+                    options = options || {};
+
+                    // Garante que o timezone seja sempre America/Sao_Paulo se não especificado explicitamente.
+                    if (!options.timeZone) {
+                        options.timeZone = TZ_BR;
+                    }
+
+                    return original.call(this, locales, options);
+                };
+            });
+        })();
+    </script>
 </head>
 <body>
 <script>
