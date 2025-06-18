@@ -4527,30 +4527,22 @@ def buscar_informacoes_alta(internacao_id):
                 'message': 'Internação não encontrada'
             }), 404
 
+        # Verificar se a internação teve alta
+        if not internacao.data_alta:
+            return jsonify({
+                'success': False,
+                'message': 'Paciente ainda não recebeu alta'
+            }), 400
+        
         # Buscar dados do paciente
         paciente = Paciente.query.get(internacao.paciente_id)
-        
-        # Se ainda não teve alta, montar histórico automaticamente
-        historico_internacao = internacao.historico_internacao
-        if not internacao.data_alta:
-            # Montar histórico automaticamente usando: HDA + Anamnese + Conduta + Exames
-            partes_historico = [
-                internacao.hda or '',
-                internacao.folha_anamnese or '',
-                internacao.conduta or '',
-                internacao.exames_laboratoriais or ''
-            ]
-            
-            # Filtrar partes vazias e juntar com uma linha simples de separação
-            historico_automatico = '\n'.join([parte.strip() for parte in partes_historico if parte.strip()])
-            historico_internacao = historico_automatico or 'Histórico será montado automaticamente'
         
         # Formatar resposta com as informações de alta
         resultado = {
             'success': True,
             'data_alta': internacao.data_alta.strftime('%d/%m/%Y %H:%M') if internacao.data_alta else None,
             'diagnostico': internacao.diagnostico or 'Não informado',
-            'historico_internacao': historico_internacao or 'Não informado', 
+            'historico_internacao': internacao.historico_internacao or 'Não informado', 
             'cuidados_gerais': internacao.cuidados_gerais or 'Não informado',
             'nome_paciente': paciente.nome if paciente else 'Não informado',
             'cpf_paciente': paciente.cpf if paciente else 'Não informado'
@@ -6016,23 +6008,15 @@ def buscar_informacoes_alta_para_impressao(atendimento_id):
                 'message': 'Internação não encontrada'
             }), 404
         
+        # Verificar se a internação teve alta
+        if not internacao.data_alta:
+            return jsonify({
+                'success': False,
+                'message': 'Paciente ainda não recebeu alta'
+            }), 400
+        
         # Buscar dados do paciente
         paciente = Paciente.query.get(internacao.paciente_id)
-        
-        # Se ainda não teve alta, montar histórico automaticamente
-        historico_internacao = internacao.historico_internacao
-        if not internacao.data_alta:
-            # Montar histórico automaticamente usando: HDA + Anamnese + Conduta + Exames
-            partes_historico = [
-                internacao.hda or '',
-                internacao.folha_anamnese or '',
-                internacao.conduta or '',
-                internacao.exames_laboratoriais or ''
-            ]
-            
-            # Filtrar partes vazias e juntar com uma linha simples de separação
-            historico_automatico = '\n'.join([parte.strip() for parte in partes_historico if parte.strip()])
-            historico_internacao = historico_automatico or 'Histórico será montado automaticamente'
         if not paciente:
             return jsonify({
                 'success': False,
@@ -6045,7 +6029,7 @@ def buscar_informacoes_alta_para_impressao(atendimento_id):
             'informacoes_alta': {
                 'data_alta': internacao.data_alta.isoformat() if internacao.data_alta else None,
                 'diagnostico': internacao.diagnostico or 'Não informado',
-                'historico_internacao': historico_internacao or 'Não informado', 
+                'historico_internacao': internacao.historico_internacao or 'Não informado', 
                 'conduta': internacao.conduta or 'Não informado',
                 'medicacao': getattr(internacao, 'medicacao_alta', None) or internacao.medicacao or 'Não informado',
                 'cuidados_gerais': internacao.cuidados_gerais or 'Não informado'

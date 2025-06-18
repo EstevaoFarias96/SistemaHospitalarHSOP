@@ -72,34 +72,35 @@
                     <input type="hidden" id="internacaoId" name="internacaoId">
 
                     <div class="row g-3">
+                        <!-- Campo do Diagnóstico Final -->
                         <div class="col-12">
-                            <label for="diagnosticoAlta" class="form-label">Diagnóstico Final</label>
-                            <textarea class="form-control" id="diagnosticoAlta" name="diagnostico" rows="3" required></textarea>
+                            <label for="diagnostico" class="form-label">
+                                <i class="fas fa-stethoscope me-1"></i>
+                                Diagnóstico Final
+                            </label>
+                            <textarea class="form-control" id="diagnostico" name="diagnostico" rows="3" required
+                                     placeholder="Diagnóstico principal e secundários do paciente..."></textarea>
                         </div>
 
+                        <!-- Campo do Histórico da Internação -->
                         <div class="col-12">
-                            <label for="historico" class="form-label">Histórico da Internação</label>
-                            <textarea class="form-control" id="historico" name="historico_internacao" rows="5" required></textarea>
+                            <label for="historico" class="form-label">
+                                <i class="fas fa-history me-1"></i>
+                                Histórico da Internação
+                                <small class="text-muted">(gerado automaticamente: HDA + Anamnese + Conduta + Exames)</small>
+                            </label>
+                            <textarea class="form-control" id="historico" name="historico_internacao" rows="8" required 
+                                     placeholder="O histórico será montado automaticamente a partir do HDA, anamnese, conduta e exames. Você pode editar e adicionar informações adicionais..."></textarea>
                         </div>
 
+                        <!-- Campo dos Cuidados Gerais -->
                         <div class="col-12">
-                            <label for="relatorioAlta" class="form-label">Relatório de Alta</label>
-                            <textarea class="form-control" id="relatorioAlta" name="relatorio_alta" rows="5" required></textarea>
-                        </div>
-
-                        <div class="col-12">
-                            <label for="condutaFinal" class="form-label">Conduta Final</label>
-                            <textarea class="form-control" id="condutaFinal" name="conduta" rows="3" required></textarea>
-                        </div>
-
-                        <div class="col-12">
-                            <label for="medicacaoAlta" class="form-label">Medicação de Alta</label>
-                            <textarea class="form-control" id="medicacaoAlta" name="medicacao" rows="3"></textarea>
-                        </div>
-
-                        <div class="col-12">
-                            <label for="cuidadosGerais" class="form-label">Cuidados Gerais</label>
-                            <textarea class="form-control" id="cuidadosGerais" name="cuidados_gerais" rows="3"></textarea>
+                            <label for="cuidadosGerais" class="form-label">
+                                <i class="fas fa-heart me-1"></i>
+                                Cuidados Gerais
+                            </label>
+                            <textarea class="form-control" id="cuidadosGerais" name="cuidados_gerais" rows="3" required
+                                     placeholder="Orientações e cuidados para continuidade do tratamento..."></textarea>
                         </div>
                     </div>
                 </form>
@@ -237,6 +238,23 @@
 
 <!-- Scripts -->
 <script>
+// ===== ATUALIZAÇÕES PARA NOVO SISTEMA DE ALTA MÉDICA =====
+// 
+// MODAL SIMPLIFICADO COM APENAS 3 CAMPOS:
+// 1. Diagnóstico Final
+// 2. Histórico da Internação (gerado automaticamente: HDA + Anamnese + Conduta + Exames)
+// 3. Cuidados Gerais
+//
+// O histórico é montado automaticamente no backend usando:
+// - HDA (História da Doença Atual)
+// - Folha de Anamnese
+// - Conduta
+// - Exames Laboratoriais
+// Todos separados por linha simples
+//
+// O médico pode visualizar e editar o histórico antes de confirmar a alta
+// ============================================================
+
 // Configurações e Constantes
 const CONFIG = {
     API_ENDPOINTS: {
@@ -409,11 +427,31 @@ class PacientesInternadosManager {
         document.getElementById('internacaoId').value = internacaoId;
 
         try {
-            const response = await fetch(CONFIG.API_ENDPOINTS.INTERNACAO(internacaoId));
+            // Buscar dados da internação através do endpoint de alta
+            const response = await fetch(CONFIG.API_ENDPOINTS.ALTA(internacaoId));
             const data = await response.json();
 
             if (data.success) {
-                this.preencherFormularioAlta(data.internacao);
+                // Pré-preencher o formulário com os dados retornados
+                await this.preencherFormularioAlta(data, internacaoId);
+            } else {
+                // Se não conseguir buscar pela alta, tentar buscar dados da internação
+                const responseInternacao = await fetch(CONFIG.API_ENDPOINTS.INTERNACAO(internacaoId));
+                const dataInternacao = await responseInternacao.json();
+                
+                if (dataInternacao.success) {
+                    // Montar histórico automaticamente usando HDA + outros campos
+                    const historicoAutomatico = await this.montarHistoricoAutomatico(dataInternacao.internacao);
+                    
+                    // Criar dados formatados para o formulário
+                    const dadosFormatados = {
+                        diagnostico: dataInternacao.internacao.diagnostico || dataInternacao.internacao.diagnostico_inicial || '',
+                        historico_internacao: historicoAutomatico,
+                        cuidados_gerais: dataInternacao.internacao.cuidados_gerais || ''
+                    };
+                    
+                    await this.preencherFormularioAlta(dadosFormatados, internacaoId);
+                }
             }
         } catch (error) {
             console.error('Erro ao carregar dados da internação:', error);
@@ -451,18 +489,19 @@ class PacientesInternadosManager {
         }
     }
 
-    preencherFormularioAlta(dados) {
+    async preencherFormularioAlta(dados, internacaoId) {
+        // Os dados já vêm formatados do endpoint GET de alta
         const campos = {
-            'diagnosticoAlta': dados.diagnostico,
-            'historico': dados.historico_internacao,
-            'relatorioAlta': dados.relatorio_alta,
-            'condutaFinal': dados.conduta,
-            'medicacaoAlta': dados.medicacao,
-            'cuidadosGerais': dados.cuidados_gerais
+            'diagnostico': dados.diagnostico || '',
+            'historico': dados.historico_internacao || 'Histórico da internação será gerado automaticamente.',
+            'cuidados_gerais': dados.cuidados_gerais || ''
         };
 
         Object.entries(campos).forEach(([id, valor]) => {
-            document.getElementById(id).value = valor || '';
+            const elemento = document.getElementById(id);
+            if (elemento) {
+                elemento.value = valor;
+            }
         });
     }
 
@@ -670,11 +709,8 @@ class PacientesInternadosManager {
 
     coletarDadosFormulario() {
         return {
-            diagnostico: document.getElementById('diagnosticoAlta').value,
+            diagnostico: document.getElementById('diagnostico').value,
             historico_internacao: document.getElementById('historico').value,
-            relatorio_alta: document.getElementById('relatorioAlta').value,
-            conduta: document.getElementById('condutaFinal').value,
-            medicacao: document.getElementById('medicacaoAlta').value,
             cuidados_gerais: document.getElementById('cuidadosGerais').value
         };
     }
@@ -730,6 +766,32 @@ class PacientesInternadosManager {
 
     async abrirModalImprimirAlta(internacaoId) {
         // Função removida: não faz mais nada
+    }
+
+    async montarHistoricoAutomatico(internacao) {
+        let historico = '';
+        
+        // HDA
+        if (internacao.hda) {
+            historico += 'HDA: ' + internacao.hda + '\n';
+        }
+        
+        // Folha de Anamnese
+        if (internacao.folha_anamnese) {
+            historico += 'Anamnese: ' + internacao.folha_anamnese + '\n';
+        }
+        
+        // Conduta
+        if (internacao.conduta) {
+            historico += 'Conduta: ' + internacao.conduta + '\n';
+        }
+        
+        // Exames Laboratoriais
+        if (internacao.exames_laboratoriais) {
+            historico += 'Exames Laboratoriais: ' + internacao.exames_laboratoriais + '\n';
+        }
+        
+        return historico.trim();
     }
 }
 
