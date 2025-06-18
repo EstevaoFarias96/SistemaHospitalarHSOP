@@ -2006,9 +2006,11 @@ def internar_paciente():
             medico_id=current_user.id,
             data_internacao=datetime.now(timezone(timedelta(hours=-3))),
             hda=dados.get('hda', ''),
-            justificativa_internacao_sinais_e_sintomas=dados.get('justificativa_internacao_sinais_e_sintomas', ''),
+            justificativa_internacao_sinais_e_sintomas=f"{dados.get('hda', '').strip()}\n\n{dados.get('folha_anamnese', '').strip()}",
+            justificativa_internacao_condicoes="RISCO DE COMPLICAÇÃO",
+            justificativa_internacao_principais_resultados_diagnostico="ANMNESE + EXAME FISICO",
             diagnostico_inicial=dados.get('diagnostico_inicial', ''),
-            folha_anamnese=dados.get('anamnese_exame_fisico', ''),
+            folha_anamnese=dados.get('folha_anamnese', ''),
             conduta=dados.get('conduta_inicial', 'Não informada'),
             carater_internacao=dados.get('carater_internacao', 'Não informado'),
             cid_principal=dados.get('cid_principal', ''),
@@ -3654,7 +3656,7 @@ def consultar_rn(rn_id):
         return jsonify({'success': True, 'rn': resultado})
 
     except Exception as e:
-        return jsonify({'success': False, 'message': f'Erro ao consultar RN: {str(e)}'}), 500    
+        return jsonify({'success': False, 'message': f'Erro ao consultar RN: {str(e)}'}), 500
 
 @bp.route('/api/pacientes', methods=['POST'])
 @login_required
@@ -5588,7 +5590,7 @@ def imprimir_prescricoes_enfermagem(atendimento_id):
                 'enfermeiro_coren': prescricao.enfermeiro_coren
             })
         
-        return render_template('impressao_prescricoes_enfermagem.html',
+        return render_template('imprimir_prescricoes_enfermagem.html',
                              paciente=paciente,
                              internacao=internacao,
                              atendimento=atendimento,

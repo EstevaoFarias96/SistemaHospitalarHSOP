@@ -397,14 +397,6 @@
                     <textarea id="hda" name="hda" rows="3" class="form-control" required></textarea>
                   </div>
                 </div>
-
-                <div class="form-row">
-                  <div class="form-group col-md-12">
-                    <label for="justificativa_internacao_sinais_e_sintomas">Justificativa da Internação (Sinais e Sintomas)*</label>
-                    <textarea id="justificativa_internacao_sinais_e_sintomas" name="justificativa_internacao_sinais_e_sintomas" rows="3" class="form-control" required></textarea>
-                  </div>
-                </div>
-
                 <div class="form-row">
                   <div class="form-group col-md-12">
                     <label for="diagnosticoInicial">Diagnóstico Inicial*</label>
@@ -414,8 +406,8 @@
                 
                 <div class="form-row">
                   <div class="form-group col-md-12">
-                    <label for="anamnese_exame_fisico">Anamnese e Exame Físico*</label>
-                    <textarea id="anamnese_exame_fisico" name="anamnese_exame_fisico" rows="3" class="form-control" required></textarea>
+                    <label for="folha_anamnese">Anamnese e Exame Físico*</label>
+                    <textarea id="folha_anamnese" name="folha_anamnese" rows="3" class="form-control" required></textarea>
                   </div>
                 </div>
 
@@ -811,9 +803,8 @@
         const dadosInternacao = {
           leito: leitoSelecionado,
           hda: $('#hda').val(),
-          justificativa_internacao_sinais_e_sintomas: $('#justificativa_internacao_sinais_e_sintomas').val(),
           diagnostico_inicial: $('#diagnosticoInicial').val(),
-          anamnese_exame_fisico: $('#anamnese_exame_fisico').val(),
+          folha_anamnese: $('#folha_anamnese').val(),
           conduta_inicial: $('#condutaInicial').val(),
           carater_internacao: $('#caraterInternacao').val(),
           cid_principal: $('#cidPrincipal').val(),
