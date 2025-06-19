@@ -693,7 +693,7 @@ def registrar_prescricao():
             texto_dieta=dados.get('texto_dieta'),
             texto_procedimento_medico=dados.get('texto_procedimento_medico'),
             texto_procedimento_multi=dados.get('texto_procedimento_multi'),
-            horario_prescricao=now_brasilia()
+            horario_prescricao=datetime.now(timezone(timedelta(hours=-3)))
         )
 
         # Se vierem medicamentos, usa o setter automático
