@@ -9,63 +9,76 @@
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             color: #333;
+            font-size: 8px; /* fonte geral menor */
         }
         .container {
             max-width: 800px;
             margin: 20px auto;
             border: 1px solid #ddd;
-            padding: 30px;
+            padding: 20px; /* padding menor */
             border-radius: 8px;
             background-color: #fff;
         }
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px; /* menor */
             border-bottom: 2px solid #0d6efd;
-            padding-bottom: 15px;
+            padding-bottom: 10px; /* menor */
         }
         .header h1 {
-            font-size: 24px;
+            font-size: 10px; /* menor */
             font-weight: bold;
             color: #0d6efd;
             margin: 0;
         }
         .section-title {
-            font-size: 18px;
+            font-size: 8px; /* menor */
             font-weight: bold;
             color: #0d6efd;
             border-bottom: 1px solid #0d6efd;
-            padding-bottom: 5px;
-            margin-top: 25px;
-            margin-bottom: 15px;
+            padding-bottom: 3px; /* menor */
+            margin-top: 18px; /* menor */
+            margin-bottom: 10px; /* menor */
         }
         .info-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* menor */
+            gap: 10px; /* menor */
         }
         .info-item {
             background-color: #f8f9fa;
-            padding: 10px;
+            padding: 6px; /* menor */
             border-radius: 5px;
+            font-size: 10px; /* menor */
         }
         .info-item strong {
             display: block;
             color: #555;
-            margin-bottom: 5px;
+            margin-bottom: 2px; /* menor */
+            font-size: 10px; /* menor */
         }
         .footer {
-            margin-top: 40px;
+            margin-top: 25px; /* menor */
             text-align: center;
+            font-size: 10px; /* menor */
         }
         .signature-line {
             border-top: 1px solid #333;
-            width: 300px;
-            margin: 60px auto 0;
-            padding-top: 5px;
+            width: 220px; /* menor */
+            margin: 40px auto 0; /* menor */
+            padding-top: 3px; /* menor */
+        }
+        .card-body {
+            font-size: 8px; /* menor */
+        }
+        .card-body strong {
+            font-size: 8px; /* menor */
         }
         @media print {
-            body { -webkit-print-color-adjust: exact; }
+            body { 
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
             .no-print { display: none; }
             .container {
                 border: none;
@@ -159,4 +172,4 @@
     </div>
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </body>
-</html> 
+</html>

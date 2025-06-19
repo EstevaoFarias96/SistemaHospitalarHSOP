@@ -1,5 +1,67 @@
 {% extends "base.html" %}
 
+{% block title %}Pacientes Internados{% endblock %}
+
+{% block styles %}
+<style>
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(0,0,0,.02);
+    }
+    
+    .btn-group .btn {
+        margin-right: 0.2rem;
+    }
+    
+    .badge-internado {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        color: white;
+        font-weight: 500;
+    }
+    
+    .table-responsive {
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    
+    .card {
+        transition: transform 0.2s ease-in-out;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+    }
+
+    /* Estilos para o modal de alta */
+    #modalRelatorioAlta .modal-dialog {
+        max-width: 900px;
+    }
+    
+    #modalRelatorioAlta .modal-body {
+        padding: 2rem;
+    }
+    
+    .editor-historico {
+        background: #fff;
+        border-radius: 0.375rem;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    /* Melhor aparência para textarea do histórico */
+    #historico {
+        resize: vertical;
+        line-height: 1.6;
+        font-size: 14px;
+    }
+    
+    /* Estilos dos campos de alta */
+    .form-label.fw-bold {
+        color: #495057;
+        font-size: 0.95rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <!-- Container Principal -->
 <div class="container-fluid py-4" id="page-data" data-cargo="{{ session.get('cargo', '') }}">
@@ -72,35 +134,33 @@
                     <input type="hidden" id="internacaoId" name="internacaoId">
 
                     <div class="row g-3">
-                        <!-- Campo do Diagnóstico Final -->
-                        <div class="col-12">
-                            <label for="diagnostico" class="form-label">
-                                <i class="fas fa-stethoscope me-1"></i>
-                                Diagnóstico Final
-                            </label>
-                            <textarea class="form-control" id="diagnostico" name="diagnostico" rows="3" required
-                                     placeholder="Diagnóstico principal e secundários do paciente..."></textarea>
-                        </div>
-
                         <!-- Campo do Histórico da Internação -->
                         <div class="col-12">
                             <label for="historico" class="form-label">
-                                <i class="fas fa-history me-1"></i>
+                                <i class="fas fa-file-medical-alt me-1"></i>
                                 Histórico da Internação
-                                <small class="text-muted">(gerado automaticamente: HDA + Anamnese + Conduta + Exames)</small>
+                                <small class="text-muted">(gerado automaticamente e editável)</small>
                             </label>
-                            <textarea class="form-control" id="historico" name="historico_internacao" rows="8" required 
-                                     placeholder="O histórico será montado automaticamente a partir do HDA, anamnese, conduta e exames. Você pode editar e adicionar informações adicionais..."></textarea>
+                            
+                            <!-- Textarea para o histórico -->
+                            <textarea id="historico" name="historico_internacao" class="form-control" 
+                                     style="min-height: 300px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;" 
+                                     placeholder="O histórico será montado automaticamente. Você pode editar e adicionar informações..." 
+                                     required></textarea>
                         </div>
 
-                        <!-- Campo dos Cuidados Gerais -->
-                        <div class="col-12">
-                            <label for="cuidadosGerais" class="form-label">
-                                <i class="fas fa-heart me-1"></i>
-                                Cuidados Gerais
-                            </label>
-                            <textarea class="form-control" id="cuidadosGerais" name="cuidados_gerais" rows="3" required
-                                     placeholder="Orientações e cuidados para continuidade do tratamento..."></textarea>
+                        <!-- Campo do Diagnóstico Final - Simplificado -->
+                        <div class="col-md-6">
+                            <label for="diagnostico" class="form-label fw-bold">Diagnóstico Final</label>
+                            <textarea class="form-control" id="diagnostico" name="diagnostico" rows="4" required
+                                     placeholder="Diagnóstico principal e secundários..."></textarea>
+                        </div>
+
+                        <!-- Campo dos Cuidados Gerais - Simplificado -->
+                        <div class="col-md-6">
+                            <label for="cuidadosGerais" class="form-label fw-bold">Cuidados Gerais</label>
+                            <textarea class="form-control" id="cuidadosGerais" name="cuidados_gerais" rows="4" required
+                                     placeholder="Orientações e cuidados..."></textarea>
                         </div>
                     </div>
                 </form>
@@ -273,12 +333,12 @@ const CONFIG = {
 // Classe principal para gerenciar a página
 class PacientesInternadosManager {
     constructor() {
-        this.cargoUsuario = document.getElementById('page-data').dataset.cargo?.toLowerCase().trim() || '';
-        this.initializeEventListeners();
+        this.cargoUsuario = document.getElementById("page-data").dataset.cargo?.toLowerCase().trim() || "medico"; console.log("Cargo detectado:", this.cargoUsuario);
+        this.inicializarEventListeners();
         this.fetchPacientesInternados();
     }
 
-    initializeEventListeners() {
+    inicializarEventListeners() {
         // Evento de busca
         document.getElementById('searchInput').addEventListener('input', (e) => this.filtrarTabela(e.target.value));
 
@@ -424,85 +484,71 @@ class PacientesInternadosManager {
     }
 
     async abrirModalAlta(internacaoId) {
-        document.getElementById('internacaoId').value = internacaoId;
-
         try {
-            // Buscar dados da internação através do endpoint de alta
-            const response = await fetch(CONFIG.API_ENDPOINTS.ALTA(internacaoId));
-            const data = await response.json();
+            // Buscar dados da internação
+            const response = await fetch(`/api/internacao/${internacaoId}/alta`);
+            const dados = await response.json();
 
-            if (data.success) {
-                // Pré-preencher o formulário com os dados retornados
-                await this.preencherFormularioAlta(data, internacaoId);
-            } else {
-                // Se não conseguir buscar pela alta, tentar buscar dados da internação
-                const responseInternacao = await fetch(CONFIG.API_ENDPOINTS.INTERNACAO(internacaoId));
-                const dataInternacao = await responseInternacao.json();
-                
-                if (dataInternacao.success) {
-                    // Montar histórico automaticamente usando HDA + outros campos
-                    const historicoAutomatico = await this.montarHistoricoAutomatico(dataInternacao.internacao);
-                    
-                    // Criar dados formatados para o formulário
-                    const dadosFormatados = {
-                        diagnostico: dataInternacao.internacao.diagnostico || dataInternacao.internacao.diagnostico_inicial || '',
-                        historico_internacao: historicoAutomatico,
-                        cuidados_gerais: dataInternacao.internacao.cuidados_gerais || ''
-                    };
-                    
-                    await this.preencherFormularioAlta(dadosFormatados, internacaoId);
-                }
+            if (!dados.success) {
+                throw new Error(dados.message || 'Erro ao carregar dados');
             }
+
+            // Preencher formulário
+            this.preencherFormularioAlta(dados, internacaoId);
+
         } catch (error) {
             console.error('Erro ao carregar dados da internação:', error);
             this.mostrarNotificacao('Erro ao carregar dados da internação', 'error');
         }
 
-        // Abrir modal usando diferentes métodos
+        // Abrir modal
         const modalElement = document.getElementById('modalRelatorioAlta');
-        
-        try {
-            // Método 1: Tentar usar Bootstrap 5
-            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-                const modalAlta = new bootstrap.Modal(modalElement);
-                modalAlta.show();
-            } else {
-                throw new Error('bootstrap.Modal não disponível');
-            }
-        } catch (error) {
-            console.log('Tentando método alternativo para abrir modal:', error.message);
-            
-            // Método 2: Fallback usando jQuery (Bootstrap 4)
-            if (typeof $ !== 'undefined') {
-                $(modalElement).modal('show');
-            } else {
-                // Método 3: Abrir manualmente adicionando classes
-                modalElement.classList.add('show');
-                modalElement.style.display = 'block';
-                document.body.classList.add('modal-open');
-                
-                // Criar backdrop
-                const backdrop = document.createElement('div');
-                backdrop.className = 'modal-backdrop fade show';
-                document.body.appendChild(backdrop);
-            }
+        if (!modalElement) {
+            throw new Error('Modal não encontrado');
         }
+        
+        const modalAlta = new bootstrap.Modal(modalElement);
+        modalAlta.show();
     }
 
-    async preencherFormularioAlta(dados, internacaoId) {
-        // Os dados já vêm formatados do endpoint GET de alta
+    preencherFormularioAlta(dados, internacaoId) {
+        // Preencher ID da internação
+        document.getElementById('internacaoId').value = internacaoId;
+
+        // Preencher campos simples
         const campos = {
             'diagnostico': dados.diagnostico || '',
-            'historico': dados.historico_internacao || 'Histórico da internação será gerado automaticamente.',
-            'cuidados_gerais': dados.cuidados_gerais || ''
+            'cuidadosGerais': dados.cuidados_gerais || '',
+            'historico': this.formatarHistoricoParaTexto(dados.historico_internacao || 'Histórico será montado automaticamente...')
         };
 
         Object.entries(campos).forEach(([id, valor]) => {
-            const elemento = document.getElementById(id);
-            if (elemento) {
-                elemento.value = valor;
+            const campo = document.getElementById(id);
+            if (campo) {
+                campo.value = valor;
             }
         });
+    }
+
+    formatarHistoricoParaTexto(texto) {
+        if (!texto || texto === 'Não informado') {
+            return 'Histórico será montado automaticamente...';
+        }
+
+        // Converter markdown para texto simples com # discreto
+        return texto
+            .replace(/### (.*?):/g, '# $1:\n')  // Converter ### para # simples
+            .replace(/<[^>]*>/g, '')           // Remover HTML tags
+            .replace(/\n{3,}/g, '\n\n')        // Limitar quebras de linha
+            .trim();
+    }
+
+    coletarDadosFormulario() {
+        return {
+            diagnostico: document.getElementById('diagnostico').value,
+            historico_internacao: document.getElementById('historico').value,
+            cuidados_gerais: document.getElementById('cuidadosGerais').value
+        };
     }
 
     async salvarRelatorioAlta() {
@@ -707,14 +753,6 @@ class PacientesInternadosManager {
         }
     }
 
-    coletarDadosFormulario() {
-        return {
-            diagnostico: document.getElementById('diagnostico').value,
-            historico_internacao: document.getElementById('historico').value,
-            cuidados_gerais: document.getElementById('cuidadosGerais').value
-        };
-    }
-
     atualizarEstadoBotao(btn, spinner, text, loading) {
         btn.disabled = loading;
         spinner.classList.toggle('d-none', !loading);
@@ -766,32 +804,6 @@ class PacientesInternadosManager {
 
     async abrirModalImprimirAlta(internacaoId) {
         // Função removida: não faz mais nada
-    }
-
-    async montarHistoricoAutomatico(internacao) {
-        let historico = '';
-        
-        // HDA
-        if (internacao.hda) {
-            historico += 'HDA: ' + internacao.hda + '\n';
-        }
-        
-        // Folha de Anamnese
-        if (internacao.folha_anamnese) {
-            historico += 'Anamnese: ' + internacao.folha_anamnese + '\n';
-        }
-        
-        // Conduta
-        if (internacao.conduta) {
-            historico += 'Conduta: ' + internacao.conduta + '\n';
-        }
-        
-        // Exames Laboratoriais
-        if (internacao.exames_laboratoriais) {
-            historico += 'Exames Laboratoriais: ' + internacao.exames_laboratoriais + '\n';
-        }
-        
-        return historico.trim();
     }
 }
 

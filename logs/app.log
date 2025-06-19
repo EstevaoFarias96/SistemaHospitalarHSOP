@@ -18936,3 +18936,321 @@ AssertionError: View function mapping is overwriting an existing endpoint functi
 2025-06-18 11:47:16,184 [INFO] __init__:72 - LoginManager inicializado com sucesso
 2025-06-18 11:47:16,275 [INFO] __init__:90 - Blueprints registrados com sucesso
 2025-06-18 11:47:16,290 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-18 12:09:37,463 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-18 12:09:37,463 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-18 12:09:37,463 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-18 12:09:37,463 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-06-18 12:09:37,463 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-18 12:09:37,472 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-18 12:09:37,472 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-18 12:09:37,591 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-18 12:09:37,595 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-18 12:09:37,775 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-18 12:09:37,775 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-18 12:09:37,775 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-18 12:09:37,775 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-06-18 12:09:37,775 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-18 12:09:37,779 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-18 12:09:37,779 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-18 12:09:37,886 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-18 12:09:37,888 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-18 13:16:42,121 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-18 13:16:42,121 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-18 13:16:42,121 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-18 13:16:42,121 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-06-18 13:16:42,121 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-18 13:16:42,126 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-18 13:16:42,126 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-18 13:16:42,284 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-18 13:16:42,286 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-18 13:18:31,761 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-18 13:18:31,761 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-18 13:18:31,761 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-18 13:18:31,761 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-06-18 13:18:31,761 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-18 13:18:31,766 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-18 13:18:31,766 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-18 13:18:31,904 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-18 13:18:31,905 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-18 13:19:37,875 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-18 13:19:37,875 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-18 13:19:37,875 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-18 13:19:37,875 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-06-18 13:19:37,875 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-18 13:19:37,880 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-18 13:19:37,880 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-18 13:19:38,018 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-18 13:19:38,019 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-18 13:20:17,715 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-18 13:20:17,715 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-18 13:20:17,715 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-18 13:20:17,715 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-06-18 13:20:17,715 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-18 13:20:17,720 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-18 13:20:17,720 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-18 13:20:17,854 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-18 13:20:17,856 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-18 13:21:14,732 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-18 13:21:14,733 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-18 13:21:14,733 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-18 13:21:14,733 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-06-18 13:21:14,733 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-18 13:21:14,737 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-18 13:21:14,738 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-18 13:21:14,894 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-18 13:21:14,896 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-18 13:21:36,386 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-18 13:21:36,386 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-18 13:21:36,386 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-18 13:21:36,386 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-06-18 13:21:36,386 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-18 13:21:36,392 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-18 13:21:36,392 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-18 13:21:36,542 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-18 13:21:36,544 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-18 13:23:56,547 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-18 13:23:56,547 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-18 13:23:56,547 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-18 13:23:56,547 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-06-18 13:23:56,547 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-18 13:23:56,551 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-18 13:23:56,552 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-18 13:23:56,585 [ERROR] __init__:92 - Erro ao registrar blueprint: unterminated string literal (detected at line 4567) (routes.py, line 4567)
+2025-06-18 13:23:56,585 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 87, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/app/routes.py", line 4567
+    historico_internacao = '\n\n'.join(secoes_historico) if secoes_historico else 'Histórico será montado automaticamente\'
+                                                                                  ^
+SyntaxError: unterminated string literal (detected at line 4567)
+
+2025-06-18 13:23:56,587 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-18 13:24:35,286 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-18 13:24:35,286 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-18 13:24:35,286 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-18 13:24:35,286 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-06-18 13:24:35,286 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-18 13:24:35,291 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-18 13:24:35,291 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-18 13:24:35,325 [ERROR] __init__:92 - Erro ao registrar blueprint: unterminated string literal (detected at line 4567) (routes.py, line 4567)
+2025-06-18 13:24:35,325 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 87, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/app/routes.py", line 4567
+    historico_internacao = '\n\n'.join(secoes_historico) if secoes_historico else 'Histórico será montado automaticamente\'
+                                                                                  ^
+SyntaxError: unterminated string literal (detected at line 4567)
+
+2025-06-18 13:24:35,327 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-18 13:25:20,057 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-18 13:25:20,057 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-18 13:25:20,057 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-18 13:25:20,057 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-06-18 13:25:20,057 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-18 13:25:20,061 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-18 13:25:20,061 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-18 13:25:20,094 [ERROR] __init__:92 - Erro ao registrar blueprint: unterminated string literal (detected at line 4567) (routes.py, line 4567)
+2025-06-18 13:25:20,094 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 87, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/app/routes.py", line 4567
+    historico_internacao = '\n\n'.join(secoes_historico) if secoes_historico else 'Histórico será montado automaticamente\'
+                                                                                  ^
+SyntaxError: unterminated string literal (detected at line 4567)
+
+2025-06-18 13:25:20,096 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-18 13:25:48,695 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-18 13:25:48,695 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-18 13:25:48,695 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-18 13:25:48,695 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-06-18 13:25:48,695 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-18 13:25:48,699 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-18 13:25:48,699 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-18 13:25:48,733 [ERROR] __init__:92 - Erro ao registrar blueprint: unterminated string literal (detected at line 4567) (routes.py, line 4567)
+2025-06-18 13:25:48,733 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 87, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/app/routes.py", line 4567
+    historico_internacao = '\n\n'.join(secoes_historico) if secoes_historico else 'Histórico será montado automaticamente\'
+                                                                                  ^
+SyntaxError: unterminated string literal (detected at line 4567)
+
+2025-06-18 13:25:48,735 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-18 13:29:15,773 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-18 13:29:15,773 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-18 13:29:15,774 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-18 13:29:15,774 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-06-18 13:29:15,774 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-18 13:29:15,778 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-18 13:29:15,778 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-18 13:29:15,807 [ERROR] __init__:92 - Erro ao registrar blueprint: unterminated string literal (detected at line 4567) (routes.py, line 4567)
+2025-06-18 13:29:15,808 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 87, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/app/routes.py", line 4567
+    historico_internacao = '\n\n'.join(secoes_historico) if secoes_historico else 'Histórico será montado automaticamente\'
+                                                                                  ^
+SyntaxError: unterminated string literal (detected at line 4567)
+
+2025-06-18 13:29:15,809 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-18 13:29:15,995 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-18 13:29:15,995 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-18 13:29:15,995 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-18 13:29:15,995 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-06-18 13:29:15,995 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-18 13:29:15,999 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-18 13:29:15,999 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-18 13:29:16,031 [ERROR] __init__:92 - Erro ao registrar blueprint: unterminated string literal (detected at line 4567) (routes.py, line 4567)
+2025-06-18 13:29:16,031 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 87, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/app/routes.py", line 4567
+    historico_internacao = '\n\n'.join(secoes_historico) if secoes_historico else 'Histórico será montado automaticamente\'
+                                                                                  ^
+SyntaxError: unterminated string literal (detected at line 4567)
+
+2025-06-18 13:29:16,033 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-18 13:47:51,855 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-18 13:47:51,855 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-18 13:47:51,855 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-18 13:47:51,855 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-06-18 13:47:51,855 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-18 13:47:51,859 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-18 13:47:51,859 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-18 13:47:52,084 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-18 13:47:52,086 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-18 13:47:52,261 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-18 13:47:52,261 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-18 13:47:52,261 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-18 13:47:52,261 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-06-18 13:47:52,261 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-18 13:47:52,265 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-18 13:47:52,265 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-18 13:47:52,376 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-18 13:47:52,377 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-18 13:48:35,131 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-18 13:48:35,131 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-18 13:48:35,131 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-18 13:48:35,131 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-18 13:48:35,131 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-18 13:48:35,164 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-18 13:48:35,164 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-18 13:48:35,276 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-18 13:48:35,291 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-18 14:01:41,927 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-18 14:01:41,927 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-18 14:01:41,927 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-18 14:01:41,927 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-18 14:01:41,927 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-18 14:01:41,953 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-18 14:01:41,953 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-18 14:01:42,109 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-18 14:01:42,122 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-18 14:01:49,501 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-18 14:01:49,502 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-18 14:01:49,502 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-18 14:01:49,502 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-18 14:01:49,502 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-18 14:01:49,525 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-18 14:01:49,525 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-18 14:01:49,670 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-18 14:01:49,685 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-18 14:02:23,427 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-18 14:02:23,427 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-18 14:02:23,427 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-18 14:02:23,427 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-18 14:02:23,427 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-18 14:02:23,451 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-18 14:02:23,451 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-18 14:02:23,596 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-18 14:02:23,611 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-18 14:03:07,465 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-18 14:03:07,465 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-18 14:03:07,465 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-18 14:03:07,465 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-18 14:03:07,465 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-18 14:03:07,486 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-18 14:03:07,486 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-18 14:03:07,625 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-18 14:03:07,637 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-18 14:03:35,270 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-18 14:03:35,270 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-18 14:03:35,270 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-18 14:03:35,270 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-18 14:03:35,270 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-18 14:03:35,291 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-18 14:03:35,291 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-18 14:03:35,439 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-18 14:03:35,451 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-18 14:22:15,292 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-18 14:22:15,292 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-18 14:22:15,292 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-18 14:22:15,292 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-18 14:22:15,292 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-18 14:22:15,311 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-18 14:22:15,311 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-18 14:22:15,422 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-18 14:22:15,435 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-18 14:22:15,600 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-18 14:22:15,600 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-18 14:22:15,600 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-18 14:22:15,600 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-18 14:22:15,600 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-18 14:22:15,618 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-18 14:22:15,618 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-18 14:22:15,720 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-18 14:22:15,735 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-19 09:36:14,398 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-19 09:36:14,398 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-19 09:36:14,398 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-19 09:36:14,398 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-19 09:36:14,398 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-19 09:36:14,437 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-19 09:36:14,437 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-19 09:36:14,662 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-19 09:36:14,688 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-19 09:36:14,856 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-19 09:36:14,856 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-19 09:36:14,856 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-19 09:36:14,856 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-19 09:36:14,856 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-19 09:36:14,873 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-19 09:36:14,874 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-19 09:36:14,975 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-19 09:36:14,987 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-19 09:48:03,310 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-19 09:48:03,311 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-19 09:48:03,311 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-19 09:48:03,311 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-19 09:48:03,311 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-19 09:48:03,336 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-19 09:48:03,336 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-19 09:48:03,516 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-19 09:48:03,543 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-19 09:48:17,991 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-19 09:48:17,991 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-19 09:48:17,991 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-19 09:48:17,991 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-19 09:48:17,991 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-19 09:48:18,011 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-19 09:48:18,011 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-19 09:48:18,157 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-19 09:48:18,171 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-19 09:57:16,685 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-19 09:57:16,685 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-19 09:57:16,685 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-19 09:57:16,685 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-19 09:57:16,686 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-19 09:57:16,705 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-19 09:57:16,705 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-19 09:57:16,817 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-19 09:57:16,829 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-19 09:57:17,024 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-19 09:57:17,024 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-19 09:57:17,024 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-19 09:57:17,024 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-19 09:57:17,024 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-19 09:57:17,044 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-19 09:57:17,044 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-19 09:57:17,156 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-19 09:57:17,168 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
