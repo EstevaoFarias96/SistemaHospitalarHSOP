@@ -9,4 +9,5 @@ docxtpl==0.20.0
 pdfkit==1.0.0
 Pillow==9.0.1
 requests==2.25.1
+tzdata>=2024.1
 
