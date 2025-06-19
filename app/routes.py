@@ -29,7 +29,7 @@ def now_brasilia():
     """
     Força horário de Brasília (UTC-3) sempre
     """
-    utc_now = datetime.utc()
+    utc_now = datetime.now(timezone.utc)
     brasilia_time = utc_now - timedelta(hours=3)  # Subtrai 3 horas do UTC
     return brasilia_time.replace(tzinfo=timezone(timedelta(hours=-3)))
 
