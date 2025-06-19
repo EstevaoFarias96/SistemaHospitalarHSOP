@@ -52,7 +52,7 @@ def api_status():
             'status': 'online',
             'database': 'connected',
             'funcionarios_count': count,
-            'timestamp': datetime.now(timezone(timedelta(hours=-3))).isoformat()
+            'timestamp': datetime.now(ZoneInfo("America/Sao_Paulo")).isoformat()
         })
     except Exception as e:
         logging.error(f"Erro na rota de status: {str(e)}")
@@ -60,7 +60,7 @@ def api_status():
         return jsonify({
             'status': 'error',
             'error': str(e),
-            'timestamp': datetime.now(timezone(timedelta(hours=-3))).isoformat()
+            'timestamp': datetime.now(ZoneInfo("America/Sao_Paulo")).isoformat()
         }), 500
 
 
@@ -1979,7 +1979,7 @@ def internar_paciente():
             db.session.add(paciente)
             db.session.flush()
 
-        agora = datetime.now(timezone(timedelta(hours=-3)))
+        agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
         atendimento_id = dados.get('atendimento_id')
 
         if atendimento_id and len(atendimento_id) > 8:
@@ -2526,7 +2526,7 @@ def atualizar_aprazamento(aprazamento_id):
             # Se o medicamento foi marcado como administrado, registrar a data
             if dados['realizado']:
                 from datetime import datetime
-                aprazamento.data_realizacao = datetime.now(timezone(timedelta(hours=-3)))
+                aprazamento.data_realizacao = datetime.now(ZoneInfo("America/Sao_Paulo"))
             else:
                 aprazamento.data_realizacao = None
                 
@@ -2781,7 +2781,7 @@ def marcar_aprazamento_realizado(aprazamento_id):
             return jsonify({'success': False, 'message': 'Este aprazamento já foi realizado'}), 400
 
         aprazamento.realizado = True
-        aprazamento.data_realizacao = datetime.now(timezone(timedelta(hours=-3)))
+        aprazamento.data_realizacao = datetime.now(ZoneInfo("America/Sao_Paulo"))
         aprazamento.enfermeiro_responsavel_id = current_user.id
 
         db.session.commit()
@@ -2865,7 +2865,7 @@ def listar_aprazamentos_ativos():
         # Buscar aprazamentos ativos
         aprazamentos = Aprazamento.query.filter(
             Aprazamento.realizado == False,
-            Aprazamento.data_hora_aprazamento >= datetime.now(timezone(timedelta(hours=-3)))
+            Aprazamento.data_hora_aprazamento >= datetime.now(ZoneInfo("America/Sao_Paulo"))
         ).order_by(
             Aprazamento.data_hora_aprazamento
         ).all()
@@ -3082,7 +3082,7 @@ def listar_aprazamentos_pendentes():
         # Buscar aprazamentos pendentes
         aprazamentos = Aprazamento.query.filter(
             Aprazamento.realizado == False,
-            Aprazamento.data_hora_aprazamento >= datetime.now(timezone(timedelta(hours=-3)))
+            Aprazamento.data_hora_aprazamento >= datetime.now(ZoneInfo("America/Sao_Paulo"))
         ).order_by(
             Aprazamento.data_hora_aprazamento
         ).all()
@@ -3468,7 +3468,7 @@ def gerar_receita_pdf(receituario_id):
 
         contexto = {
             'paciente_nome': paciente.nome,
-            'data': datetime.now(timezone(timedelta(hours=-3))).strftime('%d/%m/%Y'),
+            'data': datetime.now(ZoneInfo("America/Sao_Paulo")).strftime('%d/%m/%Y'),
             'endereco': paciente.endereco or "Não informado",
             'medicamentos': receituario.conteudo_receita,
             'medico': medico.nome
@@ -3684,7 +3684,7 @@ def criar_paciente():
         if not dados.get('cpf'):
             # Formato: RN + AAMMDD + 4 dígitos aleatórios (total: 12 caracteres)
             import random
-            data = datetime.now(timezone(timedelta(hours=-3))).strftime('%y%m%d')
+            data = datetime.now(ZoneInfo("America/Sao_Paulo")).strftime('%y%m%d')
             random_digits = str(random.randint(0, 9999)).zfill(4)
             dados['cpf'] = f'RN{data}{random_digits}'[:14]  # Garante máximo de 14 caracteres
             logging.info(f'[criar_paciente] CPF gerado: {dados["cpf"]}')
@@ -3775,8 +3775,8 @@ def criar_atendimento_rn():
             funcionario_id=funcionario_id,
             medico_id=medico_id,
             enfermeiro_id=enfermeiro_id,
-            data_atendimento=datetime.now(timezone(timedelta(hours=-3))).date(),
-            hora_atendimento=datetime.now(timezone(timedelta(hours=-3))).time(),
+            data_atendimento=datetime.now(ZoneInfo("America/Sao_Paulo")).date(),
+            hora_atendimento=datetime.now(ZoneInfo("America/Sao_Paulo")).time(),
             status='internado'  # fixo para RN
         )
 
@@ -3993,8 +3993,6 @@ def imprimir_aih(atendimento_id):
 
         # Contexto com as variáveis para substituição
         try:
-            from datetime import datetime
-            
             contexto = {
                 'paciente_nome': paciente.nome or '',
                 'id_atendimento': atendimento.id,
@@ -4018,8 +4016,7 @@ def imprimir_aih(atendimento_id):
                 'leito': internacao.leito or '',
                 'carater_de_internacao': internacao.carater_internacao or '',
                 'funcionario_nome': medico.nome or '',
-                'medico_cpf': medico.cpf or '',
-                'data_atual': datetime.now().strftime('%d/%m/%Y')
+                'medico_cpf': medico.cpf or ''
             }
         except Exception as e:
             logging.error(f"Erro ao montar contexto: {str(e)}")
@@ -4957,7 +4954,7 @@ def imprimir_sae(atendimento_id):
             sae.enfermeiro_nome = 'Não informado'
 
         # Data atual para o rodapé
-        data_impressao = datetime.now(timezone(timedelta(hours=-3)))
+        data_impressao = datetime.now(ZoneInfo("America/Sao_Paulo"))
 
         # Renderizar template HTML para impressão
         return render_template('imprimir_sae.html',
@@ -5012,12 +5009,12 @@ def imprimir_ficha_admissao(atendimento_id):
             enfermeiro = Funcionario.query.get(atendimento.enfermeiro_id)
 
         # Data atual para o rodapé
-        data_impressao = datetime.now(timezone(timedelta(hours=-3)))
+        data_impressao = datetime.now(ZoneInfo("America/Sao_Paulo"))
 
         # Calcular idade do paciente
         idade = None
         if paciente.data_nascimento:
-            hoje = datetime.now(timezone(timedelta(hours=-3))).date()
+            hoje = datetime.now(ZoneInfo("America/Sao_Paulo")).date()
             idade = hoje.year - paciente.data_nascimento.year
             if hoje.month < paciente.data_nascimento.month or (hoje.month == paciente.data_nascimento.month and hoje.day < paciente.data_nascimento.day):
                 idade -= 1
@@ -5080,13 +5077,13 @@ def imprimir_identificacao_paciente(atendimento_id):
         # Calcular idade do paciente
         idade = None
         if paciente.data_nascimento:
-            hoje = datetime.now(timezone(timedelta(hours=-3))).date()
+            hoje = datetime.now(ZoneInfo("America/Sao_Paulo")).date()
             idade = hoje.year - paciente.data_nascimento.year
             if hoje.month < paciente.data_nascimento.month or (hoje.month == paciente.data_nascimento.month and hoje.day < paciente.data_nascimento.day):
                 idade -= 1
 
         # Data atual para o rodapé
-        data_impressao = datetime.now(timezone(timedelta(hours=-3)))
+        data_impressao = datetime.now(ZoneInfo("America/Sao_Paulo"))
 
         # Buscar prescrições médicas ativas para alertas
         prescricoes = PrescricaoClinica.query.filter_by(atendimentos_clinica_id=internacao.id).order_by(
@@ -5489,7 +5486,7 @@ def imprimir_evolucoes_enfermagem(atendimento_id):
                              atendimento=atendimento,
                              evolucoes=evolucoes_dados,
                              data_selecionada=data_selecionada,
-                             data_geracao=datetime.now(timezone(timedelta(hours=-3))),
+                             data_geracao=datetime.now(ZoneInfo("America/Sao_Paulo")),
                              atendimento_id=atendimento_id)
         
     except Exception as e:
@@ -5638,7 +5635,7 @@ def imprimir_prescricoes_enfermagem(atendimento_id):
                              atendimento=atendimento,
                              prescricoes=prescricoes_dados,
                              data_selecionada=data_selecionada,
-                             data_geracao=datetime.now(timezone(timedelta(hours=-3))),
+                             data_geracao=datetime.now(ZoneInfo("America/Sao_Paulo")),
                              atendimento_id=atendimento_id)
         
     except Exception as e:
