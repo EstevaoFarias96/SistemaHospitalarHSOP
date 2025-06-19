@@ -148,6 +148,15 @@
             resize: none;
         }
         
+        .text-area-extra-large {
+            min-height: 60px;
+            padding: 4px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            background: white;
+            resize: none;
+        }
+        
         .field-small {
             grid-column: span 1;
             max-width: 80px;
@@ -295,12 +304,12 @@
             <div class="section-content">
                 <div class="field" style="margin-bottom: 6px;">
                     <div class="field-label">Principais Sinais e Sintomas Clínicos</div>
-                    <div class="field-value text-area-large">{{ sinais_e_sintomas }}</div>
+                    <div class="field-value text-area-extra-large">{{ sinais_e_sintomas }}</div>
                 </div>
                 
                 <div class="field" style="margin-bottom: 6px;">
                     <div class="field-label">Condições que Justificam a Internação</div>
-                    <div class="field-value text-area-large">{{ justificativa_de_internacao }}</div>
+                    <div class="field-value text-area">{{ justificativa_de_internacao }}</div>
                 </div>
                 
                 <div class="field" style="margin-bottom: 6px;">
@@ -363,7 +372,7 @@
                     </div>
                     <div class="field field-small">
                         <div class="field-label">Data da Solicitação</div>
-                        <div class="field-value">-</div>
+                        <div class="field-value">{{ data_atual }}</div>
                     </div>
                     <div class="field">
                         <div class="field-label">Assinatura e Carimbo (Nº do Registro do Conselho)</div>
@@ -431,11 +440,11 @@
                 <div class="grid grid-4">
                     <div class="field">
                         <div class="field-label">Nome do Profissional Autorizador</div>
-                        <div class="field-value">{{ funcionario_nome }}</div>
+                        <div class="field-value"></div>
                     </div>
                     <div class="field">
                         <div class="field-label">Documento</div>
-                        <div class="field-value">{{ medico_cpf }}</div>
+                        <div class="field-value"></div>
                     </div>
                     <div class="field">
                         <div class="field-label">Data da Autorização</div>

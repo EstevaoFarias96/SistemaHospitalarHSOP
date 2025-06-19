@@ -1859,17 +1859,28 @@ def registrar_alta_paciente(internacao_id):
                 'message': 'Nenhum dado enviado para registrar alta.'
             }), 400
 
-        # Montar histórico da internação usando apenas os campos da internação
-        # Formato: hda + folha_anamnese + conduta + exames_laboratoriais (separados por linha)
-        partes_historico = [
-            internacao.hda or '',
-            internacao.folha_anamnese or '',
-            internacao.conduta or '',
-            internacao.exames_laboratoriais or ''
-        ]
+        # Montar histórico da internação de forma organizada com cabeçalhos
+        # Formato: seções bem definidas para melhor organização
+        secoes_historico = []
         
-        # Filtrar partes vazias e juntar com uma linha simples de separação
-        historico_final = '\n'.join([parte.strip() for parte in partes_historico if parte.strip()])
+        # HDA - História da Doença Atual
+        if internacao.hda and internacao.hda.strip():
+            secoes_historico.append(f"# HDA (História da Doença Atual):\n{internacao.hda.strip()}")
+        
+        # Anamnese
+        if internacao.folha_anamnese and internacao.folha_anamnese.strip():
+            secoes_historico.append(f"# ANAMNESE:\n{internacao.folha_anamnese.strip()}")
+        
+        # Conduta
+        if internacao.conduta and internacao.conduta.strip():
+            secoes_historico.append(f"# CONDUTA:\n{internacao.conduta.strip()}")
+        
+        # Exames Laboratoriais
+        if internacao.exames_laboratoriais and internacao.exames_laboratoriais.strip():
+            secoes_historico.append(f"# EXAMES LABORATORIAIS:\n{internacao.exames_laboratoriais.strip()}")
+        
+        # Juntar todas as seções com dupla quebra de linha para separação visual
+        historico_final = '\n\n'.join(secoes_historico) if secoes_historico else 'Histórico da internação não disponível.'
 
         # Atualizar campos da internação com dados da alta
         internacao.historico_internacao = dados.get('historico_internacao', historico_final)  # Usar o enviado ou o montado automaticamente
@@ -3982,6 +3993,8 @@ def imprimir_aih(atendimento_id):
 
         # Contexto com as variáveis para substituição
         try:
+            from datetime import datetime
+            
             contexto = {
                 'paciente_nome': paciente.nome or '',
                 'id_atendimento': atendimento.id,
@@ -4005,7 +4018,8 @@ def imprimir_aih(atendimento_id):
                 'leito': internacao.leito or '',
                 'carater_de_internacao': internacao.carater_internacao or '',
                 'funcionario_nome': medico.nome or '',
-                'medico_cpf': medico.cpf or ''
+                'medico_cpf': medico.cpf or '',
+                'data_atual': datetime.now().strftime('%d/%m/%Y')
             }
         except Exception as e:
             logging.error(f"Erro ao montar contexto: {str(e)}")
@@ -4518,7 +4532,7 @@ def buscar_informacoes_alta(internacao_id):
                 'success': False,
                 'message': 'Acesso permitido apenas para médicos e enfermeiros'
             }), 403
-        
+
         # Buscar a internação
         internacao = Internacao.query.filter_by(atendimento_id=internacao_id).first()
         if not internacao:
@@ -4529,37 +4543,60 @@ def buscar_informacoes_alta(internacao_id):
 
         # Buscar dados do paciente
         paciente = Paciente.query.get(internacao.paciente_id)
-        
-        # Se ainda não teve alta, montar histórico automaticamente
+        if not paciente:
+            return jsonify({
+                'success': False,
+                'message': 'Paciente não encontrado'
+            }), 404
+
+        # Montar histórico automaticamente se ainda não houver data de alta
         historico_internacao = internacao.historico_internacao
         if not internacao.data_alta:
-            # Montar histórico automaticamente usando: HDA + Anamnese + Conduta + Exames
-            partes_historico = [
-                internacao.hda or '',
-                internacao.folha_anamnese or '',
-                internacao.conduta or '',
-                internacao.exames_laboratoriais or ''
-            ]
-            
-            # Filtrar partes vazias e juntar com uma linha simples de separação
-            historico_automatico = '\n'.join([parte.strip() for parte in partes_historico if parte.strip()])
-            historico_internacao = historico_automatico or 'Histórico será montado automaticamente'
-        
-        # Formatar resposta com as informações de alta
+            secoes_historico = []
+
+            # HDA - História da Doença Atual
+            if internacao.hda and internacao.hda.strip():
+                secoes_historico.append(f"# HDA (História da Doença Atual):\n{internacao.hda.strip()}")
+
+            # Evolução médica (última)
+            ultima_evolucao = (
+                EvolucaoAtendimentoClinica.query
+                .filter_by(atendimentos_clinica_id=internacao.id)
+                .order_by(EvolucaoAtendimentoClinica.data_evolucao.desc())
+                .first()
+            )
+            if ultima_evolucao and ultima_evolucao.evolucao and ultima_evolucao.evolucao.strip():
+                secoes_historico.append(f"# EVOLUÇÃO MÉDICA:\n{ultima_evolucao.evolucao.strip()}")
+
+            # Anamnese
+            if internacao.folha_anamnese and internacao.folha_anamnese.strip():
+                secoes_historico.append(f"# ANAMNESE:\n{internacao.folha_anamnese.strip()}")
+
+            # Conduta
+            if internacao.conduta and internacao.conduta.strip():
+                secoes_historico.append(f"# CONDUTA:\n{internacao.conduta.strip()}")
+
+            # Exames Laboratoriais
+            if internacao.exames_laboratoriais and internacao.exames_laboratoriais.strip():
+                secoes_historico.append(f"# EXAMES LABORATORIAIS:\n{internacao.exames_laboratoriais.strip()}")
+
+            historico_internacao = '\n\n'.join(secoes_historico) if secoes_historico else 'Histórico será montado automaticamente'
+
+        # Formatar resposta
         resultado = {
             'success': True,
             'data_alta': internacao.data_alta.strftime('%d/%m/%Y %H:%M') if internacao.data_alta else None,
             'diagnostico': internacao.diagnostico or 'Não informado',
-            'historico_internacao': historico_internacao or 'Não informado', 
+            'historico_internacao': historico_internacao or 'Não informado',
             'cuidados_gerais': internacao.cuidados_gerais or 'Não informado',
-            'nome_paciente': paciente.nome if paciente else 'Não informado',
-            'cpf_paciente': paciente.cpf if paciente else 'Não informado'
+            'nome_paciente': paciente.nome or 'Não informado',
+            'cpf_paciente': paciente.cpf or 'Não informado'
         }
-        
+
         return jsonify(resultado)
-        
+
     except Exception as e:
-        logging.error(f'Erro ao buscar informações de alta: {str(e)}')
+        logging.error(f'Erro ao buscar informações de alta para impressão: {str(e)}')
         logging.error(traceback.format_exc())
         return jsonify({
             'success': False,
@@ -5174,6 +5211,7 @@ def impressoes_enfermagem(atendimento_id):
         if not paciente:
             flash('Paciente não encontrado.', 'danger')
             return redirect(url_for('main.pacientes_internados'))
+        
         
         return render_template('impressoes_enfermagem.html', 
                             paciente=paciente, 
@@ -6044,8 +6082,8 @@ def buscar_informacoes_alta_para_impressao(atendimento_id):
             'success': True,
             'informacoes_alta': {
                 'data_alta': internacao.data_alta.isoformat() if internacao.data_alta else None,
-                'diagnostico': internacao.diagnostico or 'Não informado',
-                'historico_internacao': historico_internacao or 'Não informado', 
+            'diagnostico': internacao.diagnostico or 'Não informado',
+            'historico_internacao': historico_internacao or 'Não informado', 
                 'conduta': internacao.conduta or 'Não informado',
                 'medicacao': getattr(internacao, 'medicacao_alta', None) or internacao.medicacao or 'Não informado',
                 'cuidados_gerais': internacao.cuidados_gerais or 'Não informado'
