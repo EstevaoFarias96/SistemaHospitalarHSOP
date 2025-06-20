@@ -16,7 +16,7 @@ from docxtpl import DocxTemplate
 from docx import Document
 from io import BytesIO
 from app import db
-from app.models import Funcionario,Leito,AdmissaoEnfermagem, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN
+from app.models import Funcionario,Leito,AdmissaoEnfermagem, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN, now_brasilia
 from zoneinfo import ZoneInfo
 
 # Cria o Blueprint principal
@@ -24,14 +24,6 @@ bp = Blueprint('main', __name__)
 
 # Cria o Blueprint para internações especiais
 internacoes_especiais_bp = Blueprint('internacoes_especiais', __name__)
-
-def now_brasilia():
-    """
-    Força horário de Brasília (UTC-3) sempre
-    """
-    utc_now = datetime.utc()
-    brasilia_time = utc_now - timedelta(hours=3)  # Subtrai 3 horas do UTC
-    return brasilia_time.replace(tzinfo=timezone(timedelta(hours=-3)))
 
 # Login required decorator personalizado
 def login_required(f):
