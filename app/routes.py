@@ -1590,35 +1590,40 @@ def buscar_evolucoes_enfermagem_por_internacao(internacao_id):
 @bp.route('/api/enfermagem/prescricao/<int:internacao_id>', methods=['GET'])
 def buscar_prescricoes_enfermagem_por_internacao(internacao_id):
     """
-    Busca todas as prescrições de enfermagem para uma internação específica.
+    Busca todas as prescrições de enfermagem para uma internação específica no dia atual.
     """
     try:
-        prescricoes = PrescricaoEnfermagem.query\
-            .filter_by(atendimentos_clinica_id=internacao_id)\
-            .join(Funcionario, PrescricaoEnfermagem.funcionario_id == Funcionario.id)\
-            .add_columns(
-                PrescricaoEnfermagem.id,
-                PrescricaoEnfermagem.atendimentos_clinica_id,
-                PrescricaoEnfermagem.data_prescricao,
-                PrescricaoEnfermagem.texto,
-                Funcionario.nome.label('enfermeiro_nome'),
-                Funcionario.numero_profissional.label('enfermeiro_coren')
-            )\
-            .order_by(PrescricaoEnfermagem.data_prescricao.desc())\
-            .all()
-        
-        resultado = []
-        for presc in prescricoes:
-            resultado.append({
-                'id': presc.id,
-                'atendimentos_clinica_id': presc.atendimentos_clinica_id,
-                'data_prescricao': presc.data_prescricao.isoformat() if presc.data_prescricao else None,
-                'texto': presc.texto,
-                'enfermeiro_nome': presc.enfermeiro_nome,
-                'enfermeiro_coren': presc.enfermeiro_coren
-            })
-        
+        # Define o intervalo de tempo (início e fim do dia atual)
+        hoje = datetime.now().date()
+        inicio_dia = datetime.combine(hoje, time.min)
+        fim_dia = datetime.combine(hoje, time.max)
+
+        prescricoes = db.session.query(
+            PrescricaoEnfermagem.id,
+            PrescricaoEnfermagem.atendimentos_clinica_id,
+            PrescricaoEnfermagem.data_prescricao,
+            PrescricaoEnfermagem.texto,
+            Funcionario.nome.label("enfermeiro_nome"),
+            Funcionario.numero_profissional.label("enfermeiro_coren")
+        )\
+        .outerjoin(Funcionario, PrescricaoEnfermagem.funcionario_id == Funcionario.id)\
+        .filter(PrescricaoEnfermagem.atendimentos_clinica_id == internacao_id)\
+        .filter(PrescricaoEnfermagem.data_prescricao >= inicio_dia)\
+        .filter(PrescricaoEnfermagem.data_prescricao <= fim_dia)\
+        .order_by(PrescricaoEnfermagem.data_prescricao.asc())\
+        .all()
+
+        resultado = [{
+            'id': p.id,
+            'atendimentos_clinica_id': p.atendimentos_clinica_id,
+            'data_prescricao': p.data_prescricao.isoformat() if p.data_prescricao else None,
+            'texto': p.texto,
+            'enfermeiro_nome': p.enfermeiro_nome,
+            'enfermeiro_coren': p.enfermeiro_coren
+        } for p in prescricoes]
+
         return jsonify(resultado), 200
+
     except Exception as e:
         logging.error(f'Erro ao buscar prescrições de enfermagem: {str(e)}')
         logging.error(traceback.format_exc())
@@ -1669,69 +1674,38 @@ def atualizar_prescricao_enfermagem(id):
 # API para listar todas as prescrições de enfermagem (opcional)
 @bp.route('/api/enfermagem/prescricao', methods=['GET'])
 def listar_prescricoes_enfermagem():
-    prescricoes = PrescricaoEnfermagem.query.all()
-    resultado = []
-    for prescricao in prescricoes:
-        resultado.append({
-            'id': prescricao.id,
-            'atendimentos_clinica_id': prescricao.atendimentos_clinica_id,
-            'funcionario_id': prescricao.funcionario_id,
-            'data_prescricao': prescricao.data_prescricao.isoformat(),
-            'texto': prescricao.texto
-        })
-    return jsonify(resultado), 200
-
-# API para médicos visualizarem prescrições de enfermagem por ID de internação
-@bp.route('/api/medico/prescricoes-enfermagem/<int:internacao_id>', methods=['GET'])
-@login_required
-def medico_visualizar_prescricoes_enfermagem(internacao_id):
-    """
-    Permite que médicos visualizem prescrições de enfermagem para uma internação específica.
-    """
     try:
-        # Verificar se o usuário é médico
-        current_user = get_current_user()
-        if current_user.cargo.lower() != 'medico':
-            return jsonify({
-                'success': False,
-                'message': 'Acesso permitido apenas para médicos'
-            }), 403
-        
-        # Buscar todas as prescrições de enfermagem para esta internação
-        prescricoes = PrescricaoEnfermagem.query\
-            .filter_by(atendimentos_clinica_id=internacao_id)\
-            .join(Funcionario, PrescricaoEnfermagem.funcionario_id == Funcionario.id)\
-            .add_columns(
-                PrescricaoEnfermagem.id,
-                PrescricaoEnfermagem.atendimentos_clinica_id,
-                PrescricaoEnfermagem.data_prescricao,
-                PrescricaoEnfermagem.texto,
-                Funcionario.nome.label('enfermeiro_nome'),
-                Funcionario.numero_profissional.label('enfermeiro_coren')
-            )\
-            .order_by(PrescricaoEnfermagem.data_prescricao.desc())\
-            .all()
-        
-        resultado = []
-        for presc in prescricoes:
-            resultado.append({
-                'id': presc.id,
-                'atendimentos_clinica_id': presc.atendimentos_clinica_id,
-                'data_prescricao': presc.data_prescricao.isoformat() if presc.data_prescricao else None,
-                'texto': presc.texto,
-                'enfermeiro_nome': presc.enfermeiro_nome,
-                'enfermeiro_coren': presc.enfermeiro_coren
-            })
-        
+        prescricoes = db.session.query(
+            PrescricaoEnfermagem.id,
+            PrescricaoEnfermagem.atendimentos_clinica_id,
+            PrescricaoEnfermagem.data_prescricao,
+            PrescricaoEnfermagem.texto,
+            Funcionario.nome.label("enfermeiro_nome"),
+            Funcionario.numero_profissional.label("enfermeiro_coren")
+        ).select_from(PrescricaoEnfermagem)\
+        .join(Funcionario, PrescricaoEnfermagem.funcionario_id == Funcionario.id)\
+        .order_by(PrescricaoEnfermagem.data_prescricao.asc())\
+        .all()
+
+        resultado = [{
+            'id': presc.id,
+            'atendimentos_clinica_id': presc.atendimentos_clinica_id,
+            'data_prescricao': presc.data_prescricao.isoformat() if presc.data_prescricao else None,
+            'texto': presc.texto,
+            'enfermeiro_nome': presc.enfermeiro_nome,
+            'enfermeiro_coren': presc.enfermeiro_coren
+        } for presc in prescricoes]
+
         return jsonify({
             'success': True,
             'prescricoes': resultado
         }), 200
+
     except Exception as e:
         logging.error(f'Erro ao buscar prescrições de enfermagem para médico: {str(e)}')
         logging.error(traceback.format_exc())
         return jsonify({
-            'success': False, 
+            'success': False,
             'message': f'Erro ao buscar prescrições: {str(e)}'
         }), 500
 
@@ -5520,9 +5494,10 @@ def listar_datas_prescricoes_enfermagem(atendimento_id):
             }), 404
 
         # Buscar as datas das prescrições
-        prescricoes = PrescricaoEnfermagem.query\
-            .filter_by(atendimentos_clinica_id=internacao.id)\
-            .order_by(PrescricaoEnfermagem.data_prescricao.desc())\
+        prescricoes = db.session.query(
+            PrescricaoEnfermagem.data_prescricao
+        ).filter(PrescricaoEnfermagem.atendimentos_clinica_id == internacao.id)\
+            .filter(PrescricaoEnfermagem.data_prescricao.isnot(None))\
             .all()
 
         # Agrupar por data
@@ -5600,17 +5575,17 @@ def imprimir_prescricoes_enfermagem(atendimento_id):
         inicio_dia = datetime.combine(data_selecionada, datetime.min.time())
         fim_dia = datetime.combine(data_selecionada, datetime.max.time())
         
-        prescricoes = PrescricaoEnfermagem.query\
-            .filter_by(atendimentos_clinica_id=internacao.id)\
+        prescricoes = db.session.query(
+            PrescricaoEnfermagem.id,
+            PrescricaoEnfermagem.data_prescricao,
+            PrescricaoEnfermagem.texto,
+            Funcionario.nome.label("enfermeiro_nome"),
+            Funcionario.numero_profissional.label("enfermeiro_coren")
+        ).select_from(PrescricaoEnfermagem)\
+            .join(Funcionario, PrescricaoEnfermagem.funcionario_id == Funcionario.id)\
+            .filter(PrescricaoEnfermagem.atendimentos_clinica_id == internacao.id)\
             .filter(PrescricaoEnfermagem.data_prescricao >= inicio_dia)\
             .filter(PrescricaoEnfermagem.data_prescricao <= fim_dia)\
-            .join(Funcionario, PrescricaoEnfermagem.funcionario_id == Funcionario.id)\
-            .add_columns(
-                PrescricaoEnfermagem.id,
-                PrescricaoEnfermagem.data_prescricao,
-                PrescricaoEnfermagem.texto,
-                Funcionario.nome.label('enfermeiro_nome'),
-                Funcionario.numero_profissional.label('enfermeiro_coren')            )\
             .order_by(PrescricaoEnfermagem.data_prescricao.asc())\
             .all()
         
@@ -5629,7 +5604,7 @@ def imprimir_prescricoes_enfermagem(atendimento_id):
                 'enfermeiro_coren': prescricao.enfermeiro_coren
             })
         
-        return render_template('imprimir_prescricoes_enfermagem.html',
+        return render_template('impressao_prescricoes_enfermagem.html',
                              paciente=paciente,
                              internacao=internacao,
                              atendimento=atendimento,

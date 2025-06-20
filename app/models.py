@@ -141,7 +141,7 @@ class InternacaoSae(db.Model):
     sistema_urinario = db.Column(db.Text)
     acesso_venoso = db.Column(db.Text)
     observacao = db.Column(db.Text)
-    data_registro = db.Column(db.DateTime, default=now_brasilia)
+    data_registro = db.Column(db.DateTime(timezone=True), default=now_brasilia)
 
     enfermeiro = relationship('Funcionario', backref='saes_realizadas')
 
@@ -164,7 +164,7 @@ class Internacao(db.Model):
     codigo_procedimento = db.Column(db.String(50))
     leito = db.Column(db.String(50))
     carater_internacao = db.Column(db.String(100))
-    data_da_solicitacao_exame = db.Column(db.DateTime, default=now_brasilia)
+    data_da_solicitacao_exame = db.Column(db.DateTime(timezone=True), default=now_brasilia)
     acidente_de_trabalho = db.Column(db.Boolean, default=False)
     diagnostico = db.Column(db.Text)
     hda = db.Column(db.Text)
@@ -178,8 +178,8 @@ class Internacao(db.Model):
     imagens = db.Column(db.Text)
     historico_internacao = db.Column(db.Text)
     relatorio_alta = db.Column(db.Text)
-    data_alta = db.Column(db.DateTime)
-    data_internacao = db.Column(db.DateTime)
+    data_alta = db.Column(db.DateTime(timezone=True))
+    data_internacao = db.Column(db.DateTime(timezone=True))
     folha_de_anamnese = db.Column(db.Text)
     dieta = db.Column(db.Text)
     hidratacao = db.Column(db.Text)
@@ -194,7 +194,7 @@ class EvolucaoAtendimentoClinica(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     atendimentos_clinica_id = db.Column(db.Integer, ForeignKey('atendimentos_clinica.id'), nullable=False)
     funcionario_id = db.Column(db.Integer, ForeignKey('funcionarios.id'), nullable=False)
-    data_evolucao = db.Column(db.DateTime, default=now_brasilia)
+    data_evolucao = db.Column(db.DateTime(timezone=True), default=now_brasilia)
     hda = db.Column(db.Text)
     evolucao = db.Column(db.Text)
     conduta = db.Column(db.Text)
@@ -215,10 +215,7 @@ class PrescricaoClinica(db.Model):
     texto_dieta = db.Column(db.Text)
     texto_procedimento_medico = db.Column(db.Text)
     texto_procedimento_multi = db.Column(db.Text)
-    horario_prescricao = db.Column(
-        db.DateTime,
-        default=now_brasilia
-    )
+    horario_prescricao = db.Column(db.DateTime(timezone=True), default=now_brasilia)
 
     # JSON de medicamentos
     medicamentos_json_raw = db.Column('medicamentos_json', db.Text)
@@ -257,7 +254,7 @@ class EvolucaoEnfermagem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     atendimentos_clinica_id = db.Column(db.Integer, ForeignKey('atendimentos_clinica.id'), nullable=False)
     funcionario_id = db.Column(db.Integer, ForeignKey('funcionarios.id'), nullable=False)
-    data_evolucao = db.Column(db.DateTime, default=now_brasilia)
+    data_evolucao = db.Column(db.DateTime(timezone=True), default=now_brasilia)
     texto = db.Column(db.Text)
 
     atendimento_clinica = relationship('Internacao', back_populates='evolucoes_enfermagem')
@@ -269,7 +266,7 @@ class PrescricaoEnfermagem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     atendimentos_clinica_id = db.Column(db.Integer, ForeignKey('atendimentos_clinica.id'), nullable=False)
     funcionario_id = db.Column(db.Integer, ForeignKey('funcionarios.id'), nullable=False)
-    data_prescricao = db.Column(db.DateTime, default=now_brasilia)
+    data_prescricao = db.Column(db.DateTime(timezone=True), default=now_brasilia)
     texto = db.Column(db.Text)
 
     atendimento_clinica = relationship('Internacao', backref='prescricoes_enfermagem')
@@ -298,7 +295,7 @@ class InternacaoEspecial(db.Model):
     codigo_procedimento = Column(String(50))
     leito = Column(String(50))
     carater_internacao = Column(String(100))
-    data_da_solicitacao_exame = Column(DateTime, default=now_brasilia)
+    data_da_solicitacao_exame = Column(DateTime(timezone=True), default=now_brasilia)
     acidente_de_trabalho = Column(Boolean, default=False)
     diagnostico = Column(Text)
     hda = Column(Text)
@@ -312,8 +309,8 @@ class InternacaoEspecial(db.Model):
     imagens = Column(Text)
     historico_internacao = Column(Text)
     relatorio_alta = Column(Text)
-    data_alta = Column(DateTime)
-    data_internacao = Column(DateTime)
+    data_alta = Column(DateTime(timezone=True))
+    data_internacao = Column(DateTime(timezone=True))
     folha_de_anamnese = Column(Text)
     dieta = Column(Text)
     hidratacao = Column(Text)
@@ -332,14 +329,14 @@ class Aprazamento(db.Model):
     )
     nome_medicamento = db.Column(db.String(100), nullable=False)
     descricao_uso = db.Column(db.Text)
-    data_hora_aprazamento = db.Column(db.DateTime, nullable=False)
+    data_hora_aprazamento = db.Column(db.DateTime(timezone=True), nullable=False)
     realizado = db.Column(db.Boolean, default=False)
     enfermeiro_responsavel_id = db.Column(
         db.Integer,
         db.ForeignKey('funcionarios.id'),
         nullable=True
     )
-    data_realizacao = db.Column(db.DateTime, nullable=True)
+    data_realizacao = db.Column(db.DateTime(timezone=True), nullable=True)
 
     # Relacionamentos
     prescricao = relationship('PrescricaoClinica', back_populates='aprazamentos')
@@ -360,7 +357,7 @@ class ReceituarioClinica(db.Model):
     medico_id = db.Column(db.Integer, db.ForeignKey('funcionarios.id'), nullable=False)
     tipo_receita = db.Column(db.String(20), nullable=False)
     conteudo_receita = db.Column(db.Text, nullable=False)
-    data_receita = db.Column(db.DateTime, default=now_brasilia)
+    data_receita = db.Column(db.DateTime(timezone=True), default=now_brasilia)
 
     # RELACIONAMENTOS (opcional, se quiser facilitar joins)
     atendimento = db.relationship('Atendimento', backref=db.backref('receituarios', lazy=True))
@@ -378,7 +375,7 @@ class AtestadoClinica(db.Model):
     medico_id = db.Column(db.Integer, db.ForeignKey('funcionarios.id'), nullable=False)
     conteudo_atestado = db.Column(db.Text, nullable=False)
     dias_afastamento = db.Column(db.Integer)
-    data_atestado = db.Column(db.DateTime, default=now_brasilia)
+    data_atestado = db.Column(db.DateTime(timezone=True), default=now_brasilia)
 
     atendimento = db.relationship('Atendimento', backref=db.backref('atestados', lazy=True))
     medico = db.relationship('Funcionario', backref=db.backref('atestados', lazy=True))
@@ -435,7 +432,7 @@ class AdmissaoEnfermagem(db.Model):
         nullable=True
     )
 
-    data_hora = db.Column(db.DateTime, default=func.now(), nullable=False)
+    data_hora = db.Column(db.DateTime(timezone=True), default=func.now(), nullable=False)
     admissao_texto = db.Column(db.Text)
 
     internacao = relationship("Internacao", backref="admissoes_enfermagem", passive_deletes=True)
