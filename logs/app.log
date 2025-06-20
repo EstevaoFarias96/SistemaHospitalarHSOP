@@ -19396,3 +19396,38 @@ SyntaxError: unterminated string literal (detected at line 4567)
 2025-06-20 10:57:38,489 [INFO] __init__:72 - LoginManager inicializado com sucesso
 2025-06-20 10:57:38,649 [INFO] __init__:90 - Blueprints registrados com sucesso
 2025-06-20 10:57:38,664 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-20 11:02:27,469 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-20 11:02:27,469 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-20 11:02:27,469 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-20 11:02:27,469 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-06-20 11:02:27,469 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-20 11:02:27,474 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-20 11:02:27,474 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-20 11:02:27,498 [ERROR] __init__:92 - Erro ao registrar blueprint: invalid decimal literal (routes.py, line 41)
+2025-06-20 11:02:27,498 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/app/__init__.py", line 87, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/app/routes.py", line 41
+    >>>>>>> 1882710a1fcc017484cad194ca40f5da267e1808
+                  ^
+SyntaxError: invalid decimal literal
+
+2025-06-20 11:02:27,499 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-20 11:03:04,221 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-20 11:03:04,221 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-20 11:03:04,221 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-20 11:03:04,221 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-06-20 11:03:04,221 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-20 11:03:04,225 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-20 11:03:04,225 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-20 11:03:04,373 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-20 11:03:04,375 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-20 11:04:05,347 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-20 11:04:05,347 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-20 11:04:05,347 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-20 11:04:05,347 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-06-20 11:04:05,347 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-20 11:04:05,351 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-20 11:04:05,351 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-20 11:04:05,483 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-20 11:04:05,484 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas

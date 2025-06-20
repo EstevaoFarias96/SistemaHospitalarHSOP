@@ -33,7 +33,6 @@ def now_brasilia():
     brasilia_time = utc_now - timedelta(hours=3)  # Subtrai 3 horas do UTC
     return brasilia_time.replace(tzinfo=timezone(timedelta(hours=-3)))
 
-
 # Login required decorator personalizado
 def login_required(f):
     from functools import wraps
