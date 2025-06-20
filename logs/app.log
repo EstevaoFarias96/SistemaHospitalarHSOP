@@ -19387,3 +19387,12 @@ SyntaxError: unterminated string literal (detected at line 4567)
 2025-06-19 13:04:03,248 [INFO] __init__:72 - LoginManager inicializado com sucesso
 2025-06-19 13:04:03,393 [INFO] __init__:90 - Blueprints registrados com sucesso
 2025-06-19 13:04:03,409 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-06-20 10:57:38,461 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-06-20 10:57:38,461 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-06-20 10:57:38,461 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-06-20 10:57:38,461 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-06-20 10:57:38,461 [INFO] __init__:63 - Configurações básicas definidas
+2025-06-20 10:57:38,489 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-06-20 10:57:38,489 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-06-20 10:57:38,649 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-06-20 10:57:38,664 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
