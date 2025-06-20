@@ -30,4 +30,4 @@ class ConfigDev:
 
 # === ATIVAR UMA DAS CONFIGURAÇÕES ABAIXO ===
 # Config = ConfigProd  # Produção (Render, Railway, etc.)
-Config = ConfigDev # Desenvolvimento/teste local
+Config = ConfigProd # Desenvolvimento/teste local

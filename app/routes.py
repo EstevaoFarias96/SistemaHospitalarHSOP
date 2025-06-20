@@ -33,6 +33,7 @@ def now_brasilia():
     brasilia_time = utc_now - timedelta(hours=3)  # Subtrai 3 horas do UTC
     return brasilia_time.replace(tzinfo=timezone(timedelta(hours=-3)))
 
+
 # Login required decorator personalizado
 def login_required(f):
     from functools import wraps
@@ -692,7 +693,7 @@ def registrar_prescricao():
             texto_dieta=dados.get('texto_dieta'),
             texto_procedimento_medico=dados.get('texto_procedimento_medico'),
             texto_procedimento_multi=dados.get('texto_procedimento_multi'),
-            horario_prescricao=now_brasilia()
+            horario_prescricao=datetime.now(timezone(timedelta(hours=-3)))
         )
 
         # Se vierem medicamentos, usa o setter automático
