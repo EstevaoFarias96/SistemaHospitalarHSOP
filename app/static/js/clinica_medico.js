@@ -1,5 +1,113 @@
 // Substituir EventTarget.prototype.addEventListener para monitorar eventos depreciados
 const originalAddEventListener = EventTarget.prototype.addEventListener;
+
+/**
+ * SISTEMA DE CONVERSÃO FORÇADA PARA HORÁRIO BRASILEIRO (UTC-3)
+ * Essas funções garantem que TODOS os horários sejam exibidos no horário de Brasília
+ */
+
+// Função que força conversão UTC-3 (horário de Brasília) - VERSÃO PARA PRODUÇÃO
+function forcarHorarioBrasileiro(dateTimeString) {
+    if (!dateTimeString) return '-';
+    
+    try {
+        // Criar objeto Date da string recebida (assumindo que vem como UTC)
+        let data;
+        
+        // Se a string não tem 'Z' no final, adiciona para indicar UTC
+        if (!dateTimeString.includes('Z') && !dateTimeString.includes('+') && !dateTimeString.includes('-')) {
+            data = new Date(dateTimeString + 'Z');
+        } else {
+            data = new Date(dateTimeString);
+        }
+        
+        // Forçar subtração de 3 horas (UTC-3 = horário de Brasília)
+        data.setHours(data.getHours() - 3);
+        
+        // Formatação brasileira
+        const dia = data.getDate().toString().padStart(2, '0');
+        const mes = (data.getMonth() + 1).toString().padStart(2, '0');
+        const ano = data.getFullYear();
+        const hora = data.getHours().toString().padStart(2, '0');
+        const minuto = data.getMinutes().toString().padStart(2, '0');
+        
+        return `${dia}/${mes}/${ano} ${hora}:${minuto}`;
+    } catch (error) {
+        console.warn('Erro ao converter horário:', dateTimeString, error);
+        return dateTimeString; // Retorna original se der erro
+    }
+}
+
+// Função que força conversão UTC-3 apenas para a data
+function forcarDataBrasileira(dateString) {
+    if (!dateString) return '-';
+    
+    try {
+        let data;
+        if (!dateString.includes('Z') && !dateString.includes('+') && !dateString.includes('-')) {
+            data = new Date(dateString + 'Z');
+        } else {
+            data = new Date(dateString);
+        }
+        
+        data.setHours(data.getHours() - 3);
+        
+        const dia = data.getDate().toString().padStart(2, '0');
+        const mes = (data.getMonth() + 1).toString().padStart(2, '0');
+        const ano = data.getFullYear();
+        
+        return `${dia}/${mes}/${ano}`;
+    } catch (error) {
+        console.warn('Erro ao converter data:', dateString, error);
+        return dateString;
+    }
+}
+
+// Função que força conversão UTC-3 apenas para o horário
+function forcarHoraBrasileira(dateTimeString) {
+    if (!dateTimeString) return '-';
+    
+    try {
+        let data;
+        if (!dateTimeString.includes('Z') && !dateTimeString.includes('+') && !dateTimeString.includes('-')) {
+            data = new Date(dateTimeString + 'Z');
+        } else {
+            data = new Date(dateTimeString);
+        }
+        
+        data.setHours(data.getHours() - 3);
+        
+        const hora = data.getHours().toString().padStart(2, '0');
+        const minuto = data.getMinutes().toString().padStart(2, '0');
+        
+        return `${hora}:${minuto}`;
+    } catch (error) {
+        console.warn('Erro ao converter hora:', dateTimeString, error);
+        return dateTimeString;
+    }
+}
+
+// Função para aplicar conversão automática em qualquer texto que contenha horários
+function aplicarConversaoAutomatica(texto) {
+    if (!texto) return texto;
+    
+    // Regex para capturar formatos de data/hora comuns
+    const regexDateTime = /(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2})/g;
+    const regexDate = /(\d{4}-\d{2}-\d{2})/g;
+    
+    // Substituir horários completos
+    texto = texto.replace(regexDateTime, (match) => {
+        return forcarHorarioBrasileiro(match);
+    });
+    
+    // Substituir datas
+    texto = texto.replace(regexDate, (match) => {
+        return forcarDataBrasileira(match);
+    });
+    
+    return texto;
+}
+
 EventTarget.prototype.addEventListener = function(type, listener, options) {
     if (type === 'DOMNodeInserted') {
         console.warn('Evento depreciado DOMNodeInserted detectado - usando MutationObserver em seu lugar');
@@ -1759,22 +1867,23 @@ function limparFormularioPrescricao() {
 function renderizarPrescricao(prescricao) {
     // Determinar a melhor data disponível
     const dataOriginal = prescricao.horario_prescricao || prescricao.data_prescricao || prescricao.created_at;
-    const dataPrescricao = new Date(dataOriginal);
+    
+    // USAR CONVERSÃO FORÇADA PARA HORÁRIO BRASILEIRO
+    const dataFormatadaBrasil = forcarHorarioBrasileiro(dataOriginal);
+    
+    // Verificar se é de hoje baseado na data convertida
+    const dataPrescricao = new Date(dataOriginal + (dataOriginal.includes('Z') ? '' : 'Z'));
+    dataPrescricao.setHours(dataPrescricao.getHours() - 3); // Ajustar para Brasil
     const hoje = new Date();
     const ehHoje = dataPrescricao.toDateString() === hoje.toDateString();
     
-    // Formatar data/hora de forma mais clara
+    // Formatar para exibição com conversão brasileira
     let dataFormatada;
     if (ehHoje) {
-        dataFormatada = `Hoje, ${dataPrescricao.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+        const horaApenas = forcarHoraBrasileira(dataOriginal);
+        dataFormatada = `Hoje, ${horaApenas}`;
     } else {
-        dataFormatada = dataPrescricao.toLocaleString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        dataFormatada = dataFormatadaBrasil;
     }
     
     // Classe CSS adicional para prescrições de hoje
@@ -2399,11 +2508,12 @@ function carregarEvolucoes() {
                 response.evolucoes.forEach(ev => {
                     // Permitir renderização de HTML
                     const evolucaoHtml = ev.evolucao || '---';
-                    const dataFormatada = new Date(ev.data_evolucao).toLocaleString('pt-BR');
+                    // USAR CONVERSÃO FORÇADA PARA HORÁRIO BRASILEIRO
+                    const dataFormatada = forcarHorarioBrasileiro(ev.data_evolucao);
 
                     tabela.append(`
                         <tr>
-                            <td>${dataFormatada}</td>
+                            <td><span class="horario-convertido">${dataFormatada}</span></td>
                             <td>${ev.nome_medico || '---'}</td>
                             <td>
                                 <div class="texto-evolucao" data-evolucao-id="${ev.id}">
@@ -2566,14 +2676,12 @@ function carregarEvolucoesEnfermagem() {
                 if (evolucoesDoDia.length > 0) {
                     let htmlDoDia = '';
                     evolucoesDoDia.forEach(ev => {
-                        const hora = new Date(ev.data_evolucao).toLocaleTimeString('pt-BR', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        });
+                        // USAR CONVERSÃO FORÇADA PARA HORÁRIO BRASILEIRO
+                        const hora = forcarHoraBrasileira(ev.data_evolucao);
                         
                         htmlDoDia += `
                             <tr>
-                                <td>${hora}</td>
+                                <td><span class="horario-convertido">${hora}</span></td>
                                 <td>${ev.enfermeiro_nome || 'Não informado'}</td>
                                 <td>
                                     <div class="texto-evolucao">

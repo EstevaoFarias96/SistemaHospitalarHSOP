@@ -17,6 +17,7 @@ from docx import Document
 from io import BytesIO
 from app import db
 from app.models import Funcionario,Leito,AdmissaoEnfermagem, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN, now_brasilia
+from app.timezone_helper import formatar_datetime_br_completo, formatar_datetime_br, converter_para_brasilia
 from zoneinfo import ZoneInfo
 
 # Cria o Blueprint principal
@@ -449,7 +450,7 @@ def listar_admissoes_enfermagem_old(internacao_id):  # Renomeada para evitar con
             enfermeiro = Funcionario.query.get(admissao.enfermeiro_id)
             resultado.append({
                 'id': admissao.id,
-                'data_hora': admissao.data_hora.strftime('%d/%m/%Y %H:%M'),
+                'data_hora': (admissao.data_hora - timedelta(hours=3)).strftime('%d/%m/%Y %H:%M'),
                 'enfermeiro': enfermeiro.nome if enfermeiro else 'Não informado',
                 'admissao_texto': admissao.admissao_texto
             })
@@ -1044,7 +1045,7 @@ def registrar_evolucao():
         nova_evolucao = EvolucaoAtendimentoClinica(
             atendimentos_clinica_id=atendimentos_clinica_id,
             funcionario_id=funcionario_id,
-            data_evolucao=now_brasilia(),
+            data_evolucao=datetime.now(timezone(timedelta(hours=-3))),
             evolucao=evolucao_texto
         )
 
@@ -1093,7 +1094,7 @@ def registrar_evolucao_enfermagem():
             atendimentos_clinica_id=data['atendimentos_clinica_id'],
             funcionario_id=data['funcionario_id'],
             texto=data['texto'],
-            data_evolucao=now_brasilia()
+            data_evolucao=datetime.now(timezone(timedelta(hours=-3)))
         )
         db.session.add(nova_evolucao)
         db.session.commit()
@@ -1154,7 +1155,7 @@ def salvar_admissao_enfermagem():
             internacao_id=internacao_id,
             enfermeiro_id=current_user.id,
             admissao_texto=admissao_texto,
-            data_hora=now_brasilia()
+            data_hora=datetime.now(timezone(timedelta(hours=-3)))
         )
         
         db.session.add(nova_admissao)
@@ -1219,7 +1220,7 @@ def buscar_admissao_enfermagem(internacao_id):
                 'admissao': {
                     'id': admissao.id,
                     'admissao_texto': admissao.admissao_texto,
-                    'data_hora': admissao.data_hora.strftime('%d/%m/%Y %H:%M'),
+                    'data_hora': (admissao.data_hora - timedelta(hours=3)).strftime('%d/%m/%Y %H:%M'),
                     'enfermeiro_nome': enfermeiro.nome if enfermeiro else 'Não informado'
                 }
             })
@@ -1286,7 +1287,7 @@ def listar_admissoes_enfermagem(internacao_id):
             enfermeiro = Funcionario.query.get(admissao.enfermeiro_id) if admissao.enfermeiro_id else None
             resultado.append({
                 'id': admissao.id,
-                'data_hora': admissao.data_hora.strftime('%d/%m/%Y %H:%M'),
+                'data_hora': (admissao.data_hora - timedelta(hours=3)).strftime('%d/%m/%Y %H:%M'),
                 'enfermeiro_nome': enfermeiro.nome if enfermeiro else 'Não informado',
                 'admissao_texto': admissao.admissao_texto
             })
@@ -1367,7 +1368,7 @@ def atualizar_evolucao_enfermagem(id):
     try:
         evolucao = EvolucaoEnfermagem.query.get_or_404(id)
         evolucao.texto = dados.get('texto', evolucao.texto)
-        evolucao.data_evolucao = now_brasilia()
+        evolucao.data_evolucao = datetime.now(timezone(timedelta(hours=-3)))
         db.session.commit()
         return jsonify({'mensagem': 'Evolução de enfermagem atualizada com sucesso.'}), 200
     except Exception as e:
@@ -1400,7 +1401,7 @@ def obter_sae_por_paciente(paciente_id):
             return jsonify({'success': False, 'error': 'SAE não registrada'}), 404
         
         # Separar SAEs de hoje e anteriores (como nas evoluções)
-        hoje = now_brasilia().date()
+        hoje = datetime.now(timezone(timedelta(hours=-3))).date()
         sae_hoje = None
         sae_antiga = None
         
@@ -1444,7 +1445,7 @@ def obter_sae_por_paciente(paciente_id):
                 'sistema_urinario': sae.sistema_urinario,
                 'acesso_venoso': sae.acesso_venoso,
                 'observacao': sae.observacao,
-                'data_registro': sae.data_registro.strftime('%Y-%m-%d %H:%M:%S'),
+                'data_registro': (sae.data_registro - timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S') if sae.data_registro else None,
                 'eh_hoje': True if sae_hoje and sae.id == sae_hoje.id else False
             }
         })
@@ -1501,7 +1502,7 @@ def obter_historico_sae_paciente(paciente_id):
                 'sistema_urinario': sae.sistema_urinario,
                 'acesso_venoso': sae.acesso_venoso,
                 'observacao': sae.observacao,
-                'data_registro': sae.data_registro.strftime('%Y-%m-%d %H:%M:%S')
+                'data_registro': (sae.data_registro - timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S') if sae.data_registro else None
             })
         
         return jsonify({
@@ -1544,7 +1545,7 @@ def listar_saes():
             'id': sae.id,
             'paciente_id': sae.paciente_id,
             'enfermeiro_id': sae.enfermeiro_id,
-            'data_registro': sae.data_registro.strftime('%Y-%m-%d %H:%M:%S')
+            'data_registro': (sae.data_registro - timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S') if sae.data_registro else None
         })
     return jsonify({'success': True, 'saes': resultado})
 
@@ -1574,7 +1575,7 @@ def buscar_evolucoes_enfermagem_por_internacao(internacao_id):
             resultado.append({
                 'id': ev.id,
                 'atendimentos_clinica_id': ev.atendimentos_clinica_id,
-                'data_evolucao': ev.data_evolucao.isoformat() if ev.data_evolucao else None,
+                'data_evolucao': (ev.data_evolucao - timedelta(hours=3)).isoformat() if ev.data_evolucao else None,
                 'texto': ev.texto,
                 'enfermeiro_nome': ev.enfermeiro_nome,
                 'enfermeiro_coren': ev.enfermeiro_coren
@@ -1616,7 +1617,7 @@ def buscar_prescricoes_enfermagem_por_internacao(internacao_id):
         resultado = [{
             'id': p.id,
             'atendimentos_clinica_id': p.atendimentos_clinica_id,
-            'data_prescricao': p.data_prescricao.isoformat() if p.data_prescricao else None,
+            'data_prescricao': (p.data_prescricao - timedelta(hours=3)).isoformat() if p.data_prescricao else None,
             'texto': p.texto,
             'enfermeiro_nome': p.enfermeiro_nome,
             'enfermeiro_coren': p.enfermeiro_coren
@@ -1641,7 +1642,7 @@ def registrar_prescricao_enfermagem():
             atendimentos_clinica_id=data['atendimentos_clinica_id'],
             funcionario_id=data['funcionario_id'],
             texto=data['texto'],
-            data_prescricao=now_brasilia()
+            data_prescricao=datetime.now(timezone(timedelta(hours=-3)))
         )
         db.session.add(nova_prescricao)
         db.session.commit()
@@ -1664,7 +1665,7 @@ def atualizar_prescricao_enfermagem(id):
     try:
         prescricao = PrescricaoEnfermagem.query.get_or_404(id)
         prescricao.texto = dados.get('texto', prescricao.texto)
-        prescricao.data_prescricao = now_brasilia()
+        prescricao.data_prescricao = datetime.now(timezone(timedelta(hours=-3)))
         db.session.commit()
         return jsonify({'mensagem': 'Prescrição de enfermagem atualizada com sucesso.'}), 200
     except Exception as e:
@@ -1860,7 +1861,7 @@ def registrar_alta_paciente(internacao_id):
         internacao.historico_internacao = dados.get('historico_internacao', historico_final)  # Usar o enviado ou o montado automaticamente
         internacao.diagnostico = dados.get('diagnostico') or internacao.diagnostico
         internacao.cuidados_gerais = dados.get('cuidados_gerais') or internacao.cuidados_gerais
-        internacao.data_alta = now_brasilia()  # Horário de Brasília
+        internacao.data_alta = datetime.now(timezone(timedelta(hours=-3)))  # Horário de Brasília
 
         # Atualizar ocupação do leito
         if internacao.leito:
@@ -1991,7 +1992,7 @@ def internar_paciente():
             atendimento_id=atendimento_id,
             paciente_id=paciente.id,
             medico_id=current_user.id,
-            data_internacao=now_brasilia(),
+            data_internacao=datetime.now(timezone(timedelta(hours=-3))),
             hda=dados.get('hda', ''),
             justificativa_internacao_sinais_e_sintomas=f"{dados.get('hda', '').strip()}\n\n{dados.get('folha_anamnese', '').strip()}",
             justificativa_internacao_condicoes="RISCO DE COMPLICAÇÃO",
@@ -2235,7 +2236,7 @@ def relatorio_paciente(internacao_id):
             logging.error(f"Erro ao buscar prescrições de enfermagem: {str(e)}")
         
         # Obter data e hora atual do Brasil
-        now = now_brasilia()
+        now = datetime.now(timezone(timedelta(hours=-3)))
         
         return render_template('clinica_relatorio_paciente.html', 
                               internacao=internacao, 
@@ -2244,7 +2245,7 @@ def relatorio_paciente(internacao_id):
                               prescricoes=prescricoes_formatadas,
                               evolucoes_enfermagem=evolucoes_enfermagem,
                               prescricoes_enfermagem=prescricoes_enfermagem,
-                              now=lambda: now_brasilia())
+                              now=lambda: datetime.now(timezone(timedelta(hours=-3))))
     
     except Exception as e:
         logging.error(f"Erro ao gerar relatório do paciente: {str(e)}")
@@ -3262,7 +3263,7 @@ def buscar_aprazamentos_por_medicamento(atendimento_id, nome_medicamento):
                 enfermeiro = Funcionario.query.get(apr.enfermeiro_responsavel_id)
 
             # Verificar se está atrasado
-            agora = now_brasilia()
+            agora = datetime.now(timezone(timedelta(hours=-3)))
             data_hora_apz = apr.data_hora_aprazamento.replace(tzinfo=timezone(timedelta(hours=-3)))
             atrasado = not apr.realizado and data_hora_apz < agora
 
@@ -3424,7 +3425,7 @@ def listar_receituarios(atendimento_id):
                 'medico_id': r.medico_id,
                 'tipo_receita': r.tipo_receita,
                 'conteudo_receita': r.conteudo_receita,
-                'data_receita': r.data_receita.strftime('%Y-%m-%d %H:%M:%S')
+                'data_receita': formatar_datetime_br_completo(r.data_receita)
             })
 
         return jsonify({'success': True, 'receituarios': resultado})
@@ -4339,7 +4340,7 @@ def obter_sae_por_atendimento(atendimento_id):
             return jsonify({'success': False, 'error': 'SAE não registrada'}), 404
         
         # Separar SAEs de hoje e anteriores (como nas evoluções)
-        hoje = now_brasilia().date()
+        hoje = datetime.now(timezone(timedelta(hours=-3))).date()
         sae_hoje = None
         sae_antiga = None
         
@@ -4383,7 +4384,7 @@ def obter_sae_por_atendimento(atendimento_id):
                 'sistema_urinario': sae.sistema_urinario,
                 'acesso_venoso': sae.acesso_venoso,
                 'observacao': sae.observacao,
-                'data_registro': sae.data_registro.strftime('%Y-%m-%d %H:%M:%S'),
+                'data_registro': (sae.data_registro - timedelta(hours=3)).strftime('%Y-%m-%d %H:%M:%S') if sae.data_registro else None,
                 'eh_hoje': True if sae_hoje and sae.id == sae_hoje.id else False
             }
         })
@@ -4409,7 +4410,7 @@ def obter_sae_por_paciente(paciente_id):
             return jsonify({'success': False, 'message': 'Nenhuma SAE registrada para este paciente.'}), 404
 
         # Selecionar SAE de hoje, se existir; senão, a mais recente anterior
-        hoje = now_brasilia().date()
+        hoje = datetime.now(timezone(timedelta(hours=-3))).date()
         sae_hoje = next((s for s in saes if s.data_registro.date() == hoje), None)
         sae = sae_hoje if sae_hoje else saes[0]
 
