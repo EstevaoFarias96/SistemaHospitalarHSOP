@@ -4914,31 +4914,22 @@ def imprimir_sae(atendimento_id):
             abort(404, 'Paciente não encontrado.')
 
         # Buscar a SAE mais recente para este paciente
-        sae = InternacaoSae.query.filter_by(paciente_id=paciente.id).order_by(
+        sae = InternacaoSae.query.filter_by(
+            paciente_id=internacao.paciente_id
+        ).order_by(
             InternacaoSae.data_registro.desc()
         ).first()
         
         if not sae:
-            abort(404, 'Nenhuma SAE encontrada para este paciente.')
-
-        # Buscar o nome do enfermeiro responsável
-        enfermeiro = Funcionario.query.get(sae.enfermeiro_id) if sae.enfermeiro_id else None
-        if enfermeiro:
-            sae.enfermeiro_nome = enfermeiro.nome
-        else:
-            sae.enfermeiro_nome = 'Não informado'
-
-        # Data atual para o rodapé
-        data_impressao = datetime.now(ZoneInfo("America/Sao_Paulo"))
-
-        # Renderizar template HTML para impressão
-        return render_template('imprimir_sae.html',
-                             sae=sae,
+            flash('Nenhuma SAE encontrada para este paciente.', 'warning')
+            return redirect(url_for('main.pacientes_internados'))
+        
+        return render_template('impressao_sae_enfermagem.html',
+                             paciente=paciente,
                              internacao=internacao,
                              atendimento=atendimento,
-                             paciente=paciente,
-                             data_impressao=data_impressao,
-                             hospital_nome='Hospital Sistema HSOP')
+                             sae=sae,
+                             atendimento_id=atendimento_id)
 
     except Exception as e:
         logging.error(f"Erro ao gerar impressão de SAE: {str(e)}")
@@ -5290,17 +5281,11 @@ def imprimir_sae_enfermagem(atendimento_id):
             return redirect(url_for('main.pacientes_internados'))
         
         # Buscar a SAE mais recente deste paciente
-        from app.models import InternacaoSae
         sae = InternacaoSae.query.filter_by(
-            paciente_id=internacao.paciente_id  # CORRIGIDO: usar paciente_id da internação
+            paciente_id=internacao.paciente_id
         ).order_by(
             InternacaoSae.data_registro.desc()
         ).first()
-        
-        # Buscar dados do enfermeiro responsável pela SAE
-        enfermeiro = None
-        if sae and sae.enfermeiro_id:
-            enfermeiro = Funcionario.query.get(sae.enfermeiro_id)
         
         if not sae:
             flash('Nenhuma SAE encontrada para este paciente.', 'warning')
@@ -5311,7 +5296,6 @@ def imprimir_sae_enfermagem(atendimento_id):
                              internacao=internacao,
                              atendimento=atendimento,
                              sae=sae,
-                             enfermeiro=enfermeiro,
                              atendimento_id=atendimento_id)
         
     except Exception as e:

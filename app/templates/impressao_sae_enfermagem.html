@@ -227,7 +227,7 @@
             <div class="info-item"><strong>Leito:</strong> {{ internacao.leito or '-' }}</div>
             <div class="info-item"><strong>Internação:</strong> {{ internacao.data_internacao.strftime('%d/%m/%Y') if internacao.data_internacao else '-' }}</div>
             <div class="info-item"><strong>Data SAE:</strong> {{ sae.data_registro.strftime('%d/%m/%Y %H:%M') if sae.data_registro else '-' }}</div>
-            <div class="info-item"><strong>Enfermeiro:</strong> {{ enfermeiro.nome if enfermeiro else '-' }}</div>
+            <div class="info-item"><strong>Enfermeiro:</strong> {{ sae.enfermeiro.nome if sae.enfermeiro else '-' }}</div>
         </div>
     </div>
 
@@ -431,10 +431,10 @@
         <div class="signature-box">
             <div class="signature-title">ENFERMEIRO(A) RESPONSÁVEL</div>
             <div class="signature-info">
-                {% if enfermeiro %}
-                    <strong>{{ enfermeiro.nome }}</strong><br>
-                    {% if enfermeiro.numero_profissional %}
-                        COREN: {{ enfermeiro.numero_profissional }}
+                {% if sae.enfermeiro %}
+                    <strong>{{ sae.enfermeiro.nome }}</strong><br>
+                    {% if sae.enfermeiro.numero_profissional %}
+                        COREN: {{ sae.enfermeiro.numero_profissional }}
                     {% endif %}
                     <br>____________________________<br>
                     Assinatura e Carimbo
