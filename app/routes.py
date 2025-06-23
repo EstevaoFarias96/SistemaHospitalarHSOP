@@ -370,44 +370,87 @@ def login():
 # API para registrar SAE
 @bp.route('/api/enfermagem/sae', methods=['POST'])
 @login_required
-def criar_sae():
-    data = request.get_json()
-
+def registrar_sae():
     try:
-        novo_sae = InternacaoSae(
-            paciente_id=data['paciente_id'],
-            enfermeiro_id=data['enfermeiro_id'],
-            hipotese_diagnostica=data.get('hipotese_diagnostica'),
-            pa=data.get('pa'),
-            fc=data.get('fc'),
-            sat=data.get('sat'),
-            dx=data.get('dx'),
-            r=data.get('r'),
-            t=data.get('t'),
-            medicacao=data.get('medicacao'),
-            alergias=data.get('alergias'),
-            antecedentes_pessoais=data.get('antecedentes_pessoais'),
-            sistema_neurologico=data.get('sistema_neurologico'),
-            estado_geral=data.get('estado_geral'),
-            ventilacao=data.get('ventilacao'),
-            diagnostico_de_enfermagem=data.get('diagnostico_de_enfermagem'),
-            pele=data.get('pele'),
-            sistema_gastrointerstinal=data.get('sistema_gastrointerstinal'),
-            regulacao_vascular=data.get('regulacao_vascular'),
-            pulso=data.get('pulso'),
-            regulacao_abdominal=data.get('regulacao_abdominal'),
-            rha=data.get('rha'),
-            sistema_urinario=data.get('sistema_urinario'),
-            acesso_venoso=data.get('acesso_venoso'),
-            observacao=data.get('observacao'),
+        # Verificar se o usuário é enfermeiro
+        current_user = get_current_user()
+        if current_user.cargo.lower() != 'enfermeiro':
+            return jsonify({
+                'success': False,
+                'message': 'Apenas enfermeiros podem registrar SAE'
+            }), 403
+        
+        dados = request.get_json()
+        
+        # Validar dados obrigatórios
+        campos_obrigatorios = [
+            'paciente_id',
+            'hipotese_diagnostica',
+            'pa', 'fc', 'sat', 'dx', 'r', 't',
+            'medicacao', 'alergias', 'antecedentes_pessoais',
+            'sistema_neurologico', 'estado_geral', 'ventilacao',
+            'diagnostico_de_enfermagem', 'pele',
+            'sistema_gastrointerstinal', 'regulacao_vascular',
+            'pulso', 'regulacao_abdominal', 'rha',
+            'sistema_urinario', 'acesso_venoso', 'observacao'
+        ]
+        
+        for campo in campos_obrigatorios:
+            if campo not in dados:
+                return jsonify({
+                    'success': False,
+                    'message': f'Campo obrigatório ausente: {campo}'
+                }), 400
+        
+        # Criar nova SAE com timestamp atual
+        from datetime import datetime, timezone, timedelta
+        
+        nova_sae = InternacaoSae(
+            paciente_id=dados['paciente_id'],
+            enfermeiro_id=current_user.id,
+            data_registro=datetime.now(timezone(timedelta(hours=-3))),  # Timestamp único para cada SAE
+            hipotese_diagnostica=dados['hipotese_diagnostica'],
+            pa=dados['pa'],
+            fc=dados['fc'],
+            sat=dados['sat'],
+            dx=dados['dx'],
+            r=dados['r'],
+            t=dados['t'],
+            medicacao=dados['medicacao'],
+            alergias=dados['alergias'],
+            antecedentes_pessoais=dados['antecedentes_pessoais'],
+            sistema_neurologico=dados['sistema_neurologico'],
+            estado_geral=dados['estado_geral'],
+            ventilacao=dados['ventilacao'],
+            diagnostico_de_enfermagem=dados['diagnostico_de_enfermagem'],
+            pele=dados['pele'],
+            sistema_gastrointerstinal=dados['sistema_gastrointerstinal'],
+            regulacao_vascular=dados['regulacao_vascular'],
+            pulso=dados['pulso'],
+            regulacao_abdominal=dados['regulacao_abdominal'],
+            rha=dados['rha'],
+            sistema_urinario=dados['sistema_urinario'],
+            acesso_venoso=dados['acesso_venoso'],
+            observacao=dados['observacao']
         )
-        db.session.add(novo_sae)
+        
+        db.session.add(nova_sae)
         db.session.commit()
-
-        return jsonify({'success': True, 'message': 'SAE registrado com sucesso'})
+        
+        return jsonify({
+            'success': True,
+            'message': 'SAE registrada com sucesso',
+            'id': nova_sae.id
+        }), 201
+        
     except Exception as e:
         db.session.rollback()
-        return jsonify({'success': False, 'error': str(e)}), 400
+        logging.error(f'Erro ao registrar SAE: {str(e)}')
+        logging.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'message': f'Erro interno do servidor: {str(e)}'
+        }), 500
 
 # API para listar admissões de enfermagem de uma internação
 @bp.route('/api/enfermagem/admissoes/<int:internacao_id>', methods=['GET'])
@@ -1395,7 +1438,7 @@ def obter_sae_por_paciente(paciente_id):
             }), 403
         
         # Buscar todas as SAEs do paciente, ordenadas por data
-        saes = InternacaoSae.query.filter_by(paciente_id=paciente_id).order_by(InternacaoSae.data_registro.desc()).all()
+        saes = InternacaoSae.query.filter_by(paciente_id=paciente_id).order_by(InternacaoSae.data_registro.desc(), InternacaoSae.id.desc()).all()
         
         if not saes:
             return jsonify({'success': False, 'error': 'SAE não registrada'}), 404
@@ -1467,7 +1510,7 @@ def obter_historico_sae_paciente(paciente_id):
             }), 403
             
         # Buscar todas as SAEs do paciente, ordenadas por data
-        saes = InternacaoSae.query.filter_by(paciente_id=paciente_id).order_by(InternacaoSae.data_registro.desc()).all()
+        saes = InternacaoSae.query.filter_by(paciente_id=paciente_id).order_by(InternacaoSae.data_registro.desc(), InternacaoSae.id.desc()).all()
         
         if not saes:
             return jsonify({'success': False, 'error': 'SAE não registrada'}), 404
@@ -4334,7 +4377,7 @@ def obter_sae_por_atendimento(atendimento_id):
             return jsonify({'success': False, 'error': 'Internação não encontrada'}), 404
         
         # Buscar todas as SAEs do paciente, ordenadas por data
-        saes = InternacaoSae.query.filter_by(paciente_id=internacao.paciente_id).order_by(InternacaoSae.data_registro.desc()).all()
+        saes = InternacaoSae.query.filter_by(paciente_id=internacao.paciente_id).order_by(InternacaoSae.data_registro.desc(), InternacaoSae.id.desc()).all()
         
         if not saes:
             return jsonify({'success': False, 'error': 'SAE não registrada'}), 404
@@ -4404,7 +4447,7 @@ def obter_sae_por_paciente(paciente_id):
             return jsonify({'success': False, 'message': 'Acesso permitido apenas para enfermeiros e médicos'}), 403
 
         # Recuperar todas as SAEs do paciente, ordenadas por data mais recente
-        saes = InternacaoSae.query.filter_by(paciente_id=paciente_id).order_by(InternacaoSae.data_registro.desc()).all()
+        saes = InternacaoSae.query.filter_by(paciente_id=paciente_id).order_by(InternacaoSae.data_registro.desc(), InternacaoSae.id.desc()).all()
 
         if not saes:
             return jsonify({'success': False, 'message': 'Nenhuma SAE registrada para este paciente.'}), 404

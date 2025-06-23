@@ -449,6 +449,7 @@
     <!-- Rodapé -->
     <div class="footer">
         SAE registrada em {{ sae.data_registro.strftime('%d/%m/%Y às %H:%M') if sae.data_registro else 'Data não informada' }} - Hospital Senador Ozires Pontes
+        <!-- Cache buster: gerado em {{ moment().format() if moment else 'timestamp não disponível' }} -->
     </div>
 
     <script>
