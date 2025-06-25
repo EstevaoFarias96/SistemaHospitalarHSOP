@@ -48,5 +48,5 @@ def listar_funcionario_por_id(funcionario_id):
 
 if __name__ == "__main__":
     with app.app_context():
-        atualizar_nome_funcionario(funcionario_id=24, novo_nome="Estevao Farias Vale")
-        listar_funcionario_por_id(funcionario_id=24)
+        atualizar_nome_funcionario(funcionario_id=29, novo_nome="Silas Rarison dos Santos Cavalcante")
+        listar_funcionario_por_id(funcionario_id=29)

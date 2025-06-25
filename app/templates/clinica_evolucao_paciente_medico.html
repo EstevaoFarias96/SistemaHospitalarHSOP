@@ -2267,6 +2267,11 @@
         // Carregar evoluções ao iniciar
         carregarEvolucoes();
         
+        // Inicializar módulo de receitas
+        if (typeof inicializarModuloReceitas === 'function') {
+            inicializarModuloReceitas();
+        }
+        
         // Adicionar evento para o botão de adicionar medicamento
 
         

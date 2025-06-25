@@ -2,6 +2,7 @@ from flask_login import login_required, current_user, LoginManager, login_user, 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, Flask, send_file, current_app, abort, render_template_string
 import pdfkit
 from datetime import datetime, timezone, timedelta, date, time
+from sqlalchemy.orm import joinedload
 import logging
 import traceback
 import re
@@ -3687,7 +3688,6 @@ def consultar_rn(rn_id):
 
     except Exception as e:
         return jsonify({'success': False, 'message': f'Erro ao consultar RN: {str(e)}'}), 500
-
 @bp.route('/api/pacientes', methods=['POST'])
 @login_required
 def criar_paciente():
@@ -6104,20 +6104,124 @@ def buscar_informacoes_alta_para_impressao(atendimento_id):
             'message': f'Erro ao buscar informações de alta: {str(e)}'
         }), 500
 
-@bp.route('/clinica/receituario/<int:receituario_id>/imprimir_html')
-def imprimir_receita_comum(receituario_id):
-    receituario = ReceituarioClinica.query.get(receituario_id)
-    if not receituario or receituario.tipo_receita != 'normal':
-        return '<h3>Receita não encontrada ou não é do tipo comum.</h3>', 404
-    atendimento = receituario.atendimento
-    paciente = atendimento.paciente
-    medico = receituario.medico
+@bp.route('/clinica/receituario/<int:receita_id>/imprimir_html')
+def imprimir_receita(receita_id):
+    # Localiza o receituário
+    receita = ReceituarioClinica.query.get_or_404(receita_id)
+
+    # Dados do paciente
+    paciente = receita.atendimento.paciente
+
+    # Dados do médico
+    medico = receita.medico
+
+    # Data atual para impressão
+    from datetime import datetime
+    data_hoje = datetime.now().strftime('%d/%m/%Y')
+
     return render_template(
-        'imprimir_receita_comum.html',
-        paciente=paciente,
-        medico=medico,
-        receituario=receituario
+        'impressao_receita.html',
+        paciente_nome=paciente.nome,
+        paciente_endereco=paciente.endereco,
+        paciente_telefone=paciente.telefone,
+        funcionario_nome=medico.nome,
+        funcionario_nprofissional=medico.numero_profissional,
+        receituario_receita=receita.conteudo_receita,
+        data_hoje=data_hoje
     )
 
+@bp.route('/clinica/receituario/<int:receita_id>/imprimir_html_comum')
+def imprimir_receita_comum(receita_id):
+    import re
+    from markupsafe import Markup
+    
+    # Localiza o receituário
+    receita = ReceituarioClinica.query.get_or_404(receita_id)
 
+    # Dados do paciente
+    paciente = receita.atendimento.paciente
+
+    # Data atual para impressão
+    from datetime import datetime
+    data_hoje = datetime.now().strftime('%d/%m/%Y')
+
+    # Processar conteúdo da receita para melhor formatação preservando todo o conteúdo
+    conteudo_receita = receita.conteudo_receita or ''
+    
+    # Se não há conteúdo, retorna vazio
+    if not conteudo_receita.strip():
+        conteudo_receita = ''
+    else:
+        # Limpar espaços extras entre tags, mas preservar todo o conteúdo
+        conteudo_receita = re.sub(r'>\s+<', '><', conteudo_receita)
+        
+        # Garantir que quebras de linha sejam preservadas em elementos <p> vazios
+        conteudo_receita = re.sub(r'<p>\s*</p>', '<p>&nbsp;</p>', conteudo_receita)
+        
+        # Converter quebras de linha simples em <br> apenas se não estiverem dentro de tags
+        if not re.search(r'<[^>]+>', conteudo_receita):
+            # Se o conteúdo não tem tags HTML, converter quebras de linha em <br>
+            conteudo_receita = conteudo_receita.replace('\n', '<br>')
+        
+        # Normalizar espaços múltiplos consecutivos, mas preservar formatação
+        conteudo_receita = re.sub(r'\s{3,}', '  ', conteudo_receita)
+
+    return render_template(
+        'impressao_receita_comum.html',
+        paciente_nome=paciente.nome,
+        paciente_endereco=paciente.endereco,
+        receituario_receita=Markup(conteudo_receita),
+        data_hoje=data_hoje
+    )
+
+@bp.route('/clinica/atestado/<int:atestado_id>/imprimir')
+@login_required
+def impressao_atestado(atestado_id):
+    """
+    Gera página de impressão para atestado médico
+    """
+    try:
+        # Buscar o atestado com informações relacionadas
+        atestado = AtestadoClinica.query.options(
+            joinedload(AtestadoClinica.atendimento).joinedload(Atendimento.paciente),
+            joinedload(AtestadoClinica.medico)
+        ).filter_by(id=atestado_id).first()
+        
+        if not atestado:
+            flash('Atestado não encontrado.', 'error')
+            return redirect(url_for('main.dashboard'))
+        
+        # Buscar dados do paciente
+        paciente = atestado.atendimento.paciente
+        medico = atestado.medico
+        
+        # Calcular idade do paciente
+        idade = None
+        if paciente.data_nascimento:
+            hoje = date.today()
+            idade = hoje.year - paciente.data_nascimento.year
+            if hoje.month < paciente.data_nascimento.month or \
+               (hoje.month == paciente.data_nascimento.month and hoje.day < paciente.data_nascimento.day):
+                idade -= 1
+        
+        # Formatar data do atestado
+        data_atestado_formatada = atestado.data_atestado.strftime('%d/%m/%Y')
+        
+        # Dados para o template
+        contexto = {
+            'atestado': atestado,
+            'paciente': paciente,
+            'medico': medico,
+            'idade': idade,
+            'data_atestado': data_atestado_formatada,
+            'conteudo_atestado': atestado.conteudo_atestado,
+            'dias_afastamento': atestado.dias_afastamento or 'Não especificado'
+        }
+        
+        return render_template('impressao_atestado.html', **contexto)
+        
+    except Exception as e:
+        current_app.logger.error(f'Erro ao gerar impressão do atestado {atestado_id}: {str(e)}')
+        flash('Erro interno do servidor ao gerar impressão do atestado.', 'error')
+        return redirect(url_for('main.dashboard'))
 

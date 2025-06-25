@@ -2,31 +2,94 @@
 @media print {
   @page {
     size: A4 landscape;
-    margin: 0.5cm;
+    margin: 0.3cm;
   }
   body {
     margin: 0;
     padding: 0;
+    font-family: Arial, sans-serif;
+    font-size: 9pt;
   }
   .prescription-container {
     display: flex;
     flex-direction: row;
     width: 100%;
-    gap: 10px;
+    gap: 8px;
+    justify-content: space-between;
   }
   .prescription {
-    width: 49%;
-    font-size: 10pt;
+    width: 49.5%;
+    font-size: 9pt;
     page-break-inside: avoid;
     border: 1px dashed #000;
-    padding: 5px;
+    padding: 4px;
     box-sizing: border-box;
-  }
-  .cut-line {
-    display: none;
   }
   table {
     width: 100% !important;
+    font-size: 9pt;
+  }
+  .title {
+    font-size: 11pt;
+    font-weight: bold;
+  }
+  .header-title {
+    font-size: 8pt !important;
+    font-weight: bold;
+  }
+  .prescricao-text {
+    font-size: 11pt !important;
+    font-weight: bold;
+  }
+  .carimbo-medico {
+    font-size: 9pt !important;
+  }
+  .prescription-footer {
+    font-size: 9pt;
+  }
+  .header-images {
+    margin-bottom: 5px;
+    height: 2cm;
+  }
+  .header-images img {
+    width: 2cm;
+    height: 2cm;
+  }
+  .section {
+    margin-bottom: 3px;
+  }
+  .field {
+    margin-bottom: 8px;
+  }
+  .field p {
+    margin-top: 15px;
+    margin-bottom: 15px;
+  }
+  .prescricao-text {
+    font-size: 11pt !important;
+    font-weight: bold;
+  }
+  .prescricao-text {
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+    line-height: 1.5 !important;
+    font-family: 'Courier New', monospace !important;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    min-height: 150px;
+  }
+  /* Padronizar elementos em negrito */
+  strong, b {
+    font-size: 11pt !important;
+    font-weight: bold;
+  }
+  /* Preservar formatação na impressão */
+  .prescricao-text {
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+    line-height: 1.3 !important;
+    font-family: 'Courier New', monospace !important;
+    font-size: 11pt !important;
   }
 }
 
@@ -34,194 +97,367 @@
   display: flex;
   flex-direction: row;
   width: 100%;
-  gap: 10px;
+  gap: 8px;
+  justify-content: space-between;
 }
+
 .prescription {
-  width: 49%;
+  width: 49.5%;
   border: 1px dashed #000;
-  padding: 5px;
+  padding: 4px;
   box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  font-size: 9pt;
+}
+
+.title {
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 8px;
+  font-size: 11pt;
+  display: none; /* Esconde o título antigo */
+}
+
+.section {
+  margin-bottom: 5px;
+}
+
+.field {
+  margin-bottom: 8px;
+}
+
+.field p {
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.prescription-footer {
+  font-size: 9pt;
+  text-align: center;
+  margin-top: 5px;
+}
+
+.header-images {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  height: 2cm;
+  position: relative;
+}
+
+.header-images img {
+  width: 4cm;
+  height: 4cm;
+  object-fit: contain;
+}
+
+.header-title {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: bold;
+  text-align: center;
+  font-size: 8pt !important;
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.carimbo-medico {
+  font-size: 9pt !important;
+}
+
+.prescricao-text {
+  font-size: 11pt !important;
+  white-space: pre-wrap !important;
+  word-wrap: break-word;
+  line-height: 1.5;
+  font-family: 'Courier New', monospace !important;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  min-height: 150px;
+}
+
+/* Padronizar todos os elementos de tabela */
+table {
+  font-size: 9pt;
+}
+
+/* Padronizar elementos em negrito para destaque */
+strong, b {
+  font-size: 11pt !important;
+  font-weight: bold;
+}
+
+/* Padronizar parágrafos */
+p {
+  font-size: 9pt;
+  margin: 0;
+  padding: 0;
+}
+
+/* Padronizar células de tabela */
+td {
+  font-size: 9pt;
+}
+
+/* Elementos de destaque específicos */
+td strong, td b {
+  font-size: 11pt !important;
+  font-weight: bold;
+}
+
+/* Formatação do conteúdo HTML dentro da prescrição */
+.prescricao-text p {
+  display: inline;
+  font-size: 11pt !important;
+  margin: 0;
+  padding: 0;
+  white-space: pre-wrap;
+}
+
+.prescricao-text br {
+  line-height: 1.2;
+}
+
+.prescricao-text strong, .prescricao-text b {
+  font-size: 11pt !important;
+  font-weight: normal;
+}
+
+.prescricao-text em, .prescricao-text i {
+  font-style: italic;
+  font-size: 11pt !important;
 }
 </style>
 
-<div class="prescription-container">
-<!-- PRIMEIRA VIA -->
+<div class="prescription-container"><!-- PRIMEIRA VIA -->
 <div class="prescription">
+<div class="header-images">
+  <img src="/static/Imagens/logomassape.png" alt="Logo Esquerda" width="72" height="72">
+  <div class="header-title">RECEITU&Aacute;RIO CONTROLE ESPECIAL</div>
+  <img src="/static/Imagens/sus.png" alt="Logo SUS" width="72" height="72">
+</div>
 <div class="title">RECEITU&Aacute;RIO CONTROLE ESPECIAL</div>
 <div class="section">
 <div class="field">
 <table style="height: 90px; width: 100%; border-collapse: collapse; border-style: none;" border="1">
 <tbody>
 <tr style="height: 18px;">
-<td style="width: 79.8687%; text-align: center; height: 18px;" colspan="4"><strong>IDENTIFICA&Ccedil;&Atilde;O DO EMITENTE</strong></td>
-<td style="width: 20%; height: 18px; border-style: none;">1&ordm; VIA- FARM&Aacute;CIA</td>
+<td style="width: 60.092%; text-align: center; height: 18px;" colspan="4"><strong>IDENTIFICA&Ccedil;&Atilde;O DO EMITENTE</strong></td>
+<td style="width: 38.6013%; height: 18px; border-style: none;">1&ordm; VIA- FARM&Aacute;CIA</td>
 </tr>
 <tr style="height: 18px;">
-<td style="width: 79.8687%; height: 18px;" colspan="4">Nome Completo:&nbsp; {{ funcionario_nome }}</td>
-<td style="width: 20%; height: 18px; border-style: none;">2&ordm; VIA- PACIENTE</td>
+<td style="width: 60.092%; height: 18px;" colspan="4">Nome Completo:&nbsp; {{ funcionario_nome }}</td>
+<td style="width: 38.6013%; height: 18px; border-style: none;">2&ordm; VIA- PACIENTE</td>
 </tr>
 <tr style="height: 18px;">
-<td style="width: 50.4104%; height: 18px;" colspan="2">CRM: {{funcionario_nprofissional}}&nbsp;</td>
-<td style="width: 9.45831%; height: 18px;">UF: CE&nbsp;</td>
-<td style="width: 20%; height: 18px;">&nbsp;N&ordm;</td>
-<td style="width: 20%; height: 18px; border-style: none;">&nbsp;</td>
+<td style="width: 39.5848%; height: 18px;" colspan="2">CRM: {{funcionario_nprofissional}}&nbsp;</td>
+<td style="width: 14.9128%; height: 18px;">UF: CE&nbsp;</td>
+<td style="width: 5.5944%; height: 18px;">&nbsp;N&ordm;</td>
+<td style="width: 38.6013%; height: 18px; border-style: none;">&nbsp;</td>
 </tr>
 <tr style="height: 18px;">
-<td style="width: 50.4104%; height: 18px;" colspan="2">Endere&ccedil;o Completo: RUA CRUZEIRO, S/N - COHAB</td>
-<td style="width: 29.4583%; height: 18px;" colspan="2">Telefone:{{paciente_telefone}}</td>
-<td style="width: 20%; height: 18px; border-style: none;">&nbsp;</td>
+<td style="width: 39.5848%; height: 18px;" colspan="2">Endere&ccedil;o Completo: RUA CRUZEIRO, S/N - COHAB</td>
+<td style="width: 20.5072%; height: 18px;" colspan="2">Telefone:88 9489-9216</td>
+<td style="width: 38.6013%; height: 18px; border-style: none;">&nbsp; &nbsp;________________________________</td>
 </tr>
 <tr style="height: 18px;">
 <td style="width: 20%; height: 18px;">Cidade: Massap&ecirc;</td>
-<td style="width: 59.8687%; height: 18px;" colspan="3">UF: CE</td>
-<td style="width: 20%; height: 18px; border-style: none;">&nbsp;</td>
+<td style="width: 40.092%; height: 18px;" colspan="3">UF: CE</td>
+<td style="width: 38.6013%; height: 18px; border-style: none;" class="carimbo-medico">&nbsp; &nbsp;ASSINATURA DO M&Eacute;DICO</td>
 </tr>
 </tbody>
 </table>
-<p>Paciente:{{ paciente_nome }}</p>
+<br>
+<p>Paciente: {{ paciente_nome }}</p>
 </div>
-<div class="field">Endere&ccedil;o:{{ endereco_nome }}</div>
-<div class="field">Prescri&ccedil;&atilde;o: {{ receituario_receita }}</div>
+<div class="field">Endere&ccedil;o: {{ paciente_endereco }}</div>
+<br>
+<div class="field prescricao-text">Prescri&ccedil;&atilde;o: {{ receituario_receita|safe }}</div>
+<br>
 <div class="field">&nbsp;</div>
-<div class="field">&nbsp;</div>
 </div>
-<!-- IDENTIFICAÇÃO DO COMPRADOR -->
-<div class="section">
-<div class="field">
-<table style="height: 162.188px; width: 100%; border-collapse: collapse; border-style: none;" border="1">
+<!-- IDENTIFICAÇÃO DO COMPRADOR E FORNECEDOR LADO A LADO -->
+<div class="section" style="display: flex; gap: 10px;"><!-- IDENTIFICAÇÃO DO COMPRADOR -->
+<div style="width: 50%; border: 2px solid #000; padding: 5px;">
+<table style="width: 100%; border-collapse: collapse;" border="1">
 <tbody>
-<tr style="height: 18px;">
-<td style="width: 100%; height: 18px; text-align: center;" colspan="4"><strong>IDENTIFICA&Ccedil;&Atilde;O DO COMPRADOR</strong></td>
-</tr>
-<tr style="height: 18px;">
-<td style="height: 44.1875px; width: 100%;" colspan="4" rowspan="2">Nome Completo: {{ paciente_nome }}</td>
-</tr>
-<tr style="height: 18px;">
-<td style="width: 52.541%; height: 18px;" colspan="2">CPF: {{paciente_cpf}}&nbsp;</td>
-<td style="width: 54.6704%; height: 18px;" colspan="2">Org. Emissor: CE</td>
-</tr>
-<tr style="height: 18px;">
-<td style="width: 52.541%; height: 18px;" colspan="2">Endere&ccedil;o Completo:{{paciente_endereco}}&nbsp;</td>
-<td style="width: 54.6704%; height: 18px;" colspan="2">UF: CE</td>
-</tr>
-<tr style="height: 18px;">
-<td style="width: 49.8013%; height: 64px;">Cidade: {{paciente_munipio}}&nbsp;</td>
-<td style="width: 57.4101%; height: 64px;" colspan="3">Telefone:{{paciente_telefone}}</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<!-- IDENTIFICAÇÃO DO FORNECEDOR -->
-<div class="section">
-<div class="field">
-<table style="border-collapse: collapse; width: 100%; height: 248.328px;" border="1">
-<tbody>
-<tr style="height: 36px;">
-<td style="width: 100%; text-align: center; height: 36px;" colspan="4"><strong>IDENTIFICA&Ccedil;&Atilde;O DO FORNECEDOR</strong></td>
-</tr>
-<tr style="height: 0px;">
-<td style="width: 100%; height: 116.328px;" colspan="4" rowspan="3">&nbsp;</td>
+<tr>
+<td style="text-align: center; padding: 5px; font-weight: bold;" colspan="2">IDENTIFICA&Ccedil;&Atilde;O DO COMPRADOR</td>
 </tr>
 <tr>
-<td style="width: 50%; text-align: center;" colspan="2">Assinatura do Farmac&ecirc;utico</td>
-<td style="width: 50%; text-align: center;" colspan="2">Data: {{data_hoje}}</td>
+<td style="padding: 5px;" colspan="2">Nome Completo:</td>
+</tr>
+<tr>
+<td style="padding: 5px; width: 50%;">Ident:</td>
+<td style="padding: 5px; width: 50%;">Org. Emissor: </td>
+</tr>
+<tr>
+<td style="padding: 5px;" colspan="2">Endere&ccedil;o Completo: </td>
+</tr>
+<tr>
+<td style="padding: 5px;">Cidade: </td>
+<td style="padding: 5px;">UF: </td>
+</tr>
+<tr>
+<td style="padding: 5px;" colspan="2">Telefone: </td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- IDENTIFICAÇÃO DO FORNECEDOR -->
+<div style="width: 50%; border: 2px solid #000; padding: 5px;">
+<table style="width: 100%; border-collapse: collapse; height: 100%;" border="1">
+<tbody>
+<tr>
+<td style="text-align: center; padding: 5px; font-weight: bold;" colspan="2">IDENTIFICA&Ccedil;&Atilde;O DO FORNECEDOR</td>
+</tr>
+<tr>
+<td style="padding: 30px; height: 100px;" colspan="2">&nbsp;</td>
+</tr>
+<tr>
+<td style="text-align: center; padding: 5px; width: 50%;">Assinatura do Farmac&ecirc;utico</td>
+<td style="text-align: center; padding: 5px; width: 50%;">Data: {{data_hoje}}</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 <div class="prescription-footer">1&ordf; VIA - FARM&Aacute;CIA | 2&ordf; VIA - PACIENTE</div>
-<div class="prescription-footer">ASSINATURA DO FARMAC&Ecirc;UTICO | DATA</div>
 </div>
-
 <!-- SEGUNDA VIA -->
 <div class="prescription">
+<div class="header-images">
+  <img src="/static/Imagens/logomassape.png" alt="Logo Esquerda" width="72" height="72">
+  <div class="header-title">RECEITU&Aacute;RIO CONTROLE ESPECIAL</div>
+  <img src="/static/Imagens/sus.png" alt="Logo SUS" width="72" height="72">
+</div>
 <div class="title">RECEITU&Aacute;RIO CONTROLE ESPECIAL</div>
 <div class="section">
 <div class="field">
 <table style="height: 90px; width: 100%; border-collapse: collapse; border-style: none;" border="1">
 <tbody>
 <tr style="height: 18px;">
-<td style="width: 79.8687%; text-align: center; height: 18px;" colspan="4"><strong>IDENTIFICA&Ccedil;&Atilde;O DO EMITENTE</strong></td>
-<td style="width: 20%; height: 18px; border-style: none;">2&ordm; VIA- PACIENTE</td>
+<td style="width: 60.1816%; text-align: center; height: 18px;" colspan="4"><strong>IDENTIFICA&Ccedil;&Atilde;O DO EMITENTE</strong></td>
+<td style="width: 38.6013%; height: 18px; border-style: none;">1&ordm; VIA- FARM&Aacute;CIA</td>
 </tr>
 <tr style="height: 18px;">
-<td style="width: 79.8687%; height: 18px;" colspan="4">Nome Completo:&nbsp; {{ funcionario_nome }}</td>
-<td style="width: 20%; height: 18px; border-style: none;">1&ordm; VIA- FARM&Aacute;CIA</td>
+<td style="width: 60.1816%; height: 18px;" colspan="4">Nome Completo:&nbsp; {{ funcionario_nome }}</td>
+<td style="width: 38.6013%; height: 18px; border-style: none;">2&ordm; VIA- PACIENTE</td>
 </tr>
 <tr style="height: 18px;">
-<td style="width: 50.4104%; height: 18px;" colspan="2">CRM: {{funcionario_nprofissional}}&nbsp;</td>
-<td style="width: 9.45831%; height: 18px;">UF: CE&nbsp;</td>
-<td style="width: 20%; height: 18px;">&nbsp;N&ordm;</td>
-<td style="width: 20%; height: 18px; border-style: none;">&nbsp;</td>
+<td style="width: 39.6744%; height: 18px;" colspan="2">CRM: {{funcionario_nprofissional}}&nbsp;</td>
+<td style="width: 14.9128%; height: 18px;">UF: CE&nbsp;</td>
+<td style="width: 5.5944%; height: 18px;">&nbsp;N&ordm;</td>
+<td style="width: 38.6013%; height: 18px; border-style: none;">&nbsp;</td>
 </tr>
 <tr style="height: 18px;">
-<td style="width: 50.4104%; height: 18px;" colspan="2">Endere&ccedil;o Completo: RUA CRUZEIRO, S/N - COHAB</td>
-<td style="width: 29.4583%; height: 18px;" colspan="2">Telefone:{{paciente_telefone}}</td>
-<td style="width: 20%; height: 18px; border-style: none;">&nbsp;</td>
+<td style="width: 39.6744%; height: 18px;" colspan="2">Endere&ccedil;o Completo: RUA CRUZEIRO, S/N - COHAB</td>
+<td style="width: 20.5072%; height: 18px;" colspan="2">Telefone:{{paciente_telefone}}</td>
+<td style="width: 38.6013%; height: 18px; border-style: none;">&nbsp; &nbsp;________________________________</td>
 </tr>
 <tr style="height: 18px;">
 <td style="width: 20%; height: 18px;">Cidade: Massap&ecirc;</td>
-<td style="width: 59.8687%; height: 18px;" colspan="3">UF: CE</td>
-<td style="width: 20%; height: 18px; border-style: none;">&nbsp;</td>
+<td style="width: 40.1816%; height: 18px;" colspan="3">UF: CE</td>
+<td style="width: 38.6013%; height: 18px; border-style: none;" class="carimbo-medico">&nbsp; &nbsp;ASSINATURA DO M&Eacute;DICO</td>
 </tr>
 </tbody>
 </table>
-<p>Paciente:{{ paciente_nome }}</p>
+<br>
+<p>Paciente: {{ paciente_nome }}</p>
 </div>
-<div class="field">Endere&ccedil;o:{{ endereco_nome }}</div>
-<div class="field">Prescri&ccedil;&atilde;o: {{ receituario_receita }}</div>
+<div class="field">Endere&ccedil;o: {{ paciente_endereco }}</div>
+<br>
+<div class="field prescricao-text">Prescri&ccedil;&atilde;o: {{ receituario_receita|safe }}</div>
+<br>
 <div class="field">&nbsp;</div>
-<div class="field">&nbsp;</div>
 </div>
-<!-- IDENTIFICAÇÃO DO COMPRADOR -->
-<div class="section">
-<div class="field">
-<table style="height: 162.188px; width: 100%; border-collapse: collapse; border-style: none;" border="1">
+<!-- IDENTIFICAÇÃO DO COMPRADOR E FORNECEDOR LADO A LADO -->
+<div class="section" style="display: flex; gap: 10px;"><!-- IDENTIFICAÇÃO DO COMPRADOR -->
+<div style="width: 50%; border: 2px solid #000; padding: 5px;">
+<table style="width: 100%; border-collapse: collapse;" border="1">
 <tbody>
-<tr style="height: 18px;">
-<td style="width: 100%; height: 18px; text-align: center;" colspan="4"><strong>IDENTIFICA&Ccedil;&Atilde;O DO COMPRADOR</strong></td>
-</tr>
-<tr style="height: 18px;">
-<td style="height: 44.1875px; width: 100%;" colspan="4" rowspan="2">Nome Completo: {{ paciente_nome }}</td>
-</tr>
-<tr style="height: 18px;">
-<td style="width: 52.541%; height: 18px;" colspan="2">CPF: {{paciente_cpf}}&nbsp;</td>
-<td style="width: 54.6704%; height: 18px;" colspan="2">Org. Emissor: CE</td>
-</tr>
-<tr style="height: 18px;">
-<td style="width: 52.541%; height: 18px;" colspan="2">Endere&ccedil;o Completo:{{paciente_endereco}}&nbsp;</td>
-<td style="width: 54.6704%; height: 18px;" colspan="2">UF: CE</td>
-</tr>
-<tr style="height: 18px;">
-<td style="width: 49.8013%; height: 64px;">Cidade: {{paciente_munipio}}&nbsp;</td>
-<td style="width: 57.4101%; height: 64px;" colspan="3">Telefone:{{paciente_telefone}}</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<!-- IDENTIFICAÇÃO DO FORNECEDOR -->
-<div class="section">
-<div class="field">
-<table style="border-collapse: collapse; width: 100%; height: 248.328px;" border="1">
-<tbody>
-<tr style="height: 36px;">
-<td style="width: 100%; text-align: center; height: 36px;" colspan="4"><strong>IDENTIFICA&Ccedil;&Atilde;O DO FORNECEDOR</strong></td>
-</tr>
-<tr style="height: 0px;">
-<td style="width: 100%; height: 116.328px;" colspan="4" rowspan="3">&nbsp;</td>
+<tr>
+<td style="text-align: center; padding: 5px; font-weight: bold;" colspan="2">IDENTIFICA&Ccedil;&Atilde;O DO COMPRADOR</td>
 </tr>
 <tr>
-<td style="width: 50%; text-align: center;" colspan="2">Assinatura do Farmac&ecirc;utico</td>
-<td style="width: 50%; text-align: center;" colspan="2">Data: {{data_hoje}}</td>
+<td style="padding: 5px;" colspan="2">Nome Completo:</td>
+</tr>
+<tr>
+<td style="padding: 5px; width: 50%;">Ident: </td>
+<td style="padding: 5px; width: 50%;">Org. Emissor: </td>
+</tr>
+<tr>
+<td style="padding: 5px;" colspan="2">Endere&ccedil;o Completo: </td>
+</tr>
+<tr>
+<td style="padding: 5px;">Cidade: </td>
+<td style="padding: 5px;">UF: </td>
+</tr>
+<tr>
+<td style="padding: 5px;" colspan="2">Telefone: </td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- IDENTIFICAÇÃO DO FORNECEDOR -->
+<div style="width: 50%; border: 2px solid #000; padding: 5px;">
+<table style="width: 100%; border-collapse: collapse; height: 100%;" border="1">
+<tbody>
+<tr>
+<td style="text-align: center; padding: 5px; font-weight: bold;" colspan="2">IDENTIFICA&Ccedil;&Atilde;O DO FORNECEDOR</td>
+</tr>
+<tr>
+<td style="padding: 30px; height: 100px;" colspan="2">&nbsp;</td>
+</tr>
+<tr>
+<td style="text-align: center; padding: 5px; width: 50%;">Assinatura do Farmac&ecirc;utico</td>
+<td style="text-align: center; padding: 5px; width: 50%;">Data: {{data_hoje}}</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 <div class="prescription-footer">2&ordf; VIA - PACIENTE | 1&ordf; VIA - FARM&Aacute;CIA</div>
-<div class="prescription-footer">ASSINATURA DO FARMAC&Ecirc;UTICO | DATA</div>
 </div>
-</div> <!-- Fechamento da div prescription-container -->
+</div>
+<!-- Fechamento da div prescription-container -->
+
+<script>
+// Função para obter data atual formatada
+function obterDataAtual() {
+    const agora = new Date();
+    const dia = String(agora.getDate()).padStart(2, '0');
+    const mes = String(agora.getMonth() + 1).padStart(2, '0');
+    const ano = agora.getFullYear();
+    return `${dia}/${mes}/${ano}`;
+}
+
+// Função para processar conteúdo da prescrição
+function processarPrescricao() {
+    const elementosPrescricao = document.querySelectorAll('.prescricao-text');
+    elementosPrescricao.forEach(elemento => {
+        // Preservar espaços e quebras de linha
+        elemento.style.whiteSpace = 'pre-wrap';
+        elemento.style.fontFamily = 'Courier New, monospace';
+        elemento.style.fontSize = '11pt';
+        elemento.style.lineHeight = '1.3';
+    });
+}
+
+// Substituir {{data_hoje}} pela data atual automaticamente
+document.addEventListener('DOMContentLoaded', function() {
+    const dataAtual = obterDataAtual();
+    document.body.innerHTML = document.body.innerHTML.replace(/\{\{data_hoje\}\}/g, dataAtual);
+    
+    // Processar prescrição
+    processarPrescricao();
+    
+    // Auto-imprimir quando a página carregar
+    setTimeout(function() {
+        window.print();
+    }, 500);
+});
+</script>

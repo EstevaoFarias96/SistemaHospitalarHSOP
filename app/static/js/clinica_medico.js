@@ -976,7 +976,6 @@ function inicializarInformacaoInternamento() {
 document.addEventListener('DOMContentLoaded', function() {
     inicializarInformacaoInternamento();
     inicializarModuloAtestados();
-    inicializarModuloReceitas();
     inicializarModuloPrescrições();
     inicializarModuloExames();
     inicializarNavegacao();
@@ -1138,6 +1137,10 @@ function carregarAtestados() {
                     }
                 });
 
+                // ORDENAR POR DATA/HORA - MAIS RECENTES PRIMEIRO
+                atestadosHoje.sort((a, b) => new Date(b.data_atestado) - new Date(a.data_atestado));
+                atestadosAntigos.sort((a, b) => new Date(b.data_atestado) - new Date(a.data_atestado));
+
                 // Renderizar atestados de hoje
                 renderizarAtestados(atestadosHoje, '#listaAtestadosDoDia', true);
                 
@@ -1185,8 +1188,8 @@ function renderizarAtestados(atestados, containerId, ehHoje) {
                             <button class="btn btn-sm btn-outline-primary me-1" onclick="visualizarAtestado(${atestado.id})">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button class="btn btn-sm btn-outline-success" onclick="gerarPDFAtestado(${atestado.id})">
-                                <i class="fas fa-file-pdf"></i>
+                            <button class="btn btn-sm btn-outline-success" onclick="gerarPDFAtestado(${atestado.id})" title="Imprimir Atestado">
+                                <i class="fas fa-print"></i>
                             </button>
                         </div>
                     </div>
@@ -1270,10 +1273,92 @@ function visualizarAtestado(id) {
     });
 }
 
-// Função para gerar PDF do atestado (placeholder por enquanto)
+// Função para imprimir atestado
 function gerarPDFAtestado(id) {
-    // Implementar geração de PDF
-    alert('Funcionalidade de geração de PDF em desenvolvimento');
+    if (!id) {
+        alert('ID do atestado não informado.');
+        return;
+    }
+    
+    // Abrir página de impressão do atestado em nova aba
+    const url = `/clinica/atestado/${id}/imprimir`;
+    const novaJanela = window.open(url, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+    
+    if (!novaJanela) {
+        alert('Popup bloqueado. Por favor, permita popups para este site e tente novamente.');
+        return;
+    }
+}
+
+// Função para configurar sincronização de dias de afastamento
+function configurarSincronizacaoDiasAfastamento() {
+    console.log('Configurando sincronização de dias de afastamento...');
+    
+    // Função para atualizar o texto do atestado com base nos dias
+    const atualizarTextoAtestadoComDias = function() {
+        const diasInput = document.getElementById('dias_afastamento');
+        if (!diasInput) return;
+        
+        const dias = parseInt(diasInput.value, 10);
+        
+        // Só atualizar se for um número válido maior que 0
+        if (dias > 0) {
+            // Obter dados do paciente do DOM
+            let nomePaciente = 'NOME DO PACIENTE';
+            let cpfPaciente = 'CPF DO PACIENTE';
+            
+            try {
+                // Buscar nome do paciente
+                const nomeElement = $('.paciente-info .info-item:contains("Nome:")');
+                if (nomeElement.length > 0) {
+                    const nomeTexto = nomeElement.text();
+                    const nomeMatch = nomeTexto.match(/Nome:\s*(.+)/);
+                    if (nomeMatch && nomeMatch[1]) {
+                        nomePaciente = nomeMatch[1].trim();
+                    }
+                }
+                
+                // Buscar CPF do paciente
+                const cpfElement = $('.paciente-info .info-item:contains("CPF:")');
+                if (cpfElement.length > 0) {
+                    const cpfTexto = cpfElement.text();
+                    const cpfMatch = cpfTexto.match(/CPF:\s*(.+)/);
+                    if (cpfMatch && cpfMatch[1]) {
+                        cpfPaciente = cpfMatch[1].trim();
+                    }
+                }
+            } catch (error) {
+                console.warn('Erro ao extrair dados do paciente:', error);
+            }
+            
+            // Gerar novo texto com o número de dias atualizado
+            const novoTexto = `Atesto que ${nomePaciente}, portador do CPF n: ${cpfPaciente}, deverá afastar-se do trabalho por um período de ${dias} dias, para tratamento de saúde. \n\n CID:_______`;
+            
+            // Atualizar o editor Quill se disponível
+            if (window.quillAtestado && window.quillAtestado.setText) {
+                window.quillAtestado.setText(novoTexto);
+                console.log('Texto do atestado atualizado para', dias, 'dias');
+            }
+        }
+    };
+    
+    // Adicionar event listeners quando o modal for mostrado
+    $(document).on('shown.bs.modal', '#modalNovoAtestado', function () {
+        setTimeout(() => {
+            const diasInput = document.getElementById('dias_afastamento');
+            if (diasInput) {
+                // Remover listeners existentes para evitar duplicação
+                diasInput.removeEventListener('input', atualizarTextoAtestadoComDias);
+                diasInput.removeEventListener('change', atualizarTextoAtestadoComDias);
+                
+                // Adicionar novos listeners
+                diasInput.addEventListener('input', atualizarTextoAtestadoComDias);
+                diasInput.addEventListener('change', atualizarTextoAtestadoComDias);
+                
+                console.log('Event listeners configurados para o campo de dias de afastamento');
+            }
+        }, 100);
+    });
 }
 
 // Inicializador para as funções de atestados
@@ -1282,6 +1367,9 @@ function inicializarModuloAtestados() {
     
     // Carregar atestados ao inicializar
     carregarAtestados();
+    
+    // Configurar event listeners para sincronização de dias de afastamento
+    configurarSincronizacaoDiasAfastamento();
     
     // Evento para salvar novo atestado
     const btnSalvarAtestado = document.getElementById('btn_salvar_atestado');
@@ -1455,10 +1543,14 @@ let quillReceita;
 // Inicializar editor Quill para receitas
 function inicializarEditorReceita() {
     const container = document.getElementById('editor-receita-container');
-    if (!container) return;
+    if (!container) {
+        console.warn('Container do editor de receita não encontrado');
+        return;
+    }
 
     // Se já existe, não reinicializa
     if (window.quillReceita) {
+        console.log('Editor de receita já inicializado');
         return;
     }
 
@@ -1484,13 +1576,18 @@ function inicializarEditorReceita() {
             placeholder: 'Digite o conteúdo da receita aqui...'
         });
 
-        // Sincronizar a referência local para evitar undefined em outros trechos
+        // Sincronizar as referências para garantir consistência
         quillReceita = window.quillReceita;
 
         window.quillReceita.on('text-change', function() {
             const conteudo = window.quillReceita.root.innerHTML;
-            document.getElementById('conteudo_receita').value = conteudo;
+            const hiddenField = document.getElementById('conteudo_receita');
+            if (hiddenField) {
+                hiddenField.value = conteudo;
+            }
         });
+
+        console.log('Editor de receita inicializado com sucesso');
 
     } catch (error) {
         console.error('Erro ao inicializar o editor Quill:', error);
@@ -1498,9 +1595,13 @@ function inicializarEditorReceita() {
         const fallback = document.getElementById('fallback-receita');
         if (fallback) {
             fallback.addEventListener('input', function() {
-                document.getElementById('conteudo_receita').value = this.value;
+                const hiddenField = document.getElementById('conteudo_receita');
+                if (hiddenField) {
+                    hiddenField.value = this.value;
+                }
             });
         }
+        console.log('Fallback de textarea criado para receita');
     }
 }
 
@@ -1525,6 +1626,10 @@ function carregarReceitas() {
                         receitasAntigas.push(receita);
                     }
                 });
+
+                // ORDENAR POR DATA/HORA - MAIS RECENTES PRIMEIRO
+                receitasHoje.sort((a, b) => new Date(b.data_receita) - new Date(a.data_receita));
+                receitasAntigas.sort((a, b) => new Date(b.data_receita) - new Date(a.data_receita));
 
                 // Renderizar receitas de hoje
                 renderizarReceitas(receitasHoje, '#listaReceitasDoDia', true);
@@ -1573,13 +1678,9 @@ function renderizarReceitas(receitas, containerId, ehHoje) {
                             <small class="text-muted">${dataFormatada}</small>
                         </div>
                         <div>
-                            <button class="btn btn-sm btn-outline-primary me-1" onclick="visualizarReceita(${receita.id})">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-success me-1" onclick="gerarPDFReceita(${receita.id})">
-                                <i class="fas fa-file-pdf"></i>
-                            </button>
-                            ${receita.tipo_receita === 'normal' ? `<button class='btn btn-sm btn-outline-dark' title='Imprimir (2 cópias)' onclick='imprimirReceitaComum(${receita.id})'><i class="fas fa-print"></i></button>` : ''}
+                            ${receita.tipo_receita === 'normal' ? 
+                                `<button class='btn btn-sm btn-outline-dark' title='Imprimir (2 cópias)' onclick='imprimirReceitaComum(${receita.id})'><i class="fas fa-print"></i></button>` : 
+                                `<button class='btn btn-sm btn-outline-danger' title='Imprimir Receita Especial' onclick='imprimirReceitaEspecial(${receita.id})'><i class="fas fa-print"></i></button>`}
                         </div>
                     </div>
                 </div>
@@ -1707,14 +1808,30 @@ function inicializarModuloReceitas() {
     if (btnSalvarReceita) {
         btnSalvarReceita.addEventListener('click', function() {
             const tipo_receita = document.getElementById('tipo_receita').value;
-            const conteudo_receita = quillReceita.root.innerHTML;
+            
+            // Verificar se o editor Quill está disponível
+            let conteudo_receita = '';
+            if (window.quillReceita && window.quillReceita.root) {
+                conteudo_receita = window.quillReceita.root.innerHTML;
+            } else if (quillReceita && quillReceita.root) {
+                conteudo_receita = quillReceita.root.innerHTML;
+            } else {
+                // Fallback para textarea se existir
+                const fallback = document.getElementById('fallback-receita');
+                if (fallback) {
+                    conteudo_receita = fallback.value;
+                } else {
+                    alert('Erro: Editor de receita não foi inicializado corretamente. Por favor, recarregue a página.');
+                    return;
+                }
+            }
 
             if (!tipo_receita) {
                 alert('Por favor, selecione o tipo de receita.');
                 return;
             }
 
-            if (!conteudo_receita || conteudo_receita === '<p><br></p>') {
+            if (!conteudo_receita || conteudo_receita === '<p><br></p>' || conteudo_receita.trim() === '') {
                 alert('Por favor, preencha o conteúdo da receita.');
                 return;
             }
@@ -1769,7 +1886,19 @@ function inicializarModuloReceitas() {
                     if (response.success) {
                         // Limpar formulário
                         document.getElementById('tipo_receita').value = '';
-                        quillReceita.setText('');
+                        
+                        // Limpar editor
+                        if (window.quillReceita && window.quillReceita.setText) {
+                            window.quillReceita.setText('');
+                        } else if (quillReceita && quillReceita.setText) {
+                            quillReceita.setText('');
+                        } else {
+                            // Fallback para textarea se existir
+                            const fallback = document.getElementById('fallback-receita');
+                            if (fallback) {
+                                fallback.value = '';
+                            }
+                        }
                         
                         // Fechar modal
                         $('#modalNovaReceita').modal('hide');
@@ -3461,71 +3590,6 @@ async function visualizarAprazamentos(nomeMedicamento) {
     }
 }
 
-// Inicialização principal dos editores Quill
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Inicializando editores Quill a partir do clinica_medico.js');
-    
-    // Primeiro inicializar a navegação
-    try {
-        inicializarNavegacao();
-    } catch (e) {
-        console.error('Erro ao inicializar navegação:', e);
-    }
-    
-    // Módulos específicos
-    try {
-        inicializarModuloPrescrições();
-    } catch (e) {
-        console.error('Erro ao inicializar módulo de prescrições:', e);
-    }
-    
-    try {
-        inicializarModuloAtestados();
-    } catch (e) {
-        console.error('Erro ao inicializar módulo de atestados:', e);
-    }
-    
-    try {
-        inicializarModuloReceitas();
-    } catch (e) {
-        console.error('Erro ao inicializar módulo de receitas:', e);
-    }
-    
-    try {
-        inicializarModuloExames();
-    } catch (e) {
-        console.error('Erro ao inicializar módulo de exames:', e);
-    }
-    
-    try {
-        inicializarInformacaoInternamento();
-    } catch (e) {
-        console.error('Erro ao inicializar informações de internamento:', e);
-    }
-    
-    // Inicializar os editores após o carregamento completo da página
-    // Usando setTimeout para garantir que o DOM esteja totalmente pronto
-    setTimeout(function() {
-        try {
-            inicializarEditorPrincipal();
-        } catch (e) {
-            console.error('Erro ao inicializar editor principal:', e);
-        }
-        
-        try {
-            inicializarEditorReceita();
-        } catch (e) {
-            console.error('Erro ao inicializar editor de receitas:', e);
-        }
-        
-        try {
-            inicializarEditorAtestado();
-        } catch (e) {
-            console.error('Erro ao inicializar editor de atestados:', e);
-        }
-    }, 300);
-});
-
 // Função para inicializar o editor Quill principal
 function inicializarEditorPrincipal() {
     const editorContainer = document.getElementById('editor-container');
@@ -3645,12 +3709,63 @@ $(document).on('shown.bs.modal', '#modalNovaReceita', function () {
 
 
 $(document).on('shown.bs.modal', '#modalNovoAtestado', function () {
+    // Extrair dados do paciente do DOM de forma mais robusta
+    let nomePaciente = 'NOME DO PACIENTE';
+    let cpfPaciente = 'CPF DO PACIENTE';
+    
+    try {
+        // Buscar nome do paciente
+        const nomeElement = $('.paciente-info .info-item:contains("Nome:")');
+        if (nomeElement.length > 0) {
+            const nomeTexto = nomeElement.text();
+            const nomeMatch = nomeTexto.match(/Nome:\s*(.+)/);
+            if (nomeMatch && nomeMatch[1]) {
+                nomePaciente = nomeMatch[1].trim();
+            }
+        }
+        
+        // Buscar CPF do paciente
+        const cpfElement = $('.paciente-info .info-item:contains("CPF:")');
+        if (cpfElement.length > 0) {
+            const cpfTexto = cpfElement.text();
+            const cpfMatch = cpfTexto.match(/CPF:\s*(.+)/);
+            if (cpfMatch && cpfMatch[1]) {
+                cpfPaciente = cpfMatch[1].trim();
+            }
+        }
+        
+        console.log('Dados extraídos - Nome:', nomePaciente, 'CPF:', cpfPaciente);
+    } catch (error) {
+        console.warn('Erro ao extrair dados do paciente:', error);
+    }
+    
+    // Texto pré-preenchido do atestado (inicial com placeholder)
+    const textoPrePreenchido = `Atesto que ${nomePaciente}, portador do CPF n: ${cpfPaciente}, deverá afastar-se do trabalho por um período de [dias] dias, para tratamento de saúde. \n\n CID:_______`;
+    
+    // Função para pré-preencher o editor
+    const preencherEditor = function(texto = textoPrePreenchido) {
+        if (window.quillAtestado && window.quillAtestado.setText) {
+            window.quillAtestado.setText(texto);
+            console.log('Atestado pré-preenchido com sucesso');
+            return true;
+        }
+        return false;
+    };
+    
     // Se o editor ainda não existe, inicializa
     if (!window.quillAtestado) {
         inicializarEditorAtestado();
+        // Aguardar inicialização e depois pré-preencher
+        setTimeout(() => preencherEditor(), 200);
     } else {
-        // Se já existe, apenas limpa o conteúdo
-        window.quillAtestado.setText('');
+        // Se já existe, pré-preencher imediatamente
+        preencherEditor();
+    }
+    
+    // Limpar campo de dias de afastamento
+    const diasInput = document.getElementById('dias_afastamento');
+    if (diasInput) {
+        diasInput.value = '';
     }
 });
 
@@ -3712,5 +3827,10 @@ function imprimirEvolucao(evolucaoId) {
 
 // Adicionar função global para imprimir receita comum
 window.imprimirReceitaComum = function(receitaId) {
+    window.open(`/clinica/receituario/${receitaId}/imprimir_html_comum`, '_blank');
+};
+
+// Adicionar função global para imprimir receita especial
+window.imprimirReceitaEspecial = function(receitaId) {
     window.open(`/clinica/receituario/${receitaId}/imprimir_html`, '_blank');
 };
