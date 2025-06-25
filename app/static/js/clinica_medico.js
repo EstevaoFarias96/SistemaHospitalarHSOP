@@ -975,20 +975,45 @@ function inicializarInformacaoInternamento() {
 // Inicializar quando o documento estiver pronto
 document.addEventListener('DOMContentLoaded', function() {
     inicializarInformacaoInternamento();
-    inicializarModuloAtestados();
-    inicializarModuloPrescrições();
-    inicializarModuloExames();
-    inicializarNavegacao();
-    inicializarObservadores(); // Inicializar observadores para os editores
     
-    // Carregar dados se necessário
-    if (typeof internacaoId !== 'undefined') {
-        // Verificar se estamos na página de evolução
-        if (document.getElementById('listaEvolucoes')) {
-            carregarEvolucoes();
-            carregarEvolucoesEnfermagem();
-            carregarPrescricoesEnfermagem();
-        }
+    // Aguardar QuillManager estar pronto antes de inicializar módulos que dependem dos editores
+    if (window.QuillManager) {
+        window.QuillManager.whenReady(function() {
+            inicializarModuloAtestados();
+            inicializarModuloReceitas();
+            inicializarModuloPrescrições();
+            inicializarModuloExames();
+            inicializarNavegacao();
+            inicializarObservadores(); // Inicializar observadores para os editores
+            
+            // Carregar dados se necessário
+            if (typeof internacaoId !== 'undefined') {
+                // Verificar se estamos na página de evolução
+                if (document.getElementById('listaEvolucoes')) {
+                    carregarEvolucoes();
+                    carregarEvolucoesEnfermagem();
+                    carregarPrescricoesEnfermagem();
+                }
+            }
+        });
+    } else {
+        // Fallback se QuillManager não estiver disponível
+        setTimeout(function() {
+            inicializarModuloAtestados();
+            inicializarModuloReceitas();
+            inicializarModuloPrescrições();
+            inicializarModuloExames();
+            inicializarNavegacao();
+            inicializarObservadores();
+            
+            if (typeof internacaoId !== 'undefined') {
+                if (document.getElementById('listaEvolucoes')) {
+                    carregarEvolucoes();
+                    carregarEvolucoesEnfermagem();
+                    carregarPrescricoesEnfermagem();
+                }
+            }
+        }, 100);
     }
 });
 
@@ -1798,7 +1823,7 @@ function gerarPDFReceita(id) {
 
 // Inicializador para as funções de receitas
 function inicializarModuloReceitas() {
-    inicializarEditorReceita();
+    // Não inicializar o editor aqui - será feito pelo QuillManager
     
     // Carregar receitas ao inicializar
     carregarReceitas();
@@ -1809,20 +1834,21 @@ function inicializarModuloReceitas() {
         btnSalvarReceita.addEventListener('click', function() {
             const tipo_receita = document.getElementById('tipo_receita').value;
             
-            // Verificar se o editor Quill está disponível
+            // Usar QuillManager para obter conteúdo
             let conteudo_receita = '';
-            if (window.quillReceita && window.quillReceita.root) {
-                conteudo_receita = window.quillReceita.root.innerHTML;
-            } else if (quillReceita && quillReceita.root) {
-                conteudo_receita = quillReceita.root.innerHTML;
+            if (window.QuillManager) {
+                conteudo_receita = window.QuillManager.getContent('receita');
             } else {
-                // Fallback para textarea se existir
-                const fallback = document.getElementById('fallback-receita');
-                if (fallback) {
-                    conteudo_receita = fallback.value;
+                // Fallback para método antigo
+                if (window.quillReceita && window.quillReceita.root) {
+                    conteudo_receita = window.quillReceita.root.innerHTML;
+                } else if (quillReceita && quillReceita.root) {
+                    conteudo_receita = quillReceita.root.innerHTML;
                 } else {
-                    alert('Erro: Editor de receita não foi inicializado corretamente. Por favor, recarregue a página.');
-                    return;
+                    const fallback = document.getElementById('fallback-receita');
+                    if (fallback) {
+                        conteudo_receita = fallback.value;
+                    }
                 }
             }
 
@@ -1887,16 +1913,20 @@ function inicializarModuloReceitas() {
                         // Limpar formulário
                         document.getElementById('tipo_receita').value = '';
                         
-                        // Limpar editor
-                        if (window.quillReceita && window.quillReceita.setText) {
-                            window.quillReceita.setText('');
-                        } else if (quillReceita && quillReceita.setText) {
-                            quillReceita.setText('');
+                        // Limpar editor usando QuillManager
+                        if (window.QuillManager) {
+                            window.QuillManager.setContent('receita', '');
                         } else {
-                            // Fallback para textarea se existir
-                            const fallback = document.getElementById('fallback-receita');
-                            if (fallback) {
-                                fallback.value = '';
+                            // Fallback para método antigo
+                            if (window.quillReceita && window.quillReceita.setText) {
+                                window.quillReceita.setText('');
+                            } else if (quillReceita && quillReceita.setText) {
+                                quillReceita.setText('');
+                            } else {
+                                const fallback = document.getElementById('fallback-receita');
+                                if (fallback) {
+                                    fallback.value = '';
+                                }
                             }
                         }
                         
@@ -2692,10 +2722,18 @@ function carregarEvolucoes() {
 $(document).on('submit', '#formEvolucao', function(e) {
     e.preventDefault();
     
-    // Obter o conteúdo do editor
+    // Obter o conteúdo do editor - VERSÃO CORRIGIDA
     let evolucaoHTML;
-    if (typeof quill !== 'undefined' && quill) {
+    
+    // Tentar múltiplas formas de obter o conteúdo
+    if (window.quill && window.quill.root) {
+        evolucaoHTML = window.quill.root.innerHTML;
+    } else if (window.QuillEvolucao && window.QuillEvolucao.root) {
+        evolucaoHTML = window.QuillEvolucao.root.innerHTML;
+    } else if (typeof quill !== 'undefined' && quill && quill.root) {
         evolucaoHTML = quill.root.innerHTML;
+    } else if ($('#fallback-evolucao').length > 0) {
+        evolucaoHTML = $('#fallback-evolucao').val();
     } else if ($('#fallback-editor').length > 0) {
         evolucaoHTML = $('#fallback-editor').val();
     } else {
@@ -2740,9 +2778,15 @@ $(document).on('submit', '#formEvolucao', function(e) {
                 // Fechar modal e limpar campos
                 $('#modalEvolucao').modal('hide');
                 
-                // Limpar o editor Quill
-                if (typeof quill !== 'undefined' && quill) {
+                // Limpar o editor - VERSÃO CORRIGIDA
+                if (window.quill && window.quill.setText) {
+                    window.quill.setText('');
+                } else if (window.QuillEvolucao && window.QuillEvolucao.setText) {
+                    window.QuillEvolucao.setText('');
+                } else if (typeof quill !== 'undefined' && quill && quill.setText) {
                     quill.setText('');
+                } else if ($('#fallback-evolucao').length > 0) {
+                    $('#fallback-evolucao').val('');
                 } else if ($('#fallback-editor').length > 0) {
                     $('#fallback-editor').val('');
                 }
@@ -3834,3 +3878,42 @@ window.imprimirReceitaComum = function(receitaId) {
 window.imprimirReceitaEspecial = function(receitaId) {
     window.open(`/clinica/receituario/${receitaId}/imprimir_html`, '_blank');
 };
+
+// ======== EVENT LISTENERS PARA MODAL DE EVOLUÇÃO ========
+
+// Event listener para inicializar Quill da evolução quando modal for aberto
+$(document).on('shown.bs.modal', '#modalEvolucao', function () {
+    console.log('Modal de evolução aberto - inicializando Quill...');
+    
+    // Pequeno delay para garantir que o modal foi totalmente renderizado
+    setTimeout(() => {
+        const sucesso = inicializarEditorPrincipal();
+        if (!sucesso) {
+            console.warn('Falha ao inicializar Quill da evolução - usando fallback');
+        }
+    }, 300);
+});
+
+// Event listener para limpar editor quando modal for fechado
+$(document).on('hidden.bs.modal', '#modalEvolucao', function () {
+    console.log('Modal de evolução fechado - limpando editor...');
+    
+    // Limpar todas as possíveis instâncias do editor
+    if (window.quill && window.quill.setText) {
+        window.quill.setText('');
+    }
+    
+    if (window.QuillEvolucao && window.QuillEvolucao.setText) {
+        window.QuillEvolucao.setText('');
+    }
+    
+    const fallback = document.getElementById('fallback-evolucao');
+    if (fallback) {
+        fallback.value = '';
+    }
+    
+    const hiddenField = document.getElementById('texto_evolucao');
+    if (hiddenField) {
+        hiddenField.value = '';
+    }
+});
