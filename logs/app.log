@@ -22342,3 +22342,30 @@ SyntaxError: invalid syntax
 2025-07-01 09:46:49,218 [INFO] __init__:72 - LoginManager inicializado com sucesso
 2025-07-01 09:46:49,352 [INFO] __init__:90 - Blueprints registrados com sucesso
 2025-07-01 09:46:49,364 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-07-01 12:47:44,211 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-07-01 12:47:44,211 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-07-01 12:47:44,212 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-07-01 12:47:44,212 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-07-01 12:47:44,212 [INFO] __init__:63 - Configurações básicas definidas
+2025-07-01 12:47:44,216 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-07-01 12:47:44,217 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-07-01 12:47:44,461 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-07-01 12:47:44,474 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-07-01 12:47:44,650 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-07-01 12:47:44,650 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-07-01 12:47:44,650 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-07-01 12:47:44,650 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-07-01 12:47:44,650 [INFO] __init__:63 - Configurações básicas definidas
+2025-07-01 12:47:44,654 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-07-01 12:47:44,654 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-07-01 12:47:44,764 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-07-01 12:47:44,766 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-07-01 13:04:04,107 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-07-01 13:04:04,107 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-07-01 13:04:04,107 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-07-01 13:04:04,107 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-07-01 13:04:04,107 [INFO] __init__:63 - Configurações básicas definidas
+2025-07-01 13:04:04,148 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-07-01 13:04:04,148 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-07-01 13:04:04,257 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-07-01 13:04:04,294 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas

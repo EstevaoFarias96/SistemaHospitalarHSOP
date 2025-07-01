@@ -4418,8 +4418,8 @@ function salvarFichaReferencia() {
     console.log('  - procedimento:', procedimento);
     console.log('  - unidade_referencia:', unidade_referencia);
     
-    // Validação básica
-    if (!texto_referencia && !encaminhamento_atendimento && !procedimento) {
+    // Validação básica - pelo menos um campo deve ter conteúdo
+    if (!texto_referencia && !encaminhamento_atendimento && !procedimento && !unidade_referencia) {
         console.log('❌ Validação falhou: nenhum campo preenchido');
         alert('Por favor, preencha pelo menos um dos campos da ficha de referência.');
         return;
@@ -4615,7 +4615,13 @@ function inicializarModuloFichasReferencia() {
     const btnSalvarFicha = document.getElementById('btn_salvar_ficha_referencia');
     if (btnSalvarFicha) {
         console.log('✅ Botão Salvar Ficha encontrado, configurando evento...');
-        btnSalvarFicha.addEventListener('click', salvarFichaReferencia);
+        // Remover qualquer evento anterior para evitar duplicação
+        btnSalvarFicha.removeEventListener('click', salvarFichaReferencia);
+        btnSalvarFicha.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('🎯 Event listener do botão salvar ficha acionado');
+            salvarFichaReferencia();
+        });
     } else {
         console.error('❌ Botão Salvar Ficha não encontrado!');
     }
