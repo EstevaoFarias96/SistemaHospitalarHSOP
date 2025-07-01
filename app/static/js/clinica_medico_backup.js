@@ -108,9 +108,11 @@ function aplicarConversaoAutomatica(texto) {
     return texto;
 }
 
+// Interceptação de eventos depreciados otimizada - não interferir com Quill
 EventTarget.prototype.addEventListener = function(type, listener, options) {
-    if (type === 'DOMNodeInserted') {
-        console.warn('Evento depreciado DOMNodeInserted detectado - usando MutationObserver em seu lugar');
+    // Só interceptar DOMNodeInserted se não for do Quill
+    if (type === 'DOMNodeInserted' && !this.classList?.contains('ql-editor')) {
+        // console.warn('Evento depreciado DOMNodeInserted detectado - usando MutationObserver em seu lugar');
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
@@ -974,49 +976,69 @@ function inicializarInformacaoInternamento() {
 
 // Inicializar quando o documento estiver pronto
 document.addEventListener('DOMContentLoaded', function() {
-    inicializarInformacaoInternamento();
-    
-    // Aguardar QuillManager estar pronto antes de inicializar módulos que dependem dos editores
-    if (window.QuillManager) {
-        window.QuillManager.whenReady(function() {
-            inicializarModuloAtestados();
-            inicializarModuloReceitas();
-            inicializarModuloPrescrições();
-            inicializarModuloExames();
-            inicializarModuloFichasReferencia();
-            inicializarNavegacao();
-            inicializarObservadores(); // Inicializar observadores para os editores
+    // Aguardar um pouco para garantir que todas as bibliotecas foram carregadas
+    setTimeout(() => {
+        inicializarInformacaoInternamento();
+        
+        // Verificar se o Quill está disponível antes de configurar event listeners
+        if (typeof Quill !== 'undefined') {
+            console.log('✅ Biblioteca Quill detectada - configurando event listeners...');
+        } else {
+            console.warn('⚠️ Biblioteca Quill não detectada - alguns recursos podem estar limitados');
+        }
+        
+        // Event listener para inicializar Quill da evolução quando modal for aberto
+        $(document).on('shown.bs.modal', '#modalEvolucao', function () {
+            console.log('Modal de evolução aberto - inicializando Quill...');
             
-            // Carregar dados se necessário
-            if (typeof internacaoId !== 'undefined') {
-                // Verificar se estamos na página de evolução
-                if (document.getElementById('listaEvolucoes')) {
-                    carregarEvolucoes();
-                    carregarEvolucoesEnfermagem();
-                    carregarPrescricoesEnfermagem();
+            // Delay reduzido para melhor performance
+            setTimeout(() => {
+                const sucesso = inicializarEditorPrincipal();
+                if (sucesso) {
+                    console.log('✅ Quill da evolução pronto para uso!');
+                } else {
+                    console.error('❌ Falha crítica ao inicializar editor de evolução');
                 }
+            }, 100);
+        });
+        
+        // Event listener para limpar editor quando modal for fechado
+        $(document).on('hidden.bs.modal', '#modalEvolucao', function () {
+            console.log('Modal de evolução fechado - limpando editor...');
+            
+            let limpezaRealizada = false;
+            
+            // Limpar todas as possíveis instâncias do editor
+            if (window.quill && window.quill.setText) {
+                window.quill.setText('');
+                limpezaRealizada = true;
+                console.log('✅ Editor Quill limpo');
+            }
+            
+            if (window.QuillEvolucao && window.QuillEvolucao.setText) {
+                window.QuillEvolucao.setText('');
+                limpezaRealizada = true;
+                console.log('✅ Editor QuillEvolucao limpo');
+            }
+            
+            const fallback = document.getElementById('fallback-editor-principal');
+            if (fallback) {
+                fallback.value = '';
+                limpezaRealizada = true;
+                console.log('✅ Fallback textarea limpo');
+            }
+            
+            const hiddenField = document.getElementById('texto_evolucao');
+            if (hiddenField) {
+                hiddenField.value = '';
+                console.log('✅ Campo hidden limpo');
+            }
+            
+            if (limpezaRealizada) {
+                console.log('🧹 Limpeza do editor concluída com sucesso');
             }
         });
-    } else {
-        // Fallback se QuillManager não estiver disponível
-        setTimeout(function() {
-            inicializarModuloAtestados();
-            inicializarModuloReceitas();
-            inicializarModuloPrescrições();
-            inicializarModuloExames();
-            inicializarModuloFichasReferencia();
-            inicializarNavegacao();
-            inicializarObservadores();
-            
-            if (typeof internacaoId !== 'undefined') {
-                if (document.getElementById('listaEvolucoes')) {
-                    carregarEvolucoes();
-                    carregarEvolucoesEnfermagem();
-                    carregarPrescricoesEnfermagem();
-                }
-            }
-        }, 100);
-    }
+    }, 200); // Pequeno delay para garantir que tudo foi carregado
 });
 
 // Adicionar função para inicializar navegação que estava faltando
@@ -2734,6 +2756,8 @@ $(document).on('submit', '#formEvolucao', function(e) {
         evolucaoHTML = window.QuillEvolucao.root.innerHTML;
     } else if (typeof quill !== 'undefined' && quill && quill.root) {
         evolucaoHTML = quill.root.innerHTML;
+    } else if ($('#fallback-editor-principal').length > 0) {
+        evolucaoHTML = $('#fallback-editor-principal').val();
     } else if ($('#fallback-evolucao').length > 0) {
         evolucaoHTML = $('#fallback-evolucao').val();
     } else if ($('#fallback-editor').length > 0) {
@@ -3639,19 +3663,25 @@ async function visualizarAprazamentos(nomeMedicamento) {
 // Função para inicializar o editor Quill principal
 function inicializarEditorPrincipal() {
     const editorContainer = document.getElementById('editor-container');
-    if (!editorContainer) return;
+    if (!editorContainer) {
+        console.warn('Container #editor-container não encontrado');
+        return false;
+    }
     
     try {
         // Verificar se já foi inicializado
-        if (window.quill) {
-            console.log('Editor principal já inicializado.');
-            return;
+        if (window.quill && window.quill.root) {
+            console.log('Editor principal já inicializado - reutilizando.');
+            return true;
         }
         
         // Verificar se Quill está disponível globalmente
         if (typeof Quill === 'undefined') {
             throw new Error('Biblioteca Quill não encontrada. Verifique se foi importada corretamente.');
         }
+        
+        // Limpar container antes de inicializar
+        editorContainer.innerHTML = '';
         
         // Inicializar o editor com configuração básica
         window.quill = new Quill('#editor-container', {
@@ -3676,15 +3706,23 @@ function inicializarEditorPrincipal() {
             }
         });
         
-        // Configurar observadores para o editor
-        setTimeout(() => {
-            const editor = document.querySelector('#editor-container .ql-editor');
-            if (editor) {
-                configurarObservadoresModernos(editor);
-            }
-        }, 100);
+        // Verificar se foi realmente inicializado
+        if (window.quill && window.quill.root) {
+            console.log('Editor principal inicializado com sucesso.');
+            
+            // Configurar observadores para o editor após um pequeno delay
+            setTimeout(() => {
+                const editor = document.querySelector('#editor-container .ql-editor');
+                if (editor) {
+                    configurarObservadoresModernos(editor);
+                }
+            }, 50);
+            
+            return true;
+        } else {
+            throw new Error('Falha na verificação pós-inicialização do Quill');
+        }
         
-        console.log('Editor principal inicializado com sucesso.');
     } catch (error) {
         console.error('Erro ao inicializar o editor Quill principal:', error);
         
@@ -3701,8 +3739,11 @@ function inicializarEditorPrincipal() {
                         textoEvolucao.value = this.value;
                     }
                 });
+                console.log('Fallback textarea criado para evolução');
+                return true; // Fallback também é um sucesso
             }
         }
+        return false;
     }
 }
 
@@ -3887,814 +3928,50 @@ window.imprimirReceitaEspecial = function(receitaId) {
 $(document).on('shown.bs.modal', '#modalEvolucao', function () {
     console.log('Modal de evolução aberto - inicializando Quill...');
     
-    // Pequeno delay para garantir que o modal foi totalmente renderizado
+    // Delay reduzido para melhor performance
     setTimeout(() => {
         const sucesso = inicializarEditorPrincipal();
-        if (!sucesso) {
-            console.warn('Falha ao inicializar Quill da evolução - usando fallback');
+        if (sucesso) {
+            console.log('✅ Quill da evolução pronto para uso!');
+        } else {
+            console.error('❌ Falha crítica ao inicializar editor de evolução');
         }
-    }, 300);
+    }, 100); // Reduzido de 300ms para 100ms
 });
 
 // Event listener para limpar editor quando modal for fechado
 $(document).on('hidden.bs.modal', '#modalEvolucao', function () {
     console.log('Modal de evolução fechado - limpando editor...');
     
+    let limpezaRealizada = false;
+    
     // Limpar todas as possíveis instâncias do editor
     if (window.quill && window.quill.setText) {
         window.quill.setText('');
+        limpezaRealizada = true;
+        console.log('✅ Editor Quill limpo');
     }
     
     if (window.QuillEvolucao && window.QuillEvolucao.setText) {
         window.QuillEvolucao.setText('');
+        limpezaRealizada = true;
+        console.log('✅ Editor QuillEvolucao limpo');
     }
     
-    const fallback = document.getElementById('fallback-evolucao');
+    const fallback = document.getElementById('fallback-editor-principal');
     if (fallback) {
         fallback.value = '';
+        limpezaRealizada = true;
+        console.log('✅ Fallback textarea limpo');
     }
     
     const hiddenField = document.getElementById('texto_evolucao');
     if (hiddenField) {
         hiddenField.value = '';
+        console.log('✅ Campo hidden limpo');
+    }
+    
+    if (limpezaRealizada) {
+        console.log('🧹 Limpeza do editor concluída com sucesso');
     }
 });
-
-// ======== FUNÇÕES PARA GERENCIAMENTO DE FICHAS DE REFERÊNCIA ========
-
-// Função para carregar fichas de referência
-function carregarFichasReferencia() {
-    if (!document.getElementById('listaFichasReferencia')) return;
-    
-    const atendimentoId = document.getElementById('atendimento_id') ? 
-                         document.getElementById('atendimento_id').value : 
-                         internacaoId;
-    
-    if (!atendimentoId) {
-        console.error('ID de atendimento não encontrado para carregar fichas de referência');
-        return;
-    }
-    
-    // Mostrar loading
-    document.getElementById('listaFichasReferencia').innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin text-primary"></i> Carregando fichas de referência...</div>';
-    
-    jQuery.ajax({
-        url: `/api/fichas-referencia/lista/${atendimentoId}`, // Corrigido: novo endpoint sem conflito
-        method: 'GET',
-        success: function(response) {
-            if (response.success) {
-                // ORDENAR POR DATA/HORA - MAIS RECENTES PRIMEIRO
-                const fichas = response.fichas.sort((a, b) => new Date(b.data_criacao || b.data) - new Date(a.data_criacao || a.data));
-                
-                // Renderizar todas as fichas em uma única lista
-                renderizarFichasReferencia(fichas, '#listaFichasReferencia');
-                
-                // Mostrar estatísticas simplificadas
-                mostrarEstatisticasFichas(fichas.length);
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('Erro ao carregar fichas de referência:', error);
-            document.getElementById('listaFichasReferencia').innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Erro ao carregar fichas de referência</div>';
-            mostrarMensagemErro('Erro ao carregar fichas de referência. Por favor, tente novamente.');
-        }
-    });
-}
-
-// Função para renderizar fichas de referência com UX melhorada
-function renderizarFichasReferencia(fichas, containerId) {
-    const container = jQuery(containerId);
-    
-    if (fichas.length === 0) {
-        const emptyStateHtml = `
-            <div class="empty-state text-center py-5">
-                <i class="fas fa-file-export fa-3x text-muted mb-3"></i>
-                <h6 class="text-muted">Nenhuma ficha de referência</h6>
-                <p class="text-muted small mb-0">
-                    As fichas de referência criadas aparecerão aqui
-                </p>
-            </div>
-        `;
-        container.html(emptyStateHtml);
-        return;
-    }
-    
-    let html = '<div class="fichas-grid">';
-    fichas.forEach((ficha, index) => {
-        // Corrigir formatação de data
-        let dataFormatada = 'Data não informada';
-        
-        try {
-            if (ficha.data_criacao) {
-                dataFormatada = ficha.data_criacao;
-            } else if (ficha.data && ficha.hora) {
-                dataFormatada = `${ficha.data} às ${ficha.hora}`;
-            } else if (ficha.data) {
-                const dataObj = new Date(ficha.data);
-                if (!isNaN(dataObj.getTime())) {
-                    dataFormatada = dataObj.toLocaleDateString('pt-BR');
-                }
-            }
-        } catch (error) {
-            console.warn('Erro ao formatar data da ficha:', error);
-            dataFormatada = 'Data não informada';
-        }
-
-        // Preparar conteúdo principal (encaminhamento e unidade)
-        const temEncaminhamento = ficha.encaminhamento_atendimento && ficha.encaminhamento_atendimento.trim();
-        const temUnidade = ficha.unidade_referencia && ficha.unidade_referencia.trim();
-        const temProcedimento = ficha.procedimento && ficha.procedimento.trim();
-        
-        html += `
-            <div class="ficha-card" data-ficha-id="${ficha.id}">
-                <div class="ficha-header">
-                    <div class="ficha-info">
-                        <div class="ficha-titulo">
-                            <i class="fas fa-file-export text-primary me-2"></i>
-                            <span class="titulo-texto">Referência #${String(ficha.id).padStart(3, '0')}</span>
-                        </div>
-                        <div class="ficha-metadados">
-                            <span class="timestamp">
-                                <i class="fas fa-clock me-1"></i>
-                                ${dataFormatada}
-                            </span>
-                            ${ficha.medico_nome ? `
-                                <span class="medico-info">
-                                    <i class="fas fa-user-md me-1"></i>
-                                    Dr(a). ${ficha.medico_nome}
-                                </span>
-                            ` : ''}
-                        </div>
-                    </div>
-                    <div class="ficha-actions">
-                        <button type="button" class="btn-action" 
-                                onclick="visualizarFichaReferencia(${ficha.id})" 
-                                title="Visualizar ficha completa">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button type="button" class="btn-action btn-print" 
-                                onclick="imprimirFichaReferencia(${ficha.id})" 
-                                title="Imprimir ficha">
-                            <i class="fas fa-print"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="ficha-content">
-                    <!-- FOCO: Unidade de Referência -->
-                    ${temUnidade ? `
-                        <div class="campo-principal mb-3">
-                            <div class="campo-label">
-                                <i class="fas fa-hospital text-info me-2"></i>
-                                <strong>Unidade de Referência</strong>
-                            </div>
-                            <div class="campo-valor destaque-unidade">
-                                ${ficha.unidade_referencia}
-                            </div>
-                        </div>
-                    ` : ''}
-                    
-                    <!-- FOCO: Encaminhamento -->
-                    ${temEncaminhamento ? `
-                        <div class="campo-principal mb-3">
-                            <div class="campo-label">
-                                <i class="fas fa-share text-success me-2"></i>
-                                <strong>Encaminhamento para Atendimento</strong>
-                            </div>
-                            <div class="campo-valor">
-                                ${ficha.encaminhamento_atendimento.length > 150 ? 
-                                    ficha.encaminhamento_atendimento.substring(0, 150) + '...' : 
-                                    ficha.encaminhamento_atendimento}
-                            </div>
-                        </div>
-                    ` : ''}
-                    
-                    <!-- Procedimento (se houver) -->
-                    ${temProcedimento ? `
-                        <div class="campo-secundario mb-2">
-                            <div class="campo-label-pequeno">
-                                <i class="fas fa-cogs text-warning me-1"></i>
-                                <span>Procedimento:</span>
-                            </div>
-                            <div class="campo-valor-pequeno">
-                                ${ficha.procedimento.length > 100 ? 
-                                    ficha.procedimento.substring(0, 100) + '...' : 
-                                    ficha.procedimento}
-                            </div>
-                        </div>
-                    ` : ''}
-                    
-                    <!-- Indicador se tem texto de referência -->
-                    ${ficha.texto_referencia ? `
-                        <div class="tem-mais-conteudo">
-                            <i class="fas fa-file-text text-muted me-1"></i>
-                            <span class="text-muted small">Contém texto de referência adicional - clique no olho para visualizar</span>
-                        </div>
-                    ` : ''}
-                </div>
-            </div>
-        `;
-    });
-    html += '</div>';
-    
-    container.html(html);
-}
-
-// Função para extrair preview do texto das fichas
-function extrairPreviewTexto(textoReferencia, encaminhamento, procedimento) {
-    // Esta função foi removida pois não é mais necessária
-    // O preview agora é feito diretamente na renderização
-    return '';
-}
-
-// Função para expandir/contrair ficha (removida - não mais necessária) 
-function expandirFicha(fichaId) {
-    // Esta função foi removida - agora usamos apenas o modal de visualização
-    console.log('Função expandirFicha foi removida. Use visualizarFichaReferencia() em vez disso.');
-}
-
-// Função para mostrar estatísticas das fichas
-function mostrarEstatisticasFichas(totalFichas) {
-    const statsContainer = document.querySelector('#fichaReferenciaSection .card-body');
-    
-    if (!statsContainer) return;
-    
-    // Criar ou atualizar painel de estatísticas
-    let statsPanel = statsContainer.querySelector('.stats-panel');
-    if (!statsPanel) {
-        statsPanel = document.createElement('div');
-        statsPanel.className = 'stats-panel mb-3';
-        statsContainer.insertBefore(statsPanel, statsContainer.firstChild);
-    }
-    
-    const statsHtml = `
-        <div class="stats-grid">
-            <div class="stat-item">
-                <div class="stat-icon">
-                    <i class="fas fa-file-export"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-number">${totalFichas}</div>
-                    <div class="stat-label">Fichas Criadas</div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    statsPanel.innerHTML = statsHtml;
-}
-
-// Função para carregar conteúdo completo da ficha (removida - não mais necessária)
-function carregarConteudoCompletoFicha(fichaId) {
-    // Esta função foi removida - agora usamos apenas o modal de visualização
-    console.log('Função carregarConteudoCompletoFicha foi removida. Use visualizarFichaReferencia() em vez disso.');
-}
-
-// Função para visualizar ficha de referência
-function visualizarFichaReferencia(id) {
-    console.log('👁️ Visualizando ficha de referência ID:', id);
-    
-    // Verificar se o modal existe
-    const modalElement = document.getElementById('modalVisualizarFichaReferencia');
-    if (!modalElement) {
-        console.error('❌ Modal modalVisualizarFichaReferencia não encontrado no DOM');
-        alert('Erro: Modal de visualização não encontrado. Recarregue a página.');
-        return;
-    }
-    
-    // Verificar se o Bootstrap está disponível
-    if (typeof bootstrap === 'undefined') {
-        console.error('❌ Bootstrap não está carregado');
-        alert('Erro: Bootstrap não carregado. Recarregue a página.');
-        return;
-    }
-    
-    // Mostrar loading no modal
-    const modalBody = modalElement.querySelector('.modal-body');
-    if (modalBody) {
-        modalBody.innerHTML = `
-            <div class="text-center py-4">
-                <i class="fas fa-spinner fa-spin fa-2x text-primary mb-3"></i>
-                <p class="text-muted">Carregando ficha de referência...</p>
-            </div>
-        `;
-    }
-    
-    // Tentar abrir modal com tratamento de erro
-    try {
-        const modal = new bootstrap.Modal(modalElement);
-        modal.show();
-        console.log('✅ Modal aberto com sucesso');
-    } catch (error) {
-        console.error('❌ Erro ao abrir modal:', error);
-        alert('Erro ao abrir modal de visualização: ' + error.message);
-        return;
-    }
-    
-    // Carregar dados da ficha
-    jQuery.ajax({
-        url: `/api/fichas-referencia/${id}`,
-        method: 'GET',
-        success: function(response) {
-            console.log('✅ Dados da ficha carregados:', response);
-            
-            // Verificar se a resposta tem o formato {success: true, ficha: {...}} ou se é a ficha diretamente
-            let ficha;
-            if (response.success && response.ficha) {
-                // Formato: {success: true, ficha: {...}}
-                ficha = response.ficha;
-            } else if (response.id || response.atendimento_id) {
-                // Formato: dados da ficha diretamente
-                ficha = response;
-            } else {
-                console.error('❌ Formato de resposta não reconhecido:', response);
-                if (modalBody) {
-                    modalBody.innerHTML = `
-                        <div class="alert alert-danger">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            Erro ao carregar a ficha de referência.
-                        </div>
-                    `;
-                }
-                return;
-            }
-            
-            if (ficha) {
-                // Formatar data
-                let dataFormatada = 'Data não informada';
-                try {
-                    if (ficha.data_criacao) {
-                        dataFormatada = ficha.data_criacao;
-                    } else if (ficha.data && ficha.hora) {
-                        dataFormatada = `${ficha.data} às ${ficha.hora}`;
-                    } else if (ficha.data) {
-                        const dataObj = new Date(ficha.data);
-                        if (!isNaN(dataObj.getTime())) {
-                            dataFormatada = dataObj.toLocaleDateString('pt-BR') + ' às ' + dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                        }
-                    }
-                } catch (error) {
-                    console.warn('Erro ao formatar data:', error);
-                }
-                
-                // Construir HTML do modal
-                const modalContent = `
-                    <div class="ficha-visualizacao">
-                        <!-- Cabeçalho da Ficha -->
-                        <div class="ficha-header-modal mb-4">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h5 class="mb-2">
-                                        <i class="fas fa-file-export text-primary me-2"></i>
-                                        Ficha de Referência #${String(ficha.id).padStart(3, '0')}
-                                    </h5>
-                                    <div class="text-muted">
-                                        <i class="fas fa-clock me-1"></i> ${dataFormatada}
-                                        ${ficha.medico_nome ? `<br><i class="fas fa-user-md me-1"></i> Dr(a). ${ficha.medico_nome}` : ''}
-                                    </div>
-                                </div>
-                                <button type="button" class="btn btn-outline-success btn-sm" onclick="imprimirFichaReferencia(${ficha.id})">
-                                    <i class="fas fa-print me-1"></i> Imprimir
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <!-- Conteúdo Principal -->
-                        <div class="ficha-conteudo-modal">
-                            ${ficha.unidade_referencia ? `
-                                <div class="campo-modal mb-4">
-                                    <div class="campo-titulo-modal">
-                                        <i class="fas fa-hospital text-info me-2"></i>
-                                        <strong>Unidade de Referência</strong>
-                                    </div>
-                                    <div class="campo-conteudo-modal destaque-unidade-modal">
-                                        ${ficha.unidade_referencia}
-                                    </div>
-                                </div>
-                            ` : ''}
-                            
-                            ${ficha.encaminhamento_atendimento ? `
-                                <div class="campo-modal mb-4">
-                                    <div class="campo-titulo-modal">
-                                        <i class="fas fa-share text-success me-2"></i>
-                                        <strong>Encaminhamento para Atendimento</strong>
-                                    </div>
-                                    <div class="campo-conteudo-modal">
-                                        ${ficha.encaminhamento_atendimento.replace(/\n/g, '<br>')}
-                                    </div>
-                                </div>
-                            ` : ''}
-                            
-                            ${ficha.procedimento ? `
-                                <div class="campo-modal mb-4">
-                                    <div class="campo-titulo-modal">
-                                        <i class="fas fa-cogs text-warning me-2"></i>
-                                        <strong>Procedimento</strong>
-                                    </div>
-                                    <div class="campo-conteudo-modal">
-                                        ${ficha.procedimento.replace(/\n/g, '<br>')}
-                                    </div>
-                                </div>
-                            ` : ''}
-                            
-                            ${ficha.texto_referencia ? `
-                                <div class="campo-modal mb-4">
-                                    <div class="campo-titulo-modal">
-                                        <i class="fas fa-file-text text-primary me-2"></i>
-                                        <strong>Texto de Referência</strong>
-                                    </div>
-                                    <div class="campo-conteudo-modal texto-referencia-modal">
-                                        ${ficha.texto_referencia.replace(/\n/g, '<br>')}
-                                    </div>
-                                </div>
-                            ` : ''}
-                            
-                            ${!ficha.unidade_referencia && !ficha.encaminhamento_atendimento && !ficha.procedimento && !ficha.texto_referencia ? `
-                                <div class="alert alert-info">
-                                    <i class="fas fa-info-circle me-2"></i>
-                                    Esta ficha não possui conteúdo preenchido.
-                                </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                `;
-                
-                // Atualizar conteúdo do modal
-                if (modalBody) {
-                    modalBody.innerHTML = modalContent;
-                }
-                
-                console.log('✅ Modal de visualização atualizado');
-            } else {
-                console.error('❌ Dados da ficha não encontrados na resposta');
-                if (modalBody) {
-                    modalBody.innerHTML = `
-                        <div class="alert alert-danger">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            Dados da ficha não encontrados.
-                        </div>
-                    `;
-                }
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('❌ Erro ao carregar ficha:', error);
-            console.error('Status:', xhr.status);
-            console.error('Response:', xhr.responseText);
-            
-            if (modalBody) {
-                modalBody.innerHTML = `
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Erro ao carregar a ficha de referência: ${error}
-                    </div>
-                `;
-            }
-        }
-    });
-}
-
-// Função para imprimir ficha de referência
-function imprimirFichaReferencia(id) {
-    if (!id) {
-        alert('ID da ficha de referência não informado.');
-        return;
-    }
-    
-    console.log('🖨️ Imprimindo ficha de referência ID:', id);
-    
-    // Abrir página de impressão em nova aba
-    const url = `/clinica/ficha-referencia/${id}/imprimir`;
-    const novaJanela = window.open(url, '_blank');
-    
-    if (!novaJanela) {
-        alert('Popup bloqueado. Por favor, permita popups para este site e tente novamente.');
-        return;
-    }
-    
-    // Aguardar carregamento e tentar imprimir automaticamente
-    novaJanela.onload = function() {
-        setTimeout(function() {
-            try {
-                novaJanela.print();
-            } catch (error) {
-                console.warn('Não foi possível imprimir automaticamente:', error);
-            }
-        }, 1000); // Aguarda 1 segundo para garantir que a página carregou completamente
-    };
-}
-
-// Função para salvar nova ficha de referência
-function salvarFichaReferencia() {
-    console.log('🚀 Iniciando salvarFichaReferencia()');
-    
-    // Prevenir múltiplas execuções simultâneas
-    const btnSalvar = document.getElementById('btn_salvar_ficha_referencia');
-    if (btnSalvar && btnSalvar.disabled) {
-        console.log('⚠️ Botão já está processando, ignorando clique duplo');
-        return;
-    }
-    
-    const texto_referencia = document.getElementById('texto_referencia').value;
-    const procedimento = document.getElementById('procedimento').value;
-    const unidade_referencia = document.getElementById('unidade_referencia').value;
-    
-    // Coletar checkboxes de encaminhamento
-    const encaminhamentoCheckboxes = [];
-    if (document.getElementById('encaminhamento_ambulatorial')?.checked) {
-        encaminhamentoCheckboxes.push('Ambulatorial');
-    }
-    if (document.getElementById('encaminhamento_hospitalar')?.checked) {
-        encaminhamentoCheckboxes.push('Hospitalar');
-    }
-    if (document.getElementById('encaminhamento_auxilio_diagnostico')?.checked) {
-        encaminhamentoCheckboxes.push('Auxilio Diagnostico');
-    }
-    const encaminhamento_atendimento = encaminhamentoCheckboxes.join(', ');
-    
-    console.log('📝 Valores dos campos:');
-    console.log('  - texto_referencia:', texto_referencia);
-    console.log('  - encaminhamento_atendimento:', encaminhamento_atendimento);
-    console.log('  - procedimento:', procedimento);
-    console.log('  - unidade_referencia:', unidade_referencia);
-    
-    // Validação básica
-    if (!texto_referencia && !encaminhamento_atendimento && !procedimento) {
-        console.log('❌ Validação falhou: nenhum campo preenchido');
-        alert('Por favor, preencha pelo menos um dos campos da ficha de referência.');
-        return;
-    }
-    
-    console.log('✅ Validação passou');
-    
-    // Mostrar indicador de carregamento
-    if (!btnSalvar) {
-        console.error('❌ Botão btn_salvar_ficha_referencia não encontrado!');
-        alert('Erro: Botão de salvamento não encontrado.');
-        return;
-    }
-    
-    const textoOriginal = btnSalvar.innerHTML;
-    btnSalvar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
-    btnSalvar.disabled = true;
-    
-    console.log('🔄 Botão de salvamento configurado para loading');
-    
-    // Obter ID do atendimento
-    const atendimentoId = document.getElementById('atendimento_id') ? 
-                         document.getElementById('atendimento_id').value : 
-                         internacaoId;
-    
-    console.log('🆔 ID do atendimento:', atendimentoId);
-    console.log('🆔 Tipo do atendimentoId:', typeof atendimentoId);
-    console.log('🆔 internacaoId global:', window.internacaoId);
-    
-    if (!atendimentoId) {
-        console.error('❌ ID de atendimento não encontrado');
-        alert('Erro: ID de atendimento não encontrado');
-        btnSalvar.innerHTML = textoOriginal;
-        btnSalvar.disabled = false;
-        return;
-    }
-    
-    // Preparar dados para envio
-    const dados = {
-        atendimento_id: atendimentoId,
-        texto_referencia: texto_referencia,
-        encaminhamento_atendimento: encaminhamento_atendimento,
-        procedimento: procedimento,
-        unidade_referencia: unidade_referencia
-    };
-    
-    console.log('📦 Dados da ficha de referência sendo enviados:', dados);
-    console.log('🌐 URL da requisição: /api/fichas-referencia');
-    console.log('📡 Método: POST');
-    
-    // Enviar requisição
-    $.ajax({
-        url: '/api/fichas-referencia',
-        method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify(dados),
-        beforeSend: function() {
-            console.log('📤 Enviando requisição AJAX...');
-        },
-        success: function(response) {
-            console.log('✅ Resposta de sucesso recebida:', response);
-            
-            if (response.success) {
-                console.log('🎉 Ficha criada com sucesso! ID:', response.ficha_id || response.id);
-                
-                // Limpar formulário
-                const form = document.getElementById('formFichaReferencia');
-                if (form) {
-                    form.reset();
-                    console.log('🧹 Formulário limpo');
-                }
-                
-                // Fechar modal
-                $('#modalNovaFichaReferencia').modal('hide');
-                console.log('🔒 Modal fechado');
-                
-                // AGUARDAR UM POUCO ANTES DE RECARREGAR (evitar concorrência)
-                setTimeout(() => {
-                    console.log('🔄 Recarregando lista de fichas...');
-                    carregarFichasReferencia();
-                }, 500);
-                
-                // Mostrar mensagem de sucesso melhorada
-                mostrarMensagemSucesso('✅ Ficha de referência criada com sucesso!');
-                console.log('✅ Mensagem de sucesso exibida');
-                
-                // Notificação toast adicional
-                mostrarToastSucesso('Nova ficha de referência adicionada ao prontuário');
-            } else {
-                console.error('❌ Resposta indica falha:', response);
-                alert('Erro ao registrar ficha de referência: ' + (response.message || response.error || 'Erro desconhecido'));
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('❌ Erro na requisição AJAX:');
-            console.error('  - Status HTTP:', xhr.status);
-            console.error('  - Status Text:', xhr.statusText);
-            console.error('  - Error:', error);
-            console.error('  - Response Text:', xhr.responseText);
-            
-            let mensagemErro;
-            try {
-                const errorResponse = JSON.parse(xhr.responseText);
-                console.error('  - Parsed Error:', errorResponse);
-                mensagemErro = errorResponse.message || errorResponse.error || error;
-            } catch (e) {
-                console.error('  - Erro ao fazer parse do JSON:', e);
-                mensagemErro = error;
-            }
-            
-            alert('Erro ao registrar ficha de referência: ' + mensagemErro);
-        },
-        complete: function() {
-            console.log('🏁 Requisição concluída - restaurando botão');
-            // Restaurar botão
-            btnSalvar.innerHTML = textoOriginal;
-            btnSalvar.disabled = false;
-        }
-    });
-}
-
-// Função para mostrar toast de sucesso
-function mostrarToastSucesso(mensagem) {
-    const toastHtml = `
-        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1060">
-            <div class="toast show" role="alert">
-                <div class="toast-header bg-success text-white">
-                    <i class="fas fa-check-circle me-2"></i>
-                    <strong class="me-auto">Sucesso</strong>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
-                </div>
-                <div class="toast-body">
-                    ${mensagem}
-                </div>
-            </div>
-        </div>
-    `;
-    
-    // Remover toasts anteriores
-    $('.toast').remove();
-    
-    // Adicionar novo toast
-    $('body').append(toastHtml);
-    
-    // Auto-remover após 5 segundos
-    setTimeout(() => {
-        $('.toast').fadeOut(300, function() {
-            $(this).parent().remove();
-        });
-    }, 5000);
-}
-
-// Inicializador para as funções de fichas de referência
-function inicializarModuloFichasReferencia() {
-    console.log('🔧 Inicializando módulo de fichas de referência...');
-    
-    // Carregar fichas ao inicializar
-    carregarFichasReferencia();
-    
-    // Evento para o botão "Nova Ficha de Referência"
-    const btnNovaFicha = document.getElementById('btn_nova_ficha_referencia');
-    if (btnNovaFicha) {
-        console.log('✅ Botão Nova Ficha encontrado, configurando evento...');
-        btnNovaFicha.addEventListener('click', function() {
-            console.log('🎯 Clique no botão Nova Ficha detectado');
-            
-            // Limpar formulário
-            const form = document.getElementById('formFichaReferencia');
-            if (form) {
-                form.reset();
-                console.log('🧹 Formulário resetado');
-            }
-            
-            // Auto-popular o campo texto_referencia
-            autoPopularTextoReferencia();
-            
-            // Abrir modal
-            try {
-                const modal = new bootstrap.Modal(document.getElementById('modalNovaFichaReferencia'));
-                modal.show();
-                console.log('📋 Modal aberto com sucesso');
-            } catch (error) {
-                console.error('❌ Erro ao abrir modal:', error);
-                // Fallback para jQuery
-                $('#modalNovaFichaReferencia').modal('show');
-            }
-        });
-    } else {
-        console.error('❌ Botão Nova Ficha não encontrado!');
-    }
-    
-    // Evento para salvar nova ficha de referência
-    const btnSalvarFicha = document.getElementById('btn_salvar_ficha_referencia');
-    if (btnSalvarFicha) {
-        console.log('✅ Botão Salvar Ficha encontrado, configurando evento...');
-        btnSalvarFicha.addEventListener('click', salvarFichaReferencia);
-    } else {
-        console.error('❌ Botão Salvar Ficha não encontrado!');
-    }
-    
-    console.log('🎉 Módulo de fichas de referência inicializado com sucesso!');
-}
-
-// Função para auto-popular o campo texto de referência
-function autoPopularTextoReferencia() {
-    console.log('🔧 Auto-populando texto de referência...');
-    
-    const atendimentoId = $('#atendimento_id').val();
-    if (!atendimentoId) {
-        console.warn('⚠️ ID do atendimento não encontrado para auto-população');
-        return;
-    }
-    
-    // Buscar dados da internação
-    $.ajax({
-        url: `/api/internacao/${atendimentoId}`,
-        method: 'GET',
-        success: function(response) {
-            console.log('✅ Dados da internação carregados para auto-população');
-            console.log('📋 Response completa:', response);
-            
-            // Normalizar estrutura da response
-            const dados = response.internacao || response;
-            console.log('📋 Dados normalizados:', dados);
-            
-            // Extrair informações necessárias
-            const hda = dados.hda || '';
-            const exameFisico = dados.anamnese_exame_fisico || dados.folha_anamnese || '';
-            const cidPrincipal = dados.cid_principal || '';
-            
-            console.log('📝 Campos extraídos:');
-            console.log('  - HDA:', hda);
-            console.log('  - HDA length:', hda ? hda.length : 0);
-            console.log('  - HDA trimmed:', hda ? hda.trim() : '');
-            console.log('  - Exame Físico:', exameFisico);
-            console.log('  - CID Principal:', cidPrincipal);
-            
-            // Montar texto padrão
-            let textoReferencia = '';
-            
-            if (hda && hda.trim()) {
-                textoReferencia += 'HDA:\n' + hda.trim();
-            }
-            
-            if (exameFisico && exameFisico.trim()) {
-                if (textoReferencia) textoReferencia += '\n\n';
-                textoReferencia += 'EXAME FÍSICO:\n' + exameFisico.trim();
-            }
-            
-            if (cidPrincipal && cidPrincipal.trim()) {
-                if (textoReferencia) textoReferencia += '\n\n';
-                textoReferencia += 'CID Principal: ' + cidPrincipal.trim();
-            }
-            
-            if (textoReferencia) textoReferencia += '\n\nENCOMINHO A ...';
-            else textoReferencia = 'HDA:\n\nEXAME FÍSICO:\n\nCID PRINCIPAL:\n\nENCOMINHO A ...';
-            
-            console.log('📄 Texto final montado:', textoReferencia);
-            
-            // Preencher o campo
-            const textoReferenciaField = document.getElementById('texto_referencia');
-            if (textoReferenciaField) {
-                textoReferenciaField.value = textoReferencia;
-                console.log('✅ Campo texto_referencia preenchido automaticamente');
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('❌ Erro ao carregar dados para auto-população:', error);
-            // Em caso de erro, usar formato básico
-            const textoBasico = 'HDA:\n\nEXAME FÍSICO:\n CID PRINCIPAL: \n\n \nPARÂMETROS: \n\nENCOMINHO A ...';
-            const textoReferenciaField = document.getElementById('texto_referencia');
-            if (textoReferenciaField) {
-                textoReferenciaField.value = textoBasico;
-                console.log('✅ Campo texto_referencia preenchido com formato básico');
-            }
-        }
-    });
-}

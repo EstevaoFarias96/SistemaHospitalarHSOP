@@ -437,3 +437,24 @@ class AdmissaoEnfermagem(db.Model):
 
     internacao = relationship("Internacao", backref="admissoes_enfermagem", passive_deletes=True)
     enfermeiro = relationship("Funcionario", backref="admissoes_enfermagem", passive_deletes=True)
+
+
+class FichaReferencia(db.Model):
+    __tablename__ = 'fichas_referencia'
+
+    id = db.Column(db.Integer, primary_key=True)
+    
+    atendimento_id = db.Column(db.String(8), db.ForeignKey('atendimentos.id'), nullable=False)
+    medico_id = db.Column(db.Integer, db.ForeignKey('funcionarios.id'), nullable=False)
+    internacao_id = db.Column(db.Integer, db.ForeignKey('atendimentos_clinica.id'), nullable=True)
+    
+    texto_referencia = db.Column(db.Text, nullable=True)
+    encaminhamento_atendimento = db.Column(db.Text, nullable=True)
+    procedimento = db.Column(db.Text, nullable=True)
+    unidade_referencia = db.Column(db.String(255), nullable=True)
+    data = db.Column(db.Date, nullable=False)
+    hora = db.Column(db.Time, nullable=False)
+
+    atendimento = relationship('Atendimento', backref='fichas_referencia')
+    medico = relationship('Funcionario', backref='fichas_referencia')
+    internacao = relationship('Internacao', backref='fichas_referencia')

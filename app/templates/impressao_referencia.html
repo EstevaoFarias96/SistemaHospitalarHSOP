@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha de Referência e Contra-Referência</title>
+    <style>
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 0.5cm;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: Arial, sans-serif;
+                font-size: 9pt;
+                line-height: 1.2;
+            }
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 9pt;
+            line-height: 1.2;
+            margin: 0;
+            padding: 10px;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        .header-title {
+            text-align: center;
+            font-size: 10pt;
+            font-weight: bold;
+            margin-bottom: 8px;
+            background-color: #f0f0f0;
+            padding: 4px;
+            border: 2px solid #000;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 9pt;
+            font-weight: bold;
+            background-color: #e8e8e8;
+            padding: 3px;
+            margin: 6px 0 3px 0;
+            border: 1px solid #000;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 6px;
+            font-size: 9pt;
+        }
+        
+        td, th {
+            border: 1px solid #000;
+            padding: 3px;
+            text-align: left;
+            vertical-align: top;
+        }
+        
+        .label {
+            font-weight: bold;
+            background-color: #f8f8f8;
+        }
+        
+        .text-area {
+            height: 80px;
+            border: 1px solid #000;
+            padding: 5px;
+            margin: 5px 0;
+            background-color: #fff;
+            font-size: 9pt;
+            line-height: 1.3;
+        }
+        
+        .small-field {
+            height: 25px;
+        }
+        
+        .signature-section {
+            margin-top: 15px;
+        }
+        
+        .diagnostic-row {
+            height: 20px;
+        }
+        
+        .compact-spacing {
+            margin: 3px 0;
+        }
+        
+        .header-images {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2px;
+            padding: 0px;
+        }
+        
+        .header-images img {
+            width: 4cm;
+            height: 4cm;
+            object-fit: contain;
+            border: 0px solid #ddd;
+        }
+        
+        .instructions-box {
+            width: 5cm;
+            height: 2cm;
+            border: 2px solid #000;
+            padding: 5px;
+            font-size: 7pt;
+            line-height: 1.1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background-color: #f9f9f9;
+            box-sizing: border-box;
+        }
+        
+        .instructions-box ol {
+            margin: 0;
+            padding-left: 12px;
+        }
+        
+        .instructions-box li {
+            margin-bottom: 3px;
+        }
+        
+        .header-text {
+            text-align: center;
+            font-size: 8pt;
+            line-height: 1.2;
+            font-weight: bold;
+            color: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            width: 3cm;
+            height: 3cm;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Cabeçalho com Imagens -->
+        <div class="header-images">
+            <img src="{{ url_for('static', filename='Imagens/sus.png') }}" alt="Logo Massapê">
+            <img src="{{ url_for('static', filename='Imagens/logomassape.png') }}" alt="Logo SUS">
+            <div class="instructions-box">
+                <ol>
+                    <li>Preencha esta ficha em três vias.</li>
+                    <li>Ao término da consulta ou tratamento, entregue duas vias ao usuário, orientando-o a retornar com a primeira via à unidade de origem.</li>
+                </ol>
+            </div>
+        </div>
+        
+        <!-- Cabeçalho Principal -->
+        <div class="header-title">FICHA DE REFERÊNCIA</div>
+        
+        <!-- Dados da Unidade e Paciente -->
+        <table>
+            <tr>
+                <td class="label" style="width: 25%;">Unidade de origem:</td>
+                <td style="width: 40%;">HOSPITAL SENADOR OZIRES PONTES</td>
+                <td class="label" style="width: 15%;">Município:</td>
+                <td style="width: 20%;">MASSAPÊ</td>
+            </tr>
+            <tr>
+                <td class="label" style="width: 25%;">Distrito Sanitário:</td>
+                <td style="width: 25%;"></td>
+                <td class="label" style="width: 15%;">Sexo: {{paciente_sexo}} </td>
+                <td style="width: 35%;">Prontuário: {{atendimento_id}}</td>
+            </tr>
+            <tr>
+                <td class="label">Nome:</td>
+                <td style="width: 40%;">{{paciente_nome}}</td>
+                <td class="label">Ocupação:</td>
+                <td style="width: 35%;"></td>
+            </tr>
+            <tr>
+                <td class="label">Data Nascimento:</td>
+                <td>{{paciente_data}}</td>
+                <td class="label">Endereço:</td>
+                <td>{{paciente_endereco}}</td>
+            </tr>
+        </table>
+        
+        <!-- Motivo da Referência -->
+        <div class="text-area">
+            <strong>Motivo da Referência:</strong><br>
+            {{texto_referencia}}
+        </div>
+        
+        <!-- Agendamento -->
+        <div class="section-title">AGENDAMENTO</div>
+        <table>
+            <tr>
+                <td class="label" style="width: 20%;">Encaminhamento para:</td>
+                <td style="width: 30%;">{{tipo_atendimento}}</td>
+                <td class="label" style="width: 20%;">Unidade de Referência:</td>
+                <td style="width: 30%;">{{referencia_unidade}}</td>
+            </tr>
+            <tr>
+                <td class="label">Procedimento:</td>
+                <td>{{referencia_atendimento}}</td>
+                <td class="label" colspan="2">Data: {{referencia_data}}</td>
+            </tr>
+            <tr>
+                <td class="label">Profissional:</td>
+                <td colspan="3"></td>
+            </tr>
+        </table>
+        
+        <!-- Contra-Referência -->
+        <div class="section-title">FICHA DE CONTRA-REFERÊNCIA</div>
+        <table>
+            <tr>
+                <td class="label" style="width: 25%;">Município:</td>
+                <td style="width: 25%;"></td>
+                <td class="label" style="width: 25%;">Alta:</td>
+                <td style="width: 25%;">____/____/_____</td>
+            </tr>
+            <tr>
+                <td class="label">Unidade Referência:</td>
+                <td colspan="3">{{referencia_unidade}}</td>
+            </tr>
+        </table>
+        
+        <!-- Resumo Clínico -->
+        <table>
+            <tr>
+                <td class="label">Resumo Clínico:</td>
+            </tr>
+            <tr>
+                <td class="small-field"></td>
+            </tr>
+        </table>
+        
+        <!-- Resultado de Exames -->
+        <table>
+            <tr>
+                <td class="label">Resultado de Exames:</td>
+            </tr>
+            <tr>
+                <td class="small-field"></td>
+            </tr>
+        </table>
+        
+        <!-- Diagnósticos -->
+        <table>
+            <tr>
+                <td class="label diagnostic-row" style="width: 15%;" rowspan="3">Diagnóstico:</td>
+                <td class="label diagnostic-row" style="width: 45%;">Principal:</td>
+                <td class="label diagnostic-row" style="width: 10%;">CID:</td>
+                <td class="diagnostic-row" style="width: 30%;"></td>
+            </tr>
+            <tr>
+                <td class="label diagnostic-row">Secundário 1:</td>
+                <td class="label diagnostic-row">CID:</td>
+                <td class="diagnostic-row"></td>
+            </tr>
+            <tr>
+                <td class="label diagnostic-row">Secundário 2:</td>
+                <td class="label diagnostic-row">CID:</td>
+                <td class="diagnostic-row"></td>
+            </tr>
+        </table>
+        
+        <!-- Proposta de Conduta -->
+        <table>
+            <tr>
+                <td class="label">Proposta de Conduta para seguimento:</td>
+            </tr>
+            <tr>
+                <td class="small-field"></td>
+            </tr>
+        </table>
+        
+        <!-- Questões de Avaliação -->
+        <table>
+            <tr>
+                <td style="width: 50%;">O problema justificou a referência?</td>
+                <td style="width: 50%;">O motivo da referência coincide com o diagnóstico?</td>
+            </tr>
+            <tr>
+                <td class="small-field"></td>
+                <td class="small-field"></td>
+            </tr>
+        </table>
+        
+        <!-- Assinatura -->
+        <table class="signature-section">
+            <tr>
+                <td class="label" style="width: 40%;">Assinatura do Encaminhamento - Nº Registro:</td>
+                <td class="label" style="width: 20%;">Função:</td>
+                <td class="label" style="width: 40%;">Data: ___/___/_____</td>
+            </tr>
+            <tr>
+                <td style="height: 30px;"></td>
+                <td></td>
+                <td></td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

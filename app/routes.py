@@ -17,7 +17,7 @@ from docxtpl import DocxTemplate
 from docx import Document
 from io import BytesIO
 from app import db
-from app.models import Funcionario,Leito,AdmissaoEnfermagem, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN, now_brasilia
+from app.models import Funcionario,Leito,AdmissaoEnfermagem, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN, now_brasilia, FichaReferencia
 from app.timezone_helper import formatar_datetime_br_completo, formatar_datetime_br, converter_para_brasilia
 from zoneinfo import ZoneInfo
 
@@ -516,8 +516,7 @@ def listar_admissoes_enfermagem_old(internacao_id):  # Renomeada para evitar con
 def api_listar_medicamentos():
     try:
         # Verificar autenticação
-        autenticado, _ = esta_autenticado()
-        if not autenticado:
+        if 'user_id' not in session:
             return jsonify({'success': False, 'message': 'Usuário não autenticado'}), 401
 
         # Buscar medicamentos a partir dos aprazamentos
@@ -1809,6 +1808,7 @@ def buscar_internacao(internacao_id):
             'diagnostico': internacao.diagnostico,
             'diagnostico_inicial': internacao.diagnostico_inicial,
             'cid_principal': internacao.cid_principal,
+            'hda': internacao.hda,  # Campo HDA que estava faltando
             'historico_internacao': internacao.historico_internacao,
             'conduta': internacao.conduta,
             'cuidados_gerais': internacao.cuidados_gerais,
@@ -3688,6 +3688,8 @@ def consultar_rn(rn_id):
 
     except Exception as e:
         return jsonify({'success': False, 'message': f'Erro ao consultar RN: {str(e)}'}), 500
+
+@bp.route('/api/fichas-referencia/atendimento/<string:atendimento_id>', methods=['GET'])
 @bp.route('/api/pacientes', methods=['POST'])
 @login_required
 def criar_paciente():
@@ -3938,12 +3940,15 @@ def historico_internacao(atendimento_id):
 
 @bp.route('/api/internacao/<string:atendimento_id>', methods=['GET'])
 @login_required
-def get_internacao_por_id(internacao_id):
-    internacao = Internacao.query.get_or_404(internacao_id)
+def get_internacao_por_id(atendimento_id):
+    # Buscar a internação pelo atendimento_id
+    internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
+    if not internacao:
+        return jsonify({'success': False, 'message': 'Internação não encontrada'}), 404
 
     atendimento = Atendimento.query.get(internacao.atendimento_id)
-    paciente = Paciente.query.get(atendimento.paciente_id)
-    medico = Funcionario.query.get(atendimento.medico_id)
+    paciente = atendimento.paciente if atendimento else None
+    medico = Funcionario.query.get(atendimento.medico_id) if atendimento else None
 
     return jsonify({
         'success': True,
@@ -3953,6 +3958,9 @@ def get_internacao_por_id(internacao_id):
             'data_internacao': internacao.data_internacao.isoformat() if internacao.data_internacao else None,
             'data_alta': internacao.data_alta.isoformat() if internacao.data_alta else None,
             'diagnostico': internacao.diagnostico,
+            'hda': internacao.hda,
+            'anamnese_exame_fisico': internacao.folha_anamnese,
+            'cid_principal': internacao.cid_principal,
             'historico_internacao': internacao.historico_internacao,
             'conduta': internacao.conduta,
             'cuidados_gerais': internacao.cuidados_gerais,
@@ -4630,7 +4638,7 @@ def imprimir_prescricao(prescricao_id):
     if not internacao:
         return abort(404, 'Internação não vinculada à prescrição.')
 
-        atendimento = Atendimento.query.get(internacao.atendimento_id)
+    atendimento = Atendimento.query.get(internacao.atendimento_id)
     if not atendimento:
         return abort(404, 'Atendimento não encontrado.')
 
@@ -5966,70 +5974,6 @@ def atualizar_anamnese_conduta_internacao(atendimento_id):
             'error': str(e)
         }), 500
 
-@bp.route('/api/internacao/<string:atendimento_id>/justificativas', methods=['PUT'])
-@login_required
-def atualizar_justificativas_internacao(atendimento_id):
-    """
-    Atualiza dados de justificativas da internação
-    """
-    try:
-        # Verificar se o usuário é médico
-        current_user = get_current_user()
-        if current_user.cargo.lower() != 'medico':
-            return jsonify({
-                'success': False,
-                'message': 'Apenas médicos podem atualizar justificativas'
-            }), 403
-
-        # Buscar a internação pelo atendimento_id
-        internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
-        if not internacao:
-            return jsonify({
-                'success': False,
-                'message': 'Internação não encontrada'
-            }), 404
-
-        # Obter dados do JSON
-        dados = request.get_json()
-        if not dados:
-            return jsonify({
-                'success': False,
-                'message': 'Dados não fornecidos'
-            }), 400
-
-        # Campos permitidos para atualização de justificativas
-        campos_justificativas = [
-            'justificativa_internacao_sinais_e_sintomas',
-            'justificativa_internacao_condicoes',
-            'justificativa_internacao_principais_resultados_diagnostico'
-        ]
-
-        # Atualizar campos de justificativas
-        for campo in campos_justificativas:
-            if campo in dados:
-                setattr(internacao, campo, dados[campo])
-
-        # Salvar alterações
-        db.session.commit()
-
-        # Log da ação
-        logging.info(f"Justificativas atualizadas pelo médico {current_user.nome} (ID: {current_user.id}) para internação {atendimento_id}")
-
-        return jsonify({
-            'success': True,
-            'message': 'Justificativas atualizadas com sucesso'
-        })
-
-    except Exception as e:
-        db.session.rollback()
-        logging.error(f"Erro ao atualizar justificativas da internação {atendimento_id}: {str(e)}")
-        logging.error(traceback.format_exc())
-        return jsonify({
-            'success': False,
-            'message': 'Erro interno do servidor',
-            'error': str(e)
-        }), 500
-
 @bp.route('/api/internacao/<string:atendimento_id>/informacoes-alta', methods=['GET'])
 @login_required
 def buscar_informacoes_alta_para_impressao(atendimento_id):
@@ -6225,3 +6169,212 @@ def impressao_atestado(atestado_id):
         flash('Erro interno do servidor ao gerar impressão do atestado.', 'error')
         return redirect(url_for('main.dashboard'))
 
+@bp.route('/clinica/ficha-referencia/<int:ficha_id>/imprimir')
+@login_required
+def impressao_ficha_referencia(ficha_id):
+    """
+    Gera página de impressão para ficha de referência
+    """
+    try:
+        # Buscar a ficha de referência com informações relacionadas
+        ficha = FichaReferencia.query.options(
+            joinedload(FichaReferencia.atendimento).joinedload(Atendimento.paciente),
+            joinedload(FichaReferencia.medico)
+        ).filter_by(id=ficha_id).first()
+        
+        if not ficha:
+            flash('Ficha de referência não encontrada.', 'error')
+            return redirect(url_for('main.dashboard'))
+        
+        # Buscar dados do paciente e médico
+        paciente = ficha.atendimento.paciente
+        medico = ficha.medico
+        
+        # Calcular idade do paciente
+        idade = None
+        if paciente.data_nascimento:
+            hoje = date.today()
+            idade = hoje.year - paciente.data_nascimento.year
+            if hoje.month < paciente.data_nascimento.month or \
+               (hoje.month == paciente.data_nascimento.month and hoje.day < paciente.data_nascimento.day):
+                idade -= 1
+        
+        # Formatar data da ficha
+        data_ficha_formatada = f"{ficha.data.strftime('%d/%m/%Y')} às {ficha.hora.strftime('%H:%M')}"
+        
+        # Dados para o template
+        contexto = {
+            'ficha': ficha,
+            'paciente': paciente,
+            'medico': medico,
+            'idade': idade,
+            'data_ficha': data_ficha_formatada,
+            'atendimento_id': ficha.atendimento_id,
+            'paciente_nome': paciente.nome,
+            'paciente_sexo': paciente.sexo,
+            'paciente_data': paciente.data_nascimento.strftime('%d/%m/%Y') if paciente.data_nascimento else '',
+            'paciente_endereco': paciente.endereco or '',
+            'texto_referencia': ficha.texto_referencia or '',
+            'tipo_atendimento': ficha.encaminhamento_atendimento or '',
+            'referencia_unidade': ficha.unidade_referencia or '',
+            'referencia_atendimento': ficha.procedimento or '',
+            'referencia_data': data_ficha_formatada
+        }
+        
+        return render_template('impressao_referencia.html', **contexto)
+        
+    except Exception as e:
+        current_app.logger.error(f'Erro ao gerar impressão da ficha de referência {ficha_id}: {str(e)}')
+        flash('Erro interno do servidor ao gerar impressão da ficha de referência.', 'error')
+        return redirect(url_for('main.dashboard'))
+
+@bp.route('/api/fichas-referencia', methods=['POST'])
+@login_required
+def criar_ficha_referencia():
+    dados = request.get_json()
+    
+    try:
+        # Obter dados do usuário atual
+        current_user = get_current_user()
+        if current_user.cargo.lower() != 'medico':
+            return jsonify({'success': False, 'error': 'Acesso negado. Apenas médicos podem criar fichas de referência.'}), 403
+        
+        # Buscar internação pelo atendimento_id se fornecido
+        internacao = None
+        if 'atendimento_id' in dados:
+            internacao = Internacao.query.filter_by(atendimento_id=dados['atendimento_id']).first()
+        
+        # Obter data e hora atuais
+        from datetime import datetime, timezone, timedelta
+        agora = datetime.now(timezone(timedelta(hours=-3)))  # Timezone do Brasil
+        
+        nova_ficha = FichaReferencia(
+            atendimento_id=dados['atendimento_id'],
+            medico_id=current_user.id,  # Usar o ID do médico logado
+            internacao_id=internacao.id if internacao else None,  # Preencher automaticamente se encontrado
+            texto_referencia=dados.get('texto_referencia'),
+            encaminhamento_atendimento=dados.get('encaminhamento_atendimento'),
+            procedimento=dados.get('procedimento'),
+            unidade_referencia=dados.get('unidade_referencia'),
+            data=agora.date(),  # Data atual automaticamente
+            hora=agora.time()   # Hora atual automaticamente
+        )
+        db.session.add(nova_ficha)
+        db.session.commit()
+
+        return jsonify({'success': True, 'id': nova_ficha.id}), 201
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@bp.route('/api/fichas-referencia', methods=['GET'])
+def listar_fichas_referencia():
+    fichas = FichaReferencia.query.all()
+    resultado = []
+    for ficha in fichas:
+        resultado.append({
+            'id': ficha.id,
+            'atendimento_id': ficha.atendimento_id,
+            'medico_id': ficha.medico_id,
+            'internacao_id': ficha.internacao_id,
+            'texto_referencia': ficha.texto_referencia,
+            'encaminhamento_atendimento': ficha.encaminhamento_atendimento,
+            'procedimento': ficha.procedimento,
+            'unidade_referencia': ficha.unidade_referencia,
+            'data': ficha.data.strftime('%Y-%m-%d'),
+            'hora': ficha.hora.strftime('%H:%M')
+        })
+    return jsonify(resultado), 200
+
+@bp.route('/api/fichas-referencia/lista/<string:atendimento_id>', methods=['GET'])
+@login_required
+def api_listar_fichas_por_atendimento(atendimento_id):
+    """
+    Lista as fichas de referência de um atendimento específico (endpoint específico)
+    """
+    try:
+        fichas = FichaReferencia.query.filter_by(atendimento_id=atendimento_id).order_by(FichaReferencia.data.desc(), FichaReferencia.hora.desc()).all()
+        
+        resultado = []
+        for ficha in fichas:
+            # Buscar dados do médico
+            medico = Funcionario.query.get(ficha.medico_id)
+            
+            resultado.append({
+                'id': ficha.id,
+                'atendimento_id': ficha.atendimento_id,
+                'medico_id': ficha.medico_id,
+                'medico_nome': medico.nome if medico else 'Médico não encontrado',
+                'internacao_id': ficha.internacao_id,
+                'texto_referencia': ficha.texto_referencia,
+                'encaminhamento_atendimento': ficha.encaminhamento_atendimento,
+                'procedimento': ficha.procedimento,
+                'unidade_referencia': ficha.unidade_referencia,
+                'data': ficha.data.strftime('%Y-%m-%d'),
+                'hora': ficha.hora.strftime('%H:%M'),
+                'data_criacao': f"{ficha.data.strftime('%d/%m/%Y')} às {ficha.hora.strftime('%H:%M')}"
+            })
+        
+        return jsonify({'success': True, 'fichas': resultado}), 200
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@bp.route('/api/fichas-referencia/<int:id>', methods=['GET'])
+@login_required
+def buscar_ficha_por_id(id):
+    """
+    Busca uma ficha específica por ID
+    """
+    try:
+        ficha = FichaReferencia.query.get(id)
+        if not ficha:
+            return jsonify({'success': False, 'message': 'Ficha não encontrada'}), 404
+
+        # Buscar dados do médico
+        medico = Funcionario.query.get(ficha.medico_id)
+
+        return jsonify({
+            'id': ficha.id,
+            'atendimento_id': ficha.atendimento_id,
+            'medico_id': ficha.medico_id,
+            'medico_nome': medico.nome if medico else 'Médico não encontrado',
+            'internacao_id': ficha.internacao_id,
+            'texto_referencia': ficha.texto_referencia,
+            'encaminhamento_atendimento': ficha.encaminhamento_atendimento,
+            'procedimento': ficha.procedimento,
+            'unidade_referencia': ficha.unidade_referencia,
+            'data': ficha.data.strftime('%Y-%m-%d'),
+            'hora': ficha.hora.strftime('%H:%M'),
+            'data_criacao': f"{ficha.data.strftime('%d/%m/%Y')} às {ficha.hora.strftime('%H:%M')}"
+        }), 200
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@bp.route('/api/fichas-referencia/<int:id>', methods=['PUT'])
+def atualizar_ficha_referencia(id):
+    dados = request.get_json()
+    ficha = FichaReferencia.query.get(id)
+
+    if not ficha:
+        return jsonify({'success': False, 'message': 'Ficha não encontrada'}), 404
+
+    try:
+        ficha.texto_referencia = dados.get('texto_referencia', ficha.texto_referencia)
+        ficha.encaminhamento_atendimento = dados.get('encaminhamento_atendimento', ficha.encaminhamento_atendimento)
+        ficha.procedimento = dados.get('procedimento', ficha.procedimento)
+        ficha.unidade_referencia = dados.get('unidade_referencia', ficha.unidade_referencia)
+        
+        if 'data' in dados:
+            ficha.data = datetime.strptime(dados['data'], "%Y-%m-%d").date()
+        if 'hora' in dados:
+            ficha.hora = datetime.strptime(dados['hora'], "%H:%M").time()
+
+        db.session.commit()
+        return jsonify({'success': True}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 400

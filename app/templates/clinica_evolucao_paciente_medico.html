@@ -16,7 +16,7 @@
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 
     <!-- Seu script, que depende das bibliotecas acima -->
-    <script src="/static/js/clinica_medico.js" defer></script>
+    <script src="/static/js/clinica_medico.js?v=20250627" defer></script>
     <script src="/static/js/informacoes_alta.js" defer></script>
     <script src="/static/js/modal_hda_fix.js" defer></script>
     <script src="/static/js/modals_medico_fix.js" defer></script>
@@ -1194,6 +1194,532 @@
         .spinner-border-primary {
             color: #0d6efd;
         }
+
+        /* ===== ESTILOS PARA FICHAS DE REFERÊNCIA ===== */
+        
+        /* Estatísticas das fichas */
+        .fichas-stats {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid #dee2e6;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            text-align: center;
+        }
+
+        .stat-item {
+            padding: 0.5rem;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        /* Grid das fichas */
+        .fichas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        /* Card da ficha */
+        .ficha-card {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+        }
+
+        .ficha-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            border-color: #007bff;
+        }
+
+        /* Header da ficha */
+        .ficha-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 16px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .ficha-info {
+            flex: 1;
+        }
+        
+        .ficha-titulo {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #2c3e50;
+            margin-bottom: 6px;
+        }
+        
+        .ficha-metadados {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        
+        .ficha-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-action {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #6c757d;
+        }
+        
+        .btn-action:hover {
+            background: #007bff;
+            border-color: #007bff;
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .btn-print:hover {
+            background: #28a745;
+            border-color: #28a745;
+        }
+        
+        .ficha-content {
+            padding: 16px;
+        }
+        
+        .campo-principal {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .campo-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .campo-valor {
+            color: #2c3e50;
+            line-height: 1.4;
+        }
+        
+        .destaque-unidade {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            color: #1565c0;
+            border: 1px solid #90caf9;
+        }
+        
+        .campo-secundario {
+            border-left: 3px solid #ffc107;
+            padding-left: 12px;
+        }
+        
+        .campo-label-pequeno {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #6c757d;
+            margin-bottom: 4px;
+        }
+        
+        .campo-valor-pequeno {
+            font-size: 0.9rem;
+            color: #495057;
+            line-height: 1.3;
+        }
+        
+        .tem-mais-conteudo {
+            margin-top: 12px;
+            padding: 8px 12px;
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+        
+        /* Estilos removidos: ficha-footer, btn-expand, expand-icon, ficha-expanded */
+        /* Agora usamos apenas o modal de visualização */
+        
+        /* Estilos para o Modal de Visualização */
+        .ficha-visualizacao {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .stats-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            padding: 15px;
+            color: white;
+            margin-bottom: 20px;
+        }
+        
+        .stats-grid {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .stat-icon {
+            font-size: 2rem;
+            opacity: 0.8;
+        }
+        
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .empty-state {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .fichas-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .ficha-header {
+                padding: 12px;
+            }
+            
+            .ficha-content {
+                padding: 12px;
+            }
+            
+            .ficha-metadados {
+                font-size: 0.8rem;
+            }
+        }
+        
+        /* Estilos para o Modal de Visualização */
+        .ficha-visualizacao {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .ficha-header-modal {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .ficha-header-modal h5 {
+            color: #2c3e50;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .campo-modal {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .campo-titulo-modal {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 12px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid #f1f3f4;
+            padding-bottom: 8px;
+        }
+        
+        .campo-conteudo-modal {
+            color: #2c3e50;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .destaque-unidade-modal {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-left-color: #2196f3;
+            font-weight: 600;
+            color: #1565c0;
+        }
+        
+        .texto-referencia-modal {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            border-left-color: #ff9800;
+            color: #e65100;
+        }
+        
+        /* === ESTILOS PARA A NOVA MODAL DE FICHA DE REFERÊNCIA === */
+        
+        /* Modal de tamanho extra-large com visual aprimorado */
+        .modal-xl {
+            --bs-modal-width: 1200px;
+        }
+        
+        /* Header com gradiente */
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
+        
+        /* Conteúdo da modal com padding aprimorado */
+        .modal-body.p-4 {
+            padding: 2rem !important;
+            background: #f8f9fa;
+        }
+        
+        /* Alerta informativo estilizado */
+        .alert-info {
+            background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+            border: 1px solid #b6d4da;
+            color: #0c5460;
+            border-radius: 12px;
+            padding: 1.25rem;
+            box-shadow: 0 2px 8px rgba(23, 162, 184, 0.15);
+        }
+        
+        /* Form floating labels melhorados */
+        .form-floating > .form-control {
+            height: calc(3.5rem + 2px);
+            line-height: 1.25;
+            font-size: 1rem;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-floating > .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+            background-color: #fff;
+        }
+        
+        .form-floating > label {
+            padding: 1rem 0.75rem;
+            color: #6c757d;
+            font-weight: 500;
+        }
+        
+        /* Checkboxes aprimorados */
+        .form-check-lg {
+            background: #ffffff;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .form-check-lg:hover {
+            border-color: #007bff;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .form-check-lg .form-check-input {
+            margin-top: 0.1rem;
+            transform: scale(1.3);
+        }
+        
+        .form-check-lg .form-check-input:checked {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        
+        .form-check-lg .form-check-label {
+            cursor: pointer;
+            font-size: 1rem;
+            padding-left: 0.5rem;
+        }
+        
+        .form-check-lg .form-check-label small {
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+        
+        /* Área do texto de referência destacada */
+        .border-primary.border-2 {
+            border-color: #007bff !important;
+            border-width: 2px !important;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+            border-radius: 15px !important;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.1);
+        }
+        
+        /* Textarea principal */
+        #texto_referencia {
+            border: none !important;
+            background: transparent !important;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+            font-size: 14px !important;
+            line-height: 1.6 !important;
+            resize: vertical !important;
+            box-shadow: none !important;
+        }
+        
+        #texto_referencia:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        
+        #texto_referencia::placeholder {
+            color: #6c757d;
+            font-style: italic;
+            opacity: 0.8;
+        }
+        
+        /* Footer da modal */
+        .modal-footer.bg-light {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+            border-top: 2px solid #dee2e6;
+        }
+        
+        /* Botões aprimorados */
+        .btn-lg {
+            padding: 0.75rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-success.btn-lg {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+            border: none;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .btn-success.btn-lg:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+        
+        .btn-outline-secondary.btn-lg {
+            border: 2px solid #6c757d;
+            color: #6c757d;
+        }
+        
+        .btn-outline-secondary.btn-lg:hover {
+            background: #6c757d;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+        
+        /* Ícones coloridos */
+        .text-primary { color: #007bff !important; }
+        .text-info { color: #17a2b8 !important; }
+        .text-success { color: #28a745 !important; }
+        .text-warning { color: #ffc107 !important; }
+        .text-danger { color: #dc3545 !important; }
+        
+        /* Animações suaves */
+        .modal.fade .modal-dialog {
+            transition: transform 0.4s ease-out;
+        }
+        
+        .modal.show .modal-dialog {
+            transform: none;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 1200px) {
+            .modal-xl {
+                --bs-modal-width: 95vw;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .modal-body.p-4 {
+                padding: 1rem !important;
+            }
+            
+            .form-check-lg {
+                padding: 0.75rem;
+            }
+            
+            #texto_referencia {
+                min-height: 200px !important;
+            }
+            
+            .btn-lg {
+                padding: 0.6rem 1.5rem;
+                font-size: 1rem;
+            }
+        }
+        
+        /* Responsividade do Modal */
+        @media (max-width: 768px) {
+            .ficha-header-modal {
+                padding: 15px;
+            }
+            
+            .campo-modal {
+                padding: 12px;
+            }
+            
+            .campo-titulo-modal {
+                font-size: 0.9rem;
+            }
+            
+            .campo-conteudo-modal {
+                font-size: 0.9rem;
+                padding: 10px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1240,6 +1766,10 @@
             <a class="nav-link" href="#receituarioSection" data-bs-toggle="pill">
                 <i class="fas fa-prescription"></i>
                 <span>Receituário</span>
+            </a>
+            <a class="nav-link" href="#fichaReferenciaSection" data-bs-toggle="pill">
+                <i class="fas fa-file-export"></i>
+                <span>Ficha de Referência</span>
             </a>
             <a class="nav-link" href="#atestadoSection" data-bs-toggle="pill">
                 <i class="fas fa-file-medical"></i>
@@ -2056,6 +2586,31 @@
             </div>
         </div>
     </div>
+
+    <div id="fichaReferenciaSection" class="content-section">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-file-export me-2"></i>Fichas de Referência
+                </h5>
+                <button class="btn btn-light btn-sm" id="btn_nova_ficha_referencia" data-bs-toggle="modal" data-bs-target="#modalNovaFichaReferencia">
+                    <i class="fas fa-plus-circle"></i> Nova Ficha de Referência
+                </button>
+            </div>
+            <div class="card-body">
+                <!-- Estatísticas serão inseridas aqui automaticamente pelo JS -->
+                
+                <div id="listaFichasReferencia">
+                    <div class="text-center py-4">
+                        <i class="fas fa-spinner fa-spin text-primary"></i> 
+                        Carregando fichas de referência...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 
     <div id="atestadoSection" class="content-section">
         <div class="card shadow-sm">
@@ -3720,26 +4275,6 @@
         }
     });
 
-    /* 
-     * ===== STATUS DO DEBUG FINAL =====
-     * 
-     * ✅ CORREÇÕES APLICADAS:
-     * 1. Removidas funções e event handlers duplicados
-     * 2. Unificado cache de dados (dadosDiagnosticoCache)
-     * 3. Console.logs de debug comentados para produção
-     * 4. Alertas de erro otimizados (não mostram response completa)
-     * 5. Event handlers usando $(document).on para elementos dinâmicos
-     * 6. Timeouts e error handling melhorados
-     * 
-     * ✅ FUNCIONALIDADES VERIFICADAS:
-     * - Carregamento de dados de diagnóstico ✓
-     * - Edição e salvamento de diagnóstico ✓
-     * - Feedback visual adequado ✓
-     * - Tratamento de erros robusto ✓
-     * - Performance otimizada ✓
-     * 
-     * 🚀 PRONTO PARA PRODUÇÃO
-     */
 
     // Correção específica para o modal HDA
     $(document).ready(function() {
@@ -3840,6 +4375,99 @@
         } else {
             console.error('❌ ID do atendimento não encontrado!');
         }
+        
+        // === DEBUG FICHAS DE REFERÊNCIA ===
+        console.log('🔍 === VERIFICAÇÃO FICHAS DE REFERÊNCIA ===');
+        
+        const elementosFichas = {
+            'Botão Nova Ficha': '#btn_nova_ficha_referencia',
+            'Botão Salvar Ficha': '#btn_salvar_ficha_referencia',
+            'Modal Ficha': '#modalNovaFichaReferencia',
+            'Form Ficha': '#formFichaReferencia',
+            'Campo Texto Referência': '#texto_referencia',
+            'Campo Encaminhamento': '#encaminhamento_atendimento',
+            'Campo Procedimento': '#procedimento',
+            'Campo Unidade Referência': '#unidade_referencia',
+            'Lista Fichas Hoje': '#listaFichasDoDia',
+            'Lista Fichas Antigas': '#listaFichasAntigas'
+        };
+        
+        let fichasOk = true;
+        Object.entries(elementosFichas).forEach(([nome, selector]) => {
+            const elemento = $(selector);
+            if (elemento.length > 0) {
+                console.log(`✅ ${nome}: OK (${elemento.length} encontrado)`);
+            } else {
+                console.log(`❌ ${nome}: FALTANDO`);
+                fichasOk = false;
+            }
+        });
+        
+        if (fichasOk) {
+            console.log('🎉 Todos os elementos de fichas de referência estão presentes!');
+        } else {
+            console.log('⚠️ Alguns elementos de fichas de referência estão faltando.');
+        }
+        
+        // Verificar se a função de inicialização foi chamada
+        if (typeof inicializarModuloFichasReferencia === 'function') {
+            console.log('✅ Função inicializarModuloFichasReferencia está disponível');
+            try {
+                console.log('🔄 Chamando inicializarModuloFichasReferencia()...');
+                inicializarModuloFichasReferencia();
+                console.log('✅ inicializarModuloFichasReferencia() executada com sucesso');
+            } catch (error) {
+                console.error('❌ Erro ao executar inicializarModuloFichasReferencia():', error);
+            }
+        } else {
+            console.error('❌ Função inicializarModuloFichasReferencia não está disponível');
+        }
+        
+        // === TESTE ADICIONAL PARA FICHAS DE REFERÊNCIA ===
+        setTimeout(function() {
+            console.log('🧪 === TESTE ADICIONAL FICHAS DE REFERÊNCIA ===');
+            
+            // Teste direto com jQuery no botão salvar
+            $('#btn_salvar_ficha_referencia').off('click.teste').on('click.teste', function(e) {
+                console.log('🎯 TESTE: Clique detectado no botão salvar ficha!');
+                console.log('🎯 Event object:', e);
+                console.log('🎯 This element:', this);
+                
+                // Prevenir múltiplos eventos
+                e.stopImmediatePropagation();
+                
+                if (typeof salvarFichaReferencia === 'function') {
+                    console.log('🎯 Função salvarFichaReferencia disponível, chamando...');
+                    salvarFichaReferencia();
+                } else {
+                    console.error('🎯 Função salvarFichaReferencia não está disponível!');
+                    alert('Erro: Função de salvamento não encontrada. Verifique o console para mais detalhes.');
+                }
+            });
+            
+            // Teste do botão "Nova Ficha"
+            $('#btn_nova_ficha_referencia').off('click.teste').on('click.teste', function(e) {
+                console.log('🎯 TESTE: Clique detectado no botão nova ficha!');
+                console.log('🎯 Abrindo modal...');
+                
+                // Limpar formulário
+                const form = document.getElementById('formFichaReferencia');
+                if (form) {
+                    form.reset();
+                    console.log('🎯 Formulário resetado');
+                }
+                
+                // Tentar abrir modal
+                try {
+                    $('#modalNovaFichaReferencia').modal('show');
+                    console.log('🎯 Modal aberto com sucesso');
+                } catch (error) {
+                    console.error('🎯 Erro ao abrir modal:', error);
+                }
+            });
+            
+            console.log('🧪 Eventos de teste configurados com sucesso!');
+        }, 1000);
     });
 
 </script>
@@ -4044,5 +4672,130 @@
     </div>
 </div>
 
+    <!-- Modal para Nova Ficha de Referência -->
+    <div class="modal fade" id="modalNovaFichaReferencia" tabindex="-1" aria-labelledby="modalNovaFichaReferenciaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content shadow-lg border-0 rounded-lg">
+                <div class="modal-header bg-gradient-primary text-white">
+                    <h5 class="modal-title fw-bold" id="modalNovaFichaReferenciaLabel">
+                        <i class="fas fa-file-export me-2"></i>Nova Ficha de Referência
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="alert alert-info d-flex align-items-center mb-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <div>
+                            <strong>Orientação:</strong> Preencha as informações necessárias para o encaminhamento do paciente. O texto de referência é o campo principal para detalhar a situação clínica.
+                        </div>
+                    </div>
+                    
+                    <form id="formFichaReferencia">
+                        <!-- Primeira linha: Unidade de Referência e Tipo de Encaminhamento -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control form-control-lg" id="unidade_referencia" name="unidade_referencia" placeholder="Ex: Hospital Regional, UPA Central...">
+                                    <label for="unidade_referencia">
+                                        <i class="fas fa-hospital me-1 text-primary"></i>Unidade de Referência
+                                    </label>
+                                </div>
+                                <div class="form-text">Ex: Hospital de Referência, Centro da Vida, etc..</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold mb-3">
+                                    <i class="fas fa-share me-1 text-success"></i>Tipo de Encaminhamento
+                                </label>
+                                <div class="d-flex flex-column gap-2">
+                                    <div class="form-check form-check-lg p-3 border rounded bg-light">
+                                        <input class="form-check-input form-check-input-lg" type="checkbox" id="encaminhamento_ambulatorial" name="encaminhamento_ambulatorial" value="Ambulatorial">
+                                        <label class="form-check-label fw-semibold" for="encaminhamento_ambulatorial">
+                                            <i class="fas fa-clinic-medical me-2 text-info"></i>Ambulatorial
+                                            <small class="d-block text-muted">Consultas e procedimentos ambulatoriais</small>
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-lg p-3 border rounded bg-light">
+                                        <input class="form-check-input form-check-input-lg" type="checkbox" id="encaminhamento_hospitalar" name="encaminhamento_hospitalar" value="Hospitalar">
+                                        <label class="form-check-label fw-semibold" for="encaminhamento_hospitalar">
+                                            <i class="fas fa-hospital me-2 text-danger"></i>Hospitalar
+                                            <small class="d-block text-muted">Internação e cuidados hospitalares</small>
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-lg p-3 border rounded bg-light">
+                                        <input class="form-check-input form-check-input-lg" type="checkbox" id="encaminhamento_auxilio_diagnostico" name="encaminhamento_auxilio_diagnostico" value="Auxilio Diagnostico">
+                                        <label class="form-check-label fw-semibold" for="encaminhamento_auxilio_diagnostico">
+                                            <i class="fas fa-x-ray me-2 text-warning"></i>Auxílio Diagnóstico
+                                            <small class="d-block text-muted">Exames e procedimentos diagnósticos</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Segunda linha: Procedimento -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <textarea class="form-control" id="procedimento" name="procedimento" rows="3" style="height: 100px;" placeholder="Descreva o procedimento solicitado..."></textarea>
+                                    <label for="procedimento">
+                                        <i class="fas fa-cogs me-1 text-warning"></i>Procedimento Solicitado
+                                    </label>
+                                </div>
+                                <div class="form-text">Descreva procedimentos específicos, cirurgias ou tratamentos recomendados</div>
+                            </div>
+                        </div>
+
+                        <!-- Terceira linha: Texto de Referência (Campo Principal) -->
+                        <div class="row">
+                            <div class="col-12">
+                                <label for="texto_referencia" class="form-label fw-bold text-primary mb-3">
+                                    <i class="fas fa-file-text me-2"></i>Texto de Referência (Campo Principal)
+                                </label>
+                                <div class="border border-primary border-2 rounded p-2">
+                                    <textarea class="form-control form-control-lg border-0" 
+                                              id="texto_referencia" 
+                                              name="texto_referencia" 
+                                              rows="10" 
+                                              style="resize: vertical; min-height: 280px; font-size: 14px; line-height: 1.6;"
+                                              placeholder="Digite aqui os detalhes da referência:&#10;&#10;• História clínica resumida&#10;• Motivo do encaminhamento&#10;• Exames realizados&#10;• Tratamentos já tentados&#10;• Observações importantes&#10;&#10;Seja detalhado para facilitar o atendimento na unidade de destino."></textarea>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer bg-light border-0 p-4">
+                    <button type="button" class="btn btn-outline-secondary btn-lg me-2" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </button>
+                    <button type="button" class="btn btn-success btn-lg px-4" id="btn_salvar_ficha_referencia" onclick="salvarFichaReferencia()">
+                        <i class="fas fa-save me-2"></i>Salvar Ficha de Referência
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Visualizar Ficha de Referência -->
+    <div class="modal fade" id="modalVisualizarFichaReferencia" tabindex="-1" aria-labelledby="modalVisualizarFichaReferenciaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title" id="modalVisualizarFichaReferenciaLabel">
+                        <i class="fas fa-eye me-2"></i>Visualizar Ficha de Referência
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Conteúdo será inserido dinamicamente pelo JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
