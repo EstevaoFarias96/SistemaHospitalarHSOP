@@ -1,0 +1,104 @@
+/* Fix para problemas de z-index e interatividade em modais */
+
+/* Garantir que modais tenham z-index correto */
+.modal {
+    z-index: 1055 !important;
+}
+
+.modal-backdrop {
+    z-index: 1050 !important;
+}
+
+/* Garantir que botões no modal-footer sejam clicáveis */
+.modal-footer {
+    position: relative !important;
+    z-index: 1060 !important;
+    pointer-events: auto !important;
+}
+
+.modal-footer .btn {
+    position: relative !important;
+    z-index: 1065 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Fix específico para o modal de ficha de referência */
+#modalNovaFichaReferencia {
+    z-index: 1055 !important;
+}
+
+#modalNovaFichaReferencia .modal-footer {
+    z-index: 1060 !important;
+    pointer-events: auto !important;
+}
+
+#modalNovaFichaReferencia .modal-footer .btn {
+    z-index: 1065 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Garantir que o botão salvar ficha seja clicável */
+#btn_salvar_ficha_referencia {
+    position: relative !important;
+    z-index: 1070 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    display: inline-block !important;
+}
+
+/* Remover qualquer sobreposição que possa estar bloqueando */
+.modal-content {
+    position: relative !important;
+    z-index: 1056 !important;
+}
+
+.modal-body {
+    position: relative !important;
+    z-index: 1057 !important;
+}
+
+/* Fix para possíveis elementos sobrepostos */
+.modal .form-control,
+.modal .form-floating,
+.modal .form-check {
+    position: relative;
+    z-index: auto;
+}
+
+/* Garantir que botões modais tenham aparência correta */
+.modal .btn:disabled {
+    pointer-events: none !important;
+    opacity: 0.65;
+}
+
+.modal .btn:not(:disabled) {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Fix para backdrop que pode estar bloqueando cliques */
+.modal-backdrop.show {
+    pointer-events: none !important;
+}
+
+/* Garantir que o modal em si permita cliques */
+.modal.show {
+    pointer-events: auto !important;
+}
+
+/* Fix específico para textarea grandes que podem sobrepor */
+#modalNovaFichaReferencia textarea {
+    z-index: auto !important;
+}
+
+/* Garantir que checkboxes e labels não interfiram */
+#modalNovaFichaReferencia .form-check {
+    z-index: auto !important;
+}
+
+#modalNovaFichaReferencia .form-check-input,
+#modalNovaFichaReferencia .form-check-label {
+    z-index: auto !important;
+}

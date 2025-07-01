@@ -2714,10 +2714,37 @@
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
+<!-- CSS Fix para modais -->
+<link rel="stylesheet" href="/static/css/modal_fix.css">
+
+<style>
+/* Fix inline para garantir que o botão funcione */
+#btn_salvar_ficha_referencia {
+    position: relative !important;
+    z-index: 1070 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    display: inline-block !important;
+}
+
+.modal-footer {
+    position: relative !important;
+    z-index: 1060 !important;
+    pointer-events: auto !important;
+}
+
+#modalNovaFichaReferencia .modal-footer .btn {
+    position: relative !important;
+    z-index: 1065 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+</style>
 
 <script src="/static/js/aprazamento.js"></script>
 <script src="/static/js/calendario_aprazamento.js"></script>
 <script src="/static/js/calculo_horarios.js"></script>
+<script src="/static/js/modal_ficha_fix.js"></script>
 
 <!-- Definir variáveis globais importantes -->
 <script>
@@ -4759,16 +4786,18 @@
                                               style="resize: vertical; min-height: 280px; font-size: 14px; line-height: 1.6;"
                                               placeholder="Digite aqui os detalhes da referência:&#10;&#10;• História clínica resumida&#10;• Motivo do encaminhamento&#10;• Exames realizados&#10;• Tratamentos já tentados&#10;• Observações importantes&#10;&#10;Seja detalhado para facilitar o atendimento na unidade de destino."></textarea>
                                 </div>
-                                </div>
                             </div>
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer bg-light border-0 p-4">
+                <div class="modal-footer bg-light border-0 p-4" style="position: relative; z-index: 1060;">
                     <button type="button" class="btn btn-outline-secondary btn-lg me-2" data-bs-dismiss="modal">
                         <i class="fas fa-times me-2"></i>Cancelar
                     </button>
-                    <button type="button" class="btn btn-success btn-lg px-4" id="btn_salvar_ficha_referencia">
+                    <button type="button" 
+                            class="btn btn-success btn-lg px-4" 
+                            id="btn_salvar_ficha_referencia"
+                            style="position: relative; z-index: 1070; pointer-events: auto; cursor: pointer;">
                         <i class="fas fa-save me-2"></i>Salvar Ficha de Referência
                     </button>
                 </div>
