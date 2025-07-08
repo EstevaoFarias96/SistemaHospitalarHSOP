@@ -1,3 +1,4 @@
+
 from flask_login import login_required, current_user, LoginManager, login_user, logout_user
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, Flask, send_file, current_app, abort, render_template_string
 import pdfkit
@@ -17,7 +18,7 @@ from docxtpl import DocxTemplate
 from docx import Document
 from io import BytesIO
 from app import db
-from app.models import Funcionario,Leito,AdmissaoEnfermagem, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN, now_brasilia, FichaReferencia
+from app.models import Funcionario,PrescricaoEnfermagemTemplate,Leito,AdmissaoEnfermagem, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN, now_brasilia, FichaReferencia
 from app.timezone_helper import formatar_datetime_br_completo, formatar_datetime_br, converter_para_brasilia
 from zoneinfo import ZoneInfo
 
@@ -1632,16 +1633,29 @@ def buscar_evolucoes_enfermagem_por_internacao(internacao_id):
 
 # API para listar prescrições de enfermagem por ID de internação
 @bp.route('/api/enfermagem/prescricao/<int:internacao_id>', methods=['GET'])
+@login_required
 def buscar_prescricoes_enfermagem_por_internacao(internacao_id):
     """
-    Busca todas as prescrições de enfermagem para uma internação específica no dia atual.
+    Busca todas as prescrições de enfermagem para uma internação específica.
     """
     try:
-        # Define o intervalo de tempo (início e fim do dia atual)
-        hoje = datetime.now().date()
-        inicio_dia = datetime.combine(hoje, time.min)
-        fim_dia = datetime.combine(hoje, time.max)
+        # Verificar se o usuário é enfermeiro ou médico
+        current_user = get_current_user()
+        if not current_user or current_user.cargo.lower() not in ['enfermeiro', 'medico']:
+            return jsonify({
+                'success': False,
+                'message': 'Acesso negado'
+            }), 403
 
+        # Verificar se a internação existe
+        internacao = Internacao.query.get(internacao_id)
+        if not internacao:
+            return jsonify({
+                'success': False,
+                'message': 'Internação não encontrada'
+            }), 404
+
+        # Buscar todas as prescrições de enfermagem da internação
         prescricoes = db.session.query(
             PrescricaoEnfermagem.id,
             PrescricaoEnfermagem.atendimentos_clinica_id,
@@ -1652,46 +1666,105 @@ def buscar_prescricoes_enfermagem_por_internacao(internacao_id):
         )\
         .outerjoin(Funcionario, PrescricaoEnfermagem.funcionario_id == Funcionario.id)\
         .filter(PrescricaoEnfermagem.atendimentos_clinica_id == internacao_id)\
-        .filter(PrescricaoEnfermagem.data_prescricao >= inicio_dia)\
-        .filter(PrescricaoEnfermagem.data_prescricao <= fim_dia)\
-        .order_by(PrescricaoEnfermagem.data_prescricao.asc())\
+        .order_by(PrescricaoEnfermagem.data_prescricao.desc())\
         .all()
 
-        resultado = [{
-            'id': p.id,
-            'atendimentos_clinica_id': p.atendimentos_clinica_id,
-            'data_prescricao': (p.data_prescricao - timedelta(hours=3)).isoformat() if p.data_prescricao else None,
-            'texto': p.texto,
-            'enfermeiro_nome': p.enfermeiro_nome,
-            'enfermeiro_coren': p.enfermeiro_coren
-        } for p in prescricoes]
+        resultado = []
+        for p in prescricoes:
+            # Converter para timezone brasileiro
+            data_prescricao_br = None
+            if p.data_prescricao:
+                data_prescricao_br = p.data_prescricao.isoformat()
 
-        return jsonify(resultado), 200
+            resultado.append({
+                'id': p.id,
+                'atendimentos_clinica_id': p.atendimentos_clinica_id,
+                'data_prescricao': data_prescricao_br,
+                'texto': p.texto,
+                'enfermeiro_nome': p.enfermeiro_nome or 'Não informado',
+                'enfermeiro_coren': p.enfermeiro_coren
+            })
+
+        return jsonify({
+            'success': True,
+            'prescricoes': resultado,
+            'total': len(resultado)
+        }), 200
 
     except Exception as e:
         logging.error(f'Erro ao buscar prescrições de enfermagem: {str(e)}')
         logging.error(traceback.format_exc())
-        return jsonify({'erro': f'Erro ao buscar prescrições: {str(e)}'}), 500
+        return jsonify({
+            'success': False,
+            'message': f'Erro ao buscar prescrições: {str(e)}'
+        }), 500
 
 # API para registrar nova prescrição de enfermagem
 @bp.route('/api/enfermagem/prescricao', methods=['POST'])
+@login_required
 def registrar_prescricao_enfermagem():
-    data = request.get_json()
-    if not data:
-        return jsonify({'erro': 'Dados não fornecidos'}), 400
-
+    """
+    Registra uma nova prescrição de enfermagem
+    """
     try:
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                'success': False,
+                'message': 'Dados não fornecidos'
+            }), 400
+
+        # Validações básicas
+        if not data.get('atendimentos_clinica_id'):
+            return jsonify({
+                'success': False,
+                'message': 'ID da internação é obrigatório'
+            }), 400
+            
+        if not data.get('funcionario_id'):
+            return jsonify({
+                'success': False,
+                'message': 'ID do funcionário é obrigatório'
+            }), 400
+            
+        if not data.get('texto') or not data.get('texto').strip():
+            return jsonify({
+                'success': False,
+                'message': 'Texto da prescrição é obrigatório'
+            }), 400
+
+        # Verificar se o usuário atual é enfermeiro
+        current_user = get_current_user()
+        if not current_user or current_user.cargo.lower() != 'enfermeiro':
+            return jsonify({
+                'success': False,
+                'message': 'Apenas enfermeiros podem criar prescrições de enfermagem'
+            }), 403
+
+        # Verificar se a internação existe
+        internacao = Internacao.query.get(data['atendimentos_clinica_id'])
+        if not internacao:
+            return jsonify({
+                'success': False,
+                'message': 'Internação não encontrada'
+            }), 404
+
+        # Criar nova prescrição
         nova_prescricao = PrescricaoEnfermagem(
             atendimentos_clinica_id=data['atendimentos_clinica_id'],
             funcionario_id=data['funcionario_id'],
-            texto=data['texto'],
+            texto=data['texto'].strip(),
             data_prescricao=datetime.now(timezone(timedelta(hours=-3)))
         )
+        
         db.session.add(nova_prescricao)
         db.session.commit()
         
+        logging.info(f'Prescrição de enfermagem registrada com sucesso - ID: {nova_prescricao.id}, Enfermeiro: {current_user.nome}')
+        
         return jsonify({
-            'mensagem': 'Prescrição de enfermagem registrada com sucesso!',
+            'success': True,
+            'message': 'Prescrição de enfermagem registrada com sucesso!',
             'prescricao_id': nova_prescricao.id
         }), 201
         
@@ -1699,7 +1772,10 @@ def registrar_prescricao_enfermagem():
         db.session.rollback()
         logging.error(f'Erro ao registrar prescrição de enfermagem: {str(e)}')
         logging.error(traceback.format_exc())
-        return jsonify({'erro': f'Erro ao registrar prescrição: {str(e)}'}), 500
+        return jsonify({
+            'success': False,
+            'message': f'Erro ao registrar prescrição: {str(e)}'
+        }), 500
 
 # API para atualizar prescrição de enfermagem
 @bp.route('/api/enfermagem/prescricao/<int:id>', methods=['PUT'])
@@ -4630,10 +4706,33 @@ def buscar_informacoes_alta(internacao_id):
 
 @bp.route('/api/imprimir-prescricao/<int:prescricao_id>', methods=['GET'])
 def imprimir_prescricao(prescricao_id):
-    prescricao = PrescricaoClinica.query.get(prescricao_id)
-    if not prescricao:
+    """
+    Endpoint para imprimir prescrição de enfermagem
+    Pode ser chamado tanto para prescrições médicas quanto de enfermagem
+    """
+    try:
+        # Primeiro, tentar como prescrição médica
+        prescricao_medica = PrescricaoClinica.query.get(prescricao_id)
+        if prescricao_medica:
+            return imprimir_prescricao_medica(prescricao_medica)
+        
+        # Se não encontrou, tentar como prescrição de enfermagem
+        prescricao_enfermagem = PrescricaoEnfermagem.query.get(prescricao_id)
+        if prescricao_enfermagem:
+            return imprimir_prescricao_enfermagem_html(prescricao_enfermagem)
+        
+        # Se não encontrou nenhuma, retornar erro
         return abort(404, 'Prescrição não encontrada.')
+        
+    except Exception as e:
+        logging.error(f"Erro ao imprimir prescrição: {str(e)}")
+        logging.error(traceback.format_exc())
+        return abort(500, f'Erro interno: {str(e)}')
 
+def imprimir_prescricao_medica(prescricao):
+    """
+    Função auxiliar para imprimir prescrição médica
+    """
     internacao = prescricao.internacao
     if not internacao:
         return abort(404, 'Internação não vinculada à prescrição.')
@@ -4717,8 +4816,57 @@ def imprimir_prescricao(prescricao_id):
     output.seek(0)
 
     # Enviar para download
-    nome_arquivo = f"prescricao_{prescricao.id}_{paciente.nome.replace(' ', '_')}.docx"
+    nome_arquivo = f"prescricao_medica_{prescricao.id}_{paciente.nome.replace(' ', '_')}.docx"
     return send_file(output, as_attachment=True, download_name=nome_arquivo, mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+
+def imprimir_prescricao_enfermagem_html(prescricao):
+    """
+    Função auxiliar para imprimir prescrição de enfermagem em HTML
+    """
+    # Buscar a internação relacionada
+    internacao = Internacao.query.get(prescricao.atendimentos_clinica_id)
+    if not internacao:
+        return abort(404, 'Internação não encontrada.')
+
+    # Buscar o atendimento
+    atendimento = Atendimento.query.get(internacao.atendimento_id)
+    if not atendimento:
+        return abort(404, 'Atendimento não encontrado.')
+
+    # Buscar o paciente
+    paciente = atendimento.paciente
+    if not paciente:
+        return abort(404, 'Paciente não encontrado.')
+
+    # Buscar o enfermeiro que prescreveu
+    enfermeiro = Funcionario.query.get(prescricao.funcionario_id) if prescricao.funcionario_id else None
+
+    # Renderizar template HTML para impressão
+    return render_template('impressao_prescricao_enfermagem.html',
+                         prescricao=prescricao,
+                         internacao=internacao,
+                         atendimento=atendimento,
+                         paciente=paciente,
+                         enfermeiro=enfermeiro)
+
+@bp.route('/api/imprimir-prescricao-enfermagem/<int:prescricao_id>', methods=['GET'])
+@login_required
+def imprimir_prescricao_enfermagem_by_id(prescricao_id):
+    """
+    Endpoint específico para imprimir prescrição de enfermagem por ID
+    """
+    try:
+        # Buscar a prescrição de enfermagem
+        prescricao = PrescricaoEnfermagem.query.get(prescricao_id)
+        if not prescricao:
+            return abort(404, 'Prescrição de enfermagem não encontrada.')
+
+        return imprimir_prescricao_enfermagem_html(prescricao)
+        
+    except Exception as e:
+        logging.error(f"Erro ao imprimir prescrição de enfermagem: {str(e)}")
+        logging.error(traceback.format_exc())
+        return abort(500, f'Erro interno: {str(e)}')
 
 @bp.route('/imprimir/prescricao/<string:atendimento_id>', methods=['GET'])
 def imprimir_prescricao_por_atendimento(atendimento_id):
@@ -6378,3 +6526,94 @@ def atualizar_ficha_referencia(id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'error': str(e)}), 400
+    
+@bp.route('/api/listar_prescricoes_enf', methods=['GET'])
+def listar_prescricoes_padrao():
+    """
+    Lista as prescrições de enfermagem padrão com funcionalidades de busca
+    """
+    try:
+        # Parâmetros de filtro
+        id_param = request.args.get('id')
+        termo = request.args.get('termo', '').strip()
+        categoria = request.args.get('categoria', '').strip()
+        titulo = request.args.get('titulo', '').strip()
+        nic = request.args.get('nic', '').strip()
+        apenas_padrao = request.args.get('apenas_padrao', 'true').lower() == 'true'
+        
+        # Se solicitar uma prescrição específica
+        if id_param:
+            prescricao = PrescricaoEnfermagemTemplate.query.get(id_param)
+            if not prescricao:
+                return jsonify({'success': False, 'message': 'Prescrição não encontrada'}), 404
+            return jsonify({
+                'success': True,
+                'template': {
+                    'id': prescricao.id,
+                    'padrao': prescricao.padrao,
+                    'titulo': prescricao.titulo,
+                    'texto_prescricao': prescricao.texto_prescricao,
+                    'nic': prescricao.nic,
+                    'nic_tipo': prescricao.nic_tipo
+                }
+            })
+        
+        # Query base
+        query = PrescricaoEnfermagemTemplate.query
+        
+        # Filtrar apenas prescrições padrão se solicitado
+        if apenas_padrao:
+            query = query.filter_by(padrao=True)
+        
+        # Filtrar por termo de busca (título, texto ou tipo NIC)
+        if termo:
+            query = query.filter(
+                db.or_(
+                    PrescricaoEnfermagemTemplate.titulo.ilike(f'%{termo}%'),
+                    PrescricaoEnfermagemTemplate.texto_prescricao.ilike(f'%{termo}%'),
+                    PrescricaoEnfermagemTemplate.nic_tipo.ilike(f'%{termo}%')
+                )
+            )
+        
+        # Filtrar por categoria NIC
+        if categoria:
+            query = query.filter(PrescricaoEnfermagemTemplate.nic_tipo.ilike(f'%{categoria}%'))
+        
+        # Filtrar por título específico
+        if titulo:
+            query = query.filter(PrescricaoEnfermagemTemplate.titulo.ilike(f'%{titulo}%'))
+        
+        # Filtrar por código NIC específico
+        if nic:
+            query = query.filter(PrescricaoEnfermagemTemplate.nic == nic)
+        
+        # Ordenar por título
+        prescricoes = query.order_by(PrescricaoEnfermagemTemplate.titulo).all()
+        
+        # Serializar os dados
+        prescricoes_data = []
+        for prescricao in prescricoes:
+            prescricoes_data.append({
+                'id': prescricao.id,
+                'padrao': prescricao.padrao,
+                'titulo': prescricao.titulo,
+                'texto_prescricao': prescricao.texto_prescricao,
+                'nic': prescricao.nic,
+                'nic_tipo': prescricao.nic_tipo
+            })
+        
+        return jsonify({
+            'success': True,
+            'prescricoes': prescricoes_data,
+            'total': len(prescricoes_data)
+        })
+        
+    except Exception as e:
+        print(f"Erro ao listar prescrições de enfermagem: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': 'Erro interno do servidor',
+            'message': str(e)
+        }), 500
+
+    

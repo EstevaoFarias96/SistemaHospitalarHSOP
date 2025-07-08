@@ -1,0 +1,3847 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evolução do Paciente - Enfermagem</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Add Quill Rich Text Editor CSS -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <!-- Adicionar html2canvas para exportação de imagens -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    
+    <!-- Script para interceptar e substituir scroll.js -->
+    <script>
+        // Interceptar scripts antes que sejam carregados
+        const originalCreateElement = document.createElement;
+        document.createElement = function(tagName) {
+            const element = originalCreateElement.call(document, tagName);
+            
+            if (tagName.toLowerCase() === 'script') {
+                const originalSetAttribute = element.setAttribute;
+                element.setAttribute = function(name, value) {
+                    if (name === 'src' && value && value.includes('scroll.js')) {
+                        console.log('Interceptado carregamento de scroll.js - Substituindo com implementação moderna');
+                        // Não carregamos o script original
+                        return element;
+                    }
+                    return originalSetAttribute.call(this, name, value);
+                };
+            }
+            
+            return element;
+        };
+        
+        // Sobrescrever EventTarget.prototype.addEventListener para monitorar eventos depreciados
+        (function() {
+            const originalAddEventListener = EventTarget.prototype.addEventListener;
+            const deprecatedEvents = [
+                'DOMNodeInserted', 
+                'DOMNodeRemoved', 
+                'DOMSubtreeModified',
+                'DOMAttrModified',
+                'DOMCharacterDataModified'
+            ];
+            
+            EventTarget.prototype.addEventListener = function(type, listener, options) {
+                if (deprecatedEvents.includes(type)) {
+                    console.warn(`Evento depreciado '${type}' detectado e não será adicionado`);
+                    // Não adicionamos o listener para eventos depreciados
+                    return;
+                }
+                
+                return originalAddEventListener.call(this, type, listener, options);
+            };
+        })();
+    </script>
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Variáveis de cores */
+        :root {
+            --primary-dark: #1a237e;
+            --primary-main: #283593;
+            --primary-light: #3949ab;
+            --accent: #1565c0;
+            --hover-light: rgba(255,255,255,0.08);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255,255,255,0.85);
+            --shadow-soft: 0 2px 4px rgba(0,0,0,0.08);
+            --shadow-strong: 0 4px 8px rgba(0,0,0,0.12);
+            --gradient-primary: linear-gradient(135deg, var(--primary-main), var(--primary-light));
+            --gradient-accent: linear-gradient(135deg, var(--accent), var(--primary-light));
+            --primary-main-rgb: 40, 53, 147;
+            --primary-light-rgb: 57, 73, 171;
+        }
+
+        /* Estilos globais para cards e headers */
+        .card {
+            border: none;
+            box-shadow: var(--shadow-soft);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-strong);
+        }
+
+        .card-header {
+            border-bottom: none;
+            background: var(--gradient-primary) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            border: none;
+            box-shadow: var(--shadow-soft);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--gradient-accent);
+            box-shadow: var(--shadow-strong);
+            transform: translateY(-1px);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f57c00, #ffb74d);
+            border: none;
+            color: var(--text-primary);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #ff9800, #ffa726);
+            color: var(--text-primary);
+            box-shadow: var(--shadow-strong);
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #218838);
+            border: none;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #34ce57, #28a745);
+            box-shadow: var(--shadow-strong);
+            transform: translateY(-1px);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+            border: none;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .btn-info:hover {
+            background: linear-gradient(135deg, #20c997, #17a2b8);
+            box-shadow: var(--shadow-strong);
+            transform: translateY(-1px);
+        }
+
+        .badge {
+            background: var(--gradient-primary);
+            border: none;
+            box-shadow: var(--shadow-soft);
+        }
+
+        /* Estilo do menu lateral */
+        .sidebar {
+            width: 60px;
+            height: 100vh;
+            background: linear-gradient(180deg, var(--primary-dark) 0%, var(--primary-main) 100%);
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding-top: 20px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            z-index: 1000;
+            box-shadow: var(--shadow-soft);
+        }
+        
+        .sidebar:hover {
+            width: 200px;
+            box-shadow: var(--shadow-strong);
+        }
+        
+        .nav-pills {
+            flex-direction: column;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .nav-pills .nav-link {
+            margin: 5px 10px;
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-pills .nav-link:hover {
+            background-color: var(--hover-light);
+            transform: translateX(5px);
+            color: var(--text-primary);
+            border-color: rgba(255,255,255,0.1);
+        }
+        
+        .nav-pills .nav-link i {
+            font-size: 1.2rem;
+            min-width: 30px;
+            text-align: center;
+            transition: transform 0.3s ease;
+            color: var(--text-primary);
+        }
+        
+        .nav-pills .nav-link:hover i {
+            transform: scale(1.1);
+        }
+        
+        .nav-pills .nav-link span {
+            margin-left: 10px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .sidebar:hover .nav-pills .nav-link span {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .nav-pills .nav-link.active {
+            background-color: var(--accent);
+            color: var(--text-primary);
+            box-shadow: 0 2px 4px rgba(21,101,192,0.3);
+            border-color: rgba(255,255,255,0.2);
+        }
+        
+        .nav-pills .nav-link.active:hover {
+            transform: translateX(5px) scale(1.02);
+            background-color: var(--accent);
+        }
+        
+        /* Ajuste do conteúdo principal */
+        .main-content {
+            margin-left: 60px;
+            flex: 1;
+            padding: 20px;
+            transition: all 0.3s ease;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+        
+        .sidebar:hover + .main-content {
+            margin-left: 200px;
+        }
+
+        /* Estilos para as ações rápidas */
+        .quick-actions {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            background: linear-gradient(0deg, var(--primary-dark) 0%, transparent 100%);
+        }
+
+        .quick-actions .action-btn {
+            background-color: transparent;
+            border: none;
+            color: var(--text-secondary);
+            opacity: 0.9;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .quick-actions .action-btn:hover {
+            opacity: 1;
+            color: var(--text-primary);
+            background-color: var(--hover-light);
+            transform: translateX(5px);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .menu-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .nav-pills {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Resto dos estilos existentes */
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .paciente-info {
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        .paciente-info .info-item {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        .paciente-info .info-item strong {
+            color: #495057;
+        }
+        .table-medicamentos {
+            background: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .alerta-alergia {
+            border: 2px solid #ffc107;
+            padding: 5px 10px;
+            display: none;
+            font-weight: bold;
+            color: #856404;
+            background-color: #fff3cd;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+        /* Estilos adicionais para a tabela de evoluções */
+        .table-medicamentos td {
+            vertical-align: middle;
+            padding: 10px;
+        }
+        
+        /* Estilos para as tabelas de medicamentos nas prescrições */
+        .prescricao-card {
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+        
+        .prescricao-card .card-header {
+            padding: 5px 10px;
+            font-size: 0.85rem;
+        }
+        
+        .prescricao-card .card-body {
+            padding: 8px;
+        }
+        
+        .tabela-medicamentos-prescricao th,
+        .tabela-medicamentos-prescricao td {
+            padding: 4px 8px;
+            font-size: 0.85rem;
+        }
+        
+        .tabela-medicamentos-prescricao tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+        
+        /* Estilos para prescrições */
+        .prescricao-container {
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            border: 1px solid #e9ecef;
+            background-color: #fff;
+        }
+
+        .prescricao-container:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-strong);
+        }
+
+        /* Novo estilo para prescrições do dia */
+        .prescricao-hoje {
+            border-left: 4px solid var(--primary-main);
+            background-color: rgba(var(--primary-main-rgb), 0.02);
+            position: relative;
+        }
+
+        .prescricao-hoje::before {
+            content: "Hoje";
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--primary-main);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .prescricao-antiga {
+            border-left: 4px solid transparent;
+        }
+
+        .prescricao-header {
+            padding: 12px 15px;
+            background: var(--gradient-primary);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .prescricao-body {
+            padding: 15px;
+        }
+        
+        .prescricao-section {
+            margin-bottom: 10px;
+            border-left: 3px solid #cfe2ff;
+            padding-left: 10px;
+        }
+        
+        .prescricao-section.dieta {
+            border-color: #d1e7dd;
+        }
+        
+        .prescricao-section.medicamentos {
+            border-color: #cfe2ff;
+        }
+        
+        .prescricao-section.procedimentos {
+            border-color: #f8d7da;
+        }
+        
+        .prescricao-section-title {
+            font-weight: bold;
+            color: #495057;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .prescricao-section-content {
+            background-color: #f8f9fa;
+            padding: 8px;
+        }
+        
+        .prescricao-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        
+        .data-header {
+            background-color: #6c757d;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        /* Formatação especial para a coluna de texto de evolução */
+        .texto-evolucao {
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 450px;
+            min-height: 150px;
+            overflow-y: auto;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 6px;
+            border-left: 4px solid #0d6efd;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            transition: max-height 0.3s ease;
+        }
+        
+        .texto-evolucao:hover {
+            max-height: 600px;
+        }
+        
+        .texto-evolucao p {
+            margin-bottom: 0.6rem;
+        }
+        
+        .texto-evolucao * {
+            max-width: 100%;
+        }
+        
+        .texto-evolucao h1, .texto-evolucao h2, .texto-evolucao h3 {
+            margin-top: 0.8rem;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .texto-evolucao ul, .texto-evolucao ol {
+            padding-left: 25px;
+            margin-bottom: 0.8rem;
+        }
+        
+        .texto-evolucao li {
+            margin-bottom: 0.3rem;
+        }
+        
+        .texto-evolucao strong, .texto-evolucao b {
+            font-weight: 700;
+        }
+        
+        .texto-evolucao em, .texto-evolucao i {
+            font-style: italic;
+        }
+        
+        .texto-evolucao blockquote {
+            margin: 0.8rem 0;
+            padding: 0.5rem 1rem;
+            border-left: 3px solid #adb5bd;
+            background-color: #f0f0f0;
+        }
+        
+        .texto-evolucao::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        .texto-evolucao::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .texto-evolucao::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        
+        .texto-evolucao::-webkit-scrollbar-thumb:hover {
+            background: #0d6efd;
+        }
+        
+        #editor-container {
+            height: 450px;
+            margin-bottom: 15px;
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+        }
+        
+        .ql-editor {
+            font-size: 13px;
+            line-height: 1.5;
+            min-height: 400px;
+        }
+        
+        .ql-tooltip {
+            z-index: 1060 !important;
+        }
+        
+        @media (max-width: 768px) {
+            .texto-evolucao {
+                max-height: 250px;
+                font-size: 0.85rem;
+                min-height: 100px;
+            }
+            #editor-container {
+                height: 250px;
+            }
+            .ql-editor {
+                min-height: 200px;
+            }
+        }
+        
+        /* Estilos para adaptar a altura da caixa baseado no tamanho do conteúdo */
+        .texto-evolucao[data-lines="1"],
+        .texto-evolucao[data-lines="2"],
+        .texto-evolucao[data-lines="3"] {
+            max-height: 150px;
+            min-height: 80px;
+        }
+        
+        .texto-evolucao[data-lines="4"],
+        .texto-evolucao[data-lines="5"],
+        .texto-evolucao[data-lines="6"] {
+            max-height: 200px;
+            min-height: 100px;
+        }
+        
+        .texto-evolucao[data-lines="7"],
+        .texto-evolucao[data-lines="8"],
+        .texto-evolucao[data-lines="9"] {
+            max-height: 250px;
+            min-height: 150px;
+        }
+        
+        .texto-evolucao[data-lines="10"],
+        .texto-evolucao[data-lines="11"],
+        .texto-evolucao[data-lines="12"] {
+            max-height: 300px;
+            min-height: 200px;
+        }
+        
+        .texto-evolucao[data-lines="13"],
+        .texto-evolucao[data-lines="14"],
+        .texto-evolucao[data-lines="15"] {
+            max-height: 350px;
+            min-height: 250px;
+        }
+        
+        .texto-evolucao[data-lines="16"],
+        .texto-evolucao[data-lines="17"],
+        .texto-evolucao[data-lines="18"] {
+            max-height: 400px;
+            min-height: 300px;
+        }
+        
+        .texto-evolucao[data-lines="19"],
+        .texto-evolucao[data-lines="20"],
+        .texto-evolucao[data-lines="21"] {
+            max-height: 450px;
+            min-height: 350px;
+        }
+        
+        .texto-evolucao[data-lines="22"] {
+            max-height: 500px;
+            min-height: 400px;
+        }
+        
+        /* Estilos para o calendário de aprazamento */
+        .calendar-day {
+            width: 120px;
+            min-height: 80px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            background-color: #f8f9fa;
+        }
+        
+        .calendar-day:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background-color: #fff;
+        }
+        
+        .day-header {
+            font-weight: bold;
+            border-bottom: 1px dashed #dee2e6;
+            padding-bottom: 5px;
+        }
+        
+        .time-pill {
+            border: 1px solid #e9ecef;
+            transition: all 0.2s;
+        }
+        
+        .time-pill:hover {
+            background-color: #e9ecef;
+        }
+        
+        /* Estilos para popovers dos dias */
+        .popover {
+            max-width: 300px;
+        }
+        
+        .popover-body {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        /* Estilos para o novo modal de aprazamento */
+        #modalAprazamento .modal-content {
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-radius: 8px;
+        }
+
+        #modalAprazamento .modal-header {
+            border-bottom: none;
+            padding: 0.75rem 1rem;
+            border-radius: 8px 8px 0 0;
+        }
+
+        #modalAprazamento .modal-body {
+            padding: 0.75rem 1rem;
+        }
+
+        #modalAprazamento label.form-label {
+            color: #6c757d;
+            font-weight: 500;
+            margin-bottom: 0.1rem;
+        }
+
+        #modalAprazamento .form-control-sm, 
+        #modalAprazamento .form-select-sm {
+            border-radius: 6px;
+            border-color: #dee2e6;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        #modalAprazamento .form-control-sm:focus, 
+        #modalAprazamento .form-select-sm:focus {
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.15rem rgba(13, 110, 253, 0.15);
+        }
+
+        #modalAprazamento .form-check-input {
+            cursor: pointer;
+        }
+
+        #modalAprazamento .form-check-label {
+            cursor: pointer;
+        }
+
+        #modalAprazamento #horarios_multiplos_dias {
+            background-color: #f8f9fa;
+            border-color: #e9ecef !important;
+            border-radius: 6px;
+        }
+
+        #modalAprazamento .btn-sm {
+            border-radius: 6px;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        /* Estilos para o modal de visualização de aprazamentos */
+        .modal-visualizar-aprazamento .modal-content {
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .modal-visualizar-aprazamento .modal-header {
+            background-color: #17a2b8;
+            color: white;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .modal-visualizar-aprazamento .table {
+            margin-bottom: 0;
+        }
+
+        .modal-visualizar-aprazamento .table th {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .modal-visualizar-aprazamento .table td {
+            vertical-align: middle;
+            font-size: 0.9rem;
+        }
+
+        .modal-visualizar-aprazamento .btn-realizar-aprazamento {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .modal-visualizar-aprazamento .btn-realizar-aprazamento:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .modal-visualizar-aprazamento .resumo-aprazamentos {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 1rem;
+        }
+
+        .modal-visualizar-aprazamento .resumo-aprazamentos .col {
+            text-align: center;
+        }
+
+        .modal-visualizar-aprazamento .resumo-aprazamentos small {
+            display: block;
+            margin-bottom: 0.25rem;
+            color: #6c757d;
+        }
+
+        .modal-visualizar-aprazamento .resumo-aprazamentos strong {
+            font-size: 1.25rem;
+            display: block;
+        }
+
+        .modal-visualizar-aprazamento .status-icon {
+            margin-right: 0.5rem;
+        }
+
+        .modal-visualizar-aprazamento .table-responsive {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+    <script>
+        // Ajuste global de fuso-horário
+        // Este patch garante que qualquer chamada a toLocaleString / toLocaleTimeString / toLocaleDateString
+        // utilize, por padrão, o fuso horário do Brasil (America/Sao_Paulo). Assim evitamos exibição em GMT
+        // quando o cliente estiver com time-zone diferente.
+        (function() {
+            const TZ_BR = 'America/Sao_Paulo';
+            const DEFAULT_LOCALE = 'pt-BR';
+            ['toLocaleString', 'toLocaleTimeString', 'toLocaleDateString'].forEach(function(methodName) {
+                const original = Date.prototype[methodName];
+                Date.prototype[methodName] = function(localeOrOptions, maybeOptions) {
+                    let locales = localeOrOptions;
+                    let options = maybeOptions;
+
+                    // Se o primeiro parâmetro for um objeto, significa que o chamador passou apenas as opções.
+                    if (typeof localeOrOptions === 'object' && localeOrOptions !== null) {
+                        options = localeOrOptions;
+                        locales = undefined;
+                    }
+
+                    locales = locales || DEFAULT_LOCALE;
+                    options = options || {};
+
+                    // Garante que o timezone seja sempre America/Sao_Paulo se não especificado explicitamente.
+                    if (!options.timeZone) {
+                        options.timeZone = TZ_BR;
+                    }
+
+                    return original.call(this, locales, options);
+                };
+            });
+        })();
+    </script>
+</head>
+<body>
+<script>
+// Extrair o ID do atendimento da URL e disponibilizá-lo globalmente
+window.ATENDIMENTO_ID = window.location.pathname.split('/').pop();
+console.log('[Debug] ID do atendimento extraído:', window.ATENDIMENTO_ID);
+
+// Verificar se o ID foi extraído corretamente
+if (!window.ATENDIMENTO_ID) {
+    console.error('[Debug] Erro: ID do atendimento não encontrado na URL');
+} else {
+    console.log('[Debug] ID do atendimento disponível globalmente');
+}
+
+// Função para voltar para a página de pacientes internados
+function voltarParaPacientesInternados() {
+    console.log('🔄 Botão Voltar clicado - Redirecionando para /clinica/pacientes-internados');
+    try {
+        window.location.href = '/clinica/pacientes-internados';
+        console.log('✅ Redirecionamento iniciado com sucesso');
+    } catch (error) {
+        console.error('❌ Erro no redirecionamento:', error);
+        // Fallback usando window.location.replace
+        window.location.replace('/clinica/pacientes-internados');
+    }
+}
+
+// Função para abrir a página de impressões de enfermagem
+function abrirImpressoesEnfermagem() {
+    console.log('🖨️ Botão Impressões de Enfermagem clicado - Redirecionando para impressões');
+    try {
+        const atendimentoId = window.ATENDIMENTO_ID;
+        if (!atendimentoId) {
+            console.error('❌ Erro: ID do atendimento não encontrado');
+            alert('Erro: ID do atendimento não encontrado. Por favor, recarregue a página.');
+            return;
+        }
+        
+        const url = `/clinica/impressoes-enfermagem/${atendimentoId}`;
+        console.log('✅ Redirecionando para:', url);
+        window.location.href = url;
+    } catch (error) {
+        console.error('❌ Erro no redirecionamento:', error);
+        alert('Erro ao abrir as impressões de enfermagem. Por favor, tente novamente.');
+    }
+}
+</script>
+
+<!-- Menu Lateral -->
+<div class="sidebar">
+    <nav class="nav nav-pills flex-column">
+        <!-- Menu Principal -->
+        <div class="menu-section">
+            <a class="nav-link action-btn" href="#" onclick="voltarParaPacientesInternados(); return false;">
+                <i class="fas fa-arrow-left"></i>
+                <span>Voltar</span>
+            </a>
+            <a class="nav-link" href="#" data-target="printSection">
+                <i class="fas fa-print"></i>
+                <span>Imprimir</span>
+            </a>
+            <a class="nav-link" href="#" data-target="prescricaoSection">
+                <i class="fas fa-pills"></i>
+                <span>Prescrição</span>
+            </a>
+            <a class="nav-link" href="#" data-target="evolucaoSection">
+                <i class="fas fa-notes-medical"></i>
+                <span>Evolução</span>
+            </a>
+            <a class="nav-link active" href="#" data-target="enfermagemSection">
+                <i class="fas fa-user-nurse"></i>
+                <span>Enfermagem</span>
+            </a>
+            <a class="nav-link" href="#" data-target="examesSection">
+                <i class="fas fa-vial"></i>
+                <span>Exames Lab.</span>
+            </a>
+        </div>
+
+        <!-- Ações Rápidas -->
+        <div class="quick-actions">
+        </div>
+    </nav>
+</div>
+
+<!-- Conteúdo Principal -->
+<div class="main-content">
+    <div class="container-fluid py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Evolução do Paciente - Enfermagem</h2>
+        </div>
+
+        <!-- Informações do Paciente -->
+        <div class="paciente-info row">
+            <div class="col-md-3 info-item"><strong>Nome:</strong> {{ paciente.nome }}</div>
+            <div class="col-md-3 info-item"><strong>CPF:</strong> {{ paciente.cpf }}</div>
+            <div class="col-md-3 info-item"><strong>Cartão SUS:</strong> {{ paciente.cartao_sus }}</div>
+            <div class="col-md-3 info-item"><strong>Sexo:</strong> {{ paciente.sexo }}</div>
+            <div class="col-md-3 info-item"><strong>Data de Nascimento:</strong> {{ paciente.data_nascimento.strftime('%d/%m/%Y') if paciente.data_nascimento else '-' }}</div>
+            <div class="col-md-3 info-item"><strong>Endereço:</strong> {{ paciente.endereco }}</div>
+            <div class="col-md-3 info-item"><strong>Município:</strong> {{ paciente.municipio }}</div>
+            <div class="col-md-3 info-item"><strong>Telefone:</strong> {{ paciente.telefone }}</div>
+            <div class="col-md-3 info-item"><strong>Nome Social:</strong> {{ paciente.nome_social }}</div>
+            <div class="col-md-3 info-item"><strong>Filiação:</strong> {{ paciente.filiacao }}</div>
+        </div>
+
+        <div id="printSection" class="content-section">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Opções de Impressão</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-user-nurse fa-3x text-primary mb-3"></i>
+                                    <h6 class="card-title">Relatórios de Enfermagem</h6>
+                                    <p class="card-text">Imprimir evoluções, prescrições e SAE de enfermagem</p>
+                                    <button type="button" class="btn btn-primary" onclick="abrirImpressoesEnfermagem()">
+                                        <i class="fas fa-print me-2"></i>Acessar Impressões
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-file-medical fa-3x text-info mb-3"></i>
+                                    <h6 class="card-title">Outras Opções</h6>
+                                    <p class="card-text">Outras funcionalidades de impressão serão implementadas</p>
+                                    <button type="button" class="btn btn-outline-secondary" disabled>
+                                        <i class="fas fa-cogs me-2"></i>Em Desenvolvimento
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="prescricaoSection" class="content-section">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Prescrições do Paciente</h5>
+                <button class="btn btn-outline-primary btn-sm" onclick="imprimirPrescricaoMedica()" title="Imprimir Prescrição Médica">
+                    <i class="fas fa-print me-2"></i>Imprimir Prescrição
+                </button>
+            </div>
+            <div class="table-responsive mb-3">
+                <table class="table table-borderless">
+                    <thead class="d-none">
+                        <tr>
+                            <th>Conteúdo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaPrescricoes">
+                        <tr>
+                            <td class="text-center"><i class="fas fa-spinner fa-spin"></i> Carregando prescrições...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <script>
+        function imprimirPrescricaoMedica() {
+            const atendimentoId = "{{ internacao.atendimento_id }}";
+            if (!atendimentoId) {
+                alert('Erro: ID do atendimento não encontrado.');
+                return;
+            }
+            const url = `/imprimir/prescricao/${atendimentoId}`;
+            window.open(url, '_blank', 'width=900,height=700,scrollbars=yes,resizable=yes');
+        }
+        </script>
+
+        <!-- Modal Prescrição -->
+        <div class="modal fade" id="modalPrescricao" tabindex="-1" aria-labelledby="modalPrescricaoLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="modalPrescricaoLabel">Nova Prescrição</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="formPrescricao">
+                            <input type="hidden" id="prescricao_id" value="">
+                            
+                            <!-- Dieta -->
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">Dieta</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="texto_dieta" class="form-label">Descrição da Dieta</label>
+                                        <textarea class="form-control" id="texto_dieta" rows="3" placeholder="Descreva a dieta recomendada para o paciente..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Medicamentos -->
+                            <div class="card mb-3">
+                                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">Medicamentos</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-5 mb-3">
+                                            <label for="nome_medicamento" class="form-label">Nome do Medicamento</label>
+                                            <input type="text" class="form-control" id="nome_medicamento" list="listaMedicamentosDisponiveis">
+                                            <datalist id="listaMedicamentosDisponiveis"></datalist>
+                                            <div id="avisoAlergia" class="alerta-alergia">
+                                                <i class="fas fa-exclamation-triangle me-2"></i> Atenção: paciente pode ter alergia a este medicamento.
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5 mb-3">
+                                            <label for="descricao_uso" class="form-label">Como tomar / Descrição de uso</label>
+                                            <input type="text" class="form-control" id="descricao_uso" placeholder="Ex: 1 comprimido a cada 8 horas">
+                                        </div>
+                                        <div class="col-md-2 mb-3">
+                                            <label for="aprazamento" class="form-label">Aprazamento</label>
+                                            <input type="datetime-local" class="form-control" id="aprazamento">
+                                        </div>
+                                    </div>
+                                    <div class="text-end mb-3">
+                                        <button type="button" class="btn btn-primary btn-sm" id="btnAdicionarMedicamento">
+                                            <i class="fas fa-plus-circle"></i> Adicionar Medicamento
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Lista de medicamentos adicionados -->
+                                    <div class="table-responsive mt-3">
+                                        <table class="table table-sm table-bordered" id="tabelaMedicamentosAdicionados">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Medicamento</th>
+                                                    <th>Como tomar</th>
+                                                    <th>Aprazamento</th>
+                                                    <th>Ações</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr id="semMedicamentos">
+                                                    <td colspan="4" class="text-center">Nenhum medicamento adicionado</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Procedimentos -->
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">Procedimentos</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="texto_procedimento_medico" class="form-label">Procedimento Médico</label>
+                                        <textarea class="form-control" id="texto_procedimento_medico" rows="3" placeholder="Descreva o procedimento médico a ser realizado..."></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="texto_procedimento_multi" class="form-label">Procedimento Multiprofissional</label>
+                                        <textarea class="form-control" id="texto_procedimento_multi" rows="3" placeholder="Descreva o procedimento multiprofissional a ser realizado..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-end mt-3">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Salvar Prescrição</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="evolucaoSection" class="content-section">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Evolução e Conduta</h5>
+                    <!-- Botão de Nova Evolução removido - apenas médicos podem adicionar evoluções -->
+                </div>
+                <div class="card-body">
+                    <div class="mt-3 mb-3">
+                        <h6 class="fw-bold">Informações de Admissão</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold">HDA (História da Doença Atual)</label>
+                                <textarea class="form-control" rows="2" readonly>{{ internacao.hda or 'Não registrado.' }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive mb-3">
+                        <table class="table table-striped table-medicamentos">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th scope="col" style="width: 12%">Data/Hora</th>
+                                    <th scope="col" style="width: 13%">Médico</th>
+                                    <th scope="col" style="width: 75%">Evolução</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaEvolucoes">
+                                <tr>
+                                    <td colspan="3" class="text-center">Carregando evoluções...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Evolução - Removido pois apenas médicos podem adicionar evoluções -->
+
+        <div id="enfermagemSection" class="content-section active">
+            <!-- Admissão de Enfermagem -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Admissão de Enfermagem</h5>
+                    {% if session.get('cargo')|lower|trim == 'enfermeiro' %}
+                    <button class="btn btn-light btn-sm" id="btn-editar-admissao">
+                        <i class="fas fa-edit"></i> Editar Admissão
+                    </button>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div id="admissao-texto-container">
+                        <div class="texto-admissao">
+                            {% if internacao.admissao_enfermagem %}
+                                {{ internacao.admissao_enfermagem | safe }}
+                            {% else %}
+                                <div class="text-muted">Nenhuma admissão de enfermagem registrada para este paciente.</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div id="admissao-form-container" style="display: none;">
+                        <div class="mb-3">
+                            <input type="hidden" id="internacao_id" value="{{ internacao.id }}">
+                            <textarea class="form-control" id="admissao_enfermagem" rows="5" placeholder="Digite aqui a admissão de enfermagem...">{{ internacao.admissao_enfermagem or '' }}</textarea>
+                        </div>
+                        <div class="text-end">
+                            <button id="btn-cancelar-admissao" class="btn btn-secondary me-2">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                            <button id="btn-salvar-admissao" class="btn btn-success">
+                                <i class="fas fa-save"></i> Salvar Admissão
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evoluções de Enfermagem -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Evoluções de Enfermagem</h5>
+                    <div>
+                        {% if session.get('cargo')|lower|trim == 'enfermeiro' %}
+                        <button class="btn btn-sm btn-light me-2" data-bs-toggle="modal" data-bs-target="#modalEnfermagemEvolucao">
+                            <i class="fas fa-plus-circle"></i> Nova Evolução
+                        </button>
+                        {% endif %}
+                        <button class="btn btn-sm btn-outline-light me-2" id="toggle-evolucoes-antigas">
+                            <i class="fas fa-eye-slash"></i> <span id="toggle-evolucoes-text">Ocultar Antigas</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Seletor de data para filtrar evoluções -->
+                    <div class="mb-3">
+                        <div class="row align-items-center">
+                            <div class="col-md-4">
+                                <label for="filtro-data" class="form-label">Filtrar por data:</label>
+                                <div class="input-group">
+                                    <input type="date" id="filtro-data" class="form-control form-control-sm">
+                                    <button class="btn btn-sm btn-outline-primary" id="btn-filtrar-data">
+                                        <i class="fas fa-filter"></i> Filtrar
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary" id="btn-limpar-filtro">
+                                        <i class="fas fa-times"></i> Limpar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3" id="hoje-container">
+                        <h6 class="fw-bold text-success mb-2"><i class="fas fa-calendar-day me-1"></i> <span id="titulo-evolucoes-hoje">Evoluções de Hoje</span></h6>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-medicamentos">
+                                <thead class="table-info">
+                                    <tr>
+                                        <th scope="col" style="width: 12%">Hora</th>
+                                        <th scope="col" style="width: 13%">Enfermeiro</th>
+                                        <th scope="col" style="width: 75%">Evolução</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="listaEvolucoesDoDia">
+                                    <tr>
+                                        <td colspan="3" class="text-center">Carregando evoluções de hoje...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3" id="antigas-container">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="fw-bold text-secondary mb-0"><i class="fas fa-history me-1"></i> Evoluções Anteriores</h6>
+                            <span class="badge bg-info" id="contador-evolucoes-antigas">0</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-medicamentos">
+                                <thead class="table-secondary">
+                                    <tr>
+                                        <th scope="col" style="width: 12%">Data/Hora</th>
+                                        <th scope="col" style="width: 13%">Enfermeiro</th>
+                                        <th scope="col" style="width: 75%">Evolução</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="listaEvolucoesAntigas">
+                                    <tr>
+                                        <td colspan="3" class="text-center">Carregando evoluções anteriores...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SAE -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Sistematização da Assistência de Enfermagem (SAE)</h5>
+                    {% if session.get('cargo')|lower|trim == 'enfermeiro' %}
+                    <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalSAE">
+                        <i class="fas fa-plus-circle"></i> Nova SAE
+                    </button>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div id="listaSAE">
+                        <p class="text-center text-muted">Carregando dados da SAE...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prescrições de Enfermagem -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-warning text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Prescrições de Enfermagem</h5>
+                    {% if session.get('cargo')|lower|trim == 'enfermeiro' %}
+                    <button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#modalPrescricaoEnfermagem">
+                        <i class="fas fa-plus-circle"></i> Nova Prescrição
+                    </button>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-medicamentos">
+                            <thead class="table-warning">
+                                <tr>
+                                    <th scope="col" style="width: 15%">Data/Hora</th>
+                                    <th scope="col" style="width: 15%">Enfermeiro</th>
+                                    <th scope="col" style="width: 60%">Prescrição</th>
+                                    <th scope="col" style="width: 10%">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaPrescricoesEnfermagem">
+                                <tr>
+                                    <td colspan="4" class="text-center">Carregando prescrições...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="examesSection" class="content-section">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Exames Laboratoriais</h5>
+                </div>
+                <div class="card-body">
+                    <textarea class="form-control" rows="5" readonly>{{ internacao.exames_laboratoriais or 'Não registrado.' }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Remover seção imagensSection -->
+    </div>
+</div>
+
+<!-- Modal Aprazamento -->
+<div class="modal fade" id="modalAprazamento" tabindex="-1" aria-labelledby="modalAprazamentoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white py-2">
+                <h5 class="modal-title" id="modalAprazamentoLabel">
+                    <i class="fas fa-clock me-2"></i>Aprazar Medicamento
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-3">
+                <form id="formAprazamento" class="needs-validation" novalidate>
+                    <input type="hidden" id="aprazamento_prescricao_id">
+                    <input type="hidden" id="aprazamento_medicamento_index">
+                    
+                    <!-- Informações do Medicamento -->
+                    <div class="alert alert-info py-2 mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-pills me-2"></i>
+                            <div>
+                                <small class="text-muted">Medicamento:</small>
+                                <strong id="aprazamento_medicamento_nome" class="ms-1">Medicamento</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <!-- Período -->
+                        <div class="col-12">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body p-2">
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <label class="form-label small">Data Inicial</label>
+                                            <input type="date" class="form-control form-control-sm" id="aprazamento_data_inicio" required>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label small">Data Final</label>
+                                            <input type="date" class="form-control form-control-sm" id="aprazamento_data_fim" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Configuração de Horários -->
+                        <div class="col-12">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body p-2">
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <label class="form-label small">Horário Inicial</label>
+                                            <input type="time" class="form-control form-control-sm" id="aprazamento_hora_inicial_multiplos" required>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label small">Intervalo</label>
+                                            <select class="form-select form-select-sm" id="aprazamento_multiplos_intervalo" required>
+                                                <option value="4">4 horas</option>
+                                                <option value="6" selected>6 horas</option>
+                                                <option value="8">8 horas</option>
+                                                <option value="12">12 horas</option>
+                                                <option value="24">24 horas</option>
+                                                <option value="custom">Personalizado</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12" id="multiplos_intervalo_custom" style="display: none;">
+                                            <input type="number" class="form-control form-control-sm" 
+                                                id="aprazamento_multiplos_intervalo_custom" 
+                                                min="0.5" max="24" step="0.5" value="6" 
+                                                placeholder="Intervalo em horas (0.5 a 24)">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botões de Ação -->
+                        <div class="col-12">
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-primary flex-grow-1" id="btn_calcular_multiplos_dias">
+                                    <i class="fas fa-calculator me-1"></i>Calcular
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="btn_selecionar_todos">
+                                    <i class="fas fa-check-square"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="btn_desmarcar_todos">
+                                    <i class="fas fa-square"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Horários Calculados -->
+                        <div class="col-12">
+                            <div id="horarios_multiplos_dias" class="border rounded bg-light p-2" 
+                                style="max-height: 200px; overflow-y: auto;">
+                                <p class="text-muted small text-center mb-0">
+                                    <i class="fas fa-info-circle me-1"></i>Clique em "Calcular" para ver os horários
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botões do Modal -->
+                    <div class="d-flex justify-content-end gap-2 mt-3">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-sm btn-success">
+                            <i class="fas fa-check me-1"></i>Registrar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para nova evolução de enfermagem -->
+<div class="modal fade" id="modalEnfermagemEvolucao" tabindex="-1" aria-labelledby="modalEnfermagemEvolucaoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="modalEnfermagemEvolucaoLabel">Nova Evolução de Enfermagem</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEvolucaoEnfermagem">
+                    <!-- ID da internação e do usuário -->
+                    <input type="hidden" id="internacao_id_evolucao" value="{{ internacao.id }}">
+                    <input type="hidden" id="usuario_id" value="{{ session.get('user_id', 0) }}">
+
+                    <!-- Textarea simples (único editor usado) -->
+                    <div class="mb-3">
+                        <label for="texto_evolucao_enfermagem" class="form-label fw-bold">Texto da Evolução</label>
+                        <textarea id="texto_evolucao_enfermagem"
+                                  name="texto"
+                                  class="form-control"
+                                  rows="10"
+                                  style="width: 100%; min-height: 300px; font-size: 14px;"
+                                  placeholder="Digite a evolução de enfermagem..."></textarea>
+                    </div>
+
+                    <!-- Botões -->
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Registrar Evolução</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal SAE -->
+<div class="modal fade" id="modalSAE" tabindex="-1" aria-labelledby="modalSAELabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalSAELabel">SAE - Sistematização da Assistência de Enfermagem</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-3">
+                <form id="formSAE" class="row g-3">
+                    <input type="hidden" id="sae_paciente_id" value="{{ internacao.atendimento_id }}">
+                    
+                    <!-- Sinais Vitais -->
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-light py-2">
+                                <h6 class="mb-0"><i class="fas fa-heartbeat text-primary me-2"></i>Sinais Vitais</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-2">
+                                    <div class="col-md-2">
+                                        <label class="form-label small">PA</label>
+                                        <input type="text" class="form-control form-control-sm" id="sae_pa" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label small">FC</label>
+                                        <input type="text" class="form-control form-control-sm" id="sae_fc" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label small">SAT</label>
+                                        <input type="text" class="form-control form-control-sm" id="sae_sat" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label small">R</label>
+                                        <input type="text" class="form-control form-control-sm" id="sae_r" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label small">T</label>
+                                        <input type="text" class="form-control form-control-sm" id="sae_t" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label small">Pulso</label>
+                                        <input type="text" class="form-control form-control-sm" id="sae_pulso" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label small">DX (mg/dL)</label>
+                                        <input type="text" class="form-control form-control-sm" id="sae_dx" name="dx" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sistema Neurológico e Estado Geral -->
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-light py-2">
+                                <h6 class="mb-0"><i class="fas fa-brain text-primary me-2"></i>Sistema Neurológico</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex flex-column gap-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sae_neuro_consciente">
+                                        <label class="form-check-label small" for="sae_neuro_consciente">Consciente</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sae_neuro_orientado">
+                                        <label class="form-check-label small" for="sae_neuro_orientado">Orientado</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sae_neuro_desorientado">
+                                        <label class="form-check-label small" for="sae_neuro_desorientado">Desorientado</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sae_neuro_torporoso">
+                                        <label class="form-check-label small" for="sae_neuro_torporoso">Torporoso</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sae_neuro_inquieto">
+                                        <label class="form-check-label small" for="sae_neuro_inquieto">Inquieto</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sae_neuro_reage">
+                                        <label class="form-check-label small" for="sae_neuro_reage">Reage a estímulos</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-light py-2">
+                                <h6 class="mb-0"><i class="fas fa-user-check text-primary me-2"></i>Estado Geral</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex flex-column gap-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="sae_estado_geral" id="sae_estado_bom" value="bom">
+                                        <label class="form-check-label small" for="sae_estado_bom">Bom</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="sae_estado_geral" id="sae_estado_regular" value="regular">
+                                        <label class="form-check-label small" for="sae_estado_regular">Regular</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="sae_estado_geral" id="sae_estado_prejudicado" value="prejudicado">
+                                        <label class="form-check-label small" for="sae_estado_prejudicado">Prejudicado</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ventilação e Pele -->
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-light py-2">
+                                <h6 class="mb-0"><i class="fas fa-lungs text-primary me-2"></i>Ventilação</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex flex-column gap-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sae_ventilacao_eupneico">
+                                        <label class="form-check-label small" for="sae_ventilacao_eupneico">Eupneico</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sae_ventilacao_bradipneico">
+                                        <label class="form-check-label small" for="sae_ventilacao_bradipneico">Bradipneico</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sae_ventilacao_dispneico">
+                                        <label class="form-check-label small" for="sae_ventilacao_dispneico">Dispneico</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sae_ventilacao_aa">
+                                        <label class="form-check-label small" for="sae_ventilacao_aa">AA</label>
+                                    </div>
+                                    <div class="mb-2">
+                                        <label class="form-label small d-block">O2 POR:</label>
+                                        <input type="text" class="form-control form-control-sm" id="sae_ventilacao_o2">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-light py-2">
+                                <h6 class="mb-0"><i class="fas fa-hand-holding-medical text-primary me-2"></i>Pele</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex flex-column gap-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sae_pele_normocorado">
+                                        <label class="form-check-label small" for="sae_pele_normocorado">Normocorado</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sae_pele_hipocorado">
+                                        <label class="form-check-label small" for="sae_pele_hipocorado">Hipocorado</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sae_pele_acianotica">
+                                        <label class="form-check-label small" for="sae_pele_acianotica">Acianótica</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sae_pele_icterica">
+                                        <label class="form-check-label small" for="sae_pele_icterica">Ictérica</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sae_pele_anicterica">
+                                        <label class="form-check-label small" for="sae_pele_anicterica">Anictérica</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sistema Gastrointestinal e Regulação Vascular -->
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-light py-2">
+                                <h6 class="mb-0"><i class="fas fa-stomach text-primary me-2"></i>Sistema Gastrointestinal</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex flex-column gap-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sae_gi_gavagem">
+                                        <label class="form-check-label small" for="sae_gi_gavagem">Gavagem</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sae_gi_aberta">
+                                        <label class="form-check-label small" for="sae_gi_aberta">Aberta</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sae_gi_emese">
+                                        <label class="form-check-label small" for="sae_gi_emese">Emese</label>
+                                    </div>
+                                    <div class="mt-2">
+                                        <label class="form-label small d-block">Evacuações:</label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="sae_gi_evac_presente">
+                                            <label class="form-check-label small" for="sae_gi_evac_presente">Presente</label>
+                                        </div>
+                                        <div class="form-check d-flex align-items-center gap-2">
+                                            <input class="form-check-input" type="checkbox" id="sae_gi_evac_ausente">
+                                            <label class="form-check-label small" for="sae_gi_evac_ausente">Ausente há</label>
+                                            <input type="number" class="form-control form-control-sm" id="sae_gi_evac_dias" min="0" style="width: 60px;">
+                                            <span class="small">dias</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-light py-2">
+                                <h6 class="mb-0"><i class="fas fa-heartbeat text-primary me-2"></i>Regulação Vascular</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex flex-column gap-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sae_vascular_normocardico">
+                                        <label class="form-check-label small" for="sae_vascular_normocardico">Normocárdico</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sae_vascular_taquicardico">
+                                        <label class="form-check-label small" for="sae_vascular_taquicardico">Taquicárdico</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sae_vascular_bradicardico">
+                                        <label class="form-check-label small" for="sae_vascular_bradicardico">Bradicárdico</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sae_vascular_hipertenso">
+                                        <label class="form-check-label small" for="sae_vascular_hipertenso">Hipertenso</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sae_vascular_hipotenso">
+                                        <label class="form-check-label small" for="sae_vascular_hipotenso">Hipotenso</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sae_vascular_normotenso">
+                                        <label class="form-check-label small" for="sae_vascular_normotenso">Normotenso</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pulso -->
+                    <div class="card mb-3">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Pulso</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="sae_pulso_cheio">
+                                        <label class="form-check-label" for="sae_pulso_cheio">Cheio</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="sae_pulso_filiforme">
+                                        <label class="form-check-label" for="sae_pulso_filiforme">Filiforme</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="sae_pulso_ritmico">
+                                        <label class="form-check-label" for="sae_pulso_ritmico">Rítmico</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="sae_pulso_arritmico">
+                                        <label class="form-check-label" for="sae_pulso_arritmico">Arrítmico</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Regulação Abdominal -->
+                    <div class="card mb-3">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Regulação Abdominal</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="sae_abdominal_normotenso">
+                                        <label class="form-check-label" for="sae_abdominal_normotenso">Normotenso</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="sae_abdominal_tenso">
+                                        <label class="form-check-label" for="sae_abdominal_tenso">Tenso</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="sae_abdominal_globoso">
+                                        <label class="form-check-label" for="sae_abdominal_globoso">Globoso</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="sae_abdominal_distendido">
+                                        <label class="form-check-label" for="sae_abdominal_distendido">Distendido</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="sae_abdominal_concavo">
+                                        <label class="form-check-label" for="sae_abdominal_concavo">Côncavo</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RHA -->
+                    <div class="card mb-3">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">RHA (Ruídos hidroaéreos)</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="sae_rha" id="sae_rha_presente" value="presente">
+                                        <label class="form-check-label" for="sae_rha_presente">Presente</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="sae_rha" id="sae_rha_ausente" value="ausente">
+                                        <label class="form-check-label" for="sae_rha_ausente">Ausente</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sistema Urinário -->
+                    <div class="card mb-3">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Sistema Urinário</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="sae_urinario_espontanea">
+                                        <label class="form-check-label" for="sae_urinario_espontanea">Espontânea</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="sae_urinario_anuria">
+                                        <label class="form-check-label" for="sae_urinario_anuria">Anúria</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="sae_urinario_poliuria">
+                                        <label class="form-check-label" for="sae_urinario_poliuria">Poliúria</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="sae_urinario_disuria">
+                                        <label class="form-check-label" for="sae_urinario_disuria">Disúria</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="sae_urinario_hematuria">
+                                        <label class="form-check-label" for="sae_urinario_hematuria">Hematúria</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="sae_urinario_oliguria">
+                                        <label class="form-check-label" for="sae_urinario_oliguria">Oligúria</label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="sae_urinario_cistostomia">
+                                        <label class="form-check-label" for="sae_urinario_cistostomia">Cistostomia</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Diagnóstico de Enfermagem -->
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-light py-2">
+                                <h6 class="mb-0"><i class="fas fa-clipboard-check text-primary me-2"></i>Diagnóstico de Enfermagem</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="sae_dx_risco_infeccao">
+                                            <label class="form-check-label small" for="sae_dx_risco_infeccao">Risco de infecção</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="sae_dx_risco_pele">
+                                            <label class="form-check-label small" for="sae_dx_risco_pele">Risco de integridade da pele prejudicada</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="sae_dx_mobilidade">
+                                            <label class="form-check-label small" for="sae_dx_mobilidade">Mobilidade física prejudicada</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="sae_dx_perfusao">
+                                            <label class="form-check-label small" for="sae_dx_perfusao">Perfusão tissular prejudicada</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="sae_dx_autocuidado">
+                                            <label class="form-check-label small" for="sae_dx_autocuidado">Déficit autocuidado para banho/higienização</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="sae_dx_eliminacao_vesical">
+                                            <label class="form-check-label small" for="sae_dx_eliminacao_vesical">Eliminação vesical alterada</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="sae_dx_eliminacao_intestinal">
+                                            <label class="form-check-label small" for="sae_dx_eliminacao_intestinal">Eliminação intestinal alterada</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="sae_dx_risco_lp">
+                                            <label class="form-check-label small" for="sae_dx_risco_lp">Risco de LP</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="sae_dx_troca_gases">
+                                            <label class="form-check-label small" for="sae_dx_troca_gases">Troca de gases ineficaz</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="sae_dx_nutricao">
+                                            <label class="form-check-label small" for="sae_dx_nutricao">Nutrição desequilibrada</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="sae_dx_dor_aguda">
+                                            <label class="form-check-label small" for="sae_dx_dor_aguda">Dor aguda</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="sae_dx_dor_cronica">
+                                            <label class="form-check-label small" for="sae_dx_dor_cronica">Dor crônica</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="sae_dx_protecao">
+                                            <label class="form-check-label small" for="sae_dx_protecao">Proteção ineficaz</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="sae_dx_outros" class="form-label small">Outros diagnósticos:</label>
+                                        <textarea class="form-control form-control-sm" id="sae_dx_outros" rows="2"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-light py-2">
+                                <h6 class="mb-0"><i class="fas fa-notes-medical text-primary me-2"></i>Informações Adicionais</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-2"><label class="form-label small">Medicação</label><textarea class="form-control form-control-sm" id="sae_medicacao" name="medicacao" rows="2" placeholder="Descreva as medicações em uso..."></textarea></div>
+                                <div class="mb-2"><label class="form-label small">Alergias</label><input type="text" class="form-control form-control-sm" id="sae_alergias" name="alergias"></div>
+                                <div class="mb-2"><label class="form-label small">Antecedentes Pessoais</label><input type="text" class="form-control form-control-sm" id="sae_antecedentes_pessoais" name="antecedentes_pessoais"></div>
+                                <div class="mb-2"><label class="form-label small">Acesso Venoso</label><input type="text" class="form-control form-control-sm" id="sae_acesso_venoso" name="acesso_venoso"></div>
+                                <div class="mb-2"><label class="form-label small">Observação</label><textarea class="form-control form-control-sm" id="sae_observacao" name="observacao" rows="2"></textarea></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 text-end">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Salvar SAE</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Prescrição de Enfermagem -->
+<div class="modal fade" id="modalPrescricaoEnfermagem" tabindex="-1" aria-labelledby="modalPrescricaoEnfermagemLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-white">
+                <h5 class="modal-title" id="modalPrescricaoEnfermagemLabel">Nova Prescrição de Enfermagem</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formPrescricaoEnfermagem">
+                    <input type="hidden" id="prescricao_enfermagem_id" value="">
+                    <input type="hidden" id="internacao_id_prescricao" value="{{ internacao.id }}">
+                    <input type="hidden" id="enfermeiro_id" value="{{ session.get('user_id', 0) }}">
+
+                    <div class="mb-3">
+                        <label for="texto_prescricao_enfermagem" class="form-label fw-bold">Texto da Prescrição</label>
+                        <textarea id="texto_prescricao_enfermagem"
+                                  name="texto"
+                                  class="form-control"
+                                  rows="10"
+                                  style="width: 100%; min-height: 300px; font-size: 14px;"
+                                  placeholder="Digite a prescrição de enfermagem..."></textarea>
+                    </div>
+
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Registrar Prescrição</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Quill Rich Text Editor -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+
+<script src="/static/js/aprazamento.js"></script>
+<script src="/static/js/calculo_horarios.js"></script>
+
+<!-- Adicionar referência ao módulo de evoluções de enfermagem -->
+
+<!-- Adicionar o novo módulo completo de enfermagem -->
+<script src="/static/js/enfermagem_completo.js"></script>
+
+<!-- Campo hidden para armazenar o cargo do usuário -->
+<input type="hidden" id="cargo_usuario" value="{{ session.get('cargo', '') }}">
+
+<script>
+    // Extrair ID da internação - será atribuído ao carregar o documento
+    const internacaoIdRaw = "{{ internacao.id }}";
+    console.log('Valor raw de internacao.id:', internacaoIdRaw);
+    
+    // Declarar funcionarioId globalmente
+    const funcionarioId = "{{ session.get('user_id', 0) }}";
+    console.log('ID do funcionário:', funcionarioId);
+    
+    // Garantir que a função formatarAprazamentoLegivel esteja disponível
+    if (typeof formatarAprazamentoLegivel !== 'function') {
+        // Definir a função se não estiver disponível globalmente
+        window.formatarAprazamentoLegivel = function(texto) {
+            if (!texto) return "Não aprazado";
+            
+            // Dividir por datas
+            const secoes = texto.split(';');
+            const datasDias = [];
+            
+            secoes.forEach(secao => {
+                secao = secao.trim();
+                if (!secao) return;
+                
+                const [data, horariosTexto] = secao.split(':');
+                if (!data || !horariosTexto) return;
+                
+                const dataTrimmed = data.trim();
+                const horarios = horariosTexto.split(',').map(h => h.trim()).join(', ');
+                
+                datasDias.push(`${dataTrimmed}: ${horarios}`);
+            });
+            
+            return datasDias.join(" | ");
+        };
+        
+        console.log('Função formatarAprazamentoLegivel definida no escopo global');
+    }
+    
+    let alergiasPaciente = "{{ paciente.alergias | default('') }}".toLowerCase();
+    
+    // Array global para armazenar os medicamentos adicionados
+    let medicamentosAdicionados = [];
+    
+    let quill; // Editor Quill para evolução médica
+    // Remover a inicialização do quillEnfermagem que está causando problemas
+    
+    // Inicializar Observador de Mutações para monitorar problemas DOM
+    function observarMutacoesDom(seletor, callback) {
+        const elemento = document.querySelector(seletor);
+        if (!elemento) return null;
+        
+        const observer = new MutationObserver(callback);
+        observer.observe(elemento, { 
+            childList: true, 
+            subtree: true,
+            attributes: true,
+            characterData: true
+        });
+        
+        return observer;
+    }
+    
+
+    // Função para garantir que não haja eventos depreciados no DOM
+    function removerEventosDepreciados() {
+        // Lista de eventos depreciados
+        const eventosDepreciados = [
+            'DOMNodeInserted',
+            'DOMNodeRemoved',
+            'DOMSubtreeModified',
+            'DOMAttrModified',
+            'DOMCharacterDataModified'
+        ];
+        
+        // Função para limpar o evento
+        function limparEvento(event) {
+            const elementos = document.querySelectorAll('*');
+            for (let i = 0; i < elementos.length; i++) {
+                const el = elementos[i];
+                if (el._events && el._events[event]) {
+                    delete el._events[event];
+                    console.log(`Evento depreciado ${event} removido do elemento:`, el);
+                }
+            }
+        }
+        
+        // Limpar todos os eventos depreciados
+        eventosDepreciados.forEach(limparEvento);
+    }
+
+    $(document).ready(function() {
+        // Atribuir valor à variável global internacaoId declarada em enfermagem_completo.js
+        if (typeof internacaoId !== 'undefined') {
+            internacaoId = parseInt(internacaoIdRaw, 10);
+            console.log('Valor de internacaoId após parse:', internacaoId, typeof internacaoId);
+            
+            // Verificar se internacaoId é um número válido
+            if (isNaN(internacaoId)) {
+                console.error('Erro: internacaoId não é um número válido!');
+                alert('Erro ao carregar o ID da internação. Por favor, recarregue a página ou contate o suporte.');
+            } else {
+                console.log('internacaoId válido:', internacaoId);
+            }
+        } else {
+            console.error('Variável internacaoId não declarada! Verifique se enfermagem_completo.js foi carregado.');
+        }
+        
+        // Debugar cargo do usuário
+        console.log("Cargo do usuário na sessão:", "{{ session.get('cargo') }}");
+        
+        // Inicializar Quill editor para evolução médica
+        try {
+            quill = new Quill('#editor-container', {
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                        [{ 'font': [] }],
+                        [{ 'size': ['small', false, 'large', 'huge'] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'script': 'sub'}, { 'script': 'super' }],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }, { 'list': 'check' }],
+                        [{ 'indent': '-1'}, { 'indent': '+1' }],
+                        [{ 'direction': 'rtl' }, { 'align': [] }],
+                        ['blockquote', 'code-block'],
+                        ['link'],
+                        ['clean']
+                    ]
+                },
+                placeholder: 'Digite a evolução do paciente...',
+                theme: 'snow'
+            });
+            
+            // Configurar fonte menor por padrão
+            quill.root.style.fontSize = '13px';
+            quill.root.style.lineHeight = '1.5';
+            
+            // Monitorar quando o Quill estiver totalmente carregado
+            if (quill && quill.root) {
+                // Configurar um observador específico para o editor
+                editorObserver = observarMutacoesDom('#editor-container', function() {
+                    // Remover eventos depreciados sempre que houver uma alteração
+                    setTimeout(removerEventosDepreciados, 0);
+                });
+                
+                // Aplicar uma limpeza inicial de eventos depreciados
+                setTimeout(removerEventosDepreciados, 100);
+                
+                // Aplicar a implementação de scroll moderna
+                setupModernScroll(document.getElementById('editor-container'));
+            }
+            
+            // Remover inicialização do Quill para enfermagem
+            
+            // Aplicar a implementação de scroll moderna para o editor de enfermagem
+            if (document.getElementById('editor-container-enfermagem')) {
+                setupModernScroll(document.getElementById('editor-container-enfermagem'));
+            }
+            
+            // Usar MutationObserver em vez de DOMNodeInserted
+            observarMutacoesDom('.ql-toolbar', function(mutacoes) {
+                // Processar as mutações aqui, se necessário
+                console.log('Toolbar do editor atualizada');
+                // Remover eventos depreciados após atualização da toolbar
+                setTimeout(removerEventosDepreciados, 0);
+            });
+        } catch (error) {
+            console.error('Erro no editor Quill:', error);
+        }
+        
+        // Manipular erros que possam ocorrer com o editor
+        try {
+            // Verificar se o editor foi inicializado corretamente
+            if (!quill || !quill.root) {
+                console.error('Erro ao inicializar o editor Quill.');
+                // Criar um editor de fallback se Quill falhar
+                $('#editor-container').hide();
+                $('<textarea class="form-control" rows="6" id="fallback-editor"></textarea>')
+                    .insertAfter('#editor-container');
+                
+                // Atualizar o handler de submit para usar o editor de fallback
+                $('#formEvolucao').off('submit').on('submit', function(e) {
+                    e.preventDefault();
+                    const textoPlano = $('#fallback-editor').val().trim();
+                    
+                    if (!textoPlano) {
+                        alert('Por favor, preencha o texto da evolução.');
+                        return;
+                    }
+                    
+                    const dados = {
+                        internacao_id: isNaN(internacaoId) ? null : internacaoId,
+                        funcionario_id: parseInt("{{ session.get('user_id', 0) }}", 10),
+                        evolucao: textoPlano
+                    };
+                    
+                    enviarEvolucao(dados);
+                });
+            }
+        } catch (error) {
+            console.error('Erro no editor Quill:', error);
+        }
+        
+        // Adicionar listener de erro global para Quill
+        window.addEventListener('error', function(e) {
+            if (e.message && e.message.includes('quill')) {
+                console.error('Erro relacionado ao Quill:', e.message);
+                if ($('#fallback-editor').length === 0) {
+                    $('#editor-container').hide();
+                    $('<textarea class="form-control" rows="6" id="fallback-editor"></textarea>')
+                        .insertAfter('#editor-container');
+                    
+                    // Atualizar o handler de submit
+                    $('#formEvolucao').off('submit').on('submit', function(evt) {
+                        evt.preventDefault();
+                        const textoPlano = $('#fallback-editor').val().trim();
+                        
+                        if (!textoPlano) {
+                            alert('Por favor, preencha o texto da evolução.');
+                            return;
+                        }
+                        
+                        const dados = {
+                            internacao_id: isNaN(internacaoId) ? null : internacaoId,
+                            funcionario_id: parseInt("{{ session.get('user_id', 0) }}", 10),
+                            evolucao: textoPlano
+                        };
+                        
+                        enviarEvolucao(dados);
+                    });
+                }
+            }
+        });
+        
+        // Configurar navegação das abas
+        document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                // Remove active de todos os links (exceto action-btn)
+                document.querySelectorAll('.sidebar .nav-link').forEach(l => {
+                    if (!l.classList.contains('action-btn')) {
+                        l.classList.remove('active');
+                    }
+                });
+                // Adiciona active ao link clicado (se não for action-btn)
+                if (!this.classList.contains('action-btn')) {
+                    this.classList.add('active');
+                }
+
+                const target = this.getAttribute('data-target');
+                if (target) {
+                    // Esconde todas as seções
+                    document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+                    // Mostra a seção alvo
+                    document.getElementById(target).classList.add('active');
+                }
+            });
+        });
+
+        // Ativar a aba de enfermagem por padrão
+        document.querySelector('.sidebar .nav-link[data-target="enfermagemSection"]').click();
+
+        // Carregar prescrições ao iniciar
+        carregarPrescricoes();
+        
+        // Carregar evoluções ao iniciar
+        carregarEvolucoes();
+        
+        // Comentar função local para usar a do módulo externo
+        // Função para carregar evoluções de enfermagem foi movida para o módulo externo
+        
+        // Carregar evoluções de enfermagem usando a função do módulo externo
+        carregarEvolucoesEnfermagem();
+        
+        // Configurar handler para editar admissão
+        $('#btn-editar-admissao').click(function() {
+            $('#modalEnfermagem').modal('show');
+        });
+        
+        // Handler para salvar admissão de enfermagem
+        // Usar variáveis globais já declaradas acima
+        // const internacaoId = $('#internacao_id').val(); // Removido - usar a global
+        // const funcionarioId = $('#usuario_id').val(); // Removido - usar a global
+
+        // Handler para salvar admissão de enfermagem
+        $(document).on('submit', '#formEnfermagem', function(e) {
+            e.preventDefault();
+
+            const admissaoTexto = $('#admissao_enfermagem').val().trim();
+
+            if (!admissaoTexto) {
+                alert('Por favor, preencha a admissão de enfermagem.');
+                return;
+            }
+
+            if (!internacaoId || !funcionarioId) {
+                alert('Erro: internação ou enfermeiro não identificado.');
+                return;
+            }
+
+            $('#btn-salvar-admissao').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Salvando...');
+
+            $.ajax({
+                url: '/api/enfermagem/admissao',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    internacao_id: internacaoId,
+                    enfermeiro_id: funcionarioId,
+                    admissao_texto: admissaoTexto
+                }),
+                success: function(response) {
+                    $('#btn-salvar-admissao').prop('disabled', false).html('<i class="fas fa-save"></i> Salvar Admissão');
+                    $('.texto-admissao').html(admissaoTexto);
+                    $('#admissao-form-container').hide();
+                    $('#admissao-texto-container').show();
+                    alert('Admissão de enfermagem registrada com sucesso!');
+                },
+                error: function(xhr, status, error) {
+                    $('#btn-salvar-admissao').prop('disabled', false).html('<i class="fas fa-save"></i> Salvar Admissão');
+                    console.error('Erro ao salvar admissão de enfermagem:', xhr.responseText);
+                    alert('Erro de comunicação ao tentar salvar admissão: ' + (xhr.responseJSON?.erro || error));
+                }
+            });
+        });
+
+
+        
+
+
+        // Handler completo para registrar múltiplos aprazamentos
+       // Handler completo — versão corrigida (mantém minutos "HH:MM")
+        // Handler de envio do formulário de aprazamento (pronto para copiar)
+        $(document).on('submit', '#formAprazamento', function (e) {
+            e.preventDefault();
+
+            /* ------------------------------------------------------------------
+            1. Coleta de dados básicos
+            ------------------------------------------------------------------ */
+            const prescricao_id             = $('#aprazamento_prescricao_id').val();
+            const nome_medicamento          = $('#aprazamento_medicamento_nome').text();
+            const enfermeiro_responsavel_id = $(this).data('enfermeiro-id') || window.session?.user_id;
+
+            /* ------------------------------------------------------------------
+            2. Horários selecionados
+            ------------------------------------------------------------------ */
+            const horariosSelecionados = $('#horarios_multiplos_dias .horario-check:checked')
+                .map(function () { return $(this).val().trim(); })    // "DD/MM/YYYY:HH:MM"
+                .get();
+
+            if (horariosSelecionados.length === 0) {
+                alert('Selecione pelo menos um horário para aprazamento.');
+                return;
+            }
+
+            /* ------------------------------------------------------------------
+            3. Agrupa por data (preservando minutos)
+                { '23/05/2025': ['08:00','14:30'], ... }
+            ------------------------------------------------------------------ */
+            const horariosPorData = {};
+            horariosSelecionados.forEach(v => {
+                const idx  = v.indexOf(':');     // primeiro ":"
+                if (idx === -1) return;          // segurança
+                const data = v.slice(0, idx);    // "23/05/2025"
+                const hora = v.slice(idx + 1);   // "08:00", "14:30", etc.
+                (horariosPorData[data] = horariosPorData[data] || []).push(hora);
+            });
+
+            /* ------------------------------------------------------------------
+            4. Callback coletor – fecha modal quando todas as requisições ok
+            ------------------------------------------------------------------ */
+            const totalRequisicoes = horariosSelecionados.length;
+            let respostas = 0;
+            let erroDetectado = false;
+
+            function callbackColetor(response) {
+                respostas++;
+
+                if (!response.success && !erroDetectado) {
+                    erroDetectado = true;
+                    alert(response.message || 'Erro ao registrar aprazamento.');
+                }
+
+                if (respostas === totalRequisicoes && !erroDetectado) {
+                    $('#modalAprazamento').modal('hide');
+                    carregarPrescricoes();
+                }
+            }
+
+            /* ------------------------------------------------------------------
+            5. Envia 1 requisição por horário (1 horário → 1 Aprazamento)
+            ------------------------------------------------------------------ */
+            for (const [data, horas] of Object.entries(horariosPorData)) {
+                horas.forEach(hora => {
+                    registrarAprazamento({
+                        prescricao_id,
+                        nome_medicamento,
+                        data_hora_aprazamento: `${data} ${hora}`,  // "DD/MM/YYYY HH:MM"
+                        enfermeiro_responsavel_id
+                    }, callbackColetor);
+                });
+            }
+});
+
+
+
+        // Função para carregar evoluções de enfermagem
+        function carregarEvolucoesEnfermagem() {
+            $.ajax({
+                url: `/api/enfermagem/evolucao/${internacaoId}`,
+                method: 'GET',
+                success: function(response) {
+                    // Separar evoluções de hoje e anteriores
+                    const hoje = new Date().toISOString().split('T')[0];
+                    const evolucoesDoDia = [];
+                    const evolucoesAntigas = [];
+                    
+                    if (Array.isArray(response)) {
+                        response.forEach(ev => {
+                            const dataEvolucao = new Date(ev.data_evolucao).toISOString().split('T')[0];
+                            if (dataEvolucao === hoje) {
+                                evolucoesDoDia.push(ev);
+                            } else {
+                                evolucoesAntigas.push(ev);
+                            }
+                        });
+                        
+                        // Atualizar contador
+                        $('#contador-evolucoes-antigas').text(evolucoesAntigas.length);
+                        
+                        // Renderizar evoluções do dia
+                        if (evolucoesDoDia.length > 0) {
+                            let htmlDoDia = '';
+                            evolucoesDoDia.forEach(ev => {
+                                const hora = new Date(ev.data_evolucao).toLocaleTimeString('pt-BR', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                });
+                                
+                                htmlDoDia += `
+                                    <tr>
+                                        <td>${hora}</td>
+                                        <td>${ev.enfermeiro_nome || 'Não informado'}</td>
+                                        <td>
+                                            <div class="texto-evolucao">
+                                                ${ev.texto || '---'}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `;
+                            });
+                            $('#listaEvolucoesDoDia').html(htmlDoDia);
+                        } else {
+                            $('#listaEvolucoesDoDia').html('<tr><td colspan="3" class="text-center">Nenhuma evolução registrada hoje.</td></tr>');
+                        }
+                        
+                        // Renderizar evoluções antigas
+                        if (evolucoesAntigas.length > 0) {
+                            let htmlAntigas = '';
+                            evolucoesAntigas.forEach(ev => {
+                                const dataFormatada = new Date(ev.data_evolucao).toLocaleDateString('pt-BR', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric'
+                                });
+                                const hora = new Date(ev.data_evolucao).toLocaleTimeString('pt-BR', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                });
+                                
+                                htmlAntigas += `
+                                    <tr>
+                                        <td>${dataFormatada} ${hora}</td>
+                                        <td>${ev.enfermeiro_nome || 'Não informado'}</td>
+                                        <td>
+                                            <div class="texto-evolucao">
+                                                ${ev.texto || '---'}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `;
+                            });
+                            $('#listaEvolucoesAntigas').html(htmlAntigas);
+                        } else {
+                            $('#listaEvolucoesAntigas').html('<tr><td colspan="3" class="text-center">Nenhuma evolução anterior registrada.</td></tr>');
+                        }
+                    } else {
+                        $('#listaEvolucoesDoDia').html('<tr><td colspan="3" class="text-center">Nenhuma evolução registrada hoje.</td></tr>');
+                        $('#listaEvolucoesAntigas').html('<tr><td colspan="3" class="text-center">Nenhuma evolução anterior registrada.</td></tr>');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Erro ao carregar evoluções de enfermagem:', xhr.responseText);
+                    $('#listaEvolucoesDoDia').html('<tr><td colspan="3" class="text-center text-danger">Erro ao carregar evoluções.</td></tr>');
+                    $('#listaEvolucoesAntigas').html('<tr><td colspan="3" class="text-center text-danger">Erro ao carregar evoluções.</td></tr>');
+                }
+            });
+        }
+        
+        // Toggle para mostrar/ocultar evoluções antigas
+        $('#toggle-evolucoes-antigas').click(function() {
+            const container = $('#antigas-container');
+            if (container.is(':visible')) {
+                container.hide();
+                $('#toggle-evolucoes-text').text('Mostrar Antigas');
+                $(this).find('i').removeClass('fa-eye-slash').addClass('fa-eye');
+            } else {
+                container.show();
+                $('#toggle-evolucoes-text').text('Ocultar Antigas');
+                $(this).find('i').removeClass('fa-eye').addClass('fa-eye-slash');
+            }
+        });
+        
+        // Agora as funções estão no módulo enfermagem_completo.js
+        
+        // Autocomplete de medicamentos
+        $('#nome_medicamento').on('input', function() {
+            const termo = $(this).val().trim();
+            if (termo.length >= 2) {
+                $.getJSON(`/api/medicamentos/buscar?termo=${termo}`, function(nomes) {
+                    $('#listaMedicamentosDisponiveis').empty();
+                    nomes.forEach(nome => {
+                        $('#listaMedicamentosDisponiveis').append(`<option value="${nome}">`);
+                    });
+                });
+            }
+            
+            // Verificação de alergia
+            const valorDigitado = termo.toLowerCase();
+            const termosAlergia = alergiasPaciente.split(/[\s,;.]+/).map(t => t.trim().toLowerCase()).filter(t => t.length > 2);
+            const ehAlergico = valorDigitado.length >= 3 && termosAlergia.some(t =>
+                t === valorDigitado || valorDigitado.includes(t) || t.includes(valorDigitado)
+            );
+            
+            if (ehAlergico) {
+                $('#avisoAlergia').show();
+            } else {
+                $('#avisoAlergia').hide();
+            }
+        });
+
+        // Função para adicionar medicamento à lista
+        $('#btnAdicionarMedicamento').click(function() {
+            const nome = $('#nome_medicamento').val().trim();
+            const descricao = $('#descricao_uso').val().trim();
+            let aprazamento = $('#aprazamento').val();
+            
+            if (!nome || !descricao) {
+                alert('Por favor, preencha nome do medicamento e descrição de uso.');
+                return;
+            }
+            
+            // Adicionar medicamento ao array
+            const medicamento = {
+                nome_medicamento: nome,
+                descricao_uso: descricao,
+                aprazamento: aprazamento || null
+            };
+            
+            medicamentosAdicionados.push(medicamento);
+            
+            // Atualizar a tabela
+            atualizarTabelaMedicamentos();
+            
+            // Limpar os campos para novo medicamento
+            $('#nome_medicamento').val('');
+            $('#descricao_uso').val('');
+            $('#aprazamento').val('');
+            $('#avisoAlergia').hide();
+        });
+        
+        // Função global para atualizar a tabela de medicamentos
+        function atualizarTabelaMedicamentos() {
+            const tabela = $('#tabelaMedicamentosAdicionados tbody');
+            
+            if (medicamentosAdicionados.length === 0) {
+                tabela.html('<tr id="semMedicamentos"><td colspan="4" class="text-center">Nenhum medicamento adicionado</td></tr>');
+                return;
+            }
+            
+            // Esconder a mensagem de "nenhum medicamento"
+            $('#semMedicamentos').hide();
+            
+            // Limpar e reconstruir a tabela
+            tabela.empty();
+            
+            
+            medicamentosAdicionados.forEach((med, index) => {
+                const aprazamentoFormatado = med.aprazamento ? 
+                    new Date(med.aprazamento).toLocaleString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }) : '-';
+                
+                tabela.append(`
+                    <tr data-index="${index}">
+                        <td>${med.nome_medicamento}</td>
+                        <td>${med.descricao_uso}</td>
+                        <td>${aprazamentoFormatado}</td>
+                        <td>
+                            <button type="button" class="btn btn-danger btn-sm btn-remover-medicamento">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `);
+            });
+            
+            // Adicionar event listeners para botões de remover
+            $('.btn-remover-medicamento').click(function() {
+                const index = $(this).closest('tr').data('index');
+                medicamentosAdicionados.splice(index, 1);
+                atualizarTabelaMedicamentos();
+            });
+        }
+
+        // Submissão do formulário de prescrição
+        $('#formPrescricao').on('submit', function(e) {
+            e.preventDefault();
+            
+            // Verificar se é uma nova prescrição ou uma edição
+            const prescricaoId = $('#prescricao_id').val();
+            const isEdicao = prescricaoId !== "";
+            
+            const texto_dieta = $('#texto_dieta').val().trim();
+            const texto_procedimento_medico = $('#texto_procedimento_medico').val().trim();
+            const texto_procedimento_multi = $('#texto_procedimento_multi').val().trim();
+            
+            // Verificar se ao menos algo foi preenchido (dieta, procedimentos ou medicamentos)
+            if (!texto_dieta && !texto_procedimento_medico && !texto_procedimento_multi && medicamentosAdicionados.length === 0) {
+                alert('Por favor, preencha pelo menos um dos campos da prescrição ou adicione ao menos um medicamento.');
+                return;
+            }
+            
+            // Obter horário atual formatado para o Brasil
+            const dataAtual = new Date();
+            const horarioBrasil = dataAtual.toLocaleString('pt-BR', { 
+                timeZone: 'America/Sao_Paulo',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+            
+            // Log para debug do horário
+            console.log('Horário formatado para Brasil:', horarioBrasil);
+            
+            // Preparar dados para envio
+            let dados = {
+                atendimentos_clinica_id: isNaN(internacaoId) ? null : internacaoId,
+                medico_id: parseInt("{{ session.get('user_id', 0) }}", 10),
+                funcionario_id: parseInt("{{ session.get('user_id', 0) }}", 10),
+                texto_dieta: texto_dieta || null,
+                texto_procedimento_medico: texto_procedimento_medico || null,
+                texto_procedimento_multi: texto_procedimento_multi || null,
+                horario_prescricao: horarioBrasil,
+                medicamentos: medicamentosAdicionados
+            };
+            
+            // Log para debug
+            console.log('Dados da prescrição:', dados);
+            
+            if (!dados.atendimentos_clinica_id) {
+                alert('Erro: ID da internação inválido.');
+                return;
+            }
+            
+            // URL e método dependem se é edição ou nova prescrição
+            const url = isEdicao ? `/api/prescricoes/${prescricaoId}` : '/api/prescricoes';
+            const method = isEdicao ? 'PUT' : 'POST';
+            
+            $.ajax({
+                url: url,
+                method: method,
+                contentType: 'application/json',
+                data: JSON.stringify(dados),
+                success: function(response) {
+                    if (response.success) {
+                        // Fechar modal e limpar campos
+                        $('#modalPrescricao').modal('hide');
+                        limparFormularioPrescricao();
+                        
+                        // Recarregar lista de prescrições
+                        carregarPrescricoes();
+                    } else {
+                        alert('Erro ao registrar prescrição: ' + (response.message || 'Erro desconhecido'));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Erro ao registrar prescrição:', xhr.responseText);
+                    alert('Erro de comunicação ao tentar registrar prescrição: ' + (xhr.responseJSON?.error || error));
+                    console.error('Erro ao buscar prescrições:', xhr.responseText);
+                    alert('Erro de comunicação ao buscar prescrições');
+                }
+            });
+        });
+        
+        // Adicione botão Novo ao clicar no botão de nova prescrição
+        $('.btn[data-bs-target="#modalPrescricao"]').on('click', function() {
+            limparFormularioPrescricao();
+        });
+
+        // Função para carregar prescrições da internação
+        function carregarPrescricoes(idInternacao = null, lastUpdate = false) {
+            // Se internacaoId não foi fornecido, use a variável global
+            const id = idInternacao || internacaoId;
+            
+            console.log(`Iniciando carregarPrescricoes com ID: ${id}, lastUpdate: ${lastUpdate}`);
+            
+            if (!lastUpdate) {
+                $("#listaPrescricoes").html("<tr><td class='text-center'><i class='fas fa-spinner fa-spin'></i> Carregando prescrições...</td></tr>");
+            }
+            
+            $.ajax({
+                url: "/api/prescricoes/" + id,
+                type: 'GET',
+                success: function(response) {
+                    console.log("Resposta recebida:", response);
+                    
+                    if (!response.success) {
+                        $("#listaPrescricoes").html("<tr><td class='text-center text-warning'>Erro ao carregar prescrições: " + response.error + "</td></tr>");
+                        console.error("Erro ao carregar prescrições:", response.error);
+                        return;
+                    }
+                    
+                    if (!response.prescricoes || response.prescricoes.length === 0) {
+                        $("#listaPrescricoes").html("<tr><td class='text-center'>Nenhuma prescrição encontrada</td></tr>");
+                        console.log("Nenhuma prescrição encontrada");
+                        return;
+                    }
+                    
+                    console.log(`${response.prescricoes.length} prescrições encontradas`);
+                    
+                    // Ordenar prescrições por data (mais recente primeiro)
+                    var prescricoes = response.prescricoes.sort(function(a, b) {
+                        return new Date(b.data_prescricao) - new Date(a.data_prescricao);
+                    });
+                    
+                    // Agrupar prescrições por data
+                    var prescricoesPorData = {};
+                    prescricoes.forEach(function(p) {
+                        // Extrair apenas a data (sem a hora)
+                        var dataApenas = p.data_prescricao ? p.data_prescricao.split(' ')[0] : 'Sem data';
+                        
+                        if (!prescricoesPorData[dataApenas]) {
+                            prescricoesPorData[dataApenas] = [];
+                        }
+                        prescricoesPorData[dataApenas].push(p);
+                    });
+                    
+                    var html = "<tr><td>";
+                    
+                    // Para cada data
+                    Object.keys(prescricoesPorData).forEach(function(data) {
+                        html += '<div class="card mb-3">' +
+                            '<div class="card-header bg-info text-white">' +
+                            '<h5 class="mb-0">Prescrições do dia ' + data + '</h5>' +
+                            '</div>' +
+                            '<div class="card-body">';
+                        
+                        // Para cada prescrição na data
+                        prescricoesPorData[data].forEach(function(prescricao) {
+                            var horario = prescricao.data_prescricao ? prescricao.data_prescricao.split(' ')[1] : '';
+                            
+                            html += '<div class="prescricao-item mb-4" data-id="' + prescricao.id + '">' +
+                                '<h6 class="prescricao-horario text-secondary">' +
+                                '<i class="fas fa-clock mr-1"></i> ' + horario + ' - ' +
+                                '<span class="text-primary">' + (prescricao.medico_nome || 'Médico não informado') + '</span>';
+                            
+                            // Mostrar botão Editar apenas para médicos
+                            if ("{{ session.get('cargo') }}".toLowerCase().trim() === "medico") {
+                                html += '<button class="btn btn-sm btn-outline-info float-right ml-2 btn-editar-prescricao" ' +
+                                'data-id="' + prescricao.id + '" style="float: right;">' +
+                                '<i class="fas fa-edit"></i> Editar' +
+                                '</button>';
+                            }
+                            
+                            html += '</h6>';
+                                
+                            // Seção de Dieta
+                            if (prescricao.texto_dieta) {
+                                html += '<div class="mt-3 mb-2">' +
+                                    '<h6><i class="fas fa-utensils text-success mr-1"></i> Dieta</h6>' +
+                                    '<div class="card card-body bg-light">' + prescricao.texto_dieta + '</div>' +
+                                    '</div>';
+                            }
+                            
+                            // Seção de Medicamentos
+                            if (prescricao.medicamentos && prescricao.medicamentos.length > 0) {
+                                html += '<div class="mt-3 mb-2">' +
+                                    '<h6><i class="fas fa-pills text-danger mr-1"></i> Medicamentos</h6>' +
+                                    '<div class="table-responsive">' +
+                                    '<table class="table table-sm table-bordered table-striped">' +
+                                    '<thead class="thead-light">' +
+                                    '<tr>' +
+                                    '<th>Medicamento</th>' +
+                                    '<th>Uso</th>' +
+                                    '<th>Aprazamento</th>' +
+                                    '<th>Enfermeiro</th>' +
+                                    '<th>Ações</th>' +
+                                    '</tr>' +
+                                    '</thead>' +
+                                    '<tbody>';
+
+                                prescricao.medicamentos.forEach(function(medicamento) {
+                                    html += '<tr>' +
+                                        '<td>' + (medicamento.nome_medicamento || '') + '</td>' +
+                                        '<td>' + (medicamento.descricao_uso || '') + '</td>' +
+                                        '<td>';
+
+                                        if (medicamento.aprazamentos_novos && medicamento.aprazamentos_novos.length > 0) {
+                                            html += '<div class="d-flex justify-content-center">' +
+                                                '<button type="button" class="btn btn-sm btn-outline-primary btn-ver-aprazamentos" ' +
+                                                'data-atendimento-id="' + window.ATENDIMENTO_ID + '" ' +
+                                                'data-medicamento-nome="' + medicamento.nome_medicamento.replace(/"/g, '&quot;') + '">' +
+                                                '<i class="fas fa-list"></i> Ver Horários' +
+                                                '</button>' +
+                                                '</div>';
+                                        } else {
+                                            html += '<span class="text-muted">Não aprazado</span>';
+                                        }
+
+                                        html += '</td>' +
+                                            '<td>' + (medicamento.enfermeiro_nome || '') + '</td>' +
+                                            '<td>';
+
+                                        if ("{{ session.get('cargo') }}".toLowerCase().trim() === "enfermeiro") {
+                                            html += '<button class="btn btn-primary btn-sm btn-aprazamento" ' +
+                                                'data-prescricao-id="' + prescricao.id + '" ' +
+                                                'data-medicamento-index="' + prescricao.medicamentos.indexOf(medicamento) + '" ' +
+                                                'data-medicamento-nome="' + medicamento.nome_medicamento.replace(/"/g, '&quot;') + '">' +
+                                                '<i class="fas fa-clock"></i> Aprazar' +
+                                                '</button>';
+                                        }
+
+                                        html += '</td></tr>';
+                                });
+
+                                html += '</tbody></table></div></div>';
+                            }
+                            
+                            // Seção de Procedimentos Médicos
+                            if (prescricao.texto_procedimento_medico) {
+                                html += '<div class="mt-3">' +
+                                    '<h6><i class="fas fa-user-md text-primary mr-1"></i> Procedimentos Médicos</h6>' +
+                                    '<div class="card card-body bg-light">' + prescricao.texto_procedimento_medico + '</div>' +
+                                    '</div>';
+                            }
+                            
+                            // Seção de Procedimentos Multidisciplinares
+                            if (prescricao.texto_procedimento_multi) {
+                                html += '<div class="mt-3">' +
+                                    '<h6><i class="fas fa-users text-warning mr-1"></i> Procedimentos Multidisciplinares</h6>' +
+                                    '<div class="card card-body bg-light">' + prescricao.texto_procedimento_multi + '</div>' +
+                                    '</div>';
+                            }
+                            
+                            html += '</div>';
+                            
+                            // Adicionar divisor entre prescrições, exceto na última
+                            if (prescricoesPorData[data].indexOf(prescricao) < prescricoesPorData[data].length - 1) {
+                                html += '<hr class="my-3">';
+                            }
+                        });
+                        
+                        html += '</div></div>';
+                    });
+                    
+                    html += "</td></tr>";
+                    $("#listaPrescricoes").html(html);
+                },
+                error: function(xhr, status, error) {
+                    console.error("Erro na requisição AJAX:", xhr.responseText);
+                    $("#listaPrescricoes").html("<tr><td class='text-center text-danger'>Erro ao carregar prescrições: " + error + "</td></tr>");
+                    
+                    // Tentar novamente automaticamente apenas uma vez se for erro 404 ou 500
+                    if ((xhr.status === 404 || xhr.status === 500) && !lastUpdate) {
+                        console.log("Tentando carregar prescrições novamente após erro " + xhr.status);
+                        setTimeout(function() {
+                            carregarPrescricoes(id, true);
+                        }, 2000);
+                    }
+                }
+            });
+        }
+
+        // Função para carregar evoluções da internação
+        function carregarEvolucoes() {
+            console.log('Carregando evoluções para internacaoId:', internacaoId);
+            
+            if (!internacaoId || isNaN(internacaoId)) {
+                console.error('ID de internação inválido ao carregar evoluções:', internacaoId);
+                $('#listaEvolucoes').html('<tr><td colspan="3" class="text-center text-danger">Erro: ID de internação inválido</td></tr>');
+                return;
+            }
+            
+            $.ajax({
+                url: `/api/evolucoes/${internacaoId}`,
+                method: 'GET',
+                success: function(response) {
+                    console.log('Resposta da API de evoluções:', response);
+                    const tabela = $('#listaEvolucoes');
+                    tabela.empty();
+                    
+                    if (response.success && response.evolucoes && response.evolucoes.length > 0) {
+                        response.evolucoes.forEach(ev => {
+                            const evolucaoHtml = ev.evolucao || '---';
+                            
+                            // Criar um container para a evolução com estilo seguro
+                            tabela.append(`
+                                <tr>
+                                    <td>${ev.data_evolucao || '---'}</td>
+                                    <td>${ev.nome_medico || '---'}</td>
+                                    <td>
+                                        <div class="texto-evolucao">
+                                            ${evolucaoHtml}
+                                        </div>
+                                    </td>
+                                </tr>
+                            `);
+                        });
+                        
+                        // Calcular o número de linhas e aplicar o atributo data-lines
+                        setTimeout(() => {
+                            $('.texto-evolucao').each(function() {
+                                const texto = $(this).text();
+                                const linhas = texto.split(/\r\n|\r|\n/).length;
+                                const palavras = texto.split(/\s+/).length;
+                                
+                                // Estimar o número de linhas com base no tamanho do texto
+                                let estimativaLinhas = Math.max(linhas, Math.ceil(palavras / 15));
+                                
+                                // Limitar a no máximo 22 para não criar muitas regras CSS
+                                estimativaLinhas = Math.min(estimativaLinhas, 22);
+                                
+                                // Aplicar o atributo data-lines ao elemento
+                                $(this).attr('data-lines', estimativaLinhas);
+                                
+                                console.log(`Evolução com ${linhas} linhas e ${palavras} palavras. Estimativa: ${estimativaLinhas}`);
+                            });
+                        }, 100);
+                    } else {
+                        tabela.html('<tr><td colspan="3" class="text-center">Nenhuma evolução registrada até o momento.</td></tr>');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Erro ao carregar evoluções:', xhr.responseText, status, error);
+                    $('#listaEvolucoes').html('<tr><td colspan="3" class="text-center text-danger">Erro ao carregar evoluções.</td></tr>');
+                }
+            });
+        }
+
+        // Implementação moderna de scroll para substituir a funcionalidade problemática
+        function setupModernScroll(container) {
+            if (!container) return;
+            
+            // Elementos que podem precisar de scroll
+            const scrollElements = container.querySelectorAll('.ql-editor');
+            
+            scrollElements.forEach(element => {
+                // Assegurar que o elemento tem estilo de overflow adequado
+                element.style.overflowY = 'auto';
+                element.style.maxHeight = '100%';
+                
+                // Observar redimensionamento do conteúdo
+                const resizeObserver = new ResizeObserver(() => {
+                    // Ajustar posição de scroll quando o conteúdo mudar
+                    const isAtBottom = element.scrollHeight - element.scrollTop === element.clientHeight;
+                    if (isAtBottom) {
+                        element.scrollTop = element.scrollHeight;
+                    }
+                });
+                
+                // Observar mudanças no conteúdo
+                const mutationObserver = new MutationObserver(() => {
+                    // Verificar se o scroll precisa ser ajustado
+                    const shouldScrollToBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 50;
+                    if (shouldScrollToBottom) {
+                        element.scrollTop = element.scrollHeight;
+                    }
+                });
+                
+                // Iniciar observadores
+                resizeObserver.observe(element);
+                mutationObserver.observe(element, { 
+                    childList: true, 
+                    subtree: true, 
+                    characterData: true 
+                });
+                
+                // Armazenar observadores para limpeza futura
+                element._scrollObservers = {
+                    resize: resizeObserver,
+                    mutation: mutationObserver
+                };
+            });
+        }
+        
+        // Função para verificar e corrigir o Quill após carregar
+        function checkQuillAndApplyFixes() {
+            // Aguardar um momento para garantir que o Quill tenha carregado completamente
+            setTimeout(() => {
+                const editorContainer = document.getElementById('editor-container');
+                if (editorContainer) {
+                    setupModernScroll(editorContainer);
+                    console.log('Scroll moderno aplicado ao editor Quill');
+                }
+            }, 500);
+        }
+        
+        // Executar verificação após a página carregar
+        document.addEventListener('DOMContentLoaded', checkQuillAndApplyFixes);
+
+        // Função para limpar o formulário de prescrição
+        function limparFormularioPrescricao() {
+            $('#prescricao_id').val('');
+            $('#nome_medicamento').val('');
+            $('#descricao_uso').val('');
+            $('#aprazamento').val('');
+            $('#texto_dieta').val('');
+            $('#texto_procedimento_medico').val('');
+            $('#texto_procedimento_multi').val('');
+            $('#avisoAlergia').hide();
+            medicamentosAdicionados = [];
+            atualizarTabelaMedicamentos();
+            $('#modalPrescricaoLabel').text('Nova Prescrição');
+        }
+        
+        // Função para editar prescrição
+        function editarPrescricao(prescricaoId) {
+            // Limpar o formulário primeiro
+            limparFormularioPrescricao();
+            
+            // Buscar os dados da prescrição específica
+            $.ajax({
+                url: `/api/prescricoes/${internacaoId}`,
+                method: 'GET',
+                success: function(response) {
+                    if (response.success && response.prescricoes) {
+                        // Encontrar a prescrição pelo ID
+                        const prescricao = response.prescricoes.find(p => p.id == prescricaoId);
+                        
+                        if (prescricao) {
+                            console.log("Editando prescrição:", prescricao);
+                            
+                            // Preencher o formulário com os dados da prescrição
+                            $('#prescricao_id').val(prescricao.id);
+                            $('#texto_dieta').val(prescricao.texto_dieta || '');
+                            $('#texto_procedimento_medico').val(prescricao.texto_procedimento_medico || '');
+                            $('#texto_procedimento_multi').val(prescricao.texto_procedimento_multi || '');
+                            
+                            // Limpar a lista atual de medicamentos
+                            medicamentosAdicionados = [];
+                            
+                            // Adicionar medicamentos da prescrição na lista
+                            if (prescricao.medicamentos && prescricao.medicamentos.length > 0) {
+                                prescricao.medicamentos.forEach(med => {
+                                    // Converter formato de data se necessário
+                                    let aprazamento = med.aprazamento;
+                                    if (aprazamento && typeof aprazamento === 'string') {
+                                        // Converter de DD/MM/YYYY HH:MM para YYYY-MM-DDTHH:MM
+                                        const partes = aprazamento.split(' ');
+                                        if (partes.length === 2) {
+                                            const dataPartes = partes[0].split('/');
+                                            if (dataPartes.length === 3) {
+                                                aprazamento = `${dataPartes[2]}-${dataPartes[1]}-${dataPartes[0]}T${partes[1]}`;
+                                            }
+                                        }
+                                    }
+                                    
+                                    medicamentosAdicionados.push({
+                                        nome_medicamento: med.nome_medicamento,
+                                        descricao_uso: med.descricao_uso,
+                                        aprazamento: aprazamento
+                                    });
+                                });
+                                
+                                // Atualizar a tabela de medicamentos
+                                atualizarTabelaMedicamentos();
+                            }
+                            
+                            // Alterar o título do modal
+                            $('#modalPrescricaoLabel').text('Editar Prescrição');
+                            
+                            // Abrir o modal
+                            $('#modalPrescricao').modal('show');
+                        } else {
+                            alert('Prescrição não encontrada.');
+                        }
+                    } else {
+                        alert('Erro ao buscar prescrição: ' + (response.error || 'Erro desconhecido'));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Erro ao buscar prescrição:', xhr.responseText);
+                    alert('Erro ao buscar prescrição: ' + error);
+                }
+            });
+        }
+        
+        // Adicionar listeners para os botões da tabela de prescrições usando delegação de eventos
+        $(document).on('click', '.btn-editar-prescricao', function() {
+            const prescricaoId = $(this).data('id');
+            editarPrescricao(prescricaoId);
+        });
+
+        // Evento para o botão de aprazamento
+        $(document).on('click', '.btn-aprazamento', function() {
+            const prescricaoId = $(this).data('prescricao-id');
+            const medicamentoIndex = $(this).data('medicamento-index');
+            const medicamentoNome = $(this).data('medicamento-nome');
+            
+            // Preencher os campos do modal de aprazamento
+            $('#aprazamento_prescricao_id').val(prescricaoId);
+            $('#aprazamento_medicamento_index').val(medicamentoIndex);
+            $('#aprazamento_medicamento_nome').text(medicamentoNome);
+            
+            // Definir ID do enfermeiro para usar no formulário
+            $('#formAprazamento').data('enfermeiro-id', "{{ session.get('user_id', 0) }}");
+            
+            // Definir data atual para os campos de data
+            const hoje = new Date();
+            const anoAtual = hoje.getFullYear();
+            const mesAtual = String(hoje.getMonth() + 1).padStart(2, '0');
+            const diaAtual = String(hoje.getDate()).padStart(2, '0');
+            
+            // Data de fim padrão (7 dias após a data atual)
+            const dataFim = new Date(hoje);
+            dataFim.setDate(dataFim.getDate() + 6);
+            const anoFim = dataFim.getFullYear();
+            const mesFim = String(dataFim.getMonth() + 1).padStart(2, '0');
+            const diaFim = String(dataFim.getDate()).padStart(2, '0');
+            
+            // Definir datas de início e fim para aprazamento
+            $('#aprazamento_data_inicio').val(`${anoAtual}-${mesAtual}-${diaAtual}`);
+            $('#aprazamento_data_fim').val(`${anoFim}-${mesFim}-${diaFim}`);
+            
+            // Definir a hora inicial padrão (hora atual)
+            const horaAtual = String(hoje.getHours()).padStart(2, '0');
+            const minutoAtual = String(Math.floor(hoje.getMinutes() / 5) * 5).padStart(2, '0'); // Arredondar para múltiplo de 5
+            $('#aprazamento_hora_inicial_multiplos').val(`${horaAtual}:${minutoAtual}`);
+            
+            // Resetar o conteúdo de horários calculados
+            $('#horarios_multiplos_dias').html('<p class="text-muted small text-center mb-0">Clique em "Calcular Horários" para visualizar os horários</p>');
+            
+            // Esconder o campo de intervalo personalizado inicialmente
+            $('#multiplos_intervalo_custom').hide();
+            
+            // Abrir o modal
+            $('#modalAprazamento').modal('show');
+        });
+
+        $(document).on('click', '.btn-visualizar-aprazamento', function() {
+            const prescricaoId = $(this).data('prescricao-id');
+            const medicamentoIndex = $(this).data('medicamento-index');
+            const medicamentoNome = $(this).data('medicamento-nome');
+
+            console.log('Visualizar aprazamento para:', prescricaoId, medicamentoIndex, medicamentoNome);
+
+            abrirCalendarioAprazamento(prescricaoId, medicamentoIndex, medicamentoNome);
+});
+
+        
+        // Função para calcular horários entre dois horários com um intervalo específico
+        function calcularHorariosEntreIntervalo(horaInicio, horaFim, intervaloHoras) {
+            // Converter horas para minutos para facilitar o cálculo
+            const [horaInicioH, horaInicioM] = horaInicio.split(':').map(Number);
+            const [horaFimH, horaFimM] = horaFim.split(':').map(Number);
+            
+            const inicioMinutos = horaInicioH * 60 + horaInicioM;
+            const fimMinutos = horaFimH * 60 + horaFimM;
+            
+            // Converter intervalo de horas para minutos
+            const intervaloMinutos = Math.round(intervaloHoras * 60);
+            
+            const horarios = [];
+            let minutoAtual = inicioMinutos;
+            
+            // Adicionar o horário inicial
+            horarios.push(formatarHoraMinutos(minutoAtual));
+            
+            // Calcular horários subsequentes
+            while (minutoAtual + intervaloMinutos <= fimMinutos) {
+                minutoAtual += intervaloMinutos;
+                horarios.push(formatarHoraMinutos(minutoAtual));
+            }
+            
+            return horarios;
+        }
+        
+        // Formatar minutos para formato de hora HH:MM
+        function formatarHoraMinutos(minutos) {
+            const horas = Math.floor(minutos / 60);
+            const mins = minutos % 60;
+            return `${String(horas).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+        }
+        
+        // Mostrar campo de intervalo personalizado quando "Personalizado" é selecionado
+        $('#aprazamento_intervalo').change(function() {
+            if ($(this).val() === 'custom') {
+                $('#intervalo_custom').show();
+            } else {
+                $('#intervalo_custom').hide();
+            }
+        });
+        
+        // Mostrar campo de intervalo personalizado para múltiplos dias
+        $('#aprazamento_multiplos_intervalo').change(function() {
+            if ($(this).val() === 'custom') {
+                $('#multiplos_intervalo_custom').show();
+            } else {
+                $('#multiplos_intervalo_custom').hide();
+            }
+        });
+        
+        // Calcular horários com base nos parâmetros para mesmo dia
+        $('#btn_calcular_horarios').click(function() {
+            const horaInicio = $('#aprazamento_hora_inicio').val();
+            const horaFim = $('#aprazamento_hora_fim').val();
+            
+            if (!horaInicio || !horaFim) {
+                alert('Por favor, defina a hora de início e a hora de fim.');
+                return;
+            }
+            
+            // Verificar se hora de início é menor que hora de fim
+            const [horaInicioH, horaInicioM] = horaInicio.split(':').map(Number);
+            const [horaFimH, horaFimM] = horaFim.split(':').map(Number);
+            
+            const inicioMinutos = horaInicioH * 60 + horaInicioM;
+            const fimMinutos = horaFimH * 60 + horaFimM;
+            
+            if (inicioMinutos >= fimMinutos) {
+                alert('A hora de início deve ser menor que a hora de fim.');
+                return;
+            }
+            
+            // Obter o intervalo
+            let intervaloHoras;
+            if ($('#aprazamento_intervalo').val() === 'custom') {
+                intervaloHoras = parseFloat($('#aprazamento_intervalo_custom').val());
+                if (!intervaloHoras || intervaloHoras <= 0 || intervaloHoras > 24) {
+                    alert('Por favor, defina um intervalo válido entre 0.5 e 24 horas.');
+                    return;
+                }
+            } else {
+                intervaloHoras = parseFloat($('#aprazamento_intervalo').val());
+            }
+            
+            // Calcular horários entre início e fim com o intervalo definido
+            const horarios = calcularHorariosEntreIntervalo(horaInicio, horaFim, intervaloHoras);
+            
+            if (horarios.length === 0) {
+                $('#horarios_calculados').html('<p class="text-danger">Não foi possível calcular horários com os parâmetros informados. Verifique se o intervalo não é muito grande para o período definido.</p>');
+                return;
+            }
+            
+            // Exibir os horários calculados
+            let html = '<div class="row">';
+            horarios.forEach((horario, index) => {
+                html += `<div class="col-md-4 mb-2">
+                           <div class="form-check">
+                             <input class="form-check-input horario-check" type="checkbox" value="${horario}" id="horario_${index}" checked>
+                             <label class="form-check-label" for="horario_${index}">
+                               ${horario}
+                             </label>
+                           </div>
+                         </div>`;
+            });
+            html += '</div>';
+            
+            $('#horarios_calculados').html(html);
+        });
+        
+        // Calcular horários para múltiplos dias
+        $('#btn_calcular_multiplos_dias').click(function() {
+            const dataInicio = $('#aprazamento_data_inicio').val();
+            const dataFim = $('#aprazamento_data_fim').val();
+            const horaInicial = $('#aprazamento_hora_inicial_multiplos').val();
+            
+            if (!dataInicio || !dataFim) {
+                alert('Por favor, defina as datas de início e fim.');
+                return;
+            }
+            
+            // Verificar se data de início é menor que data de fim
+            const inicio = new Date(dataInicio);
+            const fim = new Date(dataFim);
+            
+            if (inicio > fim) {
+                alert('A data de início deve ser menor ou igual à data de fim.');
+                return;
+            }
+            
+            // Obter o intervalo
+            let intervaloHoras;
+            if ($('#aprazamento_multiplos_intervalo').val() === 'custom') {
+                intervaloHoras = parseFloat($('#aprazamento_multiplos_intervalo_custom').val());
+                if (!intervaloHoras || intervaloHoras <= 0 || intervaloHoras > 24) {
+                    alert('Por favor, defina um intervalo válido entre 0.5 e 24 horas.');
+                    return;
+                }
+            } else {
+                intervaloHoras = parseFloat($('#aprazamento_multiplos_intervalo').val());
+            }
+            
+            try {
+                // Usar a nova função importada do arquivo calculo_horarios.js
+                // Passar a hora inicial se definida
+                const horariosPorDia = calcularHorariosIntervaloFixo(dataInicio, dataFim, intervaloHoras, horaInicial);
+                
+                if (Object.keys(horariosPorDia).length === 0) {
+                    $('#horarios_multiplos_dias').html('<p class="text-danger">Não foi possível calcular horários com os parâmetros informados. Verifique se o intervalo não é muito grande para o período definido.</p>');
+                    return;
+                }
+                
+                // Formatar HTML com dias e horários
+                const html = gerarHTMLHorariosPorDia(horariosPorDia);
+                $('#horarios_multiplos_dias').html(html);
+                
+                // Adicionar manipuladores de eventos para selecionar/desmarcar todos
+                $('#selecionar_todos').click(function() {
+                    $('#horarios_multiplos_dias .horario-check').prop('checked', true);
+                });
+                
+                $('#desmarcar_todos').click(function() {
+                    $('#horarios_multiplos_dias .horario-check').prop('checked', false);
+                });
+            } catch (error) {
+                console.error('Erro ao calcular horários:', error);
+                $('#horarios_multiplos_dias').html(`<p class="text-danger">Erro ao calcular horários: ${error.message}</p>`);
+            }
+        });
+        
+        
+        // Submissão do formulário de evolução
+        $('#formEvolucao').on('submit', function(e) {
+            e.preventDefault();
+            
+            let conteudo = '';
+            
+            // Capturar conteúdo do editor Quill se estiver disponível
+            if (quill && quill.root) {
+                conteudo = quill.root.innerHTML;
+                // Salvar no textarea oculto também
+                $('#texto_evolucao').val(conteudo);
+            } else if ($('#fallback-editor').length > 0) {
+                conteudo = $('#fallback-editor').val().trim();
+            } else {
+                conteudo = $('#texto_evolucao').val().trim();
+            }
+            
+            if (!conteudo) {
+                alert('Por favor, preencha o texto da evolução.');
+                return;
+            }
+            
+            // Mostrar carregamento
+            const btnSubmit = $(this).find('button[type="submit"]');
+            const textoOriginal = btnSubmit.html();
+            btnSubmit.html('<i class="fas fa-spinner fa-spin"></i> Enviando...');
+            btnSubmit.prop('disabled', true);
+            
+            // Preparar dados para envio
+            const dados = {
+                internacao_id: internacaoId,
+                funcionario_id: parseInt("{{ session.get('user_id', 0) }}", 10),
+                evolucao: conteudo
+            };
+            
+            // Enviar os dados para o servidor
+            $.ajax({
+                url: '/api/evolucoes/registrar',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(dados),
+                success: function(response) {
+                    // Restaurar botão
+                    btnSubmit.html(textoOriginal);
+                    btnSubmit.prop('disabled', false);
+                    
+                    if (response.success) {
+                        // Fechar modal e limpar campos
+                        $('#modalEvolucao').modal('hide');
+                        
+                        // Limpar o editor Quill
+                        if (quill) {
+                            quill.setText('');
+                        } else if ($('#fallback-editor').length > 0) {
+                            $('#fallback-editor').val('');
+                        }
+                        
+                        // Recarregar lista de evoluções
+                        carregarEvolucoes();
+                        
+                        // Mostrar mensagem de sucesso
+                        alert('Evolução registrada com sucesso!');
+                    } else {
+                        alert('Erro ao registrar evolução: ' + (response.message || 'Erro desconhecido'));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    // Restaurar botão
+                    btnSubmit.html(textoOriginal);
+                    btnSubmit.prop('disabled', false);
+                    
+                    console.error('Erro ao registrar evolução:', xhr.responseText);
+                    alert('Erro de comunicação ao tentar registrar evolução: ' + (xhr.responseJSON?.error || error));
+                }
+            });
+        });
+
+        // Carregar dados ao iniciar - adicionando tratamento de erros e logs
+        try {
+            console.log("Carregando prescrições...");
+            carregarPrescricoes();
+            console.log("Carregando evoluções...");
+            carregarEvolucoes();
+            console.log("Carregando evoluções de enfermagem...");
+            // Garantir que estamos usando a função do arquivo JS externo
+            if (typeof carregarEvolucoesEnfermagem === 'function') {
+                console.log("Chamando a função carregarEvolucoesEnfermagem do módulo externo");
+                carregarEvolucoesEnfermagem();
+            } else {
+                console.error("Função carregarEvolucoesEnfermagem não encontrada");
+            }
+        } catch (error) {
+            console.error("Erro ao carregar dados iniciais:", error);
+        }
+        
+        // Configurar um intervalo para tentar carregar prescrições novamente após alguns segundos
+        setTimeout(function() {
+            if ($("#listaPrescricoes").text().includes("Carregando prescrições...") || 
+                $("#listaPrescricoes").text().includes("Erro ao carregar prescrições")) {
+                console.log("Tentando carregar prescrições novamente...");
+                carregarPrescricoes(null, true);
+            }
+            
+            if ($("#listaEvolucoesDoDia").text().includes("Carregando evoluções...") || 
+                $("#listaEvolucoesDoDia").text().includes("Erro ao carregar evoluções")) {
+                console.log("Tentando carregar evoluções de enfermagem novamente...");
+                if (typeof carregarEvolucoesEnfermagem === 'function') {
+                    carregarEvolucoesEnfermagem();
+                }
+            }
+        }, 3000);
+
+        // Funções para gerenciar a admissão de enfermagem
+        $('#btn-editar-admissao').on('click', function() {
+            // Esconder o texto e mostrar o formulário
+            $('#admissao-texto-container').hide();
+            $('#admissao-form-container').show();
+            
+            // Focar no textarea
+            $('#admissao_enfermagem').focus();
+        });
+        
+        $('#btn-cancelar-admissao').on('click', function() {
+            // Restaurar o texto original e esconder o formulário
+            $('#admissao_enfermagem').val('{{ internacao.admissao_enfermagem or "" }}');
+            $('#admissao-form-container').hide();
+            $('#admissao-texto-container').show();
+        });
+
+        // Toggle evoluções antigas
+        $('#toggle-evolucoes-antigas').click(function() {
+            const container = $('#antigas-container');
+            if (container.is(':visible')) {
+                container.hide();
+                $('#toggle-evolucoes-text').text('Mostrar Antigas');
+                $(this).find('i').removeClass('fa-eye-slash').addClass('fa-eye');
+            } else {
+                container.show();
+                $('#toggle-evolucoes-text').text('Ocultar Antigas');
+                $(this).find('i').removeClass('fa-eye').addClass('fa-eye-slash');
+            }
+        });
+
+        // Verificar se o formulário já tem um handler de submit para evitar duplicações
+        if ($._data($('#formPrescricaoEnfermagem')[0], 'events') === undefined ||
+            !$._data($('#formPrescricaoEnfermagem')[0], 'events').submit) {
+            
+            console.log('[clinica_evolucao_paciente_enfermeiro.html] Não há handler de submit configurado para #formPrescricaoEnfermagem. O módulo enfermagem_completo.js deve configurar.');
+        } else {
+            console.log('[clinica_evolucao_paciente_enfermeiro.html] Handler de submit já configurado para #formPrescricaoEnfermagem pelo módulo enfermagem_completo.js.');
+        }
+
+        // Carregar prescrições ao iniciar usando a função do módulo externo
+        if (typeof carregarPrescricoesEnfermagem === 'function') {
+            console.log('Carregando prescrições de enfermagem usando função do módulo externo');
+            carregarPrescricoesEnfermagem();
+        } else {
+            console.error('Função carregarPrescricoesEnfermagem não encontrada no módulo enfermagem_completo.js');
+        }
+
+    });
+
+
+    function abrirCalendarioAprazamento(prescricaoId, medicamentoIndex, medicamentoNome) {
+        // Atualizar título do modal
+        $('#modalVisualizarAprazamentoTitulo').text(`Horários do medicamento: ${medicamentoNome}`);
+        
+        // Abrir o modal
+        $('#modalVisualizarAprazamento').modal('show');
+        
+        // Chamar a função do módulo de calendário
+        visualizarCalendarioAprazamento(prescricaoId, medicamentoIndex, medicamentoNome);
+    }
+
+
+</script>
+
+<script src="{{ url_for('static', filename='js/admissao_enfermagem.js') }}"></script>
+
+<!-- Modal para visualizar aprazamentos por medicamento -->
+<div class="modal fade" id="modalAprazamentosMedicamento" tabindex="-1" aria-labelledby="modalAprazamentosMedicamentoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalAprazamentosMedicamentoLabel">Aprazamentos do Medicamento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div id="aprazamentosMedicamentoContent">
+                    <p class="text-center"><i class="fas fa-spinner fa-spin"></i> Carregando aprazamentos...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Função para visualizar aprazamentos de um medicamento específico
+function visualizarAprazamentosMedicamento(atendimentoId, nomeMedicamento) {
+    // Atualizar título do modal
+    $('#modalAprazamentosMedicamentoLabel').text(`Aprazamentos: ${nomeMedicamento}`);
+    
+    // Mostrar modal
+    $('#modalAprazamentosMedicamento').modal('show');
+    
+    // Buscar aprazamentos
+    $.ajax({
+        url: `/api/aprazamentos/atendimento/${atendimentoId}/medicamento/${encodeURIComponent(nomeMedicamento)}`,
+        method: 'GET',
+        success: function(response) {
+            if (response.success && response.aprazamentos) {
+                // Agrupar aprazamentos por data
+                const aprazamentosPorData = {};
+                response.aprazamentos.forEach(apr => {
+                    const data = apr.data_hora_aprazamento.split(' ')[0];
+                    if (!aprazamentosPorData[data]) {
+                        aprazamentosPorData[data] = [];
+                    }
+                    aprazamentosPorData[data].push(apr);
+                });
+
+                let html = '';
+                
+                // Para cada data
+                Object.keys(aprazamentosPorData).sort().forEach(data => {
+                    const dataFormatada = new Date(data).toLocaleDateString('pt-BR');
+                    
+                    html += `
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">Data: ${dataFormatada}</h6>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered mb-0">
+                                        <thead class="table-primary">
+                                            <tr>
+                                                <th>Horário</th>
+                                                <th>Status</th>
+                                                <th>Enfermeiro</th>
+                                                <th>Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                    `;
+
+                    // Ordenar horários do dia
+                    aprazamentosPorData[data].sort((a, b) => 
+                        new Date(a.data_hora_aprazamento) - new Date(b.data_hora_aprazamento)
+                    ).forEach(apr => {
+                        const hora = apr.data_hora_aprazamento.split(' ')[1];
+                        let statusClass, statusIcon, statusText;
+                        
+                        if (apr.realizado) {
+                            statusClass = 'text-success';
+                            statusIcon = 'fa-check-circle';
+                            statusText = 'Realizado';
+                        } else if (apr.atrasado) {
+                            statusClass = 'text-danger';
+                            statusIcon = 'fa-exclamation-circle';
+                            statusText = 'Atrasado';
+                        } else {
+                            statusClass = 'text-warning';
+                            statusIcon = 'fa-clock';
+                            statusText = 'Pendente';
+                        }
+
+                        html += `
+                            <tr>
+                                <td class="align-middle">${hora}</td>
+                                <td class="align-middle ${statusClass}">
+                                    <i class="fas ${statusIcon}"></i> ${statusText}
+                                </td>
+                                <td class="align-middle">
+                                    ${apr.enfermeiro_responsavel || '-'}
+                                    ${apr.data_realizacao ? `<br><small class="text-muted">em ${new Date(apr.data_realizacao).toLocaleString('pt-BR')}</small>` : ''}
+                                </td>
+                                <td class="align-middle">
+                        `;
+
+                        if (!apr.realizado) {
+                            html += `
+                                <button class="btn btn-sm btn-success btn-realizar-aprazamento" 
+                                        data-id="${apr.id}">
+                                    <i class="fas fa-check"></i> Realizar
+                                </button>
+                            `;
+                        }
+
+                        html += `
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    html += `
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                // Adicionar resumo estatístico
+                const totalAprazamentos = response.aprazamentos.length;
+                const realizados = response.aprazamentos.filter(a => a.realizado).length;
+                const atrasados = response.aprazamentos.filter(a => !a.realizado && a.atrasado).length;
+                const pendentes = totalAprazamentos - realizados - atrasados;
+
+                html += `
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title">Resumo dos Aprazamentos</h6>
+                            <div class="row text-center">
+                                <div class="col">
+                                    <div class="p-3 border rounded bg-light">
+                                        <div class="small text-muted">Total</div>
+                                        <div class="h4 mb-0">${totalAprazamentos}</div>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="p-3 border rounded bg-success bg-opacity-10">
+                                        <div class="small text-success">Realizados</div>
+                                        <div class="h4 mb-0">${realizados}</div>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="p-3 border rounded bg-warning bg-opacity-10">
+                                        <div class="small text-warning">Pendentes</div>
+                                        <div class="h4 mb-0">${pendentes}</div>
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="p-3 border rounded bg-danger bg-opacity-10">
+                                        <div class="small text-danger">Atrasados</div>
+                                        <div class="h4 mb-0">${atrasados}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                $('#aprazamentosMedicamentoContent').html(html);
+
+                // Configurar handlers dos botões
+                $('.btn-realizar-aprazamento').click(function() {
+                    const aprazamentoId = $(this).data('id');
+                    
+                    if (confirm('Confirma a realização deste aprazamento?')) {
+                        const btnOriginal = $(this);
+                        const htmlOriginal = btnOriginal.html();
+                        btnOriginal.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Processando...');
+                        
+                        $.ajax({
+                            url: `/api/aprazamentos/${aprazamentoId}/realizar`,
+                            method: 'PUT',
+                            success: function(response) {
+                                if (response.success) {
+                                    // Recarregar aprazamentos
+                                    visualizarAprazamentosMedicamento(atendimentoId, nomeMedicamento);
+                                    // Atualizar a visualização da prescrição
+                                    carregarPrescricoes();
+                                } else {
+                                    alert('Erro ao realizar aprazamento: ' + response.message);
+                                    btnOriginal.prop('disabled', false).html(htmlOriginal);
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Erro ao realizar aprazamento:', xhr.responseText);
+                                alert('Erro ao realizar aprazamento. Por favor, tente novamente.');
+                                btnOriginal.prop('disabled', false).html(htmlOriginal);
+                            }
+                        });
+                    }
+                });
+            } else {
+                $('#aprazamentosMedicamentoContent').html('<p class="text-muted text-center">Nenhum aprazamento encontrado.</p>');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Erro ao buscar aprazamentos:', xhr.responseText);
+            $('#aprazamentosMedicamentoContent').html('<p class="text-danger text-center">Erro ao carregar aprazamentos.</p>');
+        }
+    });
+}
+
+// Modificar a função que renderiza as prescrições para incluir o novo botão
+function renderizarMedicamentosPrescricao(medicamentos, prescricao) {
+    let html = `
+        <div class="mt-3 mb-2">
+            <h6><i class="fas fa-pills text-danger mr-1"></i> Medicamentos</h6>
+            <table class="table table-sm table-bordered table-striped">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Medicamento</th>
+                        <th>Uso</th>
+                        <th>Aprazamento</th>
+                        <th>Enfermeiro</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    medicamentos.forEach(function(medicamento) {
+        html += `<tr>
+            <td>${medicamento.nome_medicamento || ''}</td>
+            <td>${medicamento.descricao_uso || ''}</td>
+            <td>`;
+
+        // Verificar se tem aprazamentos_novos
+        if (medicamento.aprazamentos_novos && medicamento.aprazamentos_novos.length > 0) {
+            html += `<div class="d-flex justify-content-center gap-2">
+                <button type="button" class="btn btn-sm btn-outline-info btn-visualizar-aprazamento" 
+                    data-prescricao-id="${prescricao.id}" 
+                    data-medicamento-index="${medicamentos.indexOf(medicamento)}" 
+                    data-medicamento-nome="${medicamento.nome_medicamento.replace(/"/g, '&quot;')}">
+                    <i class="fas fa-calendar-alt"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-primary btn-ver-aprazamentos"
+                    data-atendimento-id="${prescricao.atendimentos_clinica_id}"
+                    data-medicamento-nome="${medicamento.nome_medicamento.replace(/"/g, '&quot;')}">
+                    <i class="fas fa-list"></i>
+                </button>
+            </div>`;
+        } else {
+            html += '<span class="text-muted">Não aprazado</span>';
+        }
+
+        html += `</td>
+            <td>${medicamento.enfermeiro_nome || ''}</td>
+            <td>`;
+
+        if ("{{ session.get('cargo') }}".toLowerCase().trim() === "enfermeiro") {
+            html += `<button class="btn btn-primary btn-sm btn-aprazamento" 
+                data-prescricao-id="${prescricao.id}" 
+                data-medicamento-index="${medicamentos.indexOf(medicamento)}" 
+                data-medicamento-nome="${medicamento.nome_medicamento.replace(/"/g, '&quot;')}">
+                <i class="fas fa-clock"></i> Aprazar
+            </button>`;
+        }
+
+        html += '</td></tr>';
+    });
+
+    html += '</tbody></table></div>';
+    return html;
+}
+
+// Adicionar handler para o novo botão
+$(document).on('click', '.btn-ver-aprazamentos', function() {
+    const atendimentoId = $(this).data('atendimento-id');
+    const medicamentoNome = $(this).data('medicamento-nome');
+    visualizarAprazamentosMedicamento(atendimentoId, medicamentoNome);
+});
+
+// Obter o ID do atendimento da URL
+const urlParts = window.location.pathname.split('/');
+const atendimentoId = urlParts[urlParts.length - 1];
+
+// Modificar a função que lida com o clique no botão
+$(document).on('click', '.btn-ver-aprazamentos', function() {
+    const medicamentoNome = $(this).data('medicamento-nome');
+    console.log('[Debug] Clique no botão ver-aprazamentos:', {
+        atendimentoId: window.ATENDIMENTO_ID,
+        medicamentoNome: medicamentoNome
+    });
+    
+    if (!window.ATENDIMENTO_ID) {
+        console.error('[Debug] Erro: ID do atendimento não encontrado');
+        alert('Erro: ID do atendimento não encontrado. Por favor, recarregue a página.');
+        return;
+    }
+    
+    visualizarAprazamentosMedicamento(window.ATENDIMENTO_ID, medicamentoNome);
+});
+</script>
+
+<!-- Modal para visualizar aprazamentos -->
+<div class="modal fade modal-visualizar-aprazamento" id="modalVisualizarAprazamento" tabindex="-1" aria-labelledby="modalVisualizarAprazamentoTitulo" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalVisualizarAprazamentoTitulo">Horários de Aprazamento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body" id="modalVisualizarAprazamentoBody">
+                <p class="text-center">Aguardando dados...</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" onclick="exportarCalendarioComoImagem()">
+                    <i class="fas fa-download"></i> Exportar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

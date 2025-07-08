@@ -139,11 +139,10 @@ function carregarEvolucoesEnfermagem(dataFiltro = null) {
         idInternacao = $('#internacao_id_evolucao').val() || $('#internacao_id').val();
         console.log('carregarEvolucoesEnfermagem: usando ID de internação do campo hidden =', idInternacao);
     }
-    
-    if (!idInternacao) {
+      if (!idInternacao) {
         console.error('Erro: ID de internação não encontrado para carregar evoluções');
-        $('#listaEvolucoesDoDia').html('<tr><td colspan="3" class="text-center text-danger">Erro: ID de internação não disponível</td></tr>');
-        $('#listaEvolucoesAntigas').html('<tr><td colspan="3" class="text-center text-danger">Erro: ID de internação não disponível</td></tr>');
+        $('#tabela-evolucoes-hoje').html('<tr><td colspan="3" class="text-center text-danger">Erro: ID de internação não disponível</td></tr>');
+        $('#tabela-evolucoes-antigas').html('<tr><td colspan="3" class="text-center text-danger">Erro: ID de internação não disponível</td></tr>');
         return;
     }
     
@@ -151,8 +150,8 @@ function carregarEvolucoesEnfermagem(dataFiltro = null) {
     idInternacao = parseInt(idInternacao, 10);
     if (isNaN(idInternacao)) {
         console.error('Erro: ID de internação inválido:', idInternacao);
-        $('#listaEvolucoesDoDia').html('<tr><td colspan="3" class="text-center text-danger">Erro: ID de internação inválido</td></tr>');
-        $('#listaEvolucoesAntigas').html('<tr><td colspan="3" class="text-center text-danger">Erro: ID de internação inválido</td></tr>');
+        $('#tabela-evolucoes-hoje').html('<tr><td colspan="3" class="text-center text-danger">Erro: ID de internação inválido</td></tr>');
+        $('#tabela-evolucoes-antigas').html('<tr><td colspan="3" class="text-center text-danger">Erro: ID de internação inválido</td></tr>');
         return;
     }
     
@@ -169,11 +168,10 @@ function carregarEvolucoesEnfermagem(dataFiltro = null) {
             });
             
             // Definir hoje ou a data filtrada
-            const hoje = dataFiltro ? dataFiltro : new Date().toISOString().split('T')[0];
-            const evolucoesDoDia = [];
+            const hoje = dataFiltro ? dataFiltro : new Date().toISOString().split('T')[0];            const evolucoesDoDia = [];
             const evolucoesAntigas = [];
-            const tabelaHoje = $('#listaEvolucoesDoDia');
-            const tabelaAntigas = $('#listaEvolucoesAntigas');
+            const tabelaHoje = $('#tabela-evolucoes-hoje');
+            const tabelaAntigas = $('#tabela-evolucoes-antigas');
             
             if (Array.isArray(response)) {
                 // Ordenar todas as evoluções por data (mais recentes primeiro)

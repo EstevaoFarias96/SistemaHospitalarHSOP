@@ -55,12 +55,26 @@ function setupModernScroll(container) {
 function checkQuillAndApplyFixes() {
     // Aguardar um momento para garantir que o Quill tenha carregado completamente
     setTimeout(() => {
-        const editorContainer = document.getElementById('editor-container');
-        if (editorContainer) {
-            setupModernScroll(editorContainer);
-            console.log('Scroll moderno aplicado ao editor Quill');
-        } else {
-            console.log('Elemento editor-container não encontrado ao tentar aplicar scroll moderno');
+        // Verificar múltiplos possíveis containers
+        const containers = [
+            '#editor-container',
+            '#editor-container-enfermagem', 
+            '#prescricao_enfermagem_editor'
+        ];
+        
+        let editorContainer = null;
+        
+        for (const selector of containers) {
+            editorContainer = document.querySelector(selector);
+            if (editorContainer) {
+                console.log(`Aplicando scroll moderno ao elemento: ${selector}`);
+                setupModernScroll(editorContainer);
+                break;
+            }
+        }
+        
+        if (!editorContainer) {
+            console.log('Nenhum elemento editor encontrado para aplicar scroll moderno');
         }
     }, 500);
 }
@@ -253,7 +267,6 @@ function visualizarAprazamentosMedicamento(atendimentoId, nomeMedicamento) {
                                                 <th>Horário</th>
                                                 <th>Status</th>
                                                 <th>Enfermeiro</th>
-                                                <th>Ações</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -546,13 +559,19 @@ function carregarPrescricoesEnfermagem() {
                                     ${prescricao.texto || '---'}
                                 </div>
                             </td>
-                            <td>`;
+                            <td>
+                                <button class="btn btn-sm btn-outline-success me-1" 
+                                        onclick="imprimirPrescricaoEnfermagem(${prescricao.id})" 
+                                        title="Imprimir prescrição">
+                                    <i class="fas fa-print"></i>
+                                </button>`;
                     
                     if (window.cargoUsuario && window.cargoUsuario.toLowerCase().trim() === "enfermeiro") {
                         html += `
                             <button class="btn btn-sm btn-outline-primary btn-editar-prescricao-enfermagem" 
                                     data-id="${prescricao.id}" 
-                                    data-texto="${prescricao.texto.replace(/"/g, '&quot;')}">
+                                    data-texto="${prescricao.texto.replace(/"/g, '&quot;')}"
+                                    title="Editar prescrição">
                                 <i class="fas fa-edit"></i>
                             </button>`;
                     }
@@ -578,44 +597,100 @@ function carregarPrescricoesEnfermagem() {
  */
 function initPrescricaoEnfermagemEditor() {
     try {
-        // Verificar se o elemento editor-container existe antes de inicializar o Quill
-        if (!document.querySelector('#editor-container')) {
-            console.warn('Elemento #editor-container não encontrado. Pulando inicialização do Quill.');
+        // Verificar se existe o elemento para prescrições de enfermagem (Quill)
+        if (document.querySelector('#prescricao_enfermagem_editor')) {
+            console.log('Inicializando editor Quill para prescrições de enfermagem...');
+            
+            // Inicializar o editor Quill para prescrições de enfermagem
+            quill = new Quill('#prescricao_enfermagem_editor', {
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'indent': '-1'}, { 'indent': '+1' }],
+                        ['clean']
+                    ]
+                },
+                placeholder: 'Digite a prescrição de enfermagem...',
+                theme: 'snow'
+            });
+            
+            // Aplicar correções de scroll e outros ajustes
+            checkQuillAndApplyFixes();
+
+            // Ao mudar o conteúdo do Quill, atualizar o textarea
+            quill.on('text-change', function() {
+                const html = quill.root.innerHTML;
+                const textarea = document.getElementById('prescricao_enfermagem_texto');
+                if (textarea) {
+                    textarea.value = html;
+                }
+            });
+            
+            // Disponibilizar globalmente
+            window.quillPrescricaoEnfermagem = quill;
+            
+        } else if (document.querySelector('#editor-container-enfermagem')) {
+            console.log('Inicializando editor Quill para evoluções de enfermagem...');
+            
+            // Inicializar o editor Quill para evoluções de enfermagem
+            quill = new Quill('#editor-container-enfermagem', {
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'indent': '-1'}, { 'indent': '+1' }],
+                        ['clean']
+                    ]
+                },
+                placeholder: 'Digite a evolução de enfermagem...',
+                theme: 'snow'
+            });
+            
+            // Aplicar correções de scroll e outros ajustes
+            checkQuillAndApplyFixes();
+
+            // Ao mudar o conteúdo do Quill, atualizar o textarea
+            quill.on('text-change', function() {
+                const html = quill.root.innerHTML;
+                const textarea = document.getElementById('texto_evolucao_enfermagem');
+                if (textarea) {
+                    textarea.value = html;
+                }
+            });
+            
+            // Disponibilizar globalmente
+            window.quillEnfermagem = quill;
+            
+        } else {
+            console.log('Nenhum elemento editor Quill encontrado para enfermagem. Usando textarea simples.');
+            
+            // Para prescrições de enfermagem que usam textarea simples, não inicializar Quill
+            // Apenas configurar qualquer funcionalidade necessária para o textarea
+            const textareaEnfermagem = document.getElementById('texto_prescricao_enfermagem');
+            if (textareaEnfermagem) {
+                console.log('Configurando textarea para prescrições de enfermagem');
+                // Adicionar funcionalidades específicas para textarea se necessário
+            }
+            
             return;
         }
-        
-        // Inicializar o editor Quill
-        quill = new Quill('#editor-container', {
-            modules: {
-                toolbar: [
-                    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                    ['bold', 'italic', 'underline', 'strike'],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    [{ 'indent': '-1'}, { 'indent': '+1' }],
-                    ['clean']
-                ]
-            },
-            placeholder: 'Digite a prescrição de enfermagem...',
-            theme: 'snow'
-        });
-
-        // Aplicar correções de scroll e outros ajustes
-        checkQuillAndApplyFixes();
-
-        // Ao mudar o conteúdo do Quill, atualizar o textarea
-        quill.on('text-change', function() {
-            const html = quill.root.innerHTML;
-            document.getElementById('texto_prescricao').value = html;
-        });
     } catch (error) {
         console.error('Erro ao inicializar o editor Quill:', error);
         // Criar um fallback para o editor
-        $('#editor-container').html('<textarea id="fallback-editor" class="form-control" rows="10" placeholder="Digite a prescrição de enfermagem..."></textarea>');
-        
-        // Atualizar o textarea oculto quando o fallback for alterado
-        $('#fallback-editor').on('input', function() {
-            $('#texto_prescricao').val($(this).val());
-        });
+        if (document.querySelector('#prescricao_enfermagem_editor')) {
+            $('#prescricao_enfermagem_editor').html('<textarea id="fallback-editor-prescricao" class="form-control" rows="10" placeholder="Digite a prescrição de enfermagem..."></textarea>');
+            $('#fallback-editor-prescricao').on('input', function() {
+                $('#prescricao_enfermagem_texto').val($(this).val());
+            });
+        } else if (document.querySelector('#editor-container-enfermagem')) {
+            $('#editor-container-enfermagem').html('<textarea id="fallback-editor-evolucao" class="form-control" rows="10" placeholder="Digite a evolução de enfermagem..."></textarea>');
+            $('#fallback-editor-evolucao').on('input', function() {
+                $('#texto_evolucao_enfermagem').val($(this).val());
+            });
+        }
     }
 }
 
@@ -692,11 +767,10 @@ function resetFormPrescricaoEnfermagem() {
 }
 
 /**
- * Salvar prescrição de enfermagem (nova ou edição)
+ * Salvar prescrição de enfermagem (apenas nova prescrição)
  */
 function salvarPrescricaoEnfermagem() {
     // Obter dados do formulário
-    const prescricaoId = document.getElementById('prescricao_enfermagem_id').value;
     const internacaoId = document.getElementById('prescricao_enfermagem_internacao_id').value;
     const textoHtml = document.getElementById('prescricao_enfermagem_texto').value;
     
@@ -728,31 +802,26 @@ function salvarPrescricaoEnfermagem() {
         return;
     }
     
-    // Preparar dados para envio
+    // Preparar dados para envio - apenas criação de nova prescrição
     const dados = {
         atendimentos_clinica_id: internacaoId,
         funcionario_id: funcionarioId,
         texto: textoHtml
     };
     
-    console.log('Enviando dados:', dados);
+    console.log('Criando nova prescrição:', dados);
     
-    // Configuração da requisição
+    // Configuração da requisição - sempre POST para nova prescrição
     const config = {
-        method: prescricaoId ? 'PUT' : 'POST',
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(dados)
     };
     
-    // URL da requisição (depende se é nova prescrição ou edição)
-    const url = prescricaoId 
-        ? `/api/enfermagem/prescricao/${prescricaoId}` 
-        : '/api/enfermagem/prescricao';
-    
     // Enviar a requisição
-    fetch(url, config)
+    fetch('/api/enfermagem/prescricao', config)
         .then(response => {
             if (!response.ok) {
                 return response.json().then(data => {
@@ -774,7 +843,7 @@ function salvarPrescricaoEnfermagem() {
             carregarPrescricoesEnfermagem();
             
             // Exibir mensagem de sucesso
-            alert(prescricaoId ? 'Prescrição atualizada com sucesso!' : 'Prescrição registrada com sucesso!');
+            alert('Prescrição registrada com sucesso!');
         })
         .catch(error => {
             console.error('Erro ao salvar prescrição:', error);
@@ -823,7 +892,7 @@ function renderizarPrescricoes(prescricoes, elementId, apenasHora) {
     const tbody = document.getElementById(elementId);
     
     if (!prescricoes || prescricoes.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">Nenhuma prescrição ${apenasHora ? 'hoje' : 'anterior'}.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Nenhuma prescrição ${apenasHora ? 'hoje' : 'anterior'}.</td></tr>`;
         return;
     }
     
@@ -843,39 +912,32 @@ function renderizarPrescricoes(prescricoes, elementId, apenasHora) {
                                data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
         }
         
-        // Botão de edição (apenas para enfermeiros)
-        const btnEditar = session.cargo.toLowerCase() === 'enfermeiro' 
-            ? `<button class="btn btn-sm btn-outline-primary editar-prescricao" data-id="${prescricao.id}">
-                   <i class="fas fa-edit"></i>
-               </button>` 
-            : '';
-        
         return `
             <tr>
                 <td>${dataHoraFormatada}</td>
                 <td>${prescricao.enfermeiro_nome}</td>
                 <td>
-                    <div class="d-flex justify-content-between">
-                        <div class="prescricao-content">${prescricao.texto}</div>
-                        <div class="prescricao-actions">
-                            ${btnEditar}
-                        </div>
-                    </div>
+                    <div class="prescricao-content">${prescricao.texto}</div>
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-outline-success me-1" 
+                            onclick="imprimirPrescricaoEnfermagem(${prescricao.id})" 
+                            title="Imprimir prescrição">
+                        <i class="fas fa-print"></i>
+                    </button>
+                    ${window.cargoUsuario && window.cargoUsuario.toLowerCase().trim() === "enfermeiro" ? `
+                        <button class="btn btn-sm btn-outline-primary btn-editar-prescricao-enfermagem" 
+                                data-id="${prescricao.id}" 
+                                data-texto="${prescricao.texto.replace(/"/g, '&quot;')}"
+                                title="Editar prescrição">
+                            <i class="fas fa-edit"></i>
+                        </button>` : ''}
                 </td>
             </tr>
         `;
     }).join('');
     
     tbody.innerHTML = html;
-    
-    // Adicionar eventos aos botões de edição
-    const botoesEditar = document.querySelectorAll('.editar-prescricao');
-    botoesEditar.forEach(botao => {
-        botao.addEventListener('click', function() {
-            const prescricaoId = this.getAttribute('data-id');
-            editarPrescricaoEnfermagem(prescricaoId, prescricoes);
-        });
-    });
 }
 
 /**
@@ -1953,595 +2015,28 @@ $(document).on('click', '.btn-ver-aprazamento', function () {
 });
 
 /**
- * Calcula horários entre dois horários com um intervalo específico
- * @param {string} horaInicio - Hora inicial no formato HH:MM
- * @param {string} horaFim - Hora final no formato HH:MM
- * @param {number} intervaloHoras - Intervalo em horas
- * @returns {string[]} Array com os horários calculados
+ * Função para imprimir prescrição de enfermagem
+ * @param {number} prescricaoId - ID da prescrição a ser impressa
  */
-function calcularHorariosEntreIntervalo(horaInicio, horaFim, intervaloHoras) {
-    // Converter horas para minutos para facilitar o cálculo
-    const [horaInicioH, horaInicioM] = horaInicio.split(':').map(Number);
-    const [horaFimH, horaFimM] = horaFim.split(':').map(Number);
-    
-    const inicioMinutos = horaInicioH * 60 + horaInicioM;
-    const fimMinutos = horaFimH * 60 + horaFimM;
-    
-    // Converter intervalo de horas para minutos
-    const intervaloMinutos = Math.round(intervaloHoras * 60);
-    
-    const horarios = [];
-    let minutoAtual = inicioMinutos;
-    
-    // Adicionar o horário inicial
-    horarios.push(formatarHoraMinutos(minutoAtual));
-    
-    // Calcular horários subsequentes
-    while (minutoAtual + intervaloMinutos <= fimMinutos) {
-        minutoAtual += intervaloMinutos;
-        horarios.push(formatarHoraMinutos(minutoAtual));
-    }
-    
-    return horarios;
-}
-
-/**
- * Formata minutos para o formato de hora HH:MM
- * @param {number} minutos - Total de minutos a ser formatado
- * @returns {string} Hora formatada no padrão HH:MM
- */
-function formatarHoraMinutos(minutos) {
-    const horas = Math.floor(minutos / 60);
-    const mins = minutos % 60;
-    return `${String(horas).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
-}
-
-/**
- * Carrega as prescrições da internação
- * @param {number} idInternacao - ID da internação (opcional)
- * @param {boolean} lastUpdate - Indica se é uma última tentativa de atualização
- */
-function carregarPrescricoes(idInternacao = null, lastUpdate = false) {
-    // Se internacaoId não foi fornecido, use a variável global
-    const id = idInternacao || window.internacaoId;
-    
-    console.log(`Iniciando carregarPrescricoes com ID: ${id}, lastUpdate: ${lastUpdate}`);
-    
-    if (!lastUpdate) {
-        $("#listaPrescricoes").html("<tr><td class='text-center'><i class='fas fa-spinner fa-spin'></i> Carregando prescrições...</td></tr>");
-    }
-    
-    $.ajax({
-        url: "/api/prescricoes/" + id,
-        type: 'GET',
-        success: function(response) {
-            console.log("Resposta recebida:", response);
-            
-            if (!response.success) {
-                $("#listaPrescricoes").html("<tr><td class='text-center text-warning'>Erro ao carregar prescrições: " + response.error + "</td></tr>");
-                console.error("Erro ao carregar prescrições:", response.error);
-                return;
-            }
-            
-            if (!response.prescricoes || response.prescricoes.length === 0) {
-                $("#listaPrescricoes").html("<tr><td class='text-center'>Nenhuma prescrição encontrada</td></tr>");
-                console.log("Nenhuma prescrição encontrada");
-                return;
-            }
-            
-            console.log(`${response.prescricoes.length} prescrições encontradas`);
-            
-            // Ordenar prescrições por data (mais recente primeiro)
-            var prescricoes = response.prescricoes.sort(function(a, b) {
-                return new Date(b.data_prescricao) - new Date(a.data_prescricao);
-            });
-            
-            // Agrupar prescrições por data
-            var prescricoesPorData = {};
-            prescricoes.forEach(function(p) {
-                // Extrair apenas a data (sem a hora)
-                var dataApenas = p.data_prescricao ? p.data_prescricao.split(' ')[0] : 'Sem data';
-                
-                if (!prescricoesPorData[dataApenas]) {
-                    prescricoesPorData[dataApenas] = [];
-                }
-                prescricoesPorData[dataApenas].push(p);
-            });
-            
-            var html = "<tr><td>";
-            
-            // Para cada data
-            Object.keys(prescricoesPorData).forEach(function(data) {
-                html += '<div class="card mb-3">' +
-                    '<div class="card-header bg-info text-white">' +
-                    '<h5 class="mb-0">Prescrições do dia ' + data + '</h5>' +
-                    '</div>' +
-                    '<div class="card-body">';
-                
-                // Para cada prescrição na data
-                prescricoesPorData[data].forEach(function(prescricao) {
-                    var horario = prescricao.data_prescricao ? prescricao.data_prescricao.split(' ')[1] : '';
-                    
-                    html += '<div class="prescricao-item mb-4" data-id="' + prescricao.id + '">' +
-                        '<h6 class="prescricao-horario text-secondary">' +
-                        '<i class="fas fa-clock mr-1"></i> ' + horario + ' - ' +
-                        '<span class="text-primary">' + (prescricao.medico_nome || 'Médico não informado') + '</span>';
-                    
-                    // Mostrar botão Editar apenas para médicos
-                    if (window.cargoUsuario && window.cargoUsuario.toLowerCase().trim() === "medico") {
-                        html += '<button class="btn btn-sm btn-outline-info float-right ml-2 btn-editar-prescricao" ' +
-                        'data-id="' + prescricao.id + '" style="float: right;">' +
-                        '<i class="fas fa-edit"></i> Editar' +
-                        '</button>';
-                    }
-                    
-                    html += '</h6>';
-                        
-                    // Seção de Dieta
-                    if (prescricao.texto_dieta) {
-                        html += '<div class="mt-3 mb-2">' +
-                            '<h6><i class="fas fa-utensils text-success mr-1"></i> Dieta</h6>' +
-                            '<div class="card card-body bg-light">' + prescricao.texto_dieta + '</div>' +
-                            '</div>';
-                    }
-                    
-                    // Seção de Medicamentos
-                    if (prescricao.medicamentos && prescricao.medicamentos.length > 0) {
-                        html += '<div class="mt-3 mb-2">' +
-                            '<h6><i class="fas fa-pills text-danger mr-1"></i> Medicamentos</h6>' +
-                            '<div class="table-responsive">' +
-                            '<table class="table table-sm table-bordered table-striped">' +
-                            '<thead class="thead-light">' +
-                            '<tr>' +
-                            '<th>Medicamento</th>' +
-                            '<th>Uso</th>' +
-                            '<th>Aprazamento</th>' +
-                            '<th>Enfermeiro</th>' +
-                            '<th>Ações</th>' +
-                            '</tr>' +
-                            '</thead>' +
-                            '<tbody>';
-
-                        prescricao.medicamentos.forEach(function(medicamento) {
-                            html += '<tr>' +
-                                '<td>' + (medicamento.nome_medicamento || '') + '</td>' +
-                                '<td>' + (medicamento.descricao_uso || '') + '</td>' +
-                                '<td>';
-
-                                if (medicamento.aprazamentos_novos && medicamento.aprazamentos_novos.length > 0) {
-                                    html += '<div class="d-flex justify-content-center">' +
-                                        '<button type="button" class="btn btn-sm btn-outline-primary btn-ver-aprazamentos" ' +
-                                        'data-atendimento-id="' + window.ATENDIMENTO_ID + '" ' +
-                                        'data-medicamento-nome="' + medicamento.nome_medicamento.replace(/"/g, '&quot;') + '">' +
-                                        '<i class="fas fa-list"></i> Ver Horários' +
-                                        '</button>' +
-                                        '</div>';
-                                } else {
-                                    html += '<span class="text-muted">Não aprazado</span>';
-                                }
-
-                                html += '</td>' +
-                                    '<td>' + (medicamento.enfermeiro_nome || '') + '</td>' +
-                                    '<td>';
-
-                                if (window.cargoUsuario && window.cargoUsuario.toLowerCase().trim() === "enfermeiro") {
-                                    html += '<button class="btn btn-primary btn-sm btn-aprazamento" ' +
-                                        'data-prescricao-id="' + prescricao.id + '" ' +
-                                        'data-medicamento-index="' + prescricao.medicamentos.indexOf(medicamento) + '" ' +
-                                        'data-medicamento-nome="' + medicamento.nome_medicamento.replace(/"/g, '&quot;') + '">' +
-                                        '<i class="fas fa-clock"></i> Aprazar' +
-                                        '</button>';
-                                }
-
-                                html += '</td></tr>';
-                        });
-
-                        html += '</tbody></table></div></div>';
-                    }
-                    
-                    // Seção de Procedimentos Médicos
-                    if (prescricao.texto_procedimento_medico) {
-                        html += '<div class="mt-3">' +
-                            '<h6><i class="fas fa-user-md text-primary mr-1"></i> Procedimentos Médicos</h6>' +
-                            '<div class="card card-body bg-light">' + prescricao.texto_procedimento_medico + '</div>' +
-                            '</div>';
-                    }
-                    
-                    // Seção de Procedimentos Multidisciplinares
-                    if (prescricao.texto_procedimento_multi) {
-                        html += '<div class="mt-3">' +
-                            '<h6><i class="fas fa-users text-warning mr-1"></i> Procedimentos Multidisciplinares</h6>' +
-                            '<div class="card card-body bg-light">' + prescricao.texto_procedimento_multi + '</div>' +
-                            '</div>';
-                    }
-                    
-                    html += '</div>';
-                    
-                    // Adicionar divisor entre prescrições, exceto na última
-                    if (prescricoesPorData[data].indexOf(prescricao) < prescricoesPorData[data].length - 1) {
-                        html += '<hr class="my-3">';
-                    }
-                });
-                
-                html += '</div></div>';
-            });
-            
-            html += "</td></tr>";
-            $("#listaPrescricoes").html(html);
-        },
-        error: function(xhr, status, error) {
-            console.error("Erro na requisição AJAX:", xhr.responseText);
-            $("#listaPrescricoes").html("<tr><td class='text-center text-danger'>Erro ao carregar prescrições: " + error + "</td></tr>");
-            
-            // Tentar novamente automaticamente apenas uma vez se for erro 404 ou 500
-            if ((xhr.status === 404 || xhr.status === 500) && !lastUpdate) {
-                console.log("Tentando carregar prescrições novamente após erro " + xhr.status);
-                setTimeout(function() {
-                    carregarPrescricoes(id, true);
-                }, 2000);
-            }
-        }
-    });
-}
-
-/**
- * Carrega as evoluções da internação
- */
-function carregarEvolucoes() {
-    console.log('Carregando evoluções para internacaoId:', window.internacaoId);
-    
-    if (!window.internacaoId || isNaN(window.internacaoId)) {
-        console.error('ID de internação inválido ao carregar evoluções:', window.internacaoId);
-        $('#listaEvolucoes').html('<tr><td colspan="3" class="text-center text-danger">Erro: ID de internação inválido</td></tr>');
-        return;
-    }
-    
-    $.ajax({
-        url: `/api/evolucoes/${window.internacaoId}`,
-        method: 'GET',
-        success: function(response) {
-            console.log('Resposta da API de evoluções:', response);
-            const tabela = $('#listaEvolucoes');
-            tabela.empty();
-            
-            if (response.success && response.evolucoes && response.evolucoes.length > 0) {
-                response.evolucoes.forEach(ev => {
-                    const evolucaoHtml = ev.evolucao || '---';
-                    
-                    // Criar um container para a evolução com estilo seguro
-                    tabela.append(`
-                        <tr>
-                            <td>${ev.data_evolucao || '---'}</td>
-                            <td>${ev.nome_medico || '---'}</td>
-                            <td>
-                                <div class="texto-evolucao">
-                                    ${evolucaoHtml}
-                                </div>
-                            </td>
-                        </tr>
-                    `);
-                });
-                
-                // Calcular o número de linhas e aplicar o atributo data-lines
-                setTimeout(() => {
-                    $('.texto-evolucao').each(function() {
-                        const texto = $(this).text();
-                        const linhas = texto.split(/\r\n|\r|\n/).length;
-                        const palavras = texto.split(/\s+/).length;
-                        
-                        // Estimar o número de linhas com base no tamanho do texto
-                        let estimativaLinhas = Math.max(linhas, Math.ceil(palavras / 15));
-                        
-                        // Limitar a no máximo 22 para não criar muitas regras CSS
-                        estimativaLinhas = Math.min(estimativaLinhas, 22);
-                        
-                        // Aplicar o atributo data-lines ao elemento
-                        $(this).attr('data-lines', estimativaLinhas);
-                        
-                        console.log(`Evolução com ${linhas} linhas e ${palavras} palavras. Estimativa: ${estimativaLinhas}`);
-                    });
-                }, 100);
-            } else {
-                tabela.html('<tr><td colspan="3" class="text-center">Nenhuma evolução registrada até o momento.</td></tr>');
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('Erro ao carregar evoluções:', xhr.responseText, status, error);
-            $('#listaEvolucoes').html('<tr><td colspan="3" class="text-center text-danger">Erro ao carregar evoluções.</td></tr>');
-        }
-    });
-}
-
-/**
- * Configura o scroll moderno para elementos do editor Quill
- * @param {HTMLElement} container - Elemento container que contém os editores Quill
- */
-function setupModernScroll(container) {
-    if (!container) return;
-    
-    // Elementos que podem precisar de scroll
-    const scrollElements = container.querySelectorAll('.ql-editor');
-    
-    scrollElements.forEach(element => {
-        // Assegurar que o elemento tem estilo de overflow adequado
-        element.style.overflowY = 'auto';
-        element.style.maxHeight = '100%';
+function imprimirPrescricaoEnfermagem(prescricaoId) {
+    try {
+        console.log('🖨️ Imprimindo prescrição de enfermagem ID:', prescricaoId);
         
-        // Observar redimensionamento do conteúdo
-        const resizeObserver = new ResizeObserver(() => {
-            // Ajustar posição de scroll quando o conteúdo mudar
-            const isAtBottom = element.scrollHeight - element.scrollTop === element.clientHeight;
-            if (isAtBottom) {
-                element.scrollTop = element.scrollHeight;
-            }
-        });
+        // Construir URL para impressão
+        const url = `/api/imprimir-prescricao/${prescricaoId}`;
         
-        // Observar mudanças no conteúdo
-        const mutationObserver = new MutationObserver(() => {
-            // Verificar se o scroll precisa ser ajustado
-            const shouldScrollToBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 50;
-            if (shouldScrollToBottom) {
-                element.scrollTop = element.scrollHeight;
-            }
-        });
+        // Abrir em nova janela/aba para impressão
+        const windowFeatures = 'width=800,height=600,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,status=no';
+        const printWindow = window.open(url, '_blank', windowFeatures);
         
-        // Iniciar observadores
-        resizeObserver.observe(element);
-        mutationObserver.observe(element, { 
-            childList: true, 
-            subtree: true, 
-            characterData: true 
-        });
-        
-        // Armazenar observadores para limpeza futura
-        element._scrollObservers = {
-            resize: resizeObserver,
-            mutation: mutationObserver
-        };
-    });
-}
-
-/**
- * Verifica e aplica correções no editor Quill após o carregamento
- */
-function checkQuillAndApplyFixes() {
-    // Aguardar um momento para garantir que o Quill tenha carregado completamente
-    setTimeout(() => {
-        const editorContainer = document.getElementById('editor-container');
-        if (editorContainer) {
-            setupModernScroll(editorContainer);
-            console.log('Scroll moderno aplicado ao editor Quill');
-        } else {
-            console.log('Elemento editor-container não encontrado ao tentar aplicar scroll moderno');
+        if (!printWindow) {
+            // Fallback caso o popup seja bloqueado
+            alert('Pop-up bloqueado! Por favor, permita pop-ups para este site ou clique no link para imprimir.');
+            window.open(url, '_blank');
         }
-    }, 500);
-}
-
-/**
- * Limpa todos os campos do formulário de prescrição
- */
-function limparFormularioPrescricao() {
-    $('#prescricao_id').val('');
-    $('#nome_medicamento').val('');
-    $('#descricao_uso').val('');
-    $('#aprazamento').val('');
-    $('#texto_dieta').val('');
-    $('#texto_procedimento_medico').val('');
-    $('#texto_procedimento_multi').val('');
-    $('#avisoAlergia').hide();
-    medicamentosAdicionados = [];
-    atualizarTabelaMedicamentos();
-    $('#modalPrescricaoLabel').text('Nova Prescrição');
-}
-
-/**
- * Edita uma prescrição existente
- * @param {number} prescricaoId - ID da prescrição a ser editada
- */
-function editarPrescricao(prescricaoId) {
-    // Limpar o formulário primeiro
-    limparFormularioPrescricao();
-    
-    // Buscar os dados da prescrição específica
-    $.ajax({
-        url: `/api/prescricoes/${internacaoId}`,
-        method: 'GET',
-        success: function(response) {
-            if (response.success && response.prescricoes) {
-                // Encontrar a prescrição pelo ID
-                const prescricao = response.prescricoes.find(p => p.id == prescricaoId);
-                
-                if (prescricao) {
-                    console.log("Editando prescrição:", prescricao);
-                    
-                    // Preencher o formulário com os dados da prescrição
-                    $('#prescricao_id').val(prescricao.id);
-                    $('#texto_dieta').val(prescricao.texto_dieta || '');
-                    $('#texto_procedimento_medico').val(prescricao.texto_procedimento_medico || '');
-                    $('#texto_procedimento_multi').val(prescricao.texto_procedimento_multi || '');
-                    
-                    // Limpar a lista atual de medicamentos
-                    medicamentosAdicionados = [];
-                    
-                    // Adicionar medicamentos da prescrição na lista
-                    if (prescricao.medicamentos && prescricao.medicamentos.length > 0) {
-                        prescricao.medicamentos.forEach(med => {
-                            // Converter formato de data se necessário
-                            let aprazamento = med.aprazamento;
-                            if (aprazamento && typeof aprazamento === 'string') {
-                                // Converter de DD/MM/YYYY HH:MM para YYYY-MM-DDTHH:MM
-                                const partes = aprazamento.split(' ');
-                                if (partes.length === 2) {
-                                    const dataPartes = partes[0].split('/');
-                                    if (dataPartes.length === 3) {
-                                        aprazamento = `${dataPartes[2]}-${dataPartes[1]}-${dataPartes[0]}T${partes[1]}`;
-                                    }
-                                }
-                            }
-                            
-                            medicamentosAdicionados.push({
-                                nome_medicamento: med.nome_medicamento,
-                                descricao_uso: med.descricao_uso,
-                                aprazamento: aprazamento
-                            });
-                        });
-                        
-                        // Atualizar a tabela de medicamentos
-                        atualizarTabelaMedicamentos();
-                    }
-                    
-                    // Alterar o título do modal
-                    $('#modalPrescricaoLabel').text('Editar Prescrição');
-                    
-                    // Abrir o modal
-                    $('#modalPrescricao').modal('show');
-                } else {
-                    alert('Prescrição não encontrada.');
-                }
-            } else {
-                alert('Erro ao buscar prescrição: ' + (response.error || 'Erro desconhecido'));
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('Erro ao buscar prescrição:', xhr.responseText);
-            alert('Erro ao buscar prescrição: ' + error);
-        }
-    });
-}
-
-function atualizarTabelaMedicamentos() {
-    const tabela = $('#tabelaMedicamentosAdicionados tbody');
-    
-    if (medicamentosAdicionados.length === 0) {
-        tabela.html('<tr id="semMedicamentos"><td colspan="4" class="text-center">Nenhum medicamento adicionado</td></tr>');
-        return;
-    }
-    
-    // Esconder a mensagem de "nenhum medicamento"
-    $('#semMedicamentos').hide();
-    
-    // Limpar e reconstruir a tabela
-    tabela.empty();
-    
-    medicamentosAdicionados.forEach((med, index) => {
-        const aprazamentoFormatado = med.aprazamento ? 
-            new Date(med.aprazamento).toLocaleString('pt-BR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            }) : '-';
         
-        tabela.append(`
-            <tr data-index="${index}">
-                <td>${med.nome_medicamento}</td>
-                <td>${med.descricao_uso}</td>
-                <td>${aprazamentoFormatado}</td>
-                <td>
-                    <button type="button" class="btn btn-danger btn-sm btn-remover-medicamento">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            </tr>
-        `);
-    });
-}
-
-/**
- * Observa mutações no DOM para um determinado seletor
- * @param {string} seletor - Seletor CSS do elemento a ser observado
- * @param {function} callback - Função a ser chamada quando houver mutações
- * @returns {MutationObserver|null} - Observador criado ou null se o elemento não for encontrado
- */
-function observarMutacoesDom(seletor, callback) {
-    const elemento = document.querySelector(seletor);
-    if (!elemento) return null;
-    
-    const observer = new MutationObserver(callback);
-    observer.observe(elemento, { 
-        childList: true, 
-        subtree: true,
-        attributes: true,
-        characterData: true
-    });
-    
-    return observer;
-}
-
-/**
- * Remove eventos depreciados do DOM para melhor performance
- */
-function removerEventosDepreciados() {
-    // Lista de eventos depreciados
-    const eventosDepreciados = [
-        'DOMNodeInserted',
-        'DOMNodeRemoved',
-        'DOMSubtreeModified',
-        'DOMAttrModified',
-        'DOMCharacterDataModified'
-    ];
-    
-    // Função para limpar o evento
-    function limparEvento(event) {
-        const elementos = document.querySelectorAll('*');
-        for (let i = 0; i < elementos.length; i++) {
-            const el = elementos[i];
-            if (el._events && el._events[event]) {
-                delete el._events[event];
-                console.log(`Evento depreciado ${event} removido do elemento:`, el);
-            }
-        }
-    }
-    
-    // Limpar todos os eventos depreciados
-    eventosDepreciados.forEach(limparEvento);
-}
-
-/**
- * Configura o comportamento dos tooltips em dispositivos touch
- */
-function setupTooltips() {
-    // Verifica se é um dispositivo touch
-    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    
-    if (isTouch) {
-        // Em dispositivos touch, mostrar o título em um tooltip
-        document.querySelectorAll('.menu-link').forEach(link => {
-            const title = link.getAttribute('title');
-            if (title) {
-                link.addEventListener('click', function(e) {
-                    // Não mostrar tooltip ao navegar entre seções
-                    if (link.getAttribute('data-target')) {
-                        e.preventDefault();
-                    }
-                });
-            }
-        });
+    } catch (error) {
+        console.error('❌ Erro ao imprimir prescrição de enfermagem:', error);
+        alert('Erro ao abrir a impressão. Tente novamente.');
     }
 }
-
-$(document).on('click', '.btn-aprazamento', function () {
-    const prescricaoId = $(this).data('prescricao-id');
-    const medicamentoIndex = $(this).data('medicamento-index');
-    const medicamentoNome = $(this).data('medicamento-nome');
-
-    // Preencher os campos do modal de aprazamento
-    $('#aprazamento_prescricao_id').val(prescricaoId);
-    $('#aprazamento_medicamento_index').val(medicamentoIndex);
-    $('#aprazamento_medicamento_nome').text(medicamentoNome);
-
-    // Limpar campos do formulário, se necessário
-    $('#aprazamento_data_inicio').val('');
-    $('#aprazamento_data_fim').val('');
-    $('#aprazamento_hora_inicial_multiplos').val('');
-    $('#horarios_multiplos_dias').html('');
-
-    // Abrir o modal de aprazamento
-    $('#modalAprazamento').modal('show');
-});
-
-/**
- * Arquivo para cálculo e visualização de horários de aprazamento
- * Integra com botão de calcular horários
- */

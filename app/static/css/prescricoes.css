@@ -46,34 +46,44 @@
     display: flex;
     gap: 8px;
     align-items: center;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 /* Botão de impressão */
+.btn-print-discreto,
 .btn-imprimir-prescricao {
-    background: linear-gradient(135deg, #28a745, #20c997);
-    border: none;
-    color: white;
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.25);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-primary);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
+.btn-print-discreto:hover,
 .btn-imprimir-prescricao:hover {
-    background: linear-gradient(135deg, #218838, #1ea584);
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--text-primary);
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.35);
-    color: white;
 }
 
+.btn-print-discreto:active,
 .btn-imprimir-prescricao:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.25);
+    transform: scale(0.95);
 }
 
+.btn-print-discreto i,
 .btn-imprimir-prescricao i {
+    font-size: 0.9rem;
     margin-right: 5px;
 }
 
@@ -88,10 +98,15 @@
     .prescricao-actions {
         width: 100%;
         justify-content: center;
+        opacity: 1 !important;
+        visibility: visible !important;
     }
     
+    .btn-print-discreto,
     .btn-imprimir-prescricao {
         font-size: 0.8rem;
         padding: 5px 10px;
+        opacity: 1 !important;
+        visibility: visible !important;
     }
 }

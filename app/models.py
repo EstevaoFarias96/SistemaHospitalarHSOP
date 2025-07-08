@@ -458,3 +458,16 @@ class FichaReferencia(db.Model):
     atendimento = relationship('Atendimento', backref='fichas_referencia')
     medico = relationship('Funcionario', backref='fichas_referencia')
     internacao = relationship('Internacao', backref='fichas_referencia')
+
+class PrescricaoEnfermagemTemplate(db.Model):
+    __tablename__ = 'prescricoes_enfermagem_template'
+
+    id = db.Column(db.Integer, primary_key=True)
+    padrao = db.Column(db.Boolean, nullable=False, default=True)
+    titulo = db.Column(db.String(255), nullable=False)  # Ex: 'Avaliação Inicial'
+    texto_prescricao = db.Column(db.Text, nullable=False)  # Ex: 'Realizar entrevista...'
+    nic = db.Column(db.String(10), nullable=True)  # Ex: '7310'
+    nic_tipo = db.Column(db.String(255), nullable=True)  # Ex: 'Admissão do paciente'
+
+    def __repr__(self):
+        return f"<PrescricaoEnfermagemTemplate id={self.id} titulo={self.titulo}>"
