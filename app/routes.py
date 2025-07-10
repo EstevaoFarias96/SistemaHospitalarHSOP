@@ -18,7 +18,7 @@ from docxtpl import DocxTemplate
 from docx import Document
 from io import BytesIO
 from app import db
-from app.models import Funcionario,PrescricaoEnfermagemTemplate,Leito,AdmissaoEnfermagem, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN, now_brasilia, FichaReferencia
+from app.models import Funcionario,PrescricaoEnfermagemTemplate,Leito,AdmissaoEnfermagem, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN, now_brasilia, FichaReferencia, EvolucaoFisioterapia,EvolucaoAssistenteSocial, EvolucaoNutricao
 from app.timezone_helper import formatar_datetime_br_completo, formatar_datetime_br, converter_para_brasilia
 from zoneinfo import ZoneInfo
 
@@ -188,7 +188,24 @@ def painel_enfermeiro():
         flash('Erro ao acessar o painel. Por favor, tente novamente.', 'danger')
         return redirect(url_for('main.index'))
 
-
+@bp.route('/multi')
+@login_required
+def painel_multi():
+    try:
+        # Verificar se o usuário é enfermeiro
+        current_user = get_current_user()
+        if current_user.cargo.lower() != 'multi':
+            flash('Acesso restrito a enfermeiros.', 'danger')
+            return redirect(url_for('main.index'))
+        
+        # Renderizar o template do painel do enfermeiro
+        return render_template('multi.html')
+        
+    except Exception as e:
+        logging.error(f"Erro ao acessar painel da Equipe multiprofissional : {str(e)}")
+        logging.error(traceback.format_exc())
+        flash('Erro ao acessar o painel. Por favor, tente novamente.', 'danger')
+        return redirect(url_for('main.index'))
 
 
 
@@ -197,7 +214,7 @@ def painel_enfermeiro():
 def listar_pacientes_internados():
     try:
         current_user = get_current_user()
-        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
             return jsonify({'error': 'Acesso não autorizado'}), 403
         
         # Buscar internações onde dieta != '1' OU dieta é NULL/vazia (excluir apenas dieta = '1')
@@ -240,7 +257,7 @@ def listar_pacientes_internados():
 def get_enfermeiro_nome():
     try:
         current_user = get_current_user()
-        if current_user.cargo.lower() != 'enfermeiro':
+        if current_user.cargo.lower() not in ['enfermeiro', 'multi']:
             return jsonify({'error': 'Acesso não autorizado'}), 403
         
         return jsonify({
@@ -252,6 +269,198 @@ def get_enfermeiro_nome():
         logging.error(f"Erro ao obter nome do enfermeiro: {str(e)}")
         logging.error(traceback.format_exc())
         return jsonify({'error': 'Erro interno do servidor'}), 500
+
+# Rota para impressão das evoluções de fisioterapia
+@bp.route('/impressao_fisio/<string:atendimento_id>')
+@login_required
+def impressao_fisio(atendimento_id):
+    """Página de impressão das evoluções de fisioterapia"""
+    try:
+        # Buscar o atendimento
+        atendimento = Atendimento.query.get_or_404(atendimento_id)
+        
+        # Buscar as evoluções de fisioterapia
+        evolucoes = EvolucaoFisioterapia.query.filter_by(id_atendimento=atendimento_id)\
+            .order_by(EvolucaoFisioterapia.data_evolucao.desc()).all()
+        
+        # Buscar dados do paciente
+        paciente = atendimento.paciente
+        
+        # Buscar dados da internação
+        internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
+        
+        # Preparar dados das evoluções com informações do fisioterapeuta
+        evolucoes_dados = []
+        for evolucao in evolucoes:
+            funcionario = None
+            if evolucao.funcionario_id:
+                funcionario = Funcionario.query.get(evolucao.funcionario_id)
+            
+            evolucoes_dados.append({
+                'id': evolucao.id,
+                'data_evolucao': evolucao.data_evolucao,
+                'evolucao_fisio': evolucao.evolucao_fisio,
+                'fisioterapeuta_nome': funcionario.nome if funcionario else 'Não identificado',
+                'fisioterapeuta_registro': funcionario.numero_profissional if funcionario else ''
+            })
+        
+        # Função para obter data atual
+        def moment():
+            return datetime.now()
+        
+        return render_template('impressao_fisio.html',
+                               paciente=paciente,
+                               internacao=internacao,
+                               atendimento=atendimento,
+                               evolucoes=evolucoes_dados,
+                               moment=moment)
+                               
+    except Exception as e:
+        flash(f'Erro ao carregar dados para impressão: {str(e)}', 'error')
+        return redirect(url_for('main.index'))
+
+# Rota para impressão das evoluções de nutrição
+@bp.route('/impressao_nutricao/<string:atendimento_id>')
+@login_required
+def impressao_nutricao(atendimento_id):
+    """Página de impressão das evoluções de nutrição"""
+    try:
+        # Buscar o atendimento
+        atendimento = Atendimento.query.get_or_404(atendimento_id)
+        
+        # Buscar as evoluções de nutrição
+        evolucoes = EvolucaoNutricao.query.filter_by(id_atendimento=atendimento_id)\
+            .order_by(EvolucaoNutricao.data_evolucao.desc()).all()
+        
+        # Buscar dados do paciente
+        paciente = atendimento.paciente
+        
+        # Buscar dados da internação
+        internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
+        
+        # Preparar dados das evoluções com informações do nutricionista
+        evolucoes_dados = []
+        for evolucao in evolucoes:
+            funcionario = None
+            if evolucao.funcionario_id:
+                funcionario = Funcionario.query.get(evolucao.funcionario_id)
+            
+            evolucoes_dados.append({
+                'id': evolucao.id,
+                'data_evolucao': evolucao.data_evolucao,
+                'evolucao_nutricao': evolucao.evolucao_nutricao,
+                'nutricionista_nome': funcionario.nome if funcionario else 'Não identificado',
+                'nutricionista_registro': funcionario.numero_profissional if funcionario else ''
+            })
+        
+        # Função para obter data atual
+        def moment():
+            return datetime.now()
+        
+        return render_template('impressao_nutricao.html',
+                               paciente=paciente,
+                               internacao=internacao,
+                               atendimento=atendimento,
+                               evolucoes=evolucoes_dados,
+                               moment=moment)
+                               
+    except Exception as e:
+        flash(f'Erro ao carregar dados para impressão: {str(e)}', 'error')
+        return redirect(url_for('main.index'))
+
+# Rota para impressão de evolução individual de fisioterapia
+@bp.route('/impressao_fisio_evolucao/<int:evolucao_id>')
+@login_required
+def impressao_fisio_evolucao(evolucao_id):
+    """Página de impressão de uma evolução individual de fisioterapia"""
+    try:
+        # Buscar a evolução específica
+        evolucao = EvolucaoFisioterapia.query.get_or_404(evolucao_id)
+        
+        # Buscar o atendimento
+        atendimento = Atendimento.query.get_or_404(evolucao.id_atendimento)
+        
+        # Buscar dados do paciente
+        paciente = atendimento.paciente
+        
+        # Buscar dados da internação
+        internacao = Internacao.query.filter_by(atendimento_id=evolucao.id_atendimento).first()
+        
+        # Buscar dados do fisioterapeuta
+        funcionario = None
+        if evolucao.funcionario_id:
+            funcionario = Funcionario.query.get(evolucao.funcionario_id)
+        
+        # Preparar dados da evolução
+        evolucao_dados = {
+            'id': evolucao.id,
+            'data_evolucao': evolucao.data_evolucao,
+            'evolucao_fisio': evolucao.evolucao_fisio,
+            'fisioterapeuta_nome': funcionario.nome if funcionario else 'Não identificado',
+            'fisioterapeuta_registro': funcionario.numero_profissional if funcionario else ''
+        }
+        
+        # Função para obter data atual
+        def moment():
+            return datetime.now()
+        
+        return render_template('impressao_fisio_individual.html',
+                               paciente=paciente,
+                               internacao=internacao,
+                               atendimento=atendimento,
+                               evolucao=evolucao_dados,
+                               moment=moment)
+                               
+    except Exception as e:
+        flash(f'Erro ao carregar dados para impressão: {str(e)}', 'error')
+        return redirect(url_for('main.index'))
+
+# Rota para impressão de evolução individual de nutrição
+@bp.route('/impressao_nutricao_evolucao/<int:evolucao_id>')
+@login_required
+def impressao_nutricao_evolucao(evolucao_id):
+    """Página de impressão de uma evolução individual de nutrição"""
+    try:
+        # Buscar a evolução específica
+        evolucao = EvolucaoNutricao.query.get_or_404(evolucao_id)
+        
+        # Buscar o atendimento
+        atendimento = Atendimento.query.get_or_404(evolucao.id_atendimento)
+        
+        # Buscar dados do paciente
+        paciente = atendimento.paciente
+        
+        # Buscar dados da internação
+        internacao = Internacao.query.filter_by(atendimento_id=evolucao.id_atendimento).first()
+        
+        # Buscar dados do nutricionista
+        funcionario = None
+        if evolucao.funcionario_id:
+            funcionario = Funcionario.query.get(evolucao.funcionario_id)
+        
+        # Preparar dados da evolução
+        evolucao_dados = {
+            'id': evolucao.id,
+            'data_evolucao': evolucao.data_evolucao,
+            'evolucao_nutricao': evolucao.evolucao_nutricao,
+            'nutricionista_nome': funcionario.nome if funcionario else 'Não identificado',
+            'nutricionista_registro': funcionario.numero_profissional if funcionario else ''
+        }
+        
+        # Função para obter data atual
+        def moment():
+            return datetime.now()
+        
+        return render_template('impressao_nutricao_individual.html',
+                               paciente=paciente,
+                               internacao=internacao,
+                               atendimento=atendimento,
+                               evolucao=evolucao_dados,
+                               moment=moment)
+                               
+    except Exception as e:
+        flash(f'Erro ao carregar dados para impressão: {str(e)}', 'error')
+        return redirect(url_for('main.index'))
 
 # Rota principal
 @bp.route('/')
@@ -269,7 +478,7 @@ def index():
 def clinica():
     try:
         current_user = get_current_user()
-        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
             flash('Acesso restrito a médicos e enfermeiros.', 'danger')
             return redirect(url_for('main.index'))
         
@@ -287,7 +496,7 @@ def clinica():
 def pacientes_internados():
     try:
         current_user = get_current_user()
-        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
             flash('Acesso restrito a médicos e enfermeiros.', 'danger')
             return redirect(url_for('main.index'))
         
@@ -374,9 +583,9 @@ def login():
 @login_required
 def registrar_sae():
     try:
-        # Verificar se o usuário é enfermeiro
+        # Verificar se o usuário é enfermeiro ou multi
         current_user = get_current_user()
-        if current_user.cargo.lower() != 'enfermeiro':
+        if current_user.cargo.lower() not in ['enfermeiro', 'multi']:
             return jsonify({
                 'success': False,
                 'message': 'Apenas enfermeiros podem registrar SAE'
@@ -964,9 +1173,9 @@ def atualizar_prescricao(prescricao_id):
 @login_required
 def evolucao_paciente_enfermeiro(atendimento_id):
     try:
-        # Verificar se o usuário é enfermeiro
+        # Verificar se o usuário é enfermeiro ou multi
         current_user = get_current_user()
-        if current_user.cargo.lower() != 'enfermeiro':
+        if current_user.cargo.lower() not in ['enfermeiro', 'multi']:
             flash('Acesso restrito a enfermeiros.', 'danger')
             return redirect(url_for('main.index'))
         
@@ -987,6 +1196,37 @@ def evolucao_paciente_enfermeiro(atendimento_id):
         
     except Exception as e:
         logging.error(f"Erro ao acessar evolução do paciente (enfermeiro): {str(e)}")
+        logging.error(traceback.format_exc())
+        flash('Erro ao acessar a evolução do paciente. Por favor, tente novamente.', 'danger')
+        return redirect(url_for('main.pacientes_internados'))
+
+@bp.route('/clinica/evolucao-paciente-multi/<string:atendimento_id>')
+@login_required
+def evolucao_paciente_multi(atendimento_id):
+    try:
+        # Verificar se o usuário é multi
+        current_user = get_current_user()
+        if current_user.cargo.lower() != 'multi':
+            flash('Acesso restrito a profissionais multi.', 'danger')
+            return redirect(url_for('main.index'))
+        
+        # Buscar dados do paciente e internação
+        internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
+        if not internacao:
+            flash('Internação não encontrada.', 'danger')
+            return redirect(url_for('main.pacientes_internados'))
+        
+        paciente = Paciente.query.get(internacao.paciente_id)
+        if not paciente:
+            flash('Paciente não encontrado.', 'danger')
+            return redirect(url_for('main.pacientes_internados'))
+        
+        return render_template('clinica_evolucao_paciente_multi.html', 
+                            paciente=paciente, 
+                            internacao=internacao)
+        
+    except Exception as e:
+        logging.error(f"Erro ao acessar evolução do paciente (multi): {str(e)}")
         logging.error(traceback.format_exc())
         flash('Erro ao acessar a evolução do paciente. Por favor, tente novamente.', 'danger')
         return redirect(url_for('main.pacientes_internados'))
@@ -1161,9 +1401,9 @@ def salvar_admissao_enfermagem():
     Registra uma nova admissão de enfermagem usando a tabela específica AdmissaoEnfermagem.
     """
     try:
-        # Verificar se o usuário é enfermeiro
+        # Verificar se o usuário é enfermeiro ou multi
         current_user = get_current_user()
-        if current_user.cargo.lower() != 'enfermeiro':
+        if current_user.cargo.lower() not in ['enfermeiro', 'multi']:
             return jsonify({
                 'success': False,
                 'message': 'Apenas enfermeiros podem registrar admissões'
@@ -1232,9 +1472,9 @@ def buscar_admissao_enfermagem(internacao_id):
     Busca a admissão de enfermagem mais recente de uma internação.
     """
     try:
-        # Verificar se o usuário é médico ou enfermeiro
+        # Verificar se o usuário é médico, enfermeiro ou multi
         current_user = get_current_user()
-        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
             return jsonify({
                 'success': False,
                 'message': 'Acesso permitido apenas para médicos e enfermeiros'
@@ -1302,9 +1542,9 @@ def listar_admissoes_enfermagem(internacao_id):
     Lista todas as admissões de enfermagem de uma internação.
     """
     try:
-        # Verificar se o usuário é médico ou enfermeiro
+        # Verificar se o usuário é médico, enfermeiro ou multi
         current_user = get_current_user()
-        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
             return jsonify({
                 'success': False,
                 'message': 'Acesso permitido apenas para médicos e enfermeiros'
@@ -1357,9 +1597,9 @@ def atualizar_admissao_enfermagem(admissao_id):
     Atualiza uma admissão de enfermagem existente.
     """
     try:
-        # Verificar se o usuário é enfermeiro
+        # Verificar se o usuário é enfermeiro ou multi
         current_user = get_current_user()
-        if current_user.cargo.lower() != 'enfermeiro':
+        if current_user.cargo.lower() not in ['enfermeiro', 'multi']:
             return jsonify({
                 'success': False,
                 'message': 'Apenas enfermeiros podem atualizar admissões'
@@ -1432,7 +1672,7 @@ def obter_sae_por_paciente(paciente_id):
                 'message': 'Usuário não autenticado'
             }), 401
             
-        if current_user.cargo.lower() not in ['enfermeiro', 'medico']:
+        if current_user.cargo.lower() not in ['enfermeiro', 'medico', 'multi']:
             return jsonify({
                 'success': False,
                 'message': 'Acesso permitido apenas para enfermeiros e médicos'
@@ -1502,9 +1742,9 @@ def obter_sae_por_paciente(paciente_id):
 @bp.route('/api/enfermagem/sae/historico/<int:paciente_id>', methods=['GET'])
 def obter_historico_sae_paciente(paciente_id):
     try:
-        # Verificar se o usuário é médico ou enfermeiro
+        # Verificar se o usuário é médico, enfermeiro ou multi
         current_user = get_current_user()
-        if current_user.cargo.lower() not in ['enfermeiro', 'medico']:
+        if current_user.cargo.lower() not in ['enfermeiro', 'medico', 'multi']:
             return jsonify({
                 'success': False,
                 'message': 'Acesso permitido apenas para enfermeiros e médicos'
@@ -1639,9 +1879,9 @@ def buscar_prescricoes_enfermagem_por_internacao(internacao_id):
     Busca todas as prescrições de enfermagem para uma internação específica.
     """
     try:
-        # Verificar se o usuário é enfermeiro ou médico
+        # Verificar se o usuário é enfermeiro, médico ou multi
         current_user = get_current_user()
-        if not current_user or current_user.cargo.lower() not in ['enfermeiro', 'medico']:
+        if not current_user or current_user.cargo.lower() not in ['enfermeiro', 'medico', 'multi']:
             return jsonify({
                 'success': False,
                 'message': 'Acesso negado'
@@ -1733,9 +1973,9 @@ def registrar_prescricao_enfermagem():
                 'message': 'Texto da prescrição é obrigatório'
             }), 400
 
-        # Verificar se o usuário atual é enfermeiro
+        # Verificar se o usuário atual é enfermeiro ou multi
         current_user = get_current_user()
-        if not current_user or current_user.cargo.lower() != 'enfermeiro':
+        if not current_user or current_user.cargo.lower() not in ['enfermeiro', 'multi']:
             return jsonify({
                 'success': False,
                 'message': 'Apenas enfermeiros podem criar prescrições de enfermagem'
@@ -1839,9 +2079,9 @@ def buscar_internacao(internacao_id):
     try:
         logging.info(f'Buscando internação com atendimento_id: {internacao_id}')
         
-        # Verificar se o usuário é médico ou enfermeiro
+        # Verificar se o usuário é médico, enfermeiro ou multi
         current_user = get_current_user()
-        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
             return jsonify({
                 'success': False,
                 'message': 'Acesso permitido apenas para médicos e enfermeiros'
@@ -4624,12 +4864,12 @@ def buscar_informacoes_alta(internacao_id):
     Busca as informações de alta de uma internação específica.
     """
     try:
-        # Verificar se o usuário é médico ou enfermeiro
+        # Verificar se o usuário é médico, enfermeiro ou multi
         current_user = get_current_user()
-        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
             return jsonify({
                 'success': False,
-                'message': 'Acesso permitido apenas para médicos e enfermeiros'
+                'message': 'Acesso permitido apenas para médicos, enfermeiros e profissionais multi'
             }), 403
 
         # Buscar a internação
@@ -4706,33 +4946,10 @@ def buscar_informacoes_alta(internacao_id):
 
 @bp.route('/api/imprimir-prescricao/<int:prescricao_id>', methods=['GET'])
 def imprimir_prescricao(prescricao_id):
-    """
-    Endpoint para imprimir prescrição de enfermagem
-    Pode ser chamado tanto para prescrições médicas quanto de enfermagem
-    """
-    try:
-        # Primeiro, tentar como prescrição médica
-        prescricao_medica = PrescricaoClinica.query.get(prescricao_id)
-        if prescricao_medica:
-            return imprimir_prescricao_medica(prescricao_medica)
-        
-        # Se não encontrou, tentar como prescrição de enfermagem
-        prescricao_enfermagem = PrescricaoEnfermagem.query.get(prescricao_id)
-        if prescricao_enfermagem:
-            return imprimir_prescricao_enfermagem_html(prescricao_enfermagem)
-        
-        # Se não encontrou nenhuma, retornar erro
+    prescricao = PrescricaoClinica.query.get(prescricao_id)
+    if not prescricao:
         return abort(404, 'Prescrição não encontrada.')
-        
-    except Exception as e:
-        logging.error(f"Erro ao imprimir prescrição: {str(e)}")
-        logging.error(traceback.format_exc())
-        return abort(500, f'Erro interno: {str(e)}')
 
-def imprimir_prescricao_medica(prescricao):
-    """
-    Função auxiliar para imprimir prescrição médica
-    """
     internacao = prescricao.internacao
     if not internacao:
         return abort(404, 'Internação não vinculada à prescrição.')
@@ -4816,57 +5033,8 @@ def imprimir_prescricao_medica(prescricao):
     output.seek(0)
 
     # Enviar para download
-    nome_arquivo = f"prescricao_medica_{prescricao.id}_{paciente.nome.replace(' ', '_')}.docx"
+    nome_arquivo = f"prescricao_{prescricao.id}_{paciente.nome.replace(' ', '_')}.docx"
     return send_file(output, as_attachment=True, download_name=nome_arquivo, mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-
-def imprimir_prescricao_enfermagem_html(prescricao):
-    """
-    Função auxiliar para imprimir prescrição de enfermagem em HTML
-    """
-    # Buscar a internação relacionada
-    internacao = Internacao.query.get(prescricao.atendimentos_clinica_id)
-    if not internacao:
-        return abort(404, 'Internação não encontrada.')
-
-    # Buscar o atendimento
-    atendimento = Atendimento.query.get(internacao.atendimento_id)
-    if not atendimento:
-        return abort(404, 'Atendimento não encontrado.')
-
-    # Buscar o paciente
-    paciente = atendimento.paciente
-    if not paciente:
-        return abort(404, 'Paciente não encontrado.')
-
-    # Buscar o enfermeiro que prescreveu
-    enfermeiro = Funcionario.query.get(prescricao.funcionario_id) if prescricao.funcionario_id else None
-
-    # Renderizar template HTML para impressão
-    return render_template('impressao_prescricao_enfermagem.html',
-                         prescricao=prescricao,
-                         internacao=internacao,
-                         atendimento=atendimento,
-                         paciente=paciente,
-                         enfermeiro=enfermeiro)
-
-@bp.route('/api/imprimir-prescricao-enfermagem/<int:prescricao_id>', methods=['GET'])
-@login_required
-def imprimir_prescricao_enfermagem_by_id(prescricao_id):
-    """
-    Endpoint específico para imprimir prescrição de enfermagem por ID
-    """
-    try:
-        # Buscar a prescrição de enfermagem
-        prescricao = PrescricaoEnfermagem.query.get(prescricao_id)
-        if not prescricao:
-            return abort(404, 'Prescrição de enfermagem não encontrada.')
-
-        return imprimir_prescricao_enfermagem_html(prescricao)
-        
-    except Exception as e:
-        logging.error(f"Erro ao imprimir prescrição de enfermagem: {str(e)}")
-        logging.error(traceback.format_exc())
-        return abort(500, f'Erro interno: {str(e)}')
 
 @bp.route('/imprimir/prescricao/<string:atendimento_id>', methods=['GET'])
 def imprimir_prescricao_por_atendimento(atendimento_id):
@@ -5812,10 +5980,10 @@ def obter_historico_internamentos_paciente(paciente_id):
     """
     try:
         current_user = get_current_user()
-        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
             return jsonify({
                 'success': False,
-                'message': 'Acesso permitido apenas para médicos e enfermeiros'
+                'message': 'Acesso permitido apenas para médicos, enfermeiros e profissionais multi'
             }), 403
         
         # Verificar se o paciente existe
@@ -5926,7 +6094,7 @@ def fechar_prontuario(internacao_id):
     """
     try:
         current_user = get_current_user()
-        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
             return jsonify({
                 'success': False,
                 'message': 'Acesso não autorizado. Apenas médicos e enfermeiros podem fechar prontuários.'
@@ -6616,4 +6784,249 @@ def listar_prescricoes_padrao():
             'message': str(e)
         }), 500
 
+@bp.route('/evolucoes_fisioterapia/atendimento/<string:id_atendimento>', methods=['GET'])
+def listar_evolucoes_por_atendimento(id_atendimento):
+    from sqlalchemy.orm import joinedload
     
+    evolucoes = EvolucaoFisioterapia.query.filter_by(id_atendimento=id_atendimento).all()
+    resultado = []
+    
+    for e in evolucoes:
+        # Buscar dados do funcionário
+        funcionario = None
+        if e.funcionario_id:
+            funcionario = Funcionario.query.get(e.funcionario_id)
+        
+        resultado.append({
+            'id': e.id,
+            'id_atendimento': e.id_atendimento,
+            'funcionario_id': e.funcionario_id,
+            'fisioterapeuta_nome': funcionario.nome if funcionario else None,
+            'fisioterapeuta_registro': funcionario.numero_profissional if funcionario else None,
+            'data_evolucao': e.data_evolucao.strftime('%Y-%m-%d %H:%M:%S'),
+            'evolucao_fisio': e.evolucao_fisio
+        })
+    return jsonify(resultado)
+
+@bp.route('/evolucoes_fisioterapia/atendimento/<string:id_atendimento>', methods=['POST'])
+def criar_evolucao_para_atendimento(id_atendimento):
+    dados = request.get_json()
+
+    nova_evolucao = EvolucaoFisioterapia(
+        id_atendimento=id_atendimento,
+        funcionario_id=dados['funcionario_id'],
+        data_evolucao=datetime.strptime(dados['data_evolucao'], '%Y-%m-%d %H:%M:%S'),
+        evolucao_fisio=dados['evolucao_fisio']
+    )
+
+    db.session.add(nova_evolucao)
+    db.session.commit()
+
+    return jsonify({'mensagem': 'Evolução criada com sucesso.', 'id': nova_evolucao.id}), 201
+
+@bp.route('/evolucoes_fisioterapia/<int:id>', methods=['PUT'])
+def atualizar_evolucao(id):
+    e = EvolucaoFisioterapia.query.get_or_404(id)
+    dados = request.get_json()
+
+    e.funcionario_id = dados.get('funcionario_id', e.funcionario_id)
+    if 'data_evolucao' in dados:
+        e.data_evolucao = datetime.strptime(dados['data_evolucao'], '%Y-%m-%d %H:%M:%S')
+    e.evolucao_fisio = dados.get('evolucao_fisio', e.evolucao_fisio)
+
+    db.session.commit()
+
+    return jsonify({'mensagem': 'Evolução atualizada com sucesso.'})
+
+
+@bp.route('/evolucoes_nutricao/atendimento/<string:id_atendimento>', methods=['GET'])
+def listar_evolucoes_nutricao(id_atendimento):
+    evolucoes = EvolucaoNutricao.query.filter_by(id_atendimento=id_atendimento).all()
+    resultado = []
+    
+    for e in evolucoes:
+        # Buscar dados do funcionário
+        funcionario = None
+        if e.funcionario_id:
+            funcionario = Funcionario.query.get(e.funcionario_id)
+        
+        resultado.append({
+            'id': e.id,
+            'id_atendimento': e.id_atendimento,
+            'funcionario_id': e.funcionario_id,
+            'nutricionista_nome': funcionario.nome if funcionario else None,
+            'nutricionista_registro': funcionario.numero_profissional if funcionario else None,
+            'data_evolucao': e.data_evolucao.strftime('%Y-%m-%d %H:%M:%S'),
+            'evolucao_nutricao': e.evolucao_nutricao
+        })
+    return jsonify(resultado)
+
+@bp.route('/evolucoes_nutricao/atendimento/<string:id_atendimento>', methods=['POST'])
+def criar_evolucao_nutricao(id_atendimento):
+    dados = request.get_json()
+
+    nova_evolucao = EvolucaoNutricao(
+        id_atendimento=id_atendimento,
+        funcionario_id=dados['funcionario_id'],
+        data_evolucao=datetime.strptime(dados['data_evolucao'], '%Y-%m-%d %H:%M:%S'),
+        evolucao_nutricao=dados['evolucao_nutricao']
+    )
+
+    db.session.add(nova_evolucao)
+    db.session.commit()
+
+    return jsonify({'mensagem': 'Evolução nutricional criada com sucesso.', 'id': nova_evolucao.id}), 201
+
+@bp.route('/evolucoes_nutricao/<int:id>', methods=['GET'])
+def buscar_evolucao_nutricao(id):
+    e = EvolucaoNutricao.query.get_or_404(id)
+    return jsonify({
+        'id': e.id,
+        'id_atendimento': e.id_atendimento,
+        'funcionario_id': e.funcionario_id,
+        'data_evolucao': e.data_evolucao.strftime('%Y-%m-%d %H:%M:%S'),
+        'evolucao_nutricao': e.evolucao_nutricao
+    })
+
+@bp.route('/evolucoes_assistentesocial/atendimento/<string:id_atendimento>', methods=['GET'])
+def listar_evolucoes_assistentesocial(id_atendimento):
+    evolucoes = EvolucaoAssistenteSocial.query.filter_by(id_atendimento=id_atendimento).all()
+    resultado = []
+    
+    for e in evolucoes:
+        # Buscar dados do funcionário
+        funcionario = None
+        if e.funcionario_id:
+            funcionario = Funcionario.query.get(e.funcionario_id)
+        
+        resultado.append({
+            'id': e.id,
+            'id_atendimento': e.id_atendimento,
+            'funcionario_id': e.funcionario_id,
+            'assistente_social_nome': funcionario.nome if funcionario else None,
+            'assistente_social_registro': funcionario.numero_profissional if funcionario else None,
+            'data_evolucao': e.data_evolucao.strftime('%Y-%m-%d %H:%M:%S'),
+            'evolucao_assistente_social': e.evolucao_assistentesocial
+        })
+    return jsonify(resultado)
+
+@bp.route('/evolucoes_assistentesocial/atendimento/<string:id_atendimento>', methods=['POST'])
+def criar_evolucao_assistentesocial(id_atendimento):
+    dados = request.get_json()
+
+    nova_evolucao = EvolucaoAssistenteSocial(
+        id_atendimento=id_atendimento,
+        funcionario_id=dados['funcionario_id'],
+        data_evolucao=datetime.strptime(dados['data_evolucao'], '%Y-%m-%d %H:%M:%S'),
+        evolucao_assistentesocial=dados['evolucao_assistente_social']
+    )
+
+    db.session.add(nova_evolucao)
+    db.session.commit()
+
+    return jsonify({'mensagem': 'Evolução de assistência social criada com sucesso.', 'id': nova_evolucao.id}), 201
+
+@bp.route('/evolucoes_assistentesocial/<int:id>', methods=['GET'])
+def buscar_evolucao_assistentesocial(id):
+    e = EvolucaoAssistenteSocial.query.get_or_404(id)
+    return jsonify({
+        'id': e.id,
+        'id_atendimento': e.id_atendimento,
+        'funcionario_id': e.funcionario_id,
+        'data_evolucao': e.data_evolucao.strftime('%Y-%m-%d %H:%M:%S'),
+        'evolucao_assistentesocial': e.evolucao_assistentesocial
+    })
+
+@bp.route('/impressao_assistente_social/<string:atendimento_id>')
+@login_required
+def impressao_assistente_social(atendimento_id):
+    """Página de impressão de evoluções de assistência social de um atendimento"""
+    try:
+        # Verificar se o atendimento existe
+        atendimento = Atendimento.query.get_or_404(atendimento_id)
+        
+        # Buscar dados do paciente
+        paciente = atendimento.paciente
+        
+        # Buscar dados da internação
+        internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
+        
+        # Buscar evoluções de assistência social
+        evolucoes_query = EvolucaoAssistenteSocial.query.filter_by(id_atendimento=atendimento_id)
+        evolucoes_raw = evolucoes_query.order_by(EvolucaoAssistenteSocial.data_evolucao.desc()).all()
+        
+        # Formatar evoluções com dados do profissional
+        evolucoes = []
+        for e in evolucoes_raw:
+            funcionario = None
+            if e.funcionario_id:
+                funcionario = Funcionario.query.get(e.funcionario_id)
+            
+            evolucoes.append({
+                'id': e.id,
+                'data_evolucao': e.data_evolucao,
+                'evolucao_assistente_social': e.evolucao_assistentesocial,
+                'assistente_social_nome': funcionario.nome if funcionario else 'Não identificado',
+                'assistente_social_registro': funcionario.numero_profissional if funcionario else ''
+            })
+        
+        # Função para obter data atual
+        def moment():
+            return datetime.now()
+        
+        return render_template('impressao_assistente_social.html',
+                               paciente=paciente,
+                               internacao=internacao,
+                               atendimento=atendimento,
+                               evolucoes=evolucoes,
+                               moment=moment)
+                               
+    except Exception as e:
+        flash(f'Erro ao carregar dados para impressão: {str(e)}', 'error')
+        return redirect(url_for('main.index'))
+
+@bp.route('/impressao_assistente_social_evolucao/<int:evolucao_id>')
+@login_required
+def impressao_assistente_social_evolucao(evolucao_id):
+    """Página de impressão de uma evolução individual de assistência social"""
+    try:
+        # Buscar a evolução específica
+        evolucao = EvolucaoAssistenteSocial.query.get_or_404(evolucao_id)
+        
+        # Buscar o atendimento
+        atendimento = Atendimento.query.get_or_404(evolucao.id_atendimento)
+        
+        # Buscar dados do paciente
+        paciente = atendimento.paciente
+        
+        # Buscar dados da internação
+        internacao = Internacao.query.filter_by(atendimento_id=evolucao.id_atendimento).first()
+        
+        # Buscar dados do assistente social
+        funcionario = None
+        if evolucao.funcionario_id:
+            funcionario = Funcionario.query.get(evolucao.funcionario_id)
+        
+        # Preparar dados da evolução
+        evolucao_dados = {
+            'id': evolucao.id,
+            'data_evolucao': evolucao.data_evolucao,
+            'evolucao_assistente_social': evolucao.evolucao_assistentesocial,
+            'assistente_social_nome': funcionario.nome if funcionario else 'Não identificado',
+            'assistente_social_registro': funcionario.numero_profissional if funcionario else ''
+        }
+        
+        # Função para obter data atual
+        def moment():
+            return datetime.now()
+        
+        return render_template('impressao_assistente_social_individual.html',
+                               paciente=paciente,
+                               internacao=internacao,
+                               atendimento=atendimento,
+                               evolucao=evolucao_dados,
+                               moment=moment)
+                               
+    except Exception as e:
+        flash(f'Erro ao carregar dados para impressão: {str(e)}', 'error')
+        return redirect(url_for('main.index'))

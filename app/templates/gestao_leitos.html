@@ -783,9 +783,14 @@
                 let botaoEvoluir = '';
                 
                 if (cargoUsuario === 'medico' || cargoUsuario === 'enfermeiro') {
-                    const urlEvoluir = cargoUsuario === 'medico' 
-                        ? `/clinica/evolucao-paciente-medico/${paciente.atendimento_id}`
-                        : `/clinica/evolucao-paciente-enfermeiro/${paciente.atendimento_id}`;
+                    let urlEvoluir;
+                if (cargoUsuario === 'medico') {
+                    urlEvoluir = `/clinica/evolucao-paciente-medico/${paciente.atendimento_id}`;
+                } else if (cargoUsuario === 'multi') {
+                    urlEvoluir = `/clinica/evolucao-paciente-multi/${paciente.atendimento_id}`;
+                } else {
+                    urlEvoluir = `/clinica/evolucao-paciente-enfermeiro/${paciente.atendimento_id}`;
+                }
                     
                     botaoEvoluir = `
                         <a href="${urlEvoluir}" class="btn btn-sm btn-primary btn-evoluir">

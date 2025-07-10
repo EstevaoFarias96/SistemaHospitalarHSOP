@@ -471,3 +471,40 @@ class PrescricaoEnfermagemTemplate(db.Model):
 
     def __repr__(self):
         return f"<PrescricaoEnfermagemTemplate id={self.id} titulo={self.titulo}>"
+    
+class EvolucaoFisioterapia(db.Model):
+    __tablename__ = 'evolucao_fisioterapia'
+
+    id = db.Column(db.Integer, primary_key=True)
+    id_atendimento = db.Column(db.String(8), db.ForeignKey('atendimentos.id'), nullable=False)
+    funcionario_id = db.Column(db.Integer, db.ForeignKey('funcionarios.id'), nullable=False)
+    data_evolucao = db.Column(db.DateTime, nullable=False)
+    evolucao_fisio = db.Column(db.Text, nullable=False)
+
+    # Relacionamentos opcionais, se desejar acessar objetos completos
+    atendimento = db.relationship('Atendimento', backref=db.backref('evolucoes_fisioterapia', lazy=True))
+    funcionario = db.relationship('Funcionario', backref=db.backref('evolucoes_fisioterapia', lazy=True))
+
+class EvolucaoNutricao(db.Model):
+    __tablename__ = 'evolucao_nutricao'
+
+    id = db.Column(db.Integer, primary_key=True)
+    id_atendimento = db.Column(db.String(8), db.ForeignKey('atendimentos.id'), nullable=False)
+    funcionario_id = db.Column(db.Integer, db.ForeignKey('funcionarios.id'), nullable=False)
+    data_evolucao = db.Column(db.DateTime, nullable=False)
+    evolucao_nutricao = db.Column(db.Text, nullable=False)
+
+    atendimento = db.relationship('Atendimento', backref=db.backref('evolucoes_nutricao', lazy=True))
+    funcionario = db.relationship('Funcionario', backref=db.backref('evolucoes_nutricao', lazy=True))
+
+class EvolucaoAssistenteSocial(db.Model):
+    __tablename__ = 'evolucao_assistentesocial'
+
+    id = db.Column(db.Integer, primary_key=True)
+    id_atendimento = db.Column(db.String(8), db.ForeignKey('atendimentos.id'), nullable=False)
+    funcionario_id = db.Column(db.Integer, db.ForeignKey('funcionarios.id'), nullable=False)
+    data_evolucao = db.Column(db.DateTime, nullable=False)
+    evolucao_assistentesocial = db.Column(db.Text, nullable=False)
+
+    atendimento = db.relationship('Atendimento', backref=db.backref('evolucoes_assistentesocial', lazy=True))
+    funcionario = db.relationship('Funcionario', backref=db.backref('evolucoes_assistentesocial', lazy=True))

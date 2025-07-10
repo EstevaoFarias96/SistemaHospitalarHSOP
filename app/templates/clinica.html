@@ -3,10 +3,9 @@
 {% block content %}
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Clínica</h2>
-        <div>
+        <h2>Clínica</h2>        <div>
             <!-- Debug: {{ session.get('cargo') }} -->
-            <a href="{% if session.get('cargo')|lower|trim == 'medico' %}/medico{% elif session.get('cargo')|lower|trim == 'enfermeiro' %}/enfermeiro{% else %}/{% endif %}" class="btn btn-outline-primary">
+            <a href="{% if session.get('cargo')|lower|trim == 'medico' %}/medico{% elif session.get('cargo')|lower|trim == 'enfermeiro' %}/enfermeiro{% elif session.get('cargo')|lower|trim == 'multi' %}/multi{% else %}/{% endif %}" class="btn btn-outline-primary">
                 <i class="fas fa-arrow-left"></i> Voltar
             </a>
         </div>

@@ -23,7 +23,9 @@
   <body class="text-center">
     <main class="form-signin">
       <form id="loginForm">
-        <img class="mb-4" src="/static/Imagens/Imagem1.png" alt="Logo do Hospital" width="72" height="72">
+        <div class="d-flex justify-content-center">
+          <img class="mb-4" src="/static/Imagens/logosemfundo.png" alt="Logo do Hospital" width="700" height="170">
+        </div>
         <div class="form-floating mb-3">
           <input type="text" class="form-control" id="cpf" name="cpf" placeholder="CPF" required>
           <label for="cpf">CPF</label>
@@ -64,20 +66,14 @@
                 case 'enfermeiro':
                   window.location.href = '/enfermeiro';
                   break;
-                case 'nutricionista':
-                  window.location.href = '/nutricionista';
-                  break;
-                case 'assistente_social':
-                  window.location.href = '/assistente_social';
+                case 'multi':
+                  window.location.href = '/multi';
                   break;
                 case 'recepcionista':
                   window.location.href = '/recepcionista';
                   break;
                 case 'administrador':
                   window.location.href = '/administrador';
-                  break;
-                case 'fisioterapeuta':
-                  window.location.href = '/fisioterapeuta';
                   break;
                 default:
                   alert('Cargo não reconhecido.');

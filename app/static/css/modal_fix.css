@@ -102,3 +102,89 @@
 #modalNovaFichaReferencia .form-check-label {
     z-index: auto !important;
 }
+
+/* Fix específico para modais de evolução */
+#modalNovaEvolucaoNutricao,
+#modalNovaEvolucaoAssistenteSocial {
+    z-index: 1055 !important;
+}
+
+#modalNovaEvolucaoNutricao .modal-backdrop,
+#modalNovaEvolucaoAssistenteSocial .modal-backdrop {
+    z-index: 1050 !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+#modalNovaEvolucaoNutricao .modal-dialog,
+#modalNovaEvolucaoAssistenteSocial .modal-dialog {
+    z-index: 1056 !important;
+    position: relative !important;
+}
+
+#modalNovaEvolucaoNutricao .modal-content,
+#modalNovaEvolucaoAssistenteSocial .modal-content {
+    z-index: 1057 !important;
+    position: relative !important;
+    background-color: white !important;
+}
+
+/* Garantir que botões dos modais de evolução sejam clicáveis */
+#modalNovaEvolucaoNutricao .modal-footer .btn,
+#modalNovaEvolucaoAssistenteSocial .modal-footer .btn {
+    z-index: 1065 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    position: relative !important;
+}
+
+/* Prevent black screen issues */
+body.modal-open {
+    overflow: hidden !important;
+}
+
+.modal.fade.show {
+    display: block !important;
+}
+
+.modal-backdrop.fade.show {
+    opacity: 0.5 !important;
+}
+
+/* Fix específico para problemas de abertura do modal de assistência social */
+#modalNovaEvolucaoAssistenteSocial.show {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+#modalNovaEvolucaoAssistenteSocial .modal-dialog {
+    transform: none !important;
+    margin: 1.75rem auto !important;
+}
+
+/* Garantir que o modal apareça acima de tudo */
+#modalNovaEvolucaoAssistenteSocial {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    outline: 0 !important;
+}
+
+/* Forçar backdrop específico para assistência social */
+.modal-backdrop.assistente-social-backdrop {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 1050 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Debug styles - remover depois */
+.debug-modal-open {
+    border: 3px solid red !important;
+    background-color: rgba(255, 0, 0, 0.1) !important;
+}

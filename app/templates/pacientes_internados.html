@@ -326,6 +326,7 @@ const CONFIG = {
     ROTAS: {
         ENFERMEIRO: '/enfermeiro',
         MEDICO: '/medico',
+        MULTI: '/multi',
         HOME: '/'
     }
 };
@@ -360,7 +361,9 @@ class PacientesInternadosManager {
     navegarVoltar() {
         const rotas = {
             'enfermeiro': CONFIG.ROTAS.ENFERMEIRO,
-            'medico': CONFIG.ROTAS.MEDICO
+            'medico': CONFIG.ROTAS.MEDICO,
+            'multi': CONFIG.ROTAS.MULTI, // Descomente se Multi for uma rota válida
+
         };
         window.location.href = rotas[this.cargoUsuario] || CONFIG.ROTAS.HOME;
     }
@@ -397,9 +400,15 @@ class PacientesInternadosManager {
 
     criarLinhaPaciente(paciente) {
         const row = document.createElement('tr');
-        const evolucaoLink = this.cargoUsuario === 'enfermeiro'
-            ? `/clinica/evolucao-paciente-enfermeiro/${paciente.atendimento_id}`
-            : `/clinica/evolucao-paciente-medico/${paciente.atendimento_id}`;
+        let evolucaoLink;
+        
+        if (this.cargoUsuario === 'enfermeiro') {
+            evolucaoLink = `/clinica/evolucao-paciente-enfermeiro/${paciente.atendimento_id}`;
+        } else if (this.cargoUsuario === 'multi') {
+            evolucaoLink = `/clinica/evolucao-paciente-multi/${paciente.atendimento_id}`;
+        } else {
+            evolucaoLink = `/clinica/evolucao-paciente-medico/${paciente.atendimento_id}`;
+        }
 
         // Determinar o status do paciente e a classe CSS
         let statusClass = '';
@@ -421,8 +430,8 @@ class PacientesInternadosManager {
                 </button>`;
         }
 
-        // Mostrar botão "Fechar Prontuário" para médicos e enfermeiros em pacientes COM alta
-        if (paciente.tem_alta && (this.cargoUsuario === 'medico' || this.cargoUsuario === 'enfermeiro')) {
+        // Mostrar botão "Fechar Prontuário" para médicos, enfermeiros e multi em pacientes COM alta
+        if (paciente.tem_alta && (this.cargoUsuario === 'medico' || this.cargoUsuario === 'enfermeiro' || this.cargoUsuario === 'multi')) {
             acoesHTML += `
                 <button class="btn btn-sm btn-danger btn-fechar-prontuario" data-internacao-id="${paciente.atendimento_id}">
                     <i class="fas fa-folder-minus"></i> Fechar Prontuário
@@ -680,8 +689,8 @@ class PacientesInternadosManager {
                 // Remover botão de alta
                 btnAlta.remove();
                 
-                // Adicionar botão "Fechar Prontuário" (disponível para médicos e enfermeiros)
-                if (this.cargoUsuario === 'medico' || this.cargoUsuario === 'enfermeiro') {
+                // Adicionar botão "Fechar Prontuário" (disponível para médicos, enfermeiros e multi)
+                if (this.cargoUsuario === 'medico' || this.cargoUsuario === 'enfermeiro' || this.cargoUsuario === 'multi') {
                     const btnFecharProntuario = document.createElement('button');
                     btnFecharProntuario.className = 'btn btn-sm btn-danger btn-fechar-prontuario';
                     btnFecharProntuario.setAttribute('data-internacao-id', internacaoId);

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evoluções de Nutrição - {{ paciente.nome }}</title>
+    
+    <!-- Font Awesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* Reset e configurações básicas */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Configuração para impressão A4 */
+        @page {
+            size: A4;
+            margin: 1cm;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.3;
+            color: #333;
+            background: white;
+        }
+
+        /* Cabeçalho */
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #28a745;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+
+        .hospital-name {
+            font-size: 16pt;
+            font-weight: bold;
+            color: #28a745;
+            margin-bottom: 3px;
+        }
+
+        .evolucoes-title {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #333;
+            margin-top: 4px;
+        }
+
+        /* Dados do paciente */
+        .patient-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        .patient-info h3 {
+            color: #28a745;
+            font-size: 11pt;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 4px;
+        }
+
+        .patient-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 9pt;
+        }
+
+        .patient-field {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .patient-label {
+            font-weight: bold;
+            color: #495057;
+            min-width: 100px;
+            margin-right: 8px;
+            font-size: 9pt;
+        }
+
+        .patient-value {
+            color: #333;
+            flex: 1;
+            font-size: 9pt;
+        }
+
+        /* Período selecionado */
+        .periodo-info {
+            background: #e8f5e8;
+            border: 1px solid #28a745;
+            border-radius: 5px;
+            padding: 8px 12px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 10pt;
+            color: #155724;
+        }
+
+        /* Botão de impressão */
+        .print-button {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10pt;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .print-button:hover {
+            background: #218838;
+        }
+
+        /* Cada evolução */
+        .evolucao-item {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            page-break-inside: avoid;
+        }
+
+        .evolucao-header {
+            background: #28a745;
+            color: white;
+            padding: 8px 12px;
+            font-weight: bold;
+            font-size: 10pt;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .evolucao-data {
+            font-size: 10pt;
+        }
+
+        .evolucao-profissional {
+            font-size: 9pt;
+            font-weight: normal;
+        }
+
+        .evolucao-content {
+            padding: 12px;
+        }
+
+        .evolucao-texto {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            padding: 10px;
+            font-size: 9pt;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: #333;
+            max-height: 200px;
+            overflow: hidden;
+        }
+
+        /* Mensagem quando não há evoluções */
+        .no-evolucoes {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-style: italic;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        /* Rodapé */
+        .footer {
+            position: fixed;
+            bottom: 1cm;
+            left: 1cm;
+            right: 1cm;
+            text-align: center;
+            font-size: 8pt;
+            color: #666;
+            border-top: 1px solid #dee2e6;
+            padding-top: 5px;
+        }
+
+        /* Estilos para impressão */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            
+            body {
+                font-size: 9pt;
+            }
+            
+            .evolucao-item {
+                page-break-inside: avoid;
+                margin-bottom: 10px;
+            }
+            
+            .evolucao-texto {
+                max-height: none;
+            }
+        }
+
+        /* Responsividade */
+        @media screen and (max-width: 768px) {
+            .patient-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .evolucao-header {
+                flex-direction: column;
+                gap: 5px;
+                text-align: center;
+            }
+        }
+
+        /* Resumo das evoluções */
+        .resumo-evolucoes {
+            background: #e8f5e8;
+            border: 1px solid #28a745;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 10pt;
+            color: #155724;
+        }
+
+        .resumo-evolucoes strong {
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <!-- Botão de impressão (apenas na tela) -->
+    <button class="print-button no-print" onclick="window.print()">
+        <i class="fas fa-print"></i> Imprimir
+    </button>
+
+    <!-- Cabeçalho -->
+    <div class="header">
+        <div class="hospital-name">
+            Hospital Senador Ozires Pontes
+        </div>
+        <div class="evolucoes-title">
+            Evoluções de Nutrição
+        </div>
+        <div style="font-size: 8pt; color: #666; font-style: italic; margin-top: 5px;">
+            {% set now = moment() %}
+            Impresso em: {{ now.strftime('%d/%m/%Y às %H:%M') }}
+        </div>
+    </div>
+
+    <!-- Informações do paciente -->
+    <div class="patient-info">
+        <h3>Dados do Paciente</h3>
+        <div class="patient-grid">
+            <div class="patient-field">
+                <span class="patient-label">Nome:</span>
+                <span class="patient-value">{{ paciente.nome }}</span>
+            </div>
+            
+            <div class="patient-field">
+                <span class="patient-label">CPF:</span>
+                <span class="patient-value">{{ paciente.cpf or 'Não informado' }}</span>
+            </div>
+            
+            <div class="patient-field">
+                <span class="patient-label">Data Nascimento:</span>
+                <span class="patient-value">
+                    {% if paciente.data_nascimento %}
+                        {{ paciente.data_nascimento.strftime('%d/%m/%Y') }}
+                    {% else %}
+                        Não informada
+                    {% endif %}
+                </span>
+            </div>
+            
+            <div class="patient-field">
+                <span class="patient-label">Leito:</span>
+                <span class="patient-value">{{ internacao.leito if internacao else 'Não informado' }}</span>
+            </div>
+            
+            <div class="patient-field">
+                <span class="patient-label">Data Internação:</span>
+                <span class="patient-value">
+                    {% if internacao and internacao.data_internacao %}
+                        {{ internacao.data_internacao.strftime('%d/%m/%Y') }}
+                    {% else %}
+                        Não informada
+                    {% endif %}
+                </span>
+            </div>
+            
+            <div class="patient-field">
+                <span class="patient-label">Diagnóstico:</span>
+                <span class="patient-value">{{ internacao.diagnostico_inicial if internacao else 'Não informado' }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumo das evoluções -->
+    {% if evolucoes %}
+    <div class="resumo-evolucoes">
+        <strong>{{ evolucoes|length }}</strong> evolução(ões) de nutrição encontrada(s) para este atendimento
+    </div>
+    {% endif %}
+
+    <!-- Lista de evoluções -->
+    {% if evolucoes %}
+        {% for evolucao in evolucoes %}
+        <div class="evolucao-item">
+            <div class="evolucao-header">
+                <div class="evolucao-data">
+                    {{ evolucao.data_evolucao.strftime('%d/%m/%Y às %H:%M') }}
+                </div>
+                <div class="evolucao-profissional">
+                    {{ evolucao.nutricionista_nome }}
+                    {% if evolucao.nutricionista_registro %}
+                        - CRN: {{ evolucao.nutricionista_registro }}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="evolucao-content">
+                <div class="evolucao-texto">
+                    {{ evolucao.evolucao_nutricao }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="no-evolucoes">
+            <i class="fas fa-info-circle" style="font-size: 24px; margin-bottom: 10px; color: #28a745;"></i>
+            <p>Nenhuma evolução de nutrição encontrada para este atendimento.</p>
+        </div>
+    {% endif %}
+
+    <!-- Rodapé -->
+    <div class="footer">
+        <p>
+            <strong>Hospital Senador Ozires Pontes</strong> | 
+            Evoluções de Nutrição | 
+            {% set now = moment() %}
+            {{ now.strftime('%d/%m/%Y %H:%M') }}
+        </p>
+        <p style="font-size: 7pt; margin-top: 2px;">
+            Este documento foi gerado automaticamente pelo sistema HSOP
+        </p>
+    </div>
+
+    <script>
+        // Auto-imprimir quando a página carregar (opcional)
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                window.print();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

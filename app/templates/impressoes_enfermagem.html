@@ -373,7 +373,19 @@
         function voltarParaEvolucao() {
             console.log('🔄 Voltando para evolução do paciente...');
             try {
-                window.location.href = `/clinica/evolucao-paciente-enfermeiro/${atendimentoId}`;
+                // Detectar o cargo do usuário
+                const cargoUsuario = document.getElementById('page-data')?.dataset?.cargo?.toLowerCase().trim() || 'enfermeiro';
+                
+                let evolucaoUrl;
+                if (cargoUsuario === 'multi') {
+                    evolucaoUrl = `/clinica/evolucao-paciente-multi/${atendimentoId}`;
+                } else if (cargoUsuario === 'medico') {
+                    evolucaoUrl = `/clinica/evolucao-paciente-medico/${atendimentoId}`;
+                } else {
+                    evolucaoUrl = `/clinica/evolucao-paciente-enfermeiro/${atendimentoId}`;
+                }
+                
+                window.location.href = evolucaoUrl;
             } catch (error) {
                 console.error('❌ Erro no redirecionamento:', error);
                 window.history.back();
