@@ -24108,3 +24108,12 @@ NameError: name 'bp' is not defined
 2025-07-10 14:05:13,853 [INFO] __init__:72 - LoginManager inicializado com sucesso
 2025-07-10 14:05:13,995 [INFO] __init__:90 - Blueprints registrados com sucesso
 2025-07-10 14:05:14,010 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-07-10 15:48:26,355 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-07-10 15:48:26,355 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-07-10 15:48:26,355 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-07-10 15:48:26,355 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-07-10 15:48:26,355 [INFO] __init__:63 - Configurações básicas definidas
+2025-07-10 15:48:26,365 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-07-10 15:48:26,365 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-07-10 15:48:26,499 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-07-10 15:48:26,517 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
