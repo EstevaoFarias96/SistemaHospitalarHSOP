@@ -52,7 +52,7 @@ class Funcionario(db.Model):
 class Paciente(db.Model):
     __tablename__ = 'pacientes'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    cartao_sus = db.Column(db.String(20), unique=True)
+    cartao_sus = db.Column(db.String(20), unique=True,nullable=True)
     nome = db.Column(db.String(255))
     nome_social = db.Column(db.String(255))
     filiacao = db.Column(db.String(255))
@@ -508,3 +508,33 @@ class EvolucaoAssistenteSocial(db.Model):
 
     atendimento = db.relationship('Atendimento', backref=db.backref('evolucoes_assistentesocial', lazy=True))
     funcionario = db.relationship('Funcionario', backref=db.backref('evolucoes_assistentesocial', lazy=True))
+
+class ListaObservacao(db.Model):
+    __tablename__ = 'lista_observacao'
+
+    id = db.Column(db.Integer, primary_key=True)
+    id_atendimento = db.Column(db.String(8), db.ForeignKey('atendimentos.id'), nullable=False)
+    id_paciente = db.Column(db.Integer, db.ForeignKey('pacientes.id'), nullable=False)
+    medico_entrada = db.Column(db.String(255))
+    medico_conduta = db.Column(db.String(255))
+    data_entrada = db.Column(db.DateTime)
+    data_saida = db.Column(db.DateTime)
+    conduta_final = db.Column(db.Text)
+
+    atendimento = db.relationship('Atendimento', backref=db.backref('lista_observacoes', lazy=True))
+    paciente = db.relationship('Paciente', backref=db.backref('lista_observacoes', lazy=True))
+
+class ListaInternacao(db.Model):
+    __tablename__ = 'lista_internacao'
+
+    id = db.Column(db.Integer, primary_key=True)
+    id_atendimento = db.Column(db.String(8), db.ForeignKey('atendimentos.id'), nullable=False)
+    id_paciente = db.Column(db.Integer, db.ForeignKey('pacientes.id'), nullable=False)
+    medico_entrada = db.Column(db.String(255))
+    medico_conduta = db.Column(db.String(255))
+    data_entrada = db.Column(db.DateTime)
+    data_saida = db.Column(db.DateTime)
+    conduta_final = db.Column(db.Text)
+
+    atendimento = db.relationship('Atendimento', backref=db.backref('lista_internacao', lazy=True))
+    paciente = db.relationship('Paciente', backref=db.backref('lista_internacao', lazy=True))

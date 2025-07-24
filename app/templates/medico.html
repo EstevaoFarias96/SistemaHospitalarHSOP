@@ -155,13 +155,16 @@
             <a href="/logout" id="logoutOption">Sair</a>
           </div>
         </div>
-      </div>
-
-      <!-- Conteúdo Principal -->
+      </div>      <!-- Conteúdo Principal -->
       <div class="col main-content">
         <!-- Botão de Internar Paciente -->
         <button id="btnInternarPaciente" class="btn btn-primary btn-internar">
           <i class="fas fa-procedures"></i> Internar Paciente
+        </button>
+        
+        <!-- Botão de Adicionar Paciente em Observação -->
+        <button id="btnObservacaoPaciente" class="btn btn-success btn-internar" style="top: 70px;">
+          <i class="fas fa-eye"></i> Adicionar Paciente em Observação
         </button>
         
         <h1 id="saudacao">Bem-vindo, Doutor(a)</h1>
@@ -316,10 +319,15 @@
                       <option value="M">Masculino</option>
                       <option value="F">Feminino</option>
                     </select>
-                  </div>
-                  <div class="form-group col-md-4">
+                  </div>                  <div class="form-group col-md-4">
                     <label for="cartaoSus">Cartão SUS</label>
-                    <input type="text" class="form-control" id="cartaoSus" name="cartaoSus">
+                    <input type="text" class="form-control" id="cartaoSus" name="cartaoSus" maxlength="15">
+                    <div class="form-check mt-2">
+                      <input class="form-check-input" type="checkbox" id="semCartaoSus" name="sem_cartao_sus">
+                      <label class="form-check-label" for="semCartaoSus">
+                        Paciente não possui Cartão SUS
+                      </label>
+                    </div>
                   </div>
                   <div class="form-group col-md-4">
                     <label for="telefone">Telefone*</label>
@@ -440,15 +448,230 @@
                   </div>
                 </div>
 
-                <p class="text-muted mt-2"><small>* Campos obrigatórios</small></p>
-
-                <div class="d-flex justify-content-between mt-3">
+                <p class="text-muted mt-2"><small>* Campos obrigatórios</small></p>                <div class="d-flex justify-content-between mt-3">
                   <button type="button" class="btn btn-secondary" id="btnVoltarDados"><i class="fas fa-arrow-left mr-1"></i> Voltar</button>
                   <button type="submit" class="btn btn-success"><i class="fas fa-check mr-1"></i> Finalizar Internação</button>
                 </div>
               </form>
             </div>
-            
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Adicionar Paciente em Observação -->
+  <div class="modal fade" id="observacaoPacienteModal" tabindex="-1" role="dialog" aria-labelledby="observacaoPacienteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="observacaoPacienteModalLabel">Adicionar Paciente em Observação</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- Abas para as etapas do processo -->
+          <ul class="nav nav-tabs" id="observacaoTabs" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="pesquisar-paciente-obs-tab" data-toggle="tab" href="#pesquisar-paciente-obs" role="tab" aria-controls="pesquisar-paciente-obs" aria-selected="true">1. Buscar Paciente</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link disabled" id="dados-paciente-obs-tab" data-toggle="tab" href="#dados-paciente-obs" role="tab" aria-controls="dados-paciente-obs" aria-selected="false">2. Dados do Paciente</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link disabled" id="observacao-info-tab" data-toggle="tab" href="#observacao-info" role="tab" aria-controls="observacao-info" aria-selected="false">3. Informações da Observação</a>
+            </li>
+          </ul>
+          <div class="tab-content mt-3" id="observacaoTabsContent">
+            <!-- Etapa 1: Buscar Paciente Existente -->
+            <div class="tab-pane fade show active" id="pesquisar-paciente-obs" role="tabpanel" aria-labelledby="pesquisar-paciente-obs-tab">
+              <div class="text-center mb-4">
+                <h5>Verificar se o paciente já está cadastrado</h5>
+                <p class="text-muted">Pesquise pelo CPF para verificar se o paciente já possui cadastro no sistema.</p>
+              </div>
+              
+              <form id="pesquisarPacienteObsForm">
+                <div class="form-row justify-content-center">
+                  <div class="form-group col-md-6">
+                    <label for="pesquisaCpfObs">CPF do Paciente</label>
+                    <input type="text" class="form-control" id="pesquisaCpfObs" name="pesquisaCpfObs" placeholder="000.000.000-00" maxlength="14" required>
+                  </div>
+                </div>
+                <div class="text-center">
+                  <button type="submit" class="btn btn-primary"><i class="fas fa-search mr-1"></i> Buscar Paciente</button>
+                  <button type="button" class="btn btn-secondary ml-2" id="btnNovoPacienteObs"><i class="fas fa-plus mr-1"></i> Cadastrar Novo Paciente</button>
+                </div>
+              </form>
+              
+              <!-- Resultado da Pesquisa -->
+              <div id="resultadoPesquisaObs" class="mt-4" style="display: none;">
+                <div class="alert alert-success">
+                  <h6><i class="fas fa-check-circle mr-2"></i>Paciente encontrado!</h6>
+                  <div id="infoPacienteEncontradoObs"></div>
+                  <div class="mt-3">
+                    <button type="button" class="btn btn-success" id="btnUsarPacienteEncontradoObs"><i class="fas fa-user-plus mr-1"></i> Usar este paciente</button>
+                    <button type="button" class="btn btn-secondary ml-2" id="btnNovasBuscaObs"><i class="fas fa-search mr-1"></i> Nova busca</button>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Paciente Não Encontrado -->
+              <div id="pacienteNaoEncontradoObs" class="mt-4" style="display: none;">
+                <div class="alert alert-warning">
+                  <h6><i class="fas fa-exclamation-triangle mr-2"></i>Paciente não encontrado</h6>
+                  <p>Não foi encontrado nenhum paciente com o CPF informado. Você pode cadastrar um novo paciente.</p>
+                  <button type="button" class="btn btn-primary" id="btnProsseguirNovoObs"><i class="fas fa-plus mr-1"></i> Cadastrar novo paciente</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Etapa 2: Dados do Paciente -->
+            <div class="tab-pane fade" id="dados-paciente-obs" role="tabpanel" aria-labelledby="dados-paciente-obs-tab">
+              <form id="dadosPacienteObsForm">
+                <div class="form-row">
+                  <div class="form-group col-md-8">
+                    <label for="nomeObs">Nome Completo*</label>
+                    <input type="text" class="form-control" id="nomeObs" name="nome" required>
+                  </div>
+                  <div class="form-group col-md-4">
+                    <label for="cpfObs">CPF*</label>
+                    <input type="text" class="form-control" id="cpfObs" name="cpf" maxlength="14" required>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group col-md-6">
+                    <label for="nomeMaeObs">Nome da Mãe*</label>
+                    <input type="text" class="form-control" id="nomeMaeObs" name="filiacao" required>
+                  </div>
+                  <div class="form-group col-md-3">
+                    <label for="dataNascimentoObs">Data de Nascimento*</label>
+                    <input type="date" class="form-control" id="dataNascimentoObs" name="data_nascimento" required>
+                  </div>
+                  <div class="form-group col-md-3">
+                    <label for="sexoObs">Sexo*</label>
+                    <select class="form-control" id="sexoObs" name="sexo" required>
+                      <option value="">Selecione...</option>
+                      <option value="M">Masculino</option>
+                      <option value="F">Feminino</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group col-md-6">
+                    <label for="cartaoSusObs">Cartão SUS</label>
+                    <input type="text" class="form-control" id="cartaoSusObs" name="cartao_sus" maxlength="15">
+                    <div class="form-check mt-2">
+                      <input class="form-check-input" type="checkbox" id="semCartaoSusObs" name="sem_cartao_sus">
+                      <label class="form-check-label" for="semCartaoSusObs">
+                        Paciente não possui Cartão SUS
+                      </label>
+                    </div>
+                  </div>
+                  <div class="form-group col-md-6">
+                    <label for="telefoneObs">Telefone</label>
+                    <input type="text" class="form-control" id="telefoneObs" name="telefone" placeholder="(00) 00000-0000">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group col-md-6">
+                    <label for="enderecoObs">Endereço</label>
+                    <input type="text" class="form-control" id="enderecoObs" name="endereco">
+                  </div>
+                  <div class="form-group col-md-3">
+                    <label for="bairroObs">Bairro</label>
+                    <input type="text" class="form-control" id="bairroObs" name="bairro">
+                  </div>
+                  <div class="form-group col-md-3">
+                    <label for="municipioObs">Município</label>
+                    <input type="text" class="form-control" id="municipioObs" name="municipio">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group col-md-6">
+                    <label for="corObs">Cor/Raça</label>
+                    <select class="form-control" id="corObs" name="cor">
+                      <option value="">Selecione...</option>
+                      <option value="Branca">Branca</option>
+                      <option value="Preta">Preta</option>
+                      <option value="Parda">Parda</option>
+                      <option value="Amarela">Amarela</option>
+                      <option value="Indígena">Indígena</option>
+                      <option value="Não informada">Não informada</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group col-md-12">
+                    <label for="alergiasObs">Alergias</label>
+                    <textarea class="form-control" id="alergiasObs" name="alergias" rows="3" placeholder="Descreva alergias conhecidas do paciente (medicamentos, alimentos, etc.)"></textarea>
+                    <small class="text-muted">Informe todas as alergias conhecidas para evitar complicações durante o tratamento</small>
+                  </div>
+                </div>
+                <p class="text-muted mt-2"><small>* Campos obrigatórios</small></p>
+                <div class="d-flex justify-content-end">
+                  <button type="submit" class="btn btn-primary">Próximo <i class="fas fa-arrow-right ml-1"></i></button>
+                </div>
+              </form>
+            </div>
+              <!-- Etapa 3: Informações da Observação -->
+            <div class="tab-pane fade" id="observacao-info" role="tabpanel" aria-labelledby="observacao-info-tab">
+              <form id="observacaoInfoForm">
+                <!-- História da Doença Atual -->
+                <div class="form-row">
+                  <div class="form-group col-md-12">
+                    <label for="hdaObs">História da Doença Atual (HDA)*</label>
+                    <textarea id="hdaObs" name="hda" rows="4" class="form-control" required placeholder="Descreva a história da doença atual do paciente..."></textarea>
+                  </div>
+                </div>
+
+                <!-- Exame Físico -->
+                <div class="form-row">
+                  <div class="form-group col-md-12">
+                    <label for="exameFisicoObs">Exame Físico*</label>
+                    <textarea id="exameFisicoObs" name="exame_fisico" rows="4" class="form-control" required placeholder="Descreva os achados do exame físico do paciente..."></textarea>
+                  </div>
+                </div>
+
+                <!-- Diagnóstico Inicial -->
+                <div class="form-row">
+                  <div class="form-group col-md-12">
+                    <label for="diagnosticoInicialObs">Diagnóstico Inicial*</label>
+                    <textarea id="diagnosticoInicialObs" name="diagnostico_inicial" rows="3" class="form-control" required placeholder="Informe o diagnóstico inicial ou hipótese diagnóstica..."></textarea>
+                  </div>
+                </div>                <!-- CID Principal e Secundário -->
+                <div class="form-row">
+                  <div class="form-group col-md-6">
+                    <label for="cidPrincipalObs">CID-10 Principal*</label>
+                    <input type="text" class="form-control" id="cidPrincipalObs" name="cid_principal" required placeholder="Ex: A09.9" style="text-transform: uppercase;">
+                  </div>
+                  <div class="form-group col-md-6">
+                    <label for="cidSecundarioObs">CID-10 Secundário</label>
+                    <input type="text" class="form-control" id="cidSecundarioObs" name="cid_secundario" placeholder="Ex: K59.1" style="text-transform: uppercase;">
+                  </div>
+                </div>
+
+                <!-- Primeira Evolução -->
+                <div class="form-row">
+                  <div class="form-group col-md-12">
+                    <label for="primeiraEvolucaoObs">Primeira Evolução*</label>
+                    <textarea id="primeiraEvolucaoObs" name="primeira_evolucao" rows="4" class="form-control" required placeholder="Registre a primeira evolução médica do paciente, incluindo estado atual, sinais vitais, resposta ao tratamento inicial, etc."></textarea>
+                  </div>
+                </div>
+
+                <p class="text-muted mt-2"><small>* Campos obrigatórios</small></p>
+
+                <div class="d-flex justify-content-between mt-3">
+                  <button type="button" class="btn btn-secondary" id="btnVoltarDadosObs"><i class="fas fa-arrow-left mr-1"></i> Voltar</button>
+                  <button type="submit" class="btn btn-success"><i class="fas fa-check mr-1"></i> Adicionar à Observação</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Scripts -->
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
@@ -639,9 +862,7 @@
         $('#resultadoPesquisa').hide();
         $('#pesquisarPacienteForm')[0].reset();
         sessionStorage.removeItem('pacienteEncontrado');
-      });
-
-      // Máscara para CPF na pesquisa
+      });      // Máscara para CPF na pesquisa
       $('#pesquisaCpf').on('input', function (e) {
         let value = e.target.value.replace(/\D/g, '');
         if (value.length > 11) value = value.substring(0, 11);
@@ -651,12 +872,20 @@
         e.target.value = value;
       });
 
+      // Checkbox para paciente sem cartão SUS na internação
+      $('#semCartaoSus').change(function() {
+        if ($(this).is(':checked')) {
+          $('#cartaoSus').val('').prop('disabled', true);
+        } else {
+          $('#cartaoSus').prop('disabled', false);
+        }
+      });
+
       // Submissão do formulário de dados do paciente (etapa 2)
-      $('#dadosPacienteForm').submit(function(e) {
-        e.preventDefault();
+      $('#dadosPacienteForm').submit(function(e) {        e.preventDefault();
         
         const cpfValue = $('#cpf').val().replace(/\D/g, ''); // Remove formatação
-        const cnsValue = $('#cartaoSus').val().trim();
+        const cnsValue = $('#semCartaoSus').is(':checked') ? null : $('#cartaoSus').val().trim();
         
         // Verificar duplicatas antes de prosseguir
         verificarDuplicatas(cpfValue, cnsValue).then(function(duplicataEncontrada) {
@@ -680,17 +909,16 @@
           }
           
           const parametrosVerificacao = {};
-          
-          if (cpf) {
+            if (cpf) {
             parametrosVerificacao.cpf = cpf;
           }
           
-          if (cns) {
+          if (cns && cns !== null) {
             parametrosVerificacao.cartao_sus = cns;
           }
           
           // Se não há CPF nem CNS para verificar
-          if (!cpf && !cns) {
+          if (!cpf && (!cns || cns === null)) {
             resolve(false);
             return;
           }
@@ -739,15 +967,14 @@
       }
       
       // Função para prosseguir com os dados do paciente
-      function prosseguirComDadosPaciente() {
-        // Coletar dados do paciente
+      function prosseguirComDadosPaciente() {        // Coletar dados do paciente
         const dadosPaciente = {
           nome: $('#nome').val(),
           filiacao: $('#nomeMae').val(),
           cpf: $('#cpf').val().replace(/\D/g, ''), // Remove formatação
           data_nascimento: $('#dataNascimento').val(),
           sexo: $('#sexo').val(),
-          cartao_sus: $('#cartaoSus').val(),
+          cartao_sus: $('#semCartaoSus').is(':checked') ? null : $('#cartaoSus').val(),
           telefone: $('#telefone').val(),
           endereco: $('#endereco').val(),
           municipio: $('#municipio').val(),
@@ -851,6 +1078,344 @@
         } else {
           // Se não há paciente encontrado, voltar para dados do paciente
           $('#dados-paciente-tab').tab('show');
+        }
+      });
+
+      // Botão de adicionar paciente em observação
+      $('#btnObservacaoPaciente').click(function() {
+        $('#observacaoPacienteModal').modal('show');
+        // Reset das abas quando abrir o modal
+        resetarModalObservacao();
+      });
+
+      // Função para resetar o modal de observação
+      function resetarModalObservacao() {
+        // Voltar para a primeira aba
+        $('#pesquisar-paciente-obs-tab').tab('show');
+        $('#dados-paciente-obs-tab').addClass('disabled');
+        $('#observacao-info-tab').addClass('disabled');
+        
+        // Limpar formulários
+        $('#pesquisarPacienteObsForm')[0].reset();
+        $('#dadosPacienteObsForm')[0].reset();
+        $('#observacaoInfoForm')[0].reset();
+        
+        // Esconder resultados de pesquisa
+        $('#resultadoPesquisaObs').hide();
+        $('#pacienteNaoEncontradoObs').hide();
+        
+        // Limpar dados temporários
+        sessionStorage.removeItem('dadosPacienteObs');
+        sessionStorage.removeItem('pacienteEncontradoObs');
+      }
+
+      // Submissão do formulário de pesquisa de paciente para observação
+      $('#pesquisarPacienteObsForm').submit(function(e) {
+        e.preventDefault();
+        
+        const cpf = $('#pesquisaCpfObs').val().trim();
+        
+        if (!cpf) {
+          alert('Por favor, informe o CPF do paciente para buscar.');
+          return;
+        }
+        
+        // Esconder resultados anteriores
+        $('#resultadoPesquisaObs').hide();
+        $('#pacienteNaoEncontradoObs').hide();
+        
+        // Mostrar loading
+        const btnBuscar = $(this).find('button[type="submit"]');
+        const textoOriginal = btnBuscar.html();
+        btnBuscar.html('<i class="fas fa-spinner fa-spin mr-1"></i> Buscando...');
+        btnBuscar.prop('disabled', true);
+        
+        // Fazer a busca no servidor
+        const parametrosBusca = {
+          cpf: cpf.replace(/\D/g, '') // Remove formatação do CPF
+        };
+        
+        fetch('/api/pacientes/buscar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(parametrosBusca)
+        })
+        .then(response => response.json())
+        .then(data => {
+          btnBuscar.html(textoOriginal);
+          btnBuscar.prop('disabled', false);
+          
+          if (data.success && data.paciente) {
+            // Paciente encontrado
+            mostrarPacienteEncontradoObs(data.paciente);
+          } else {
+            // Paciente não encontrado
+            $('#pacienteNaoEncontradoObs').show();
+          }
+        })
+        .catch(error => {
+          console.error('Erro ao buscar paciente:', error);
+          btnBuscar.html(textoOriginal);
+          btnBuscar.prop('disabled', false);
+          alert('Erro ao buscar paciente. Tente novamente.');
+        });
+      });
+
+      // Função para mostrar informações do paciente encontrado na observação
+      function mostrarPacienteEncontradoObs(paciente) {
+        const infoPaciente = `
+          <div class="row">
+            <div class="col-md-6">
+              <strong>Nome:</strong> ${paciente.nome}<br>
+              <strong>CPF:</strong> ${formatarCPF(paciente.cpf)}<br>
+              <strong>Data de Nascimento:</strong> ${formatarData(paciente.data_nascimento)}<br>
+              <strong>Sexo:</strong> ${paciente.sexo === 'M' ? 'Masculino' : 'Feminino'}
+            </div>
+            <div class="col-md-6">
+              <strong>Mãe:</strong> ${paciente.filiacao || 'Não informado'}<br>
+              <strong>Telefone:</strong> ${paciente.telefone || 'Não informado'}<br>
+              <strong>Município:</strong> ${paciente.municipio || 'Não informado'}<br>
+              <strong>Cartão SUS:</strong> ${paciente.cartao_sus || 'Não informado'}
+            </div>
+          </div>
+        `;
+        
+        $('#infoPacienteEncontradoObs').html(infoPaciente);
+        $('#resultadoPesquisaObs').show();
+        
+        // Armazenar dados do paciente encontrado
+        sessionStorage.setItem('pacienteEncontradoObs', JSON.stringify(paciente));
+      }
+
+      // Usar paciente encontrado na observação
+      $('#btnUsarPacienteEncontradoObs').click(function() {
+        const pacienteEncontrado = JSON.parse(sessionStorage.getItem('pacienteEncontradoObs'));
+        preencherDadosPacienteObs(pacienteEncontrado);
+        
+        // Ir direto para a aba de informações da observação
+        $('#observacao-info-tab').removeClass('disabled');
+        $('#observacao-info-tab').tab('show');
+      });
+
+      // Função para preencher os dados do paciente no formulário de observação
+      function preencherDadosPacienteObs(paciente) {
+        $('#nomeObs').val(paciente.nome);
+        $('#cpfObs').val(formatarCPF(paciente.cpf));
+        $('#nomeMaeObs').val(paciente.filiacao || '');
+        $('#dataNascimentoObs').val(paciente.data_nascimento);
+        $('#sexoObs').val(paciente.sexo);
+        $('#cartaoSusObs').val(paciente.cartao_sus || '');
+        $('#telefoneObs').val(paciente.telefone || '');
+        $('#enderecoObs').val(paciente.endereco || '');
+        $('#bairroObs').val(paciente.bairro || '');
+        $('#municipioObs').val(paciente.municipio || '');
+        $('#corObs').val(paciente.cor || '');
+        $('#alergiasObs').val(paciente.alergias || '');
+        
+        // Armazenar dados para uso posterior
+        const dadosPaciente = {
+          nome: paciente.nome,
+          filiacao: paciente.filiacao || '',
+          cpf: paciente.cpf,
+          data_nascimento: paciente.data_nascimento,
+          sexo: paciente.sexo,
+          cartao_sus: paciente.cartao_sus || '',
+          telefone: paciente.telefone || '',
+          endereco: paciente.endereco || '',
+          municipio: paciente.municipio || '',
+          bairro: paciente.bairro || '',
+          cor: paciente.cor || '',
+          alergias: paciente.alergias || '',
+          paciente_id: paciente.id // ID do paciente existente
+        };
+        
+        sessionStorage.setItem('dadosPacienteObs', JSON.stringify(dadosPaciente));
+      }
+
+      // Botões para cadastrar novo paciente na observação
+      $('#btnNovoPacienteObs, #btnProsseguirNovoObs').click(function() {
+        $('#dados-paciente-obs-tab').removeClass('disabled');
+        $('#dados-paciente-obs-tab').tab('show');
+      });
+
+      // Nova busca na observação
+      $('#btnNovasBuscaObs').click(function() {
+        $('#resultadoPesquisaObs').hide();
+        $('#pesquisarPacienteObsForm')[0].reset();
+        sessionStorage.removeItem('pacienteEncontradoObs');
+      });
+
+      // Máscara para CPF na pesquisa de observação
+      $('#pesquisaCpfObs').on('input', function (e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 11) value = value.substring(0, 11);
+        value = value.replace(/(\d{3})(\d)/, '$1.$2');
+        value = value.replace(/(\d{3})(\d)/, '$1.$2');
+        value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        e.target.value = value;
+      });
+
+      // Máscara de CPF para o campo de dados do paciente na observação
+      $('#cpfObs').on('input', function (e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 11) value = value.substring(0, 11);
+        value = value.replace(/(\d{3})(\d)/, '$1.$2');
+        value = value.replace(/(\d{3})(\d)/, '$1.$2');
+        value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        e.target.value = value;
+      });
+
+      // Checkbox para paciente sem cartão SUS
+      $('#semCartaoSusObs').change(function() {
+        if ($(this).is(':checked')) {
+          $('#cartaoSusObs').val('').prop('disabled', true);
+        } else {
+          $('#cartaoSusObs').prop('disabled', false);
+        }
+      });      // Submissão do formulário de dados do paciente para observação
+      $('#dadosPacienteObsForm').submit(function(e) {
+        e.preventDefault();
+        
+        const cpfValue = $('#cpfObs').val().replace(/\D/g, ''); // Remove formatação
+        const cnsValue = $('#semCartaoSusObs').is(':checked') ? null : $('#cartaoSusObs').val().trim();
+        
+        // Verificar duplicatas antes de prosseguir
+        verificarDuplicatasObs(cpfValue, cnsValue).then(function(duplicataEncontrada) {
+          if (duplicataEncontrada) {
+            return; // Para a execução se encontrou duplicata
+          }
+          
+          // Se não há duplicata, continuar com o processo normal
+          prosseguirComDadosPacienteObs();
+        });
+      });      // Função para verificar duplicatas na observação
+      function verificarDuplicatasObs(cpf, cns) {
+        return new Promise(function(resolve) {
+          // Se já existe um paciente encontrado pela pesquisa, não verificar duplicatas
+          const pacienteEncontrado = sessionStorage.getItem('pacienteEncontradoObs');
+          if (pacienteEncontrado) {
+            resolve(false);
+            return;
+          }
+          
+          const parametrosVerificacao = {};
+          
+          if (cpf) {
+            parametrosVerificacao.cpf = cpf;
+          }
+          
+          if (cns && cns !== null) {
+            parametrosVerificacao.cartao_sus = cns;
+          }
+          
+          // Se não há CPF nem CNS para verificar
+          if (!cpf && (!cns || cns === null)) {
+            resolve(false);
+            return;
+          }
+          
+          fetch('/api/pacientes/verificar-duplicatas', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(parametrosVerificacao)
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success && data.duplicata_encontrada) {
+              alert('Já existe um paciente cadastrado com esses dados. Verifique o CPF ou Cartão SUS.');
+              resolve(true);
+              return;
+            }
+            
+            resolve(false); // Não há duplicata ou usuário escolheu continuar
+          })
+          .catch(error => {
+            console.error('Erro ao verificar duplicatas:', error);
+            // Em caso de erro, permitir continuar
+            resolve(false);
+          });
+        });
+      }      // Função para prosseguir com os dados do paciente na observação
+      function prosseguirComDadosPacienteObs() {
+        // Coletar dados do paciente
+        const dadosPaciente = {
+          nome: $('#nomeObs').val(),
+          filiacao: $('#nomeMaeObs').val(),
+          cpf: $('#cpfObs').val().replace(/\D/g, ''), // Remove formatação
+          data_nascimento: $('#dataNascimentoObs').val(),
+          sexo: $('#sexoObs').val(),
+          cartao_sus: $('#semCartaoSusObs').is(':checked') ? null : $('#cartaoSusObs').val(),
+          telefone: $('#telefoneObs').val(),
+          endereco: $('#enderecoObs').val(),
+          municipio: $('#municipioObs').val(),
+          bairro: $('#bairroObs').val(),
+          cor: $('#corObs').val(),
+          alergias: $('#alergiasObs').val(),
+          sem_cartao_sus: $('#semCartaoSusObs').is(':checked')
+        };
+        
+        // Se já existem dados de paciente encontrado, manter o ID
+        const dadosExistentes = sessionStorage.getItem('dadosPacienteObs');
+        if (dadosExistentes) {
+          const dados = JSON.parse(dadosExistentes);
+          if (dados.paciente_id) {
+            dadosPaciente.paciente_id = dados.paciente_id;
+          }
+        }
+        
+        // Armazenar os dados temporariamente
+        sessionStorage.setItem('dadosPacienteObs', JSON.stringify(dadosPaciente));
+        
+        // Habilitar e mostrar a próxima aba
+        $('#observacao-info-tab').removeClass('disabled');
+        $('#observacao-info-tab').tab('show');
+      }      // Submissão do formulário de informações da observação
+      $('#observacaoInfoForm').submit(function (e) {
+        e.preventDefault();
+
+        const dadosPaciente = JSON.parse(sessionStorage.getItem('dadosPacienteObs'));        const dadosObservacao = {
+          hda: $('#hdaObs').val(),
+          exame_fisico: $('#exameFisicoObs').val(),
+          diagnostico_inicial: $('#diagnosticoInicialObs').val(),
+          cid_principal: $('#cidPrincipalObs').val(),
+          cid_secundario: $('#cidSecundarioObs').val(),
+          primeira_evolucao: $('#primeiraEvolucaoObs').val()
+        };
+
+        const payload = {
+          ...dadosPaciente,
+          ...dadosObservacao,
+          atendimento_id: gerarAtendimentoId()
+        };
+
+        fetch('/api/observacao-paciente', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+          .then(r => r.json())
+          .then(d => {
+            if (d.success) {
+              alert('Paciente adicionado à observação com sucesso!');
+              $('#observacaoPacienteModal').modal('hide');
+              resetarModalObservacao();
+            } else {
+              alert('Erro: ' + d.message);
+            }
+          })
+          .catch(() => alert('Falha na comunicação com o servidor.'));
+      });
+
+      // Voltar para dados do paciente na observação
+      $('#btnVoltarDadosObs').click(function() {
+        // Verificar se há um paciente encontrado (que veio da pesquisa)
+        const pacienteEncontrado = sessionStorage.getItem('pacienteEncontradoObs');
+        if (pacienteEncontrado) {
+          // Se há paciente encontrado, voltar para a pesquisa
+          $('#pesquisar-paciente-obs-tab').tab('show');
+        } else {
+          // Se não há paciente encontrado, voltar para dados do paciente
+          $('#dados-paciente-obs-tab').tab('show');
         }
       });
     });
@@ -962,9 +1527,8 @@
 
     function abrirMaternidade() {
       alert("Funcionalidade ainda não disponível na versão beta");
-    }
-    function abrirObservacao() {
-      alert("Funcionalidade ainda não disponível na versão beta");
+    }    function abrirObservacao() {
+      window.location.href = "/observacao";
     }
     function abrirClinica() {
       window.location.href = "/clinica";

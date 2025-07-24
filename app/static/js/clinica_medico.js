@@ -888,8 +888,50 @@ function abrirImpressao(id) {
     return;
   }
 
+  console.log('🖨️ abrirImpressao chamada com ID:', id);
+  console.log('📍 URL atual:', window.location.pathname);
+
+  // Verificar se estamos na página de observação e usar impressão específica de observação
+  if (window.location.pathname.includes('clinica_observacao') || 
+      window.location.pathname.includes('observacao') ||
+      document.title.includes('Observação')) {
+    console.log('✅ Detectada página de observação - usando impressão específica');
+    // Buscar o ID da evolução/observação mais recente para imprimir
+    buscarUltimaObservacaoParaImprimir(id);
+    return;
+  }
+
+  console.log('📄 Usando impressão padrão');
   const url = `/clinica/impressoes/${id}`;
   window.open(url, '_blank');  // Abre em nova aba ou janela
+}
+
+// Função auxiliar para buscar a última observação/evolução do paciente
+function buscarUltimaObservacaoParaImprimir(atendimentoId) {
+  console.log('🔍 Buscando última observação para atendimento:', atendimentoId);
+  
+  $.ajax({
+    url: `/api/ultima-evolucao-id/${atendimentoId}`,
+    method: 'GET',
+    success: function(response) {
+      console.log('📋 Resposta da API:', response);
+      
+      if (response.success && response.evolucao_id) {
+        console.log('✅ Evolução encontrada, ID:', response.evolucao_id);
+        // Usar a função de impressão de observação já existente
+        imprimirObservacao(response.evolucao_id);
+      } else {
+        console.log('❌ Nenhuma evolução encontrada');
+        alert('Nenhuma observação encontrada para imprimir.');
+      }
+    },
+    error: function(xhr, status, error) {
+      console.error('❌ Erro ao buscar observação para impressão:', error);
+      console.error('Status:', status);
+      console.error('Response:', xhr.responseText);
+      alert('Erro ao buscar observação para impressão.');
+    }
+  });
 }
 
 
@@ -3852,6 +3894,34 @@ function imprimirEvolucao(evolucaoId) {
     
     // Abrir página de impressão em nova aba
     const url = `/api/imprimir-evolucao-html/${evolucaoId}`;
+    const novaJanela = window.open(url, '_blank');
+    
+    if (!novaJanela) {
+        alert('Popup bloqueado. Por favor, permita popups para este site e tente novamente.');
+        return;
+    }
+    
+    // Aguardar carregamento e tentar imprimir automaticamente
+    novaJanela.onload = function() {
+        setTimeout(function() {
+            try {
+                novaJanela.print();
+            } catch (error) {
+                console.warn('Não foi possível imprimir automaticamente:', error);
+            }
+        }, 1000); // Aguarda 1 segundo para garantir que a página carregou completamente
+    };
+}
+
+
+function imprimirObservacao(observacao_id) {
+    if (!observacao_id) {
+        alert('ID da evolução não informado.');
+        return;
+    }
+    
+    // Abrir página de impressão em nova aba
+    const url = `/api/imprimir-observacao-html/${observacao_id}`;
     const novaJanela = window.open(url, '_blank');
     
     if (!novaJanela) {

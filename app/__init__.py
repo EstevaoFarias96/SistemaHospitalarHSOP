@@ -129,16 +129,11 @@ def create_app():
         except Exception as e:
             logger.error(f"Erro ao verificar status da API: {str(e)}")
             logger.error(traceback.format_exc())
-            return jsonify({'status': 'error', 'message': str(e)}), 500
-
-    # Handler global de erro 500
+            return jsonify({'status': 'error', 'message': str(e)}), 500    # Handler global de erro 500
     @app.errorhandler(500)
     def internal_error(error):
         logger.error(f"Erro 500: {str(error)}")
         logger.error(traceback.format_exc())
         return jsonify({'error': 'Erro interno do servidor'}), 500
-
-    # Importar rotas extras
-    from . import routes_extra
 
     return app
