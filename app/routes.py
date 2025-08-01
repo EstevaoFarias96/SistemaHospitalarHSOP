@@ -1,4 +1,5 @@
 
+
 from flask_login import login_required, current_user, LoginManager, login_user, logout_user
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, Flask, send_file, current_app, abort, render_template_string
 import pdfkit
@@ -385,22 +386,22 @@ def listar_pacientes_internados():
         
         pacientes_list = []
         
-        # Buscar pacientes que:
-        # 1. Ainda estão internados (data_alta NULL) OU
-        # 2. Tiveram alta mas têm prontuário para fechar (data_alta preenchida E dieta = '1')
-        internacoes = Internacao.query.filter(
-            db.or_(
-                Internacao.data_alta.is_(None),  # Ainda estão internados
-                db.and_(
-                    Internacao.data_alta.isnot(None),  # Já tiveram alta
-                    Internacao.dieta == '1'  # Prontuário para fechar
-                )
-            )
+        # Buscar pacientes com status "Internado" na tabela atendimentos
+        # Inclui tanto pacientes ainda internados quanto aqueles com alta mas com prontuário para fechar
+        internacoes = db.session.query(Internacao).join(
+            Atendimento, Internacao.atendimento_id == Atendimento.id
+        ).filter(
+            Atendimento.status == 'Internado'
         ).all()
         
         for internacao in internacoes:
             paciente = Paciente.query.get(internacao.paciente_id)
-            if paciente:
+            atendimento = Atendimento.query.get(internacao.atendimento_id)
+            
+            if paciente and atendimento:
+                # Determinar se é um paciente com prontuário para fechar
+                prontuario_para_fechar = internacao.data_alta is not None and atendimento.status == 'Internado'
+                
                 pacientes_list.append({
                     'atendimento_id': internacao.atendimento_id,
                     'nome': paciente.nome,
@@ -413,7 +414,9 @@ def listar_pacientes_internados():
                     'diagnostico_inicial': internacao.diagnostico_inicial,
                     'cid_principal': internacao.cid_principal,
                     'carater_internacao': internacao.carater_internacao,
-                    'tem_alta': internacao.data_alta is not None
+                    'tem_alta': internacao.data_alta is not None,
+                    'prontuario_para_fechar': prontuario_para_fechar,
+                    'status_atendimento': atendimento.status
                 })
         
         return jsonify({
@@ -6188,7 +6191,8 @@ def buscar_prescricao_base(prescricao_id):
 @login_required
 def fechar_prontuario(internacao_id):
     """
-    Fecha o prontuário de um paciente que já teve alta, definindo dieta = '1'.
+    Fecha o prontuário de um paciente que já teve alta, definindo dieta = '1'
+    e atualizando o status do atendimento para 'Alta'.
     Isso remove o paciente da listagem de pacientes internados.
     """
     try:
@@ -6208,6 +6212,15 @@ def fechar_prontuario(internacao_id):
                 'message': 'Internação não encontrada.'
             }), 404
         
+        # Buscar o atendimento relacionado
+        atendimento = Atendimento.query.get(internacao_id)
+        
+        if not atendimento:
+            return jsonify({
+                'success': False,
+                'message': 'Atendimento não encontrado.'
+            }), 404
+        
         # Verificar se o paciente já teve alta
         if not internacao.data_alta:
             return jsonify({
@@ -6215,18 +6228,21 @@ def fechar_prontuario(internacao_id):
                 'message': 'Só é possível fechar prontuário de pacientes que já tiveram alta.'
             }), 400
         
-        # Fechar o prontuário definindo dieta = '1' (permite fechar mesmo se já foi fechado)
+        # Fechar o prontuário definindo dieta = '1'
         internacao.dieta = '1'
+        
+        # Atualizar o status do atendimento para 'Alta'
+        atendimento.status = 'Alta'
         
         # Commit das alterações
         db.session.commit()
         
         # Log da ação
-        logging.info(f"Prontuário fechado pelo {current_user.cargo} {current_user.nome} (ID: {current_user.id}) para internação {internacao_id}")
+        logging.info(f"Prontuário fechado pelo {current_user.cargo} {current_user.nome} (ID: {current_user.id}) para internação {internacao_id} - Status atualizado para 'Alta'")
         
         return jsonify({
             'success': True,
-            'message': 'Prontuário fechado com sucesso.'
+            'message': 'Prontuário fechado com sucesso. Paciente removido da lista de internados.'
         })
         
     except Exception as e:

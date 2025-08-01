@@ -25486,3 +25486,39 @@ AssertionError: View function mapping is overwriting an existing endpoint functi
 2025-08-01 15:39:35,692 [INFO] __init__:72 - LoginManager inicializado com sucesso
 2025-08-01 15:39:35,825 [INFO] __init__:90 - Blueprints registrados com sucesso
 2025-08-01 15:39:35,843 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-08-01 20:51:04,167 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-08-01 20:51:04,167 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-08-01 20:51:04,167 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-08-01 20:51:04,167 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-08-01 20:51:04,167 [INFO] __init__:63 - Configurações básicas definidas
+2025-08-01 20:51:04,173 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-08-01 20:51:04,174 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-08-01 20:51:04,457 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-08-01 20:51:04,461 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-08-01 20:51:04,684 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-08-01 20:51:04,684 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-08-01 20:51:04,684 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-08-01 20:51:04,684 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-08-01 20:51:04,684 [INFO] __init__:63 - Configurações básicas definidas
+2025-08-01 20:51:04,690 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-08-01 20:51:04,690 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-08-01 20:51:04,857 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-08-01 20:51:04,859 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-08-01 20:51:49,719 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-08-01 20:51:49,719 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-08-01 20:51:49,719 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-08-01 20:51:49,719 [INFO] __init__:59 - Banco de dados: postgresql://hsop:senha123
+2025-08-01 20:51:49,720 [INFO] __init__:63 - Configurações básicas definidas
+2025-08-01 20:51:49,746 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-08-01 20:51:49,746 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-08-01 20:51:49,890 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-08-01 20:51:49,913 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-08-01 20:53:06,058 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-08-01 20:53:06,058 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-08-01 20:53:06,058 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-08-01 20:53:06,058 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-08-01 20:53:06,058 [INFO] __init__:63 - Configurações básicas definidas
+2025-08-01 20:53:06,064 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-08-01 20:53:06,064 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-08-01 20:53:06,237 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-08-01 20:53:06,239 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
