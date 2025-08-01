@@ -385,10 +385,17 @@ def listar_pacientes_internados():
         
         pacientes_list = []
         
-        # Buscar pacientes que ainda estão internados (data_alta NULL) e com dieta != '1'
+        # Buscar pacientes que:
+        # 1. Ainda estão internados (data_alta NULL) OU
+        # 2. Tiveram alta mas têm prontuário para fechar (data_alta preenchida E dieta = '1')
         internacoes = Internacao.query.filter(
-            Internacao.data_alta.is_(None),  # Ainda estão internados
-            Internacao.dieta != '1'  # Prontuário não foi fechado
+            db.or_(
+                Internacao.data_alta.is_(None),  # Ainda estão internados
+                db.and_(
+                    Internacao.data_alta.isnot(None),  # Já tiveram alta
+                    Internacao.dieta == '1'  # Prontuário para fechar
+                )
+            )
         ).all()
         
         for internacao in internacoes:
