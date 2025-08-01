@@ -385,18 +385,15 @@ def listar_pacientes_internados():
         
         pacientes_list = []
         
-        # LÓGICA ANTIGA: Buscar internações onde dieta != '1' OU dieta é NULL/vazia (excluir apenas dieta = '1')
+        # Buscar pacientes que ainda estão internados (data_alta NULL) e com dieta != '1'
         internacoes = Internacao.query.filter(
-            (Internacao.dieta != '1') | (Internacao.dieta.is_(None)) | (Internacao.dieta == '')
+            Internacao.data_alta.is_(None),  # Ainda estão internados
+            Internacao.dieta != '1'  # Prontuário não foi fechado
         ).all()
-        
-        # Coletar IDs dos atendimentos já processados para evitar duplicatas
-        atendimentos_processados = set()
         
         for internacao in internacoes:
             paciente = Paciente.query.get(internacao.paciente_id)
             if paciente:
-                atendimentos_processados.add(internacao.atendimento_id)
                 pacientes_list.append({
                     'atendimento_id': internacao.atendimento_id,
                     'nome': paciente.nome,
@@ -411,39 +408,6 @@ def listar_pacientes_internados():
                     'carater_internacao': internacao.carater_internacao,
                     'tem_alta': internacao.data_alta is not None
                 })
-        
-        # NOVA LÓGICA: Buscar pacientes que estão na ListaInternacao (data_entrada sem data_saida)
-        internacoes_ativas = db.session.query(ListaInternacao).filter(
-            ListaInternacao.data_entrada.isnot(None),
-            ListaInternacao.data_saida.is_(None)
-        ).all()
-        
-        for lista_internacao in internacoes_ativas:
-            # Verificar se já foi processado na lógica antiga
-            if lista_internacao.id_atendimento not in atendimentos_processados:
-                internacao = Internacao.query.filter_by(atendimento_id=lista_internacao.id_atendimento).first()
-                if internacao:
-                    # CORREÇÃO: Verificar se o prontuário não foi fechado (dieta != '1')
-                    if internacao.dieta == '1':
-                        logging.info(f"Paciente com prontuário fechado excluído da lista: atendimento_id={lista_internacao.id_atendimento}")
-                        continue  # Pular pacientes com prontuário fechado
-                    
-                    paciente = Paciente.query.get(internacao.paciente_id)
-                    if paciente:
-                        pacientes_list.append({
-                            'atendimento_id': internacao.atendimento_id,
-                            'nome': paciente.nome,
-                            'cpf': paciente.cpf,
-                            'data_nascimento': paciente.data_nascimento.strftime('%Y-%m-%d') if paciente.data_nascimento else None,
-                            'leito': internacao.leito,
-                            'data_internacao': internacao.data_internacao.strftime('%Y-%m-%d %H:%M') if internacao.data_internacao else None,
-                            'data_alta': internacao.data_alta.strftime('%Y-%m-%d %H:%M') if internacao.data_alta else None,
-                            'diagnostico': internacao.diagnostico,
-                            'diagnostico_inicial': internacao.diagnostico_inicial,
-                            'cid_principal': internacao.cid_principal,
-                            'carater_internacao': internacao.carater_internacao,
-                            'tem_alta': internacao.data_alta is not None
-                        })
         
         return jsonify({
             'success': True,
