@@ -423,6 +423,11 @@ def listar_pacientes_internados():
             if lista_internacao.id_atendimento not in atendimentos_processados:
                 internacao = Internacao.query.filter_by(atendimento_id=lista_internacao.id_atendimento).first()
                 if internacao:
+                    # CORREÇÃO: Verificar se o prontuário não foi fechado (dieta != '1')
+                    if internacao.dieta == '1':
+                        logging.info(f"Paciente com prontuário fechado excluído da lista: atendimento_id={lista_internacao.id_atendimento}")
+                        continue  # Pular pacientes com prontuário fechado
+                    
                     paciente = Paciente.query.get(internacao.paciente_id)
                     if paciente:
                         pacientes_list.append({
