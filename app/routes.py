@@ -6239,14 +6239,7 @@ def fechar_prontuario(internacao_id):
                 'message': 'Só é possível fechar prontuário de pacientes que já tiveram alta.'
             }), 400
         
-        # Verificar se o prontuário já foi fechado
-        if internacao.dieta == '1':
-            return jsonify({
-                'success': False,
-                'message': 'Prontuário já foi fechado anteriormente.'
-            }), 400
-        
-        # Fechar o prontuário definindo dieta = '1'
+        # Fechar o prontuário definindo dieta = '1' (permite fechar mesmo se já foi fechado)
         internacao.dieta = '1'
         
         # Commit das alterações
