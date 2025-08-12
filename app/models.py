@@ -58,7 +58,7 @@ class Paciente(db.Model):
     filiacao = db.Column(db.String(255))
     data_nascimento = db.Column(db.Date)
     sexo = db.Column(db.String(10))
-    cpf = db.Column(db.String(14), unique=True)
+    cpf = db.Column(db.String(14), unique=True,nullable=True)
     endereco = db.Column(db.String(255))
     municipio = db.Column(db.String(255))
     bairro = db.Column(db.String(255))

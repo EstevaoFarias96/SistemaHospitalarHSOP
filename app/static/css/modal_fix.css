@@ -183,6 +183,50 @@ body.modal-open {
     background-color: rgba(0, 0, 0, 0.5) !important;
 }
 
+/* Fix específico para o modal de adicionar RN */
+#modalAdicionarRN {
+    z-index: 1055 !important;
+}
+
+#modalAdicionarRN .modal-content {
+    z-index: 1056 !important;
+    position: relative !important;
+}
+
+#modalAdicionarRN .modal-backdrop {
+    z-index: 1050 !important;
+}
+
+#modalAdicionarRN .modal-footer {
+    position: relative !important;
+    z-index: 1060 !important;
+    pointer-events: auto !important;
+}
+
+#modalAdicionarRN .modal-footer .btn {
+    position: relative !important;
+    z-index: 1065 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Garantir que o modal RN não feche durante transições */
+#modalAdicionarRN.show {
+    display: block !important;
+}
+
+/* Garantir que as abas do modal RN funcionem corretamente */
+#modalAdicionarRN .nav-tabs .nav-link {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+#modalAdicionarRN .nav-tabs .nav-link.disabled {
+    pointer-events: none !important;
+    cursor: not-allowed !important;
+    opacity: 0.5 !important;
+}
+
 /* Debug styles - remover depois */
 .debug-modal-open {
     border: 3px solid red !important;

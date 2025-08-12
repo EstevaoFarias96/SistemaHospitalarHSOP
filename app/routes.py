@@ -1409,6 +1409,1417 @@ def evolucao_paciente_multi(atendimento_id):
         flash('Erro ao acessar a evolução do paciente. Por favor, tente novamente.', 'danger')
         return redirect(url_for('main.pacientes_internados'))
 
+
+
+from flask_login import login_required, current_user, LoginManager, login_user, logout_user
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session, Flask, send_file, current_app, abort, render_template_string
+import pdfkit
+from datetime import datetime, timezone, timedelta, date, time
+from sqlalchemy.orm import joinedload
+import logging
+import traceback
+import re
+import json
+import chardet
+import os
+import random
+import subprocess
+import base64
+from tempfile import NamedTemporaryFile
+from docxtpl import DocxTemplate
+from docx import Document
+from io import BytesIO
+from app import db
+from app.models import Funcionario,PrescricaoEnfermagemTemplate,Leito,AdmissaoEnfermagem,ListaInternacao, ListaObservacao, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN, now_brasilia, FichaReferencia, EvolucaoFisioterapia,EvolucaoAssistenteSocial, EvolucaoNutricao
+from app.timezone_helper import formatar_datetime_br_completo, formatar_datetime_br, converter_para_brasilia
+from zoneinfo import ZoneInfo
+
+# Cria o Blueprint principal
+bp = Blueprint('main', __name__)
+
+# Cria o Blueprint para internações especiais
+internacoes_especiais_bp = Blueprint('internacoes_especiais', __name__)
+
+# Login required decorator personalizado
+def login_required(f):
+    from functools import wraps
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Por favor, faça login para acessar esta página', 'warning')
+            return redirect(url_for('main.index'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# Helper para obter o usuário atual
+def get_current_user():
+    if 'user_id' not in session:
+        return None
+    return Funcionario.query.get(session['user_id'])
+
+# Rota de teste simples para diagnóstico
+@bp.route('/api/status')
+def api_status():
+    try:
+        # Tentar fazer uma consulta simples ao banco de dados
+        count = Funcionario.query.count()
+        return jsonify({
+            'status': 'online',
+            'database': 'connected',
+            'funcionarios_count': count,
+            'timestamp': datetime.now(ZoneInfo("America/Sao_Paulo")).isoformat()
+        })
+    except Exception as e:
+        logging.error(f"Erro na rota de status: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({
+            'status': 'error',
+            'error': str(e),
+            'timestamp': datetime.now(ZoneInfo("America/Sao_Paulo")).isoformat()
+                }), 500
+        
+# API para adicionar paciente em observação
+
+@bp.route('/api/observacao-paciente', methods=['POST'])
+@login_required
+def observacao_paciente():
+            """
+            Registra um novo paciente e cria uma observação associada.
+            """
+            try:
+                current_user = get_current_user()
+                if current_user.cargo.lower() != 'medico':
+                    return jsonify({
+                        'success': False,
+                        'message': 'Apenas médicos podem adicionar pacientes em observação'
+                    }), 403
+        
+                dados = request.get_json()
+                
+                campos_paciente_obrigatorios = ['nome', 'cpf', 'data_nascimento', 'sexo']
+                for campo in campos_paciente_obrigatorios:
+                    if campo not in dados or not dados[campo]:
+                        return jsonify({
+                            'success': False,
+                            'message': f'Campo obrigatório não informado: {campo}'
+                        }), 400
+        
+                campos_observacao_obrigatorios = ['hda', 'diagnostico_inicial']
+                for campo in campos_observacao_obrigatorios:
+                    if campo not in dados or not dados[campo]:
+                        return jsonify({
+                            'success': False,
+                            'message': f'Campo obrigatório não informado: {campo}'
+                        }), 400
+        
+                # Verificar se o paciente já existe
+                paciente_existente = Paciente.query.filter_by(cpf=dados['cpf']).first()
+        
+                if paciente_existente:
+                    paciente = paciente_existente
+                else:
+                    try:
+                        data_nascimento = datetime.strptime(dados['data_nascimento'], '%Y-%m-%d').date()
+                    except ValueError:
+                        return jsonify({
+                            'success': False,
+                            'message': 'Formato de data de nascimento inválido. Use YYYY-MM-DD.'
+                        }), 400
+        
+                    # Tratar cartão SUS - pode ser vazio se o checkbox estiver marcado
+                    cartao_sus = dados.get('cartao_sus')
+                    if dados.get('sem_cartao_sus', False) or not cartao_sus:
+                        cartao_sus = None
+        
+                    paciente = Paciente(
+                        nome=dados['nome'],
+                        filiacao=dados.get('filiacao', 'Não informado'),
+                        cpf=dados['cpf'],
+                        data_nascimento=data_nascimento,
+                        sexo=dados['sexo'],
+                        telefone=dados.get('telefone', 'Não informado'),
+                        endereco=dados.get('endereco', 'Não informado'),
+                        municipio=dados.get('municipio', 'Não informado'),
+                        bairro=dados.get('bairro', 'Não informado'),
+                        cartao_sus=cartao_sus,
+                        nome_social=dados.get('nome_social', ''),
+                        cor=dados.get('cor', 'Não informada'),
+                        identificado=True
+                    )
+                    db.session.add(paciente)
+                    db.session.flush()
+        
+                agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
+                atendimento_id = dados.get('atendimento_id')
+        
+                if atendimento_id and len(atendimento_id) > 8:
+                    return jsonify({
+                        'success': False,
+                        'message': 'ID de atendimento excede o limite máximo de 8 dígitos.'
+                    }), 400
+        
+                if not atendimento_id:
+                    prefixo_data = agora.strftime('%y%m%d')
+                    numero_unico = str(paciente.id)[-2:].zfill(2)
+                    atendimento_id = f"{prefixo_data}{numero_unico}"
+        
+                if Atendimento.query.get(atendimento_id):
+                    return jsonify({
+                        'success': False,
+                        'message': 'ID de atendimento já existe. Tente novamente.'
+                    }), 400
+        
+                # Criar atendimento
+                atendimento = Atendimento(
+                    id=atendimento_id,
+                    paciente_id=paciente.id,
+                    funcionario_id=current_user.id,
+                    medico_id=current_user.id,
+                    data_atendimento=date.today(),
+                    hora_atendimento=time(agora.hour, agora.minute, agora.second),
+                    status='Em Observação',
+                    horario_observacao=agora,
+                    alergias=dados.get('alergias', '')
+                )
+                db.session.add(atendimento)
+                db.session.flush()
+        
+                # Criar entrada na tabela Internacao (atendimento_clinica)
+                internacao = Internacao(
+                    atendimento_id=atendimento_id,
+                    paciente_id=paciente.id,
+                    medico_id=current_user.id,
+                    enfermeiro_id=None,
+                    hda=dados.get('hda', ''),
+                    diagnostico_inicial=dados.get('diagnostico_inicial', ''),
+                    folha_anamnese=dados.get('exame_fisico', ''),  # Usando folha_anamnese para armazenar exame físico
+                    cid_principal=dados.get('cid_principal', ''),
+                    cid_10_secundario=dados.get('cid_secundario', ''),
+                    data_internacao=agora,
+                    leito='Observação',
+                    carater_internacao='Observação',
+                    dieta='1'  # ADICIONAR: Definir dieta = '2' para observação
+                )
+                db.session.add(internacao)
+                db.session.flush()
+
+                # Criar primeira evolução na tabela EvolucaoAtendimentoClinica
+                if dados.get('primeira_evolucao'):
+                    primeira_evolucao = EvolucaoAtendimentoClinica(
+                        atendimentos_clinica_id=internacao.id,
+                        funcionario_id=current_user.id,
+                        data_evolucao=agora,
+                        hda=dados.get('hda', ''),
+                        evolucao=dados.get('primeira_evolucao', ''),
+                        conduta='Primeira evolução médica - Observação'
+                    )
+                    db.session.add(primeira_evolucao)
+        
+                # Criar registro na ListaObservacao
+                observacao = ListaObservacao(
+                    id_atendimento=atendimento_id,
+                    id_paciente=paciente.id,
+                    medico_entrada=current_user.nome,
+                    data_entrada=agora,
+                    medico_conduta=None,
+                    data_saida=None,
+                    conduta_final=None
+                )
+                db.session.add(observacao)
+        
+                db.session.commit()
+        
+                return jsonify({
+                    'success': True,
+                    'message': 'Paciente adicionado à observação com sucesso',
+                    'paciente_id': paciente.id,
+                    'observacao_id': observacao.id,
+                    'atendimento_id': atendimento_id
+                }), 201
+        
+            except Exception as e:
+                db.session.rollback()
+                logging.error(f'Erro ao adicionar paciente em observação: {str(e)}')
+                logging.error(traceback.format_exc())
+                return jsonify({
+                    'success': False,
+                    'message': f'Erro interno do servidor: {str(e)}'
+                }), 500
+
+
+# GET /api/medico/nome
+@bp.route('/api/medico/nome', methods=['GET'])
+@login_required
+def get_nome_medico():
+    """
+    Retorna o nome do médico logado.
+    """
+    try:
+        # Usar o sistema de autenticação personalizado
+        current_user = get_current_user()
+        if not current_user:
+            return jsonify({'success': False, 'message': 'Usuário não autenticado.'}), 401
+        
+        if current_user.cargo.lower() != 'medico':
+            return jsonify({'success': False, 'message': 'Usuário não é médico.'}), 403
+
+        return jsonify({
+            'success': True,
+            'nome': current_user.nome
+        })
+
+    except Exception as e:
+        logging.error(f"Erro ao buscar nome do médico: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'message': 'Erro ao buscar nome do médico.',
+            'error': str(e)
+        }), 500
+
+# POST /api/medico/mudar-senha
+@bp.route('/api/medico/mudar-senha', methods=['POST'])
+@login_required
+def mudar_senha_medico():
+    """
+    Permite que o médico altere a própria senha.
+    """
+    try:
+        # Usar o sistema de autenticação personalizado
+        current_user = get_current_user()
+        if not current_user:
+            return jsonify({'success': False, 'message': 'Usuário não autenticado.'}), 401
+        
+        if current_user.cargo.lower() != 'medico':
+            return jsonify({'success': False, 'message': 'Usuário não é médico.'}), 403
+
+        dados = request.get_json()
+        if not dados:
+            return jsonify({'success': False, 'message': 'Dados não fornecidos.'}), 400
+
+        senha_atual = dados.get('senha_atual')
+        nova_senha = dados.get('nova_senha')
+
+        if not senha_atual or not nova_senha:
+            return jsonify({'success': False, 'message': 'Campos obrigatórios não preenchidos.'}), 400
+
+        # Verificar se a senha atual confere
+        if not current_user.check_password(senha_atual):
+            return jsonify({'success': False, 'message': 'Senha atual incorreta.'}), 400
+
+        # Atualizar a senha
+        current_user.set_password(nova_senha)
+        db.session.commit()
+
+        return jsonify({'success': True, 'message': 'Senha alterada com sucesso.'})
+
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Erro ao alterar senha do médico: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'message': 'Erro ao alterar a senha.',
+            'error': str(e)
+        }), 500
+
+# Rota protegida para médicos redirecionarem
+@bp.route('/medico')
+@login_required
+def painel_medico():
+    """
+    Renderiza o painel do médico.
+    """
+    try:
+        # Usar o sistema de autenticação personalizado
+        current_user = get_current_user()
+        if not current_user:
+            flash('Sessão expirada. Por favor, faça login novamente.', 'warning')
+            return redirect(url_for('main.index'))
+
+        if current_user.cargo.strip().lower() != 'medico':
+            flash('Acesso restrito a médicos.', 'danger')
+            return redirect(url_for('main.index'))
+        
+        return render_template('medico.html')
+        
+    except Exception as e:
+        logging.error(f"Erro ao acessar painel do médico: {str(e)}")
+        logging.error(traceback.format_exc())
+        flash('Erro ao acessar o painel. Por favor, tente novamente.', 'danger')
+        return redirect(url_for('main.index'))
+    
+@bp.route('/enfermeiro')
+@login_required
+def painel_enfermeiro():
+    try:
+        # Verificar se o usuário é enfermeiro
+        current_user = get_current_user()
+        if current_user.cargo.lower() != 'enfermeiro':
+            flash('Acesso restrito a enfermeiros.', 'danger')
+            return redirect(url_for('main.index'))
+        
+        # Renderizar o template do painel do enfermeiro
+        return render_template('enfermeiro.html')
+        
+    except Exception as e:
+        logging.error(f"Erro ao acessar painel do enfermeiro: {str(e)}")
+        logging.error(traceback.format_exc())
+        flash('Erro ao acessar o painel. Por favor, tente novamente.', 'danger')
+        return redirect(url_for('main.index'))
+
+@bp.route('/multi')
+@login_required
+def painel_multi():
+    try:
+        # Verificar se o usuário é enfermeiro
+        current_user = get_current_user()
+        if current_user.cargo.lower() != 'multi':
+            flash('Acesso restrito a enfermeiros.', 'danger')
+            return redirect(url_for('main.index'))
+        
+        # Renderizar o template do painel do enfermeiro
+        return render_template('multi.html')
+        
+    except Exception as e:
+        logging.error(f"Erro ao acessar painel da Equipe multiprofissional : {str(e)}")
+        logging.error(traceback.format_exc())
+        flash('Erro ao acessar o painel. Por favor, tente novamente.', 'danger')
+        return redirect(url_for('main.index'))
+
+@bp.route('/api/pacientes/internados')
+@login_required
+def listar_pacientes_internados():
+    try:
+        current_user = get_current_user()
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
+            return jsonify({'error': 'Acesso não autorizado'}), 403
+        
+        pacientes_list = []
+        
+        # Buscar pacientes com status "Internado" na tabela atendimentos
+        # Inclui tanto pacientes ainda internados quanto aqueles com alta mas com prontuário para fechar
+        internacoes = db.session.query(Internacao).join(
+            Atendimento, Internacao.atendimento_id == Atendimento.id
+        ).filter(
+            Atendimento.status == 'Internado'
+        ).all()
+        
+        for internacao in internacoes:
+            paciente = Paciente.query.get(internacao.paciente_id)
+            atendimento = Atendimento.query.get(internacao.atendimento_id)
+            
+            if paciente and atendimento:
+                # Determinar se é um paciente com prontuário para fechar
+                prontuario_para_fechar = internacao.data_alta is not None and atendimento.status == 'Internado'
+                
+                pacientes_list.append({
+                    'atendimento_id': internacao.atendimento_id,
+                    'nome': paciente.nome,
+                    'cpf': paciente.cpf,
+                    'data_nascimento': paciente.data_nascimento.strftime('%Y-%m-%d') if paciente.data_nascimento else None,
+                    'leito': internacao.leito,
+                    'data_internacao': internacao.data_internacao.strftime('%Y-%m-%d %H:%M') if internacao.data_internacao else None,
+                    'data_alta': internacao.data_alta.strftime('%Y-%m-%d %H:%M') if internacao.data_alta else None,
+                    'diagnostico': internacao.diagnostico,
+                    'diagnostico_inicial': internacao.diagnostico_inicial,
+                    'cid_principal': internacao.cid_principal,
+                    'carater_internacao': internacao.carater_internacao,
+                    'tem_alta': internacao.data_alta is not None,
+                    'prontuario_para_fechar': prontuario_para_fechar,
+                    'status_atendimento': atendimento.status
+                })
+        
+        return jsonify({
+            'success': True,
+            'pacientes': pacientes_list
+        })
+        
+    except Exception as e:
+        logging.error(f"Erro ao listar pacientes internados: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'error': 'Erro interno do servidor'}), 500
+    
+# API para obter o nome do enfermeiro logado
+@bp.route('/api/enfermeiro/nome')
+@login_required
+def get_enfermeiro_nome():
+    try:
+        current_user = get_current_user()
+        if current_user.cargo.lower() not in ['enfermeiro', 'multi']:
+            return jsonify({'error': 'Acesso não autorizado'}), 403
+        
+        return jsonify({
+            'nome': current_user.nome,
+            'cargo': current_user.cargo
+        })
+        
+    except Exception as e:
+        logging.error(f"Erro ao obter nome do enfermeiro: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'error': 'Erro interno do servidor'}), 500
+
+# Rota para impressão das evoluções de fisioterapia
+@bp.route('/impressao_fisio/<string:atendimento_id>')
+@login_required
+def impressao_fisio(atendimento_id):
+    """Página de impressão das evoluções de fisioterapia"""
+    try:
+        # Buscar o atendimento
+        atendimento = Atendimento.query.get_or_404(atendimento_id)
+        
+        # Buscar as evoluções de fisioterapia
+        evolucoes = EvolucaoFisioterapia.query.filter_by(id_atendimento=atendimento_id)\
+            .order_by(EvolucaoFisioterapia.data_evolucao.desc()).all()
+        
+        # Buscar dados do paciente
+        paciente = atendimento.paciente
+        
+        # Buscar dados da internação
+        internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
+        
+        # Preparar dados das evoluções com informações do fisioterapeuta
+        evolucoes_dados = []
+        for evolucao in evolucoes:
+            funcionario = None
+            if evolucao.funcionario_id:
+                funcionario = Funcionario.query.get(evolucao.funcionario_id)
+            
+            evolucoes_dados.append({
+                'id': evolucao.id,
+                'data_evolucao': evolucao.data_evolucao,
+                'evolucao_fisio': evolucao.evolucao_fisio,
+                'fisioterapeuta_nome': funcionario.nome if funcionario else 'Não identificado',
+                'fisioterapeuta_registro': funcionario.numero_profissional if funcionario else ''
+            })
+        
+        # Função para obter data atual
+        def moment():
+            return datetime.now()
+        
+        return render_template('impressao_fisio.html',
+                               paciente=paciente,
+                               internacao=internacao,
+                               atendimento=atendimento,
+                               evolucoes=evolucoes_dados,
+                               moment=moment)
+                               
+    except Exception as e:
+        flash(f'Erro ao carregar dados para impressão: {str(e)}', 'error')
+        return redirect(url_for('main.index'))
+
+# Rota para impressão das evoluções de nutrição
+@bp.route('/impressao_nutricao/<string:atendimento_id>')
+@login_required
+def impressao_nutricao(atendimento_id):
+    """Página de impressão das evoluções de nutrição"""
+    try:
+        # Buscar o atendimento
+        atendimento = Atendimento.query.get_or_404(atendimento_id)
+        
+        # Buscar as evoluções de nutrição
+        evolucoes = EvolucaoNutricao.query.filter_by(id_atendimento=atendimento_id)\
+            .order_by(EvolucaoNutricao.data_evolucao.desc()).all()
+        
+        # Buscar dados do paciente
+        paciente = atendimento.paciente
+        
+        # Buscar dados da internação
+        internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
+        
+        # Preparar dados das evoluções com informações do nutricionista
+        evolucoes_dados = []
+        for evolucao in evolucoes:
+            funcionario = None
+            if evolucao.funcionario_id:
+                funcionario = Funcionario.query.get(evolucao.funcionario_id)
+            
+            evolucoes_dados.append({
+                'id': evolucao.id,
+                'data_evolucao': evolucao.data_evolucao,
+                'evolucao_nutricao': evolucao.evolucao_nutricao,
+                'nutricionista_nome': funcionario.nome if funcionario else 'Não identificado',
+                'nutricionista_registro': funcionario.numero_profissional if funcionario else ''
+            })
+        
+        # Função para obter data atual
+        def moment():
+            return datetime.now()
+        
+        return render_template('impressao_nutricao.html',
+                               paciente=paciente,
+                               internacao=internacao,
+                               atendimento=atendimento,
+                               evolucoes=evolucoes_dados,
+                               moment=moment)
+                               
+    except Exception as e:
+        flash(f'Erro ao carregar dados para impressão: {str(e)}', 'error')
+        return redirect(url_for('main.index'))
+
+# Rota para impressão de evolução individual de fisioterapia
+@bp.route('/impressao_fisio_evolucao/<int:evolucao_id>')
+@login_required
+def impressao_fisio_evolucao(evolucao_id):
+    """Página de impressão de uma evolução individual de fisioterapia"""
+    try:
+        # Buscar a evolução específica
+        evolucao = EvolucaoFisioterapia.query.get_or_404(evolucao_id)
+        
+        # Buscar o atendimento
+        atendimento = Atendimento.query.get_or_404(evolucao.id_atendimento)
+        
+        # Buscar dados do paciente
+        paciente = atendimento.paciente
+        
+        # Buscar dados da internação
+        internacao = Internacao.query.filter_by(atendimento_id=evolucao.id_atendimento).first()
+        
+        # Buscar dados do fisioterapeuta
+        funcionario = None
+        if evolucao.funcionario_id:
+            funcionario = Funcionario.query.get(evolucao.funcionario_id)
+        
+        # Preparar dados da evolução
+        evolucao_dados = {
+            'id': evolucao.id,
+            'data_evolucao': evolucao.data_evolucao,
+            'evolucao_fisio': evolucao.evolucao_fisio,
+            'fisioterapeuta_nome': funcionario.nome if funcionario else 'Não identificado',
+            'fisioterapeuta_registro': funcionario.numero_profissional if funcionario else ''
+        }
+        
+        # Função para obter data atual
+        def moment():
+            return datetime.now()
+        
+        return render_template('impressao_fisio_individual.html',
+                               paciente=paciente,
+                               internacao=internacao,
+                               atendimento=atendimento,
+                               evolucao=evolucao_dados,
+                               moment=moment)
+                               
+    except Exception as e:
+        flash(f'Erro ao carregar dados para impressão: {str(e)}', 'error')
+        return redirect(url_for('main.index'))
+
+# Rota para impressão de evolução individual de nutrição
+@bp.route('/impressao_nutricao_evolucao/<int:evolucao_id>')
+@login_required
+def impressao_nutricao_evolucao(evolucao_id):
+    """Página de impressão de uma evolução individual de nutrição"""
+    try:
+        # Buscar a evolução específica
+        evolucao = EvolucaoNutricao.query.get_or_404(evolucao_id)
+        
+        # Buscar o atendimento
+        atendimento = Atendimento.query.get_or_404(evolucao.id_atendimento)
+        
+        # Buscar dados do paciente
+        paciente = atendimento.paciente
+        
+        # Buscar dados da internação
+        internacao = Internacao.query.filter_by(atendimento_id=evolucao.id_atendimento).first()
+        
+        # Buscar dados do nutricionista
+        funcionario = None
+        if evolucao.funcionario_id:
+            funcionario = Funcionario.query.get(evolucao.funcionario_id)
+        
+        # Preparar dados da evolução
+        evolucao_dados = {
+            'id': evolucao.id,
+            'data_evolucao': evolucao.data_evolucao,
+            'evolucao_nutricao': evolucao.evolucao_nutricao,
+            'nutricionista_nome': funcionario.nome if funcionario else 'Não identificado',
+            'nutricionista_registro': funcionario.numero_profissional if funcionario else ''
+        }
+        
+        # Função para obter data atual
+        def moment():
+            return datetime.now()
+        
+        return render_template('impressao_nutricao_individual.html',
+                               paciente=paciente,
+                               internacao=internacao,
+                               atendimento=atendimento,
+                               evolucao=evolucao_dados,
+                               moment=moment)
+                               
+    except Exception as e:
+        flash(f'Erro ao carregar dados para impressão: {str(e)}', 'error')
+        return redirect(url_for('main.index'))
+
+# Rota principal
+@bp.route('/')
+def index():
+    try:
+        return render_template('index.html')
+    except Exception as e:
+        logging.error(f"Erro na rota index: {str(e)}")
+        logging.error(traceback.format_exc())
+        return f"Erro ao renderizar página: {str(e)}", 500
+
+# Rota principal da clínica
+@bp.route('/clinica')
+@login_required
+def clinica():
+    try:
+        current_user = get_current_user()
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
+            flash('Acesso restrito a médicos e enfermeiros.', 'danger')
+            return redirect(url_for('main.index'))
+        
+        return render_template('clinica.html')
+        
+    except Exception as e:
+        logging.error(f"Erro ao acessar página da clínica: {str(e)}")
+        logging.error(traceback.format_exc())
+        flash('Erro ao acessar a página. Por favor, tente novamente.', 'danger')
+        return redirect(url_for('main.index'))
+
+# Rota para listar pacientes internados
+@bp.route('/clinica/pacientes-internados')
+@login_required
+def pacientes_internados():
+    try:
+        current_user = get_current_user()
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
+            flash('Acesso restrito a médicos e enfermeiros.', 'danger')
+            return redirect(url_for('main.index'))
+        
+        return render_template('pacientes_internados.html')
+        
+    except Exception as e:
+        logging.error(f"Erro ao acessar lista de pacientes internados: {str(e)}")
+        logging.error(traceback.format_exc())
+        flash('Erro ao acessar a lista de pacientes. Por favor, tente novamente.', 'danger')
+        return redirect(url_for('main.clinica'))
+
+# Rota de login com tratamento de erro mais robusto
+
+@bp.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        try:
+            # Log para diagnóstico
+            logging.info("Recebendo requisição de login")
+            
+            # Obter dados do formulário
+            cpf = request.form.get('cpf')
+            senha = request.form.get('senha')
+            
+            if not cpf or not senha:
+                logging.warning("Tentativa de login sem CPF ou senha")
+                return jsonify({
+                    'success': False,
+                    'error': 'CPF e senha são obrigatórios.'
+                }), 400
+            
+            # Log para diagnóstico
+            logging.info(f"Tentativa de login para CPF: {cpf}")
+            
+            # Buscar funcionário pelo CPF
+            funcionario = Funcionario.query.filter_by(cpf=cpf).first()
+            
+            if not funcionario:
+                logging.warning(f"Login falhou: CPF {cpf} não encontrado")
+                return jsonify({
+                    'success': False,
+                    'error': 'CPF ou senha inválidos.'
+                })
+            
+            # Verificar a senha
+            if not funcionario.check_password(senha):
+                logging.warning(f"Login falhou: Senha incorreta para CPF {cpf}")
+                return jsonify({
+                    'success': False,
+                    'error': 'CPF ou senha inválidos.'
+                })
+            
+            # Login bem-sucedido
+            login_user(funcionario)
+            
+            # Armazenar dados na sessão
+            session['cargo'] = funcionario.cargo
+            session['user_id'] = funcionario.id
+            
+            # Log para diagnóstico
+            logging.info(f"Usuário {funcionario.nome} (ID: {funcionario.id}) com cargo {funcionario.cargo} logado com sucesso")
+            
+            return jsonify({
+                'success': True,
+                'cargo': funcionario.cargo
+            })
+            
+        except Exception as e:
+            # Log detalhado do erro
+            logging.error(f"Erro no processamento do login: {str(e)}")
+            logging.error(traceback.format_exc())
+            
+            # Retornar resposta de erro
+            return jsonify({
+                'success': False,
+                'error': 'Erro interno do servidor. Por favor, tente novamente.'
+            }), 500
+    else:
+        return render_template('login.html')
+
+
+# API para registrar SAE
+@bp.route('/api/enfermagem/sae', methods=['POST'])
+@login_required
+def registrar_sae():
+    try:
+        # Verificar se o usuário é enfermeiro ou multi
+        current_user = get_current_user()
+        if current_user.cargo.lower() not in ['enfermeiro', 'multi']:
+            return jsonify({
+                'success': False,
+                'message': 'Apenas enfermeiros podem registrar SAE'
+            }), 403
+        
+        dados = request.get_json()
+        
+        # Validar dados obrigatórios
+        campos_obrigatorios = [
+            'paciente_id',
+            'hipotese_diagnostica',
+            'pa', 'fc', 'sat', 'dx', 'r', 't',
+            'medicacao', 'alergias', 'antecedentes_pessoais',
+            'sistema_neurologico', 'estado_geral', 'ventilacao',
+            'diagnostico_de_enfermagem', 'pele',
+            'sistema_gastrointerstinal', 'regulacao_vascular',
+            'pulso', 'regulacao_abdominal', 'rha',
+            'sistema_urinario', 'acesso_venoso', 'observacao'
+        ]
+        
+        for campo in campos_obrigatorios:
+            if campo not in dados:
+                return jsonify({
+                    'success': False,
+                    'message': f'Campo obrigatório ausente: {campo}'
+                }), 400
+        
+        # Criar nova SAE com timestamp atual
+        from datetime import datetime, timezone, timedelta
+        
+        nova_sae = InternacaoSae(
+            paciente_id=dados['paciente_id'],
+            enfermeiro_id=current_user.id,
+            data_registro=datetime.now(timezone(timedelta(hours=-3))),  # Timestamp único para cada SAE
+            hipotese_diagnostica=dados['hipotese_diagnostica'],
+            pa=dados['pa'],
+            fc=dados['fc'],
+            sat=dados['sat'],
+            dx=dados['dx'],
+            r=dados['r'],
+            t=dados['t'],
+            medicacao=dados['medicacao'],
+            alergias=dados['alergias'],
+            antecedentes_pessoais=dados['antecedentes_pessoais'],
+            sistema_neurologico=dados['sistema_neurologico'],
+            estado_geral=dados['estado_geral'],
+            ventilacao=dados['ventilacao'],
+            diagnostico_de_enfermagem=dados['diagnostico_de_enfermagem'],
+            pele=dados['pele'],
+            sistema_gastrointerstinal=dados['sistema_gastrointerstinal'],
+            regulacao_vascular=dados['regulacao_vascular'],
+            pulso=dados['pulso'],
+            regulacao_abdominal=dados['regulacao_abdominal'],
+            rha=dados['rha'],
+            sistema_urinario=dados['sistema_urinario'],
+            acesso_venoso=dados['acesso_venoso'],
+            observacao=dados['observacao']
+        )
+        
+        db.session.add(nova_sae)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'SAE registrada com sucesso',
+            'id': nova_sae.id
+        }), 201
+        
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f'Erro ao registrar SAE: {str(e)}')
+        logging.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'message': f'Erro interno do servidor: {str(e)}'
+        }), 500
+
+# API para listar admissões de enfermagem de uma internação
+@bp.route('/api/enfermagem/admissoes/<int:internacao_id>', methods=['GET'])
+@login_required
+def listar_admissoes_enfermagem_old(internacao_id):  # Renomeada para evitar conflito
+    """
+    Lista todas as admissões de enfermagem de uma internação.
+    ---
+    tags:
+      - Enfermagem
+    parameters:
+      - name: internacao_id
+        in: path
+        type: integer
+        required: true
+        description: ID da internação
+    responses:
+      200:
+        description: Lista de admissões
+      404:
+        description: Internação não encontrada
+      500:
+        description: Erro interno do servidor
+    """
+    try:
+        # Verifica se a internação existe
+        internacao = Internacao.query.get(internacao_id)
+        if not internacao:
+            return jsonify({
+                'status': 'erro',
+                'mensagem': 'Internação não encontrada'
+            }), 404
+        
+        # Busca todas as admissões dessa internação
+        admissoes = AdmissaoEnfermagem.query.filter_by(internacao_id=internacao_id).all()
+        
+        # Formata a resposta
+        resultado = []
+        for admissao in admissoes:
+            enfermeiro = Funcionario.query.get(admissao.enfermeiro_id)
+            resultado.append({
+                'id': admissao.id,
+                'data_hora': (admissao.data_hora - timedelta(hours=3)).strftime('%d/%m/%Y %H:%M'),
+                'enfermeiro': enfermeiro.nome if enfermeiro else 'Não informado',
+                'admissao_texto': admissao.admissao_texto
+            })
+        
+        return jsonify({
+            'status': 'sucesso',
+            'admissoes': resultado
+        }), 200
+        
+    except Exception as e:
+        current_app.logger.error(f'Erro ao listar admissões de enfermagem: {str(e)}')
+        return jsonify({
+            'status': 'erro',
+            'mensagem': 'Erro interno do servidor'
+        }), 500
+
+@bp.route('/api/medicamentos', methods=['GET'])
+@login_required
+def api_listar_medicamentos():
+    try:
+        # Verificar autenticação
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'message': 'Usuário não autenticado'}), 401
+
+        # Buscar medicamentos a partir dos aprazamentos
+        aprazamentos = Aprazamento.query.all()
+
+        result = []
+        nomes_unicos = set()
+
+        for apr in aprazamentos:
+            chave = (apr.nome_medicamento.strip().lower(), (apr.descricao_uso or '').strip().lower())
+            if chave not in nomes_unicos:
+                nomes_unicos.add(chave)
+                result.append({
+                    'nome_medicamento': apr.nome_medicamento,
+                    'descricao_uso': apr.descricao_uso or '',
+                    'aprazamento': '',  
+                    'enfermeiro_nome': ''  
+                })
+
+        return jsonify({
+            'success': True,
+            'medicamentos': result
+        })
+
+    except Exception as e:
+        logging.error(f"Erro ao buscar medicamentos: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'error': 'Erro ao buscar medicamentos'
+        }), 500
+
+
+@bp.route('/api/prescricoes/<int:internacao_id>', methods=['GET'])
+@login_required
+def listar_prescricoes(internacao_id):
+    """
+    Lista todas as prescrições médicas de uma internação.
+    Inclui aprazamentos da nova tabela Aprazamento.
+    """
+    try:
+        internacao = Internacao.query.get(internacao_id)
+        if not internacao:
+            return jsonify({
+                'success': False,
+                'message': 'Internação não encontrada'
+            }), 404
+
+        prescricoes = PrescricaoClinica.query.filter_by(atendimentos_clinica_id=internacao_id).order_by(PrescricaoClinica.horario_prescricao.desc()).all()
+
+        # ------- Função para corrigir o formato do aprazamento -------
+        from datetime import date
+
+        def corrigir_aprazamento(aprazamento_raw):
+            if not aprazamento_raw:
+                return ""
+            aprazamento_str = str(aprazamento_raw).strip()
+
+            padrao_completo = r'^\d{2}/\d{2}/\d{4}\s*:\s*\d{2}:\d{2}(?:\s*,\s*\d{2}:\d{2})*(?:\s*;\s*\d{2}/\d{2}/\d{4}\s*:\s*\d{2}:\d{2}(?:\s*,\s*\d{2}:\d{2})*)*$'
+            padrao_apenas_horarios = r'^\d{2}:\d{2}(?:\s*,\s*\d{2}:\d{2})*$'
+
+            if re.match(padrao_completo, aprazamento_str):
+                return aprazamento_str
+
+            if re.match(padrao_apenas_horarios, aprazamento_str):
+                hoje = date.today()
+                return f"{hoje.day:02d}/{hoje.month:02d}/{hoje.year}: {aprazamento_str}"
+
+            # Corrigir formatos quebrados
+            partes = aprazamento_str.split(':')
+            if len(partes) > 2:
+                data_match = re.match(r'^(\d{2}/\d{2}/\d{4})', aprazamento_str)
+                if data_match:
+                    data = data_match.group(1)
+                    horarios_match = re.findall(r'(\d{2}:\d{2})(?:,\s*|$)', aprazamento_str)
+                    if horarios_match:
+                        return f"{data}: {', '.join(horarios_match)}"
+
+            return aprazamento_str
+
+        # --------------------------------------------------------------
+
+        resultado = []
+        for prescricao in prescricoes:
+            medico = Funcionario.query.get(prescricao.medico_id)
+            enfermeiro = Funcionario.query.get(prescricao.enfermeiro_id) if prescricao.enfermeiro_id else None
+
+            # ----- PROCESSAR MEDICAMENTOS -----
+            medicamentos = prescricao.medicamentos_json or []
+            if isinstance(medicamentos, str):
+                import json
+                try:
+                    medicamentos = json.loads(medicamentos)
+                except:
+                    medicamentos = []
+
+            medicamentos_formatados = []
+            for med in medicamentos:
+                aprazamento_corrigido = corrigir_aprazamento(med.get('aprazamento'))
+                
+                # Obter aprazamentos da nova tabela para este medicamento
+                aprazamentos_novos = []
+                if med.get('nome_medicamento'):
+                    aprazamentos_db = Aprazamento.query.filter_by(
+                        prescricao_id=prescricao.id, 
+                        nome_medicamento=med.get('nome_medicamento')
+                    ).order_by(Aprazamento.data_hora_aprazamento).all()
+                    
+                    for apz in aprazamentos_db:
+                        enfermeiro_resp = Funcionario.query.get(apz.enfermeiro_responsavel_id) if apz.enfermeiro_responsavel_id else None
+                        
+                        aprazamentos_novos.append({
+                            'id': apz.id,
+                            'data_hora': apz.data_hora_aprazamento.isoformat(),
+                            'realizado': apz.realizado,
+                            'enfermeiro_nome': enfermeiro_resp.nome if enfermeiro_resp else None,
+                            'data_realizacao': apz.data_realizacao.isoformat() if apz.data_realizacao else None
+                        })
+                
+                medicamentos_formatados.append({
+                    'nome_medicamento': med.get('nome_medicamento'),
+                    'descricao_uso': med.get('descricao_uso'),
+                    'aprazamentos_novos': aprazamentos_novos  # Novos aprazamentos da tabela
+                })
+
+            # ----- BUSCAR APRAZAMENTOS GERAIS DA PRESCRIÇÃO -----
+            aprazamentos_gerais = []
+            aprazamentos_db = Aprazamento.query.filter_by(
+                prescricao_id=prescricao.id
+            ).order_by(Aprazamento.data_hora_aprazamento).all()
+            
+            for apz in aprazamentos_db:
+                enfermeiro_resp = Funcionario.query.get(apz.enfermeiro_responsavel_id) if apz.enfermeiro_responsavel_id else None
+                
+                # Verificar se já existe na lista de medicamentos
+                ja_incluido = False
+                for med in medicamentos_formatados:
+                    if med['nome_medicamento'] == apz.nome_medicamento:
+                        ja_incluido = True
+                        break
+                
+                # Se não foi incluído nos medicamentos específicos, adicionar aos gerais
+                if not ja_incluido:
+                    aprazamentos_gerais.append({
+                        'id': apz.id,
+                        'nome_medicamento': apz.nome_medicamento,
+                        'descricao_uso': apz.descricao_uso,
+                        'data_hora': apz.data_hora_aprazamento.isoformat(),
+                        'realizado': apz.realizado,
+                        'enfermeiro_nome': enfermeiro_resp.nome if enfermeiro_resp else None,
+                        'data_realizacao': apz.data_realizacao.isoformat() if apz.data_realizacao else None
+                    })
+
+            # ----- MONTAR RESULTADO -----
+            resultado.append({
+                'id': prescricao.id,
+                'data_prescricao': prescricao.horario_prescricao.isoformat() if prescricao.horario_prescricao else None,
+                'medico_nome': medico.nome if medico else 'Não informado',
+                'enfermeiro_nome': enfermeiro.nome if enfermeiro else None,
+                'texto_dieta': prescricao.texto_dieta,
+                'texto_procedimento_medico': prescricao.texto_procedimento_medico,
+                'texto_procedimento_multi': prescricao.texto_procedimento_multi,
+                'aprazamentos_gerais': aprazamentos_gerais,  # Novos aprazamentos da tabela
+                'medicamentos': medicamentos_formatados
+            })
+
+        return jsonify({
+            'success': True,
+            'prescricoes': resultado
+        }), 200
+    except Exception as e:
+        logging.error(f'Erro ao listar prescrições: {str(e)}')
+        logging.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'message': 'Erro ao listar prescrições',
+            'error': str(e)
+        }), 500
+
+
+# API para registrar ou atualizar prescrição
+@bp.route('/api/prescricoes', methods=['POST'])
+@login_required
+def registrar_prescricao():
+    """
+    Registra uma nova prescrição médica.
+    Agora também cria registros na tabela Aprazamento para todos os medicamentos com informações de aprazamento.
+    """
+    try:
+        current_user = get_current_user()
+        dados = request.get_json()
+        
+        if not dados.get('atendimentos_clinica_id'):
+            return jsonify({
+                'success': False,
+                'message': 'ID da internação é obrigatório'
+            }), 400
+        
+        internacao = Internacao.query.get(dados['atendimentos_clinica_id'])
+        if not internacao:
+            return jsonify({
+                'success': False,
+                'message': 'Internação não encontrada'
+            }), 404
+        
+        nova_prescricao = PrescricaoClinica(
+            atendimentos_clinica_id=dados['atendimentos_clinica_id'],
+            medico_id=current_user.id,
+            texto_dieta=dados.get('texto_dieta'),
+            texto_procedimento_medico=dados.get('texto_procedimento_medico'),
+            texto_procedimento_multi=dados.get('texto_procedimento_multi'),
+            horario_prescricao=datetime.now(timezone(timedelta(hours=-3)))
+        )
+
+        # Se vierem medicamentos, usa o setter automático
+        if 'medicamentos' in dados:
+            nova_prescricao.medicamentos_json = dados['medicamentos']
+
+        db.session.add(nova_prescricao)
+        db.session.flush()  # Gera o ID da nova prescrição sem fazer commit
+
+        # Processar os aprazamentos dos medicamentos, caso existam
+        if 'medicamentos' in dados and isinstance(dados['medicamentos'], list):
+            for medicamento in dados['medicamentos']:
+                # Verificar se existe informação de aprazamento
+                if medicamento.get('aprazamento'):
+                    try:
+                        # Processar o texto de aprazamento para criar registros individuais
+                        aprazamento_texto = medicamento.get('aprazamento')
+                        
+                        # Formato esperado: "DD/MM/YYYY: HH:MM, HH:MM; DD/MM/YYYY: HH:MM, HH:MM"
+                        dias = aprazamento_texto.split(';')
+                        
+                        for dia in dias:
+                            dia = dia.strip()
+                            if not dia:
+                                continue
+                                
+                            partes = dia.split(':')
+                            if len(partes) < 2:
+                                continue
+                                
+                            data_str = partes[0].strip()
+                            horarios_str = ':'.join(partes[1:]).strip()  # Reconectar caso haja múltiplos ":" após o primeiro
+                            
+                            horarios = [h.strip() for h in horarios_str.split(',')]
+                            
+                            try:
+                                # Converter data no formato DD/MM/YYYY para objeto Date
+                                dia, mes, ano = map(int, data_str.split('/'))
+                                
+                                for horario in horarios:
+                                    if not horario:
+                                        continue
+                                        
+                                    # Converter horário no formato HH:MM para objeto Time
+                                    hora, minuto = map(int, horario.split(':'))
+                                    
+                                    # Criar o objeto DateTime combinando a data e o horário
+                                    data_hora = datetime(ano, mes, dia, hora, minuto)
+                                    
+                                    # Criar registro de Aprazamento
+                                    novo_aprazamento = Aprazamento(
+                                        prescricao_id=nova_prescricao.id,
+                                        nome_medicamento=medicamento.get('nome_medicamento', ''),
+                                        descricao_uso=medicamento.get('descricao_uso', ''),
+                                        data_hora_aprazamento=data_hora,
+                                        enfermeiro_responsavel_id=dados.get('enfermeiro_id')
+                                    )
+                                    
+                                    db.session.add(novo_aprazamento)
+                                    
+                            except Exception as e:
+                                logging.error(f"Erro ao processar aprazamento para a data {data_str}: {str(e)}")
+                                continue
+                    except Exception as e:
+                        logging.error(f"Erro ao processar aprazamento do medicamento {medicamento.get('nome_medicamento')}: {str(e)}")
+                        continue
+
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Prescrição registrada com sucesso',
+            'id': nova_prescricao.id
+        }), 201
+
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f'Erro ao registrar prescrição: {str(e)}')
+        logging.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'message': 'Erro interno do servidor'
+        }), 500
+
+
+# API para atualizar prescrição existente
+@bp.route('/api/prescricoes/<int:prescricao_id>', methods=['PUT'])
+@login_required
+def atualizar_prescricao(prescricao_id):
+    """
+    Atualiza uma prescrição médica existente.
+    Agora também atualiza os registros na tabela Aprazamento quando os medicamentos são alterados.
+    """
+    try:
+        current_user = get_current_user()
+        dados = request.get_json()
+        
+        prescricao = PrescricaoClinica.query.get(prescricao_id)
+        if not prescricao:
+            return jsonify({
+                'success': False,
+                'message': 'Prescrição não encontrada'
+            }), 404
+        
+        if 'texto_dieta' in dados:
+            prescricao.texto_dieta = dados['texto_dieta']
+        if 'texto_procedimento_medico' in dados:
+            prescricao.texto_procedimento_medico = dados['texto_procedimento_medico']
+        if 'texto_procedimento_multi' in dados:
+            prescricao.texto_procedimento_multi = dados['texto_procedimento_multi']
+        
+        if 'medicamentos' in dados:
+            # Obter lista anterior de medicamentos para comparar
+            medicamentos_anteriores = prescricao.medicamentos_json
+            
+            # Atualizar medicamentos na prescrição
+            prescricao.medicamentos_json = dados['medicamentos']
+            
+            # Processar aprazamentos atualizados
+            if isinstance(dados['medicamentos'], list):
+                # Manter um registro dos medicamentos que ainda existem
+                nomes_medicamentos_atuais = set()
+                
+                for medicamento in dados['medicamentos']:
+                    nome_medicamento = medicamento.get('nome_medicamento', '')
+                    nomes_medicamentos_atuais.add(nome_medicamento)
+                    
+                    # Verificar se existe informação de aprazamento
+                    if medicamento.get('aprazamento'):
+                        # Se for um medicamento novo ou se o aprazamento foi alterado, atualizar
+                        medicamento_anterior = None
+                        if isinstance(medicamentos_anteriores, list):
+                            for med_ant in medicamentos_anteriores:
+                                if med_ant.get('nome_medicamento') == nome_medicamento:
+                                    medicamento_anterior = med_ant
+                                    break
+                        
+                        aprazamento_alterado = (
+                            not medicamento_anterior or 
+                            medicamento_anterior.get('aprazamento') != medicamento.get('aprazamento')
+                        )
+                        
+                        if aprazamento_alterado:
+                            # Remover aprazamentos anteriores deste medicamento
+                            Aprazamento.query.filter_by(
+                                prescricao_id=prescricao_id, 
+                                nome_medicamento=nome_medicamento
+                            ).delete()
+                            
+                            try:
+                                # Processar o texto de aprazamento para criar registros individuais
+                                aprazamento_texto = medicamento.get('aprazamento')
+                                
+                                # Formato esperado: "DD/MM/YYYY: HH:MM, HH:MM; DD/MM/YYYY: HH:MM, HH:MM"
+                                dias = aprazamento_texto.split(';')
+                                
+                                for dia in dias:
+                                    dia = dia.strip()
+                                    if not dia:
+                                        continue
+                                        
+                                    partes = dia.split(':')
+                                    if len(partes) < 2:
+                                        continue
+                                        
+                                    data_str = partes[0].strip()
+                                    horarios_str = ':'.join(partes[1:]).strip()  # Reconectar caso haja múltiplos ":" após o primeiro
+                                    
+                                    horarios = [h.strip() for h in horarios_str.split(',')]
+                                    
+                                    try:
+                                        # Converter data no formato DD/MM/YYYY para objeto Date
+                                        dia, mes, ano = map(int, data_str.split('/'))
+                                        
+                                        for horario in horarios:
+                                            if not horario:
+                                                continue
+                                                
+                                            # Converter horário no formato HH:MM para objeto Time
+                                            hora, minuto = map(int, horario.split(':'))
+                                            
+                                            # Criar o objeto DateTime combinando a data e o horário
+                                            data_hora = datetime(ano, mes, dia, hora, minuto)
+                                            
+                                            # Criar registro de Aprazamento
+                                            novo_aprazamento = Aprazamento(
+                                                prescricao_id=prescricao_id,
+                                                nome_medicamento=nome_medicamento,
+                                                descricao_uso=medicamento.get('descricao_uso', ''),
+                                                data_hora_aprazamento=data_hora,
+                                                enfermeiro_responsavel_id=dados.get('enfermeiro_id')
+                                            )
+                                            
+                                            db.session.add(novo_aprazamento)
+                                            
+                                    except Exception as e:
+                                        logging.error(f"Erro ao processar aprazamento para a data {data_str}: {str(e)}")
+                                        continue
+                            except Exception as e:
+                                logging.error(f"Erro ao processar aprazamento do medicamento {nome_medicamento}: {str(e)}")
+                                continue
+                
+                # Remover aprazamentos de medicamentos que não existem mais
+                if isinstance(medicamentos_anteriores, list):
+                    for med_ant in medicamentos_anteriores:
+                        nome_ant = med_ant.get('nome_medicamento', '')
+                        if nome_ant and nome_ant not in nomes_medicamentos_atuais:
+                            # Este medicamento foi removido, então devemos remover seus aprazamentos
+                            Aprazamento.query.filter_by(
+                                prescricao_id=prescricao_id, 
+                                nome_medicamento=nome_ant
+                            ).delete()
+
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Prescrição atualizada com sucesso'
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f'Erro ao atualizar prescrição: {str(e)}')
+        logging.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'message': 'Erro interno do servidor'
+        }), 500
+
+
+@bp.route('/clinica/evolucao-paciente-enfermeiro/<string:atendimento_id>')
+@login_required
+def evolucao_paciente_enfermeiro(atendimento_id):
+    try:
+        # Verificar se o usuário é enfermeiro ou multi
+        current_user = get_current_user()
+        if current_user.cargo.lower() not in ['enfermeiro', 'multi']:
+            flash('Acesso restrito a enfermeiros.', 'danger')
+            return redirect(url_for('main.index'))
+        
+        # Buscar dados do paciente e internação
+        internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
+        if not internacao:
+            flash('Internação não encontrada.', 'danger')
+            return redirect(url_for('main.pacientes_internados'))
+        
+        paciente = Paciente.query.get(internacao.paciente_id)
+        if not paciente:
+            flash('Paciente não encontrado.', 'danger')
+            return redirect(url_for('main.pacientes_internados'))
+        
+        return render_template('clinica_evolucao_paciente_enfermeiro.html', 
+                            paciente=paciente, 
+                            internacao=internacao)
+        
+    except Exception as e:
+        logging.error(f"Erro ao acessar evolução do paciente (enfermeiro): {str(e)}")
+        logging.error(traceback.format_exc())
+        flash('Erro ao acessar a evolução do paciente. Por favor, tente novamente.', 'danger')
+        return redirect(url_for('main.pacientes_internados'))
+
+@bp.route('/clinica/evolucao-paciente-multi/<string:atendimento_id>')
+@login_required
+def evolucao_paciente_multi(atendimento_id):
+    try:
+        # Verificar se o usuário é multi
+        current_user = get_current_user()
+        if current_user.cargo.lower() != 'multi':
+            flash('Acesso restrito a profissionais multi.', 'danger')
+            return redirect(url_for('main.index'))
+        
+        # Buscar dados do paciente e internação
+        internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
+        if not internacao:
+            flash('Internação não encontrada.', 'danger')
+            return redirect(url_for('main.pacientes_internados'))
+        
+        paciente = Paciente.query.get(internacao.paciente_id)
+        if not paciente:
+            flash('Paciente não encontrado.', 'danger')
+            return redirect(url_for('main.pacientes_internados'))
+        
+        return render_template('clinica_evolucao_paciente_multi.html', 
+                            paciente=paciente, 
+                            internacao=internacao)
+        
+    except Exception as e:
+        logging.error(f"Erro ao acessar evolução do paciente (multi): {str(e)}")
+        logging.error(traceback.format_exc())
+        flash('Erro ao acessar a evolução do paciente. Por favor, tente novamente.', 'danger')
+        return redirect(url_for('main.pacientes_internados'))
+
 @bp.route('/clinica/evolucao-paciente-medico/<string:atendimento_id>')
 @login_required
 def evolucao_paciente_medico(atendimento_id):
@@ -7727,3 +9138,204 @@ def internar_paciente():
             'success': False,
             'message': f'Erro interno do servidor: {str(e)}'
         }), 500
+
+@bp.route('/api/rn-internacao', methods=['POST'])
+@login_required
+def adicionar_rn_internacao():
+    """
+    Registra um novo RN, cria atendimento, internação e primeira evolução médica
+    """
+    try:
+        current_user = get_current_user()
+        if current_user.cargo.lower() != 'medico':
+            return jsonify({
+                'success': False,
+                'message': 'Apenas médicos podem adicionar RN em internação'
+            }), 403
+
+        dados = request.get_json()
+        
+        # Campos obrigatórios do RN
+        campos_rn_obrigatorios = ['nome', 'data_nascimento', 'sexo', 'peso_ao_nascer', 'responsavel_id']
+        for campo in campos_rn_obrigatorios:
+            if campo not in dados or not dados[campo]:
+                return jsonify({
+                    'success': False,
+                    'message': f'Campo obrigatório não informado: {campo}'
+                }), 400
+
+        # Campos obrigatórios da internação
+        campos_internacao_obrigatorios = ['hda', 'diagnostico_inicial']
+        for campo in campos_internacao_obrigatorios:
+            if campo not in dados or not dados[campo]:
+                return jsonify({
+                    'success': False,
+                    'message': f'Campo obrigatório não informado: {campo}'
+                }), 400
+
+        # Verificar se o responsável existe
+        responsavel = Paciente.query.get(dados['responsavel_id'])
+        if not responsavel:
+            return jsonify({
+                'success': False,
+                'message': 'Responsável não encontrado'
+            }), 404
+
+        # Processar data de nascimento
+        try:
+            data_nascimento = datetime.strptime(dados['data_nascimento'], '%Y-%m-%d').date()
+        except ValueError:
+            return jsonify({
+                'success': False,
+                'message': 'Formato de data de nascimento inválido. Use YYYY-MM-DD.'
+            }), 400
+
+        # Gerar CPF temporário para RN se não fornecido
+        if not dados.get('cpf'):
+            import random
+            data_str = datetime.now(ZoneInfo("America/Sao_Paulo")).strftime('%y%m%d')
+            random_digits = str(random.randint(0, 9999)).zfill(4)
+            dados['cpf'] = f'RN{data_str}{random_digits}'[:14]
+
+        # Verificar se o paciente RN já existe
+        paciente_existente = Paciente.query.filter_by(cpf=dados['cpf']).first()
+
+        if paciente_existente:
+            paciente = paciente_existente
+        else:
+            # Criar novo paciente RN
+            paciente = Paciente(
+                nome=dados['nome'],
+                filiacao=dados.get('filiacao', responsavel.nome),
+                cpf=dados['cpf'],
+                data_nascimento=data_nascimento,
+                sexo=dados['sexo'],
+                telefone=dados.get('telefone', responsavel.telefone),
+                endereco=dados.get('endereco', responsavel.endereco),
+                municipio=dados.get('municipio', responsavel.municipio),
+                bairro=dados.get('bairro', responsavel.bairro),
+                cartao_sus=dados.get('cartao_sus'),
+                nome_social=dados.get('nome_social', ''),
+                cor=dados.get('cor', 'Não informada'),
+                identificado=True
+            )
+            db.session.add(paciente)
+            db.session.flush()
+
+        agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
+        
+        # Gerar ID de atendimento para RN (começando com 999)
+        def gerar_id_rn():
+            import random
+            while True:
+                sufixo = str(random.randint(0, 99999)).zfill(5)
+                novo_id = f"999{sufixo}"
+                if not Atendimento.query.get(novo_id):
+                    return novo_id
+
+        atendimento_id = gerar_id_rn()
+
+        # Criar atendimento
+        atendimento = Atendimento(
+            id=atendimento_id,
+            paciente_id=paciente.id,
+            funcionario_id=current_user.id,
+            medico_id=current_user.id,
+            data_atendimento=date.today(),
+            hora_atendimento=time(agora.hour, agora.minute, agora.second),
+            status='Internado',
+            horario_internacao=agora,
+            alergias=dados.get('alergias', ''),
+            peso=dados.get('peso_ao_nascer'),
+            altura=dados.get('altura')
+        )
+        db.session.add(atendimento)
+        db.session.flush()
+
+        # Criar entrada na tabela Internacao (atendimento_clinica)
+        internacao = Internacao(
+            atendimento_id=atendimento_id,
+            paciente_id=paciente.id,
+            medico_id=current_user.id,
+            enfermeiro_id=dados.get('enfermeiro_id'),
+            hda=dados.get('hda', ''),
+            diagnostico_inicial=dados.get('diagnostico_inicial', ''),
+            folha_anamnese=dados.get('exame_fisico', ''),
+            cid_principal=dados.get('cid_principal', ''),
+            cid_10_secundario=dados.get('cid_secundario', ''),
+            data_internacao=agora,
+            leito=dados.get('leito', 'Berçário'),
+            carater_internacao='Internação RN',
+            dieta=dados.get('dieta', 'Aleitamento materno')
+        )
+        db.session.add(internacao)
+        db.session.flush()
+
+        # Criar registro na tabela PacienteRN
+        paciente_rn = PacienteRN(
+            paciente_id=paciente.id,
+            responsavel_id=dados['responsavel_id'],
+            data_nascimento=data_nascimento,
+            tipo_parto=dados.get('tipo_parto', ''),
+            idade_gestacional=dados.get('idade_gestacional', ''),
+            peso_ao_nascer=dados.get('peso_ao_nascer'),
+            observacoes=dados.get('observacoes_rn', '')
+        )
+        db.session.add(paciente_rn)
+        db.session.flush()
+
+        # Criar primeira evolução médica com dados específicos do RN
+        dados_rn_para_evolucao = []
+        
+        if dados.get('peso_ao_nascer'):
+            dados_rn_para_evolucao.append(f"Peso ao nascer: {dados['peso_ao_nascer']}g")
+        
+        if dados.get('altura'):
+            dados_rn_para_evolucao.append(f"Altura: {dados['altura']}cm")
+        
+        if dados.get('apgar'):
+            dados_rn_para_evolucao.append(f"Índice de Apgar: {dados['apgar']}")
+        
+        if dados.get('tipo_parto'):
+            dados_rn_para_evolucao.append(f"Tipo de parto: {dados['tipo_parto']}")
+        
+        if dados.get('idade_gestacional'):
+            dados_rn_para_evolucao.append(f"Idade gestacional: {dados['idade_gestacional']}")
+
+        evolucao_texto = f"Primeira evolução médica - RN\n\n"
+        evolucao_texto += f"Dados do nascimento:\n"
+        evolucao_texto += "\n".join(dados_rn_para_evolucao)
+        
+        if dados.get('primeira_evolucao'):
+            evolucao_texto += f"\n\nEvolução médica:\n{dados['primeira_evolucao']}"
+
+        primeira_evolucao = EvolucaoAtendimentoClinica(
+            atendimentos_clinica_id=internacao.id,
+            funcionario_id=current_user.id,
+            data_evolucao=agora,
+            hda=dados.get('hda', ''),
+            evolucao=evolucao_texto,
+            conduta=dados.get('conduta', 'Internação em berçário - Acompanhamento médico'),
+            parametros=dados.get('parametros', '')
+        )
+        db.session.add(primeira_evolucao)
+
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'RN adicionado à internação com sucesso',
+            'paciente_id': paciente.id,
+            'paciente_rn_id': paciente_rn.id,
+            'atendimento_id': atendimento_id,
+            'internacao_id': internacao.id
+        }), 201
+
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f'Erro ao adicionar RN em internação: {str(e)}')
+        logging.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'message': f'Erro interno do servidor: {str(e)}'
+        }), 500 
