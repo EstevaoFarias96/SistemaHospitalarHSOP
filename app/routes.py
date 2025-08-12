@@ -2841,9 +2841,41 @@ def evolucao_paciente_medico(atendimento_id):
             flash('Paciente não encontrado.', 'danger')
             return redirect(url_for('main.pacientes_internados'))
         
+        # Procurar se este paciente é responsável por algum RN e, se sim, montar info para link rápido
+        rn_ativo_info = None
+        try:
+            rns_responsavel = PacienteRN.query.filter_by(responsavel_id=paciente.id).all()
+            for rn_rel in rns_responsavel:
+                paciente_rn = Paciente.query.get(rn_rel.paciente_id)
+                if not paciente_rn:
+                    continue
+                # Preferir uma internação ativa (sem alta). Se não houver, usar a mais recente
+                internacao_rn_ativa = (
+                    Internacao.query
+                    .filter_by(paciente_id=paciente_rn.id, data_alta=None)
+                    .order_by(Internacao.id.desc())
+                    .first()
+                )
+                internacao_rn = internacao_rn_ativa or (
+                    Internacao.query
+                    .filter_by(paciente_id=paciente_rn.id)
+                    .order_by(Internacao.id.desc())
+                    .first()
+                )
+                if internacao_rn:
+                    rn_ativo_info = {
+                        'nome': paciente_rn.nome,
+                        'atendimento_id': internacao_rn.atendimento_id,
+                    }
+                    break
+        except Exception as e:
+            logging.error(f"Erro ao buscar RN vinculado ao responsável {paciente.id}: {str(e)}")
+            logging.error(traceback.format_exc())
+        
         return render_template('clinica_evolucao_paciente_medico.html', 
                             paciente=paciente, 
-                            internacao=internacao)
+                            internacao=internacao,
+                            rn_ativo_info=rn_ativo_info)
         
     except Exception as e:
         logging.error(f"Erro ao acessar evolução do paciente (médico): {str(e)}")
@@ -5795,7 +5827,8 @@ def imprimir_aih(atendimento_id):
                 'leito': internacao.leito or '',
                 'carater_de_internacao': internacao.carater_internacao or '',
                 'funcionario_nome': medico.nome or '',
-                'medico_cpf': medico.cpf or ''
+                'medico_cpf': medico.cpf or '',
+                'data_atual': datetime.now(ZoneInfo("America/Sao_Paulo")).strftime('%d/%m/%Y')
             }
         except Exception as e:
             logging.error(f"Erro ao montar contexto: {str(e)}")

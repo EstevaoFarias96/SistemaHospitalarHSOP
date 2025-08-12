@@ -1810,6 +1810,11 @@
                 <button type="button" class="btn btn-outline-success me-2" id="btnAdicionarRN">
                     <i class="fas fa-plus"></i> Adicionar RN
                 </button>
+                {% if rn_ativo_info %}
+                <a href="/clinica/evolucao-paciente-medico/{{ rn_ativo_info.atendimento_id }}" class="btn btn-success me-2">
+                    <i class="fas fa-baby"></i> Ficha do RN
+                </a>
+                {% endif %}
                 {% if internacao.data_alta %}
                 <button type="button" class="btn btn-success me-2" onclick="verInformacoesAlta('{{ internacao.atendimento_id }}')">
                     <i class="fas fa-user-check me-1"></i> Informações de Alta

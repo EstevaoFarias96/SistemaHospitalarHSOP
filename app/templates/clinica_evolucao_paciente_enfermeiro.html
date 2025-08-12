@@ -1783,7 +1783,7 @@ function abrirImpressoesEnfermagem() {
                 <i class="fas fa-arrow-left"></i>
                 <span>Voltar</span>
             </a>
-            <a class="nav-link" href="#" data-target="printSection">
+            <a class="nav-link" href="#" onclick="abrirImpressoesEnfermagem(); return false;">
                 <i class="fas fa-print"></i>
                 <span>Imprimir</span>
             </a>
@@ -3374,7 +3374,7 @@ function abrirImpressoesEnfermagem() {
 <script src="/static/js/aprazamento.js"></script>
 <script src="/static/js/calculo_horarios.js"></script>
 
-<!-- Adicionar referência ao módulo de evoluções de enfermagem -->
+<!-- Adicionar referência ao módulo de evoluções de enfermeiro -->
 
 <!-- Adicionar o novo módulo completo de enfermagem -->
 <script src="/static/js/enfermagem_completo.js"></script>
@@ -3478,7 +3478,6 @@ function abrirImpressoesEnfermagem() {
     }
     
     let quill; // Editor Quill para evolução médica
-    // Remover a inicialização do quillEnfermagem que está causando problemas
     
     // Inicializar Observador de Mutações para monitorar problemas DOM
     function observarMutacoesDom(seletor, callback) {
