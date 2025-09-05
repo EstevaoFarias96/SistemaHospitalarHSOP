@@ -27881,3 +27881,30 @@ IndentationError: unexpected unindent
 2025-09-05 11:07:34,541 [INFO] __init__:72 - LoginManager inicializado com sucesso
 2025-09-05 11:07:34,729 [INFO] __init__:90 - Blueprints registrados com sucesso
 2025-09-05 11:07:34,746 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-09-05 12:15:56,828 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-09-05 12:15:56,828 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-09-05 12:15:56,828 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-09-05 12:15:56,828 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-09-05 12:15:56,828 [INFO] __init__:63 - Configurações básicas definidas
+2025-09-05 12:15:56,836 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-09-05 12:15:56,836 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-09-05 12:15:57,078 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-09-05 12:15:57,086 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-09-05 12:16:02,431 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-09-05 12:16:02,431 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-09-05 12:16:02,431 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-09-05 12:16:02,431 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-09-05 12:16:02,431 [INFO] __init__:63 - Configurações básicas definidas
+2025-09-05 12:16:02,435 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-09-05 12:16:02,435 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-09-05 12:16:02,579 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-09-05 12:16:02,581 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-09-05 12:16:03,869 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-09-05 12:16:03,869 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-09-05 12:16:03,869 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-09-05 12:16:03,869 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-09-05 12:16:03,869 [INFO] __init__:63 - Configurações básicas definidas
+2025-09-05 12:16:03,874 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-09-05 12:16:03,875 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-09-05 12:16:04,039 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-09-05 12:16:04,042 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
