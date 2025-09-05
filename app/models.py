@@ -71,6 +71,27 @@ class Paciente(db.Model):
     internacoes_sae = relationship('InternacaoSae', backref='paciente', lazy=True)
     atendimentos_clinica = relationship('Internacao', backref='paciente', lazy=True)
 
+class AtendimentosGestante(db.Model):
+    __tablename__ = 'atendimentos_gestante'
+
+    id_atendimentos_gestante = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id_atendimentos = db.Column(db.String, db.ForeignKey('atendimentos.id'), nullable=False)
+    id_paciente = db.Column(db.Integer, db.ForeignKey('pacientes.id'), nullable=False)
+
+    semanas = db.Column(db.Numeric(5, 2))
+    dias = db.Column(db.Integer)
+    altura_uterina = db.Column(db.Numeric(5, 2))
+    quantidade_gestacoes = db.Column(db.Integer)
+    ultima_menstruacao = db.Column(db.Date)
+    bcf = db.Column(db.Numeric(6, 2))
+    data_primeiro_ultrassom = db.Column(db.Date)
+    abo_rh = db.Column(db.String(10))
+
+    atendimento = db.relationship('Atendimento', backref='atendimento_gestante', lazy=True)
+    paciente = db.relationship('Paciente', backref='atendimentos_gestante', lazy=True)
+
+
+
 class Atendimento(db.Model):
     __tablename__ = 'atendimentos'
     id = db.Column(db.String(8), primary_key=True)

@@ -47,9 +47,7 @@
         $('#cpf').mask('000.000.000-00', {
           reverse: true,
           clearIfNotMatch: true
-        });
-
-        $('#loginForm').on('submit', function(e) {
+        });        $('#loginForm').on('submit', function(e) {
         e.preventDefault();
         $.ajax({
           url: '/login',

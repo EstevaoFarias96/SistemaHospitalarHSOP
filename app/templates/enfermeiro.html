@@ -273,6 +273,10 @@
           $('#userNameDisplay').text(data.nome);
         }
       });
+
+      // Carrega automaticamente os pacientes aguardando triagem
+      console.log("Carregando automaticamente pacientes aguardando triagem...");
+      abrirTriagem();
     });
 
     // Toggle do menu do usuário

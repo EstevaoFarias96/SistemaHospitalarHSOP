@@ -508,14 +508,33 @@
           totalDias = semanas * 7 + dias;
         }
 
+        // Função para limpar e validar valores numéricos
+        function limparValorNumerico(valor, campo) {
+          if (!valor || valor.trim() === '') return '';
+
+          // Remove unidades comuns e caracteres não numéricos
+          let valorLimpo = valor.toString()
+            .replace(/[^\d.,]/g, '')  // Remove tudo exceto dígitos, ponto e vírgula
+            .replace(',', '.');       // Converte vírgula para ponto
+
+          // Converte para número e valida
+          const numero = parseFloat(valorLimpo);
+          if (isNaN(numero)) {
+            alert(`Valor inválido para ${campo}: ${valor}`);
+            return '';
+          }
+
+          return numero.toString();
+        }
+
         const formData = {
           pressao: document.getElementById('pressao').value,
-          pulso: document.getElementById('pulso').value,
-          sp02: document.getElementById('sp02').value,
-          temp: document.getElementById('temp').value,
-          peso: document.getElementById('peso').value,
+          pulso: limparValorNumerico(document.getElementById('pulso').value, 'Pulso'),
+          sp02: limparValorNumerico(document.getElementById('sp02').value, 'SpO₂'),
+          temp: limparValorNumerico(document.getElementById('temp').value, 'Temperatura'),
+          peso: limparValorNumerico(document.getElementById('peso').value, 'Peso'),
           altura: document.getElementById('altura').value,
-          fr: document.getElementById('fr').value,
+          fr: limparValorNumerico(document.getElementById('fr').value, 'FR'),
           dx: document.getElementById('dx').value,
           triagem: document.getElementById('triagem').value,
           alergias: document.getElementById('alergias').value,
@@ -524,10 +543,12 @@
           observacao: document.getElementById('observacao').value,
           // Envia a idade gestacional total em dias (se for gestante)
           idade_gestacional: totalDias,
-          altura_uterina: document.getElementById('altura_uterina').value,
-          quantidade_de_gestacoes: document.getElementById('quantidade_de_gestacoes').value,
+          idade_gestacional_semanas: document.getElementById('idade_gestacional_semanas').value,
+          idade_gestacional_dias: document.getElementById('idade_gestacional_dias').value,
+          altura_uterina: limparValorNumerico(document.getElementById('altura_uterina').value, 'Altura Uterina'),
+          quantidade_de_gestacoes: limparValorNumerico(document.getElementById('quantidade_de_gestacoes').value, 'Quantidade de Gestações'),
           ultima_mestruacao: document.getElementById('ultima_mestruacao').value,
-          bcf: document.getElementById('bcf').value,
+          bcf: limparValorNumerico(document.getElementById('bcf').value, 'BCF'),
           data_primeira_ultrassom: document.getElementById('data_primeira_ultrassom').value,
           // Condições clínicas (apenas se gestante estiver marcada)
           itu: document.getElementById('itu').checked,

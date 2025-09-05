@@ -23,11 +23,11 @@ class ConfigProd:
 
 class ConfigDev:
     SECRET_KEY = 'uma_chave_secreta_muito_segura'
-    SQLALCHEMY_DATABASE_URI = 'postgresql://hsop:senha123@localhost:5432/hospital_db'
+    SQLALCHEMY_DATABASE_URI = 'postgresql://hsop:Estv,123@localhost:5432/hospital_db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     logging.info(f"[DESENVOLVIMENTO] SQLALCHEMY_DATABASE_URI: {SQLALCHEMY_DATABASE_URI.split('@')[0] if '@' in SQLALCHEMY_DATABASE_URI else SQLALCHEMY_DATABASE_URI}")
 
 
 # === ATIVAR UMA DAS CONFIGURAÇÕES ABAIXO ===
 # Config = ConfigProd  # Produção (Render, Railway, etc.)
-Config = ConfigProd # Desenvolvimento/teste local
+Config = ConfigDev # Desenvolvimento/teste local

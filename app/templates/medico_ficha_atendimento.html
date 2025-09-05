@@ -1,0 +1,2090 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ficha de Atendimento</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    /* ===== VARIÁVEIS DE DESIGN PROFISSIONAL ===== */
+    :root {
+      --primary-dark: #1a237e;
+      --primary-main: #283593;
+      --primary-light: #3949ab;
+      --accent: #1565c0;
+      --success: #2e7d32;
+      --warning: #f57c00;
+      --danger: #d32f2f;
+      --info: #0288d1;
+      --secondary: #616161;
+      
+      --text-primary: #212529;
+      --text-secondary: #6c757d;
+      --text-muted: #adb5bd;
+      
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8f9fa;
+      --bg-tertiary: #e9ecef;
+      
+      --border-light: #e9ecef;
+      --border-medium: #dee2e6;
+      --border-dark: #adb5bd;
+      
+      --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+      --shadow-md: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+      --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+      
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+      
+      --transition-fast: 0.15s ease;
+      --transition-normal: 0.3s ease;
+      --transition-slow: 0.5s ease;
+    }
+
+    /* ===== LAYOUT PRINCIPAL ===== */
+    body { 
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-primary);
+    }
+
+    /* ===== SIDEBAR PROFISSIONAL ===== */
+    .sidebar { 
+      width: 80px; 
+      height: 100vh; 
+      position: fixed; 
+      left: 0; 
+      top: 0; 
+      background: linear-gradient(180deg, var(--primary-dark) 0%, var(--primary-main) 100%);
+      display: flex; 
+      flex-direction: column; 
+      transition: all var(--transition-normal);
+      z-index: 1000;
+      box-shadow: var(--shadow-md);
+      border-right: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .sidebar:hover { 
+      width: 260px; 
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .sidebar .nav-link { 
+      color: rgba(255,255,255,0.85); 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      padding: 14px 16px; 
+      border-radius: var(--radius-md); 
+      margin: 4px 12px; 
+      white-space: nowrap; 
+      overflow: hidden; 
+      text-overflow: ellipsis;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all var(--transition-fast);
+      position: relative;
+    }
+    
+    .sidebar .nav-link::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 3px;
+      background: var(--accent);
+      transform: scaleY(0);
+      transition: transform var(--transition-fast);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    }
+    
+    .sidebar .nav-link i { 
+      width: 20px; 
+      text-align: center;
+      font-size: 16px;
+      color: rgba(255,255,255,0.9);
+    }
+    
+    .sidebar .nav-link.active::before,
+    .sidebar .nav-link:hover::before { 
+      transform: scaleY(1);
+    }
+    
+    .sidebar .nav-link.active, 
+    .sidebar .nav-link:hover { 
+      background-color: rgba(255,255,255,0.15);
+      color: #ffffff;
+      transform: translateX(3px);
+    }
+    
+    .sidebar .nav-link span {
+      opacity: 0;
+      transform: translateX(-10px);
+      transition: all var(--transition-normal);
+    }
+    
+    .sidebar:hover .nav-link span {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* ===== CONTEÚDO PRINCIPAL ===== */
+    .main-content { 
+      margin-left: 80px; 
+      padding: 0;
+      transition: margin-left var(--transition-normal); 
+      min-height: 100vh;
+      background: transparent;
+    }
+    
+    .content-inner { 
+      max-width: 1400px; 
+      margin: 0 auto; 
+      padding: 24px;
+    }
+
+    /* ===== RESPONSIVIDADE MELHORADA ===== */
+    @media (min-width: 1200px) {
+      .sidebar:hover + .main-content { margin-left: 260px; }
+    }
+    
+    @media (min-width: 1600px) { 
+      .content-inner { max-width: 1600px; } 
+    }
+    
+    @media (max-width: 992px) {
+      .sidebar { width: 70px; }
+      .sidebar:hover { width: 70px; }
+      .main-content { margin-left: 70px; }
+      .sidebar .nav-link span { display: none !important; }
+      .content-inner { padding: 20px; }
+    }
+    
+    @media (max-width: 768px) {
+      .sidebar { width: 60px; }
+      .main-content { margin-left: 60px; }
+      .content-inner { padding: 16px; }
+      .card .card-body { padding: 1rem; }
+    }
+
+    /* ===== HEADER DA PÁGINA ===== */
+    .page-header {
+      background: var(--bg-primary);
+      border-radius: var(--radius-lg);
+      padding: 24px 32px;
+      margin-bottom: 32px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-light);
+    }
+    
+    .page-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .page-title i {
+      color: var(--primary-main);
+    }
+
+    /* ===== CARDS PROFISSIONAIS ===== */
+    .card { 
+      border: none; 
+      box-shadow: var(--shadow-sm);
+      border-radius: var(--radius-lg);
+      transition: all var(--transition-normal);
+      background: var(--bg-primary);
+      overflow: hidden;
+    }
+    
+    .card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    
+    .card-header {
+      background: linear-gradient(135deg, var(--primary-main), var(--primary-light));
+      color: white;
+      border-bottom: none;
+      padding: 20px 24px;
+      font-weight: 600;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .card-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--primary-light));
+    }
+    
+    .card-body {
+      padding: 24px;
+    }
+
+    /* ===== DADOS DO PACIENTE ===== */
+    .patient-info-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+      border: 2px solid var(--primary-light);
+      border-radius: var(--radius-xl);
+      padding: 28px;
+      margin-bottom: 32px;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .patient-info-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-main), var(--accent), var(--primary-light));
+    }
+    
+    .patient-info-card .info-item {
+      margin-bottom: 16px;
+      padding: 12px 16px;
+      background: rgba(40, 53, 147, 0.04);
+      border-radius: var(--radius-md);
+      border-left: 4px solid var(--primary-light);
+      transition: all var(--transition-fast);
+    }
+    
+    .patient-info-card .info-item:hover {
+      background: rgba(40, 53, 147, 0.08);
+      transform: translateX(4px);
+    }
+    
+    .patient-info-card .info-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary-main);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      display: block;
+    }
+    
+    .patient-info-card .info-value {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    /* ===== SEÇÕES DE CONTEÚDO ===== */
+    .section { 
+      display: none; 
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    
+    .section.active { 
+      display: block; 
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== TRIAGEM CARD ===== */
+    .triagem-card .card-header {
+      background: linear-gradient(135deg, var(--info), #0ea5e9);
+    }
+    
+    .vital-signs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .vital-sign-item {
+      background: var(--bg-secondary);
+      padding: 16px;
+      border-radius: var(--radius-md);
+      text-align: center;
+      border: 1px solid var(--border-light);
+      transition: all var(--transition-fast);
+    }
+    
+    .vital-sign-item:hover {
+      background: #ffffff;
+      box-shadow: var(--shadow-sm);
+      transform: translateY(-2px);
+    }
+    
+    .vital-sign-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: block;
+    }
+    
+    .vital-sign-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    /* ===== TEXTO BLOCKS MELHORADOS ===== */
+    .texto-bloco { 
+      white-space: pre-wrap; 
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      border: 2px solid var(--border-light); 
+      border-radius: var(--radius-lg); 
+      padding: 20px; 
+      min-height: 120px; 
+      font-size: 14px; 
+      line-height: 1.6;
+      font-family: 'Inter', system-ui, sans-serif;
+      color: var(--text-primary);
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+      transition: all var(--transition-fast);
+    }
+    
+    .texto-bloco:hover {
+      border-color: var(--primary-light);
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1), 0 0 0 3px rgba(40, 53, 147, 0.1);
+    }
+
+    /* ===== CARDS ESPECIALIZADOS ===== */
+    .anamnese-card { 
+      border-left: 5px solid var(--primary-main);
+      background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%);
+    }
+    
+    .anamnese-card .card-header {
+      background: linear-gradient(135deg, var(--primary-main), var(--primary-light));
+    }
+    
+    .reavaliacao-card { 
+      border-left: 5px solid #6f42c1;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f4ff 100%);
+    }
+    
+    .reavaliacao-card .card-header {
+      background: linear-gradient(135deg, #6f42c1, #8e5ec6);
+    }
+    
+    .conduta-card { 
+      border-left: 5px solid var(--success);
+      background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
+    }
+    
+    .conduta-card .card-header {
+      background: linear-gradient(135deg, var(--success), #43a047);
+    }
+
+    /* ===== BADGES E INDICADORES ===== */
+    .risk-badge { 
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ===== BOTÕES PROFISSIONAIS ===== */
+    .btn {
+      font-weight: 600;
+      border-radius: var(--radius-md);
+      padding: 10px 20px;
+      font-size: 14px;
+      transition: all var(--transition-fast);
+      border: none;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-main), var(--primary-light));
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--primary-light), var(--accent));
+      color: white;
+    }
+    
+    .btn-success {
+      background: linear-gradient(135deg, var(--success), #43a047);
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background: linear-gradient(135deg, #43a047, #4caf50);
+      color: white;
+    }
+    
+    .btn-outline-secondary {
+      border: 2px solid var(--border-medium);
+      color: var(--text-secondary);
+      background: transparent;
+    }
+    
+    .btn-outline-secondary:hover {
+      background: var(--secondary);
+      border-color: var(--secondary);
+      color: white;
+    }
+
+    /* ===== FORMULÁRIOS E INPUTS ===== */
+    .form-control, .form-select {
+      border: 2px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      font-size: 14px;
+      transition: all var(--transition-fast);
+      background: var(--bg-primary);
+    }
+    
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary-main);
+      box-shadow: 0 0 0 4px rgba(40, 53, 147, 0.1);
+      background: #ffffff;
+    }
+    
+    .form-label {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+
+    /* ===== MODAIS PROFISSIONAIS ===== */
+    .modal-content {
+      border: none;
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+    
+    .modal-header {
+      background: linear-gradient(135deg, var(--primary-main), var(--primary-light));
+      color: white;
+      padding: 24px 32px;
+      border-bottom: none;
+    }
+    
+    .modal-title {
+      font-weight: 700;
+      font-size: 20px;
+    }
+    
+    .modal-body {
+      padding: 32px;
+      background: var(--bg-secondary);
+    }
+    
+    .modal-footer {
+      padding: 24px 32px;
+      background: var(--bg-primary);
+      border-top: 1px solid var(--border-light);
+    }
+
+    /* ===== LISTAS E CONTAINERS ===== */
+    .receita-container, .atestado-container, .prescricao-container {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      margin-bottom: 16px;
+      transition: all var(--transition-normal);
+      overflow: hidden;
+    }
+    
+    .receita-container:hover, 
+    .atestado-container:hover, 
+    .prescricao-container:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-3px);
+      border-color: var(--primary-light);
+    }
+    
+    .receita-container .card-header,
+    .atestado-container .card-header,
+    .prescricao-container .card-header {
+      background: linear-gradient(135deg, var(--bg-secondary), #e3f2fd);
+      color: var(--text-primary);
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-light);
+      font-weight: 600;
+    }
+    
+    .receita-container .card-body,
+    .atestado-container .card-body,
+    .prescricao-container .card-body {
+      padding: 20px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* ===== BADGES E CONTADORES ===== */
+    .badge {
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ===== ESPAÇAMENTOS OTIMIZADOS ===== */
+    .mb-3 { margin-bottom: 24px !important; }
+    .mb-4 { margin-bottom: 32px !important; }
+    .py-3 { padding-top: 24px !important; padding-bottom: 24px !important; }
+    .py-4 { padding-top: 32px !important; padding-bottom: 32px !important; }
+
+    /* ===== ESTADOS DE LOADING ===== */
+    .loading-state {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      color: var(--text-secondary);
+    }
+    
+    .loading-state i {
+      margin-right: 12px;
+      font-size: 18px;
+    }
+
+    /* ===== MELHORIAS ESPECÍFICAS ===== */
+    .text-center.text-muted {
+      color: var(--text-secondary) !important;
+      font-weight: 500;
+    }
+    
+    .text-danger {
+      color: var(--danger) !important;
+      font-weight: 600;
+    }
+    
+    .text-success {
+      color: var(--success) !important;
+      font-weight: 600;
+    }
+
+    /* ===== QUILL EDITOR STYLING ===== */
+    .ql-container {
+      border-radius: 0 0 var(--radius-md) var(--radius-md);
+      border: 2px solid var(--border-light);
+      border-top: none;
+    }
+    
+    .ql-toolbar {
+      border-radius: var(--radius-md) var(--radius-md) 0 0;
+      border: 2px solid var(--border-light);
+      border-bottom: 1px solid var(--border-medium);
+      background: var(--bg-secondary);
+    }
+    
+    .ql-editor {
+      min-height: 150px;
+      font-size: 14px;
+      line-height: 1.6;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+
+    /* ===== ANIMAÇÕES SUAVES ===== */
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .card {
+      animation: slideInUp 0.4s ease-out;
+    }
+
+    /* ===== ABAS PROFISSIONAIS ===== */
+    .nav-tabs {
+      border-bottom: 2px solid var(--border-light);
+      background: var(--bg-secondary);
+      padding: 8px 8px 0 8px;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+    
+    .nav-tabs .nav-link {
+      border: none;
+      border-radius: var(--radius-md) var(--radius-md) 0 0;
+      padding: 12px 20px;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-secondary);
+      background: transparent;
+      transition: all var(--transition-fast);
+      position: relative;
+      margin-bottom: -2px;
+    }
+    
+    .nav-tabs .nav-link::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary-main), var(--accent));
+      transform: scaleX(0);
+      transition: transform var(--transition-fast);
+      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    }
+    
+    .nav-tabs .nav-link:hover {
+      background: rgba(40, 53, 147, 0.05);
+      color: var(--primary-main);
+    }
+    
+    .nav-tabs .nav-link.active {
+      background: var(--bg-primary);
+      color: var(--primary-main);
+      border-bottom: 3px solid var(--primary-main);
+    }
+    
+    .nav-tabs .nav-link.active::before {
+      transform: scaleX(1);
+    }
+    
+    .tab-content {
+      background: var(--bg-primary);
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+      min-height: 400px;
+    }
+    
+    .tab-pane {
+      animation: fadeInTab 0.3s ease-in-out;
+    }
+    
+    @keyframes fadeInTab {
+      from { 
+        opacity: 0; 
+        transform: translateX(10px); 
+      }
+      to { 
+        opacity: 1; 
+        transform: translateX(0); 
+      }
+    }
+
+    /* ===== CORES ESPECÍFICAS PARA CADA ABA ===== */
+    #exame-fisico-tab.active {
+      color: var(--primary-main) !important;
+      border-bottom-color: var(--primary-main) !important;
+    }
+    
+    #conduta-medica-tab.active {
+      color: var(--success) !important;
+      border-bottom-color: var(--success) !important;
+    }
+    
+    #reavaliacao-medica-tab.active {
+      color: var(--warning) !important;
+      border-bottom-color: var(--warning) !important;
+    }
+    
+    /* ===== EFEITOS DE TRANSIÇÃO DAS ABAS ===== */
+    .fade-in-active {
+      animation: fadeInTab 0.3s ease-in-out !important;
+    }
+
+    /* ===== MELHORIAS PARA IMPRESSÃO ===== */
+    @media print {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; }
+      .btn { display: none; }
+      .card { box-shadow: none; border: 1px solid #ddd; }
+      .nav-tabs { display: none; }
+      .tab-pane { display: block !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar text-white">
+    <nav class="nav flex-column">
+      <a class="nav-link active" href="#" data-target="triagemSection"><i class="fas fa-heartbeat"></i><span>Triagem</span></a>
+      <a class="nav-link" href="#" data-target="anamneseSection"><i class="fas fa-user-md"></i><span>Anamnese</span></a>
+      <a class="nav-link" href="#" data-target="prescricaoSection"><i class="fas fa-prescription-bottle-alt"></i><span>Prescrição</span></a>
+      <a class="nav-link" href="#" data-target="receituarioSection"><i class="fas fa-receipt"></i><span>Receituário</span></a>
+      <a class="nav-link" href="#" data-target="atestadoSection"><i class="fas fa-file-medical"></i><span>Atestado</span></a>
+      <a class="nav-link" href="#" data-target="enfermagemSection"><i class="fas fa-user-nurse"></i><span>Ficha de Enfermagem</span></a>
+      <hr class="mx-3 my-2" style="opacity:.2">
+      <a class="nav-link" href="/medico/aguardando-medico"><i class="fas fa-arrow-left"></i><span>Voltar Lista</span></a>
+    </nav>
+  </div>
+
+  <div class="main-content">
+    <div class="content-inner">
+    <!-- Header da Página -->
+    <div class="page-header">
+      <div class="d-flex justify-content-between align-items-center">
+        <h1 class="page-title">
+          <i class="fas fa-notes-medical"></i>
+          Ficha de Atendimento Médico
+        </h1>
+        <div class="d-flex gap-3">
+          <button class="btn btn-success btn-lg" id="btnEncerrarAtendimento">
+            <i class="fas fa-clipboard-check me-2"></i> 
+            Encerrar Atendimento
+          </button>
+          <a href="/medico/aguardando-medico" class="btn btn-outline-secondary btn-lg">
+            <i class="fas fa-arrow-left me-2"></i>
+            Voltar à Lista
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dados do Paciente - Design Profissional -->
+    <div class="patient-info-card">
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="info-item">
+            <span class="info-label">Nome Completo</span>
+            <div class="info-value" id="pacienteNome">{{ paciente.nome }}</div>
+          </div>
+        </div>
+        <div class="col-md-2">
+          <div class="info-item">
+            <span class="info-label">Idade</span>
+            <div class="info-value" id="pacienteIdade">-</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="info-item">
+            <span class="info-label">CPF</span>
+            <div class="info-value" id="pacienteCpf">{{ paciente.cpf }}</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="info-item">
+            <span class="info-label">Telefone</span>
+            <div class="info-value" id="pacienteTelefone">{{ paciente.telefone }}</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="info-item">
+            <span class="info-label">Endereço Completo</span>
+            <div class="info-value" id="pacienteEndereco">{{ paciente.endereco }}</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="info-item">
+            <span class="info-label">Município</span>
+            <div class="info-value" id="pacienteMunicipio">{{ paciente.municipio }}</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="info-item">
+            <span class="info-label">Cartão SUS</span>
+            <div class="info-value" id="pacienteCns">{{ paciente.cartao_sus }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seção: Triagem -->
+    <div id="triagemSection" class="section active">
+      <div class="card triagem-card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-3">
+            <i class="fas fa-heartbeat"></i>
+            <h5 class="mb-0">Dados da Triagem</h5>
+          </div>
+          <span id="badgeRisco" class="risk-badge bg-secondary">-</span>
+        </div>
+        <div class="card-body">
+          <!-- Sinais Vitais em Grid -->
+          <div class="vital-signs">
+            <div class="vital-sign-item">
+              <span class="vital-sign-label">Pressão Arterial</span>
+              <div class="vital-sign-value" id="pa">-</div>
+          </div>
+            <div class="vital-sign-item">
+              <span class="vital-sign-label">Pulso</span>
+              <div class="vital-sign-value" id="pulso">-</div>
+            </div>
+            <div class="vital-sign-item">
+              <span class="vital-sign-label">SpO₂</span>
+              <div class="vital-sign-value" id="sp02">-</div>
+            </div>
+            <div class="vital-sign-item">
+              <span class="vital-sign-label">Temperatura</span>
+              <div class="vital-sign-value" id="temp">-</div>
+            </div>
+            <div class="vital-sign-item">
+              <span class="vital-sign-label">Freq. Respiratória</span>
+              <div class="vital-sign-value" id="fr">-</div>
+            </div>
+            <div class="vital-sign-item">
+              <span class="vital-sign-label">Classificação</span>
+              <div class="vital-sign-value" id="classificacao">-</div>
+            </div>
+          </div>
+
+          <!-- Alergias -->
+          <div class="row mb-4">
+            <div class="col-12">
+              <div class="card border-warning">
+                <div class="card-header bg-warning text-dark">
+                  <h6 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Alergias Conhecidas</h6>
+                </div>
+                <div class="card-body">
+            <div id="alergias" class="fw-bold">-</div>
+          </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Texto da Triagem -->
+          <div class="row">
+            <div class="col-12">
+              <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                  <h6 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Avaliação da Triagem</h6>
+                </div>
+                <div class="card-body">
+            <div id="triagemTexto" class="texto-bloco">-</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seção: Anamnese -->
+    <div id="anamneseSection" class="section">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-3">
+            <i class="fas fa-user-md"></i>
+            <h5 class="mb-0">Avaliação Médica</h5>
+          </div>
+          <button class="btn btn-light btn-sm" id="btnEditarAnamneseGeral">
+            <i class="fas fa-edit me-2"></i> Editar Tudo
+          </button>
+        </div>
+        <div class="card-body p-0">
+          <!-- Navegação por abas -->
+          <ul class="nav nav-tabs nav-justified" id="anamneseTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="exame-fisico-tab" data-bs-toggle="tab" data-bs-target="#exame-fisico-pane" type="button" role="tab">
+                <i class="fas fa-stethoscope me-2"></i>Exame Físico
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="conduta-medica-tab" data-bs-toggle="tab" data-bs-target="#conduta-medica-pane" type="button" role="tab">
+                <i class="fas fa-clipboard-check me-2"></i>Conduta Médica
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="reavaliacao-medica-tab" data-bs-toggle="tab" data-bs-target="#reavaliacao-medica-pane" type="button" role="tab">
+                <i class="fas fa-redo me-2"></i>Reavaliação Médica
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content" id="anamneseTabContent">
+            <!-- Aba: Exame Físico -->
+            <div class="tab-pane fade show active p-4" id="exame-fisico-pane" role="tabpanel">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="text-primary fw-bold mb-0">
+                  <i class="fas fa-user-check me-2"></i>Anamnese e Exame Físico
+                </h6>
+                <button class="btn btn-outline-primary btn-sm" id="btnEditarExameFisico">
+                  <i class="fas fa-edit me-1"></i> Editar
+                </button>
+              </div>
+              <div class="card border-primary">
+                <div class="card-body">
+                  <div class="texto-bloco" id="anamneseExame">-</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Aba: Conduta Médica -->
+            <div class="tab-pane fade p-4" id="conduta-medica-pane" role="tabpanel">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="text-success fw-bold mb-0">
+                  <i class="fas fa-clipboard-check me-2"></i>Conduta Médica
+                </h6>
+                <button class="btn btn-outline-success btn-sm" id="btnEditarConduta">
+                  <i class="fas fa-edit me-1"></i> Editar
+                </button>
+              </div>
+              <div class="card border-success">
+                <div class="card-body">
+                  <div class="texto-bloco" id="condutaTexto">-</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Aba: Reavaliação Médica -->
+            <div class="tab-pane fade p-4" id="reavaliacao-medica-pane" role="tabpanel">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="text-warning fw-bold mb-0">
+                  <i class="fas fa-redo me-2"></i>Reavaliação Médica
+                </h6>
+                <button class="btn btn-outline-warning btn-sm" id="btnEditarReavaliacao">
+                  <i class="fas fa-edit me-1"></i> Editar
+                </button>
+              </div>
+              <div class="card border-warning">
+                <div class="card-body">
+                  <div class="texto-bloco" id="reavaliacaoTexto">-</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seção: Prescrição -->
+    <div id="prescricaoSection" class="section">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-3">
+            <i class="fas fa-pills"></i>
+          <h5 class="mb-0">Prescrições Médicas</h5>
+          </div>
+          <button class="btn btn-light btn-sm" id="btnNovaPrescricao">
+            <i class="fas fa-plus me-2"></i> Nova Prescrição
+          </button>
+        </div>
+        <div class="card-body">
+          <div id="prescricaoAvisoSemInternacao" class="alert alert-info border-0" style="display:none;">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Informação:</strong> Prescrições estão disponíveis após iniciar uma internação ou observação vinculada a este atendimento.
+          </div>
+          <div id="listaPrescricoes" class="loading-state">
+            <i class="fas fa-spinner fa-spin"></i> 
+            <span>Carregando prescrições médicas...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seção: Receituário -->
+    <div id="receituarioSection" class="section">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-3">
+            <i class="fas fa-prescription"></i>
+            <h5 class="mb-0">Receituário Médico</h5>
+          </div>
+          <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalNovaReceita">
+            <i class="fas fa-plus me-2"></i> Nova Receita
+          </button>
+        </div>
+        <div class="card-body">
+          <!-- Receitas de Hoje -->
+          <div class="mb-4" id="hoje-container-receituario">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <i class="fas fa-calendar-day text-success"></i>
+              <h6 class="fw-bold text-success mb-0" id="titulo-receitas-hoje">Receitas de Hoje</h6>
+        </div>
+            <div id="listaReceitasDoDia" class="loading-state">
+              <i class="fas fa-spinner fa-spin"></i>
+              <span>Carregando receitas de hoje...</span>
+      </div>
+    </div>
+
+          <!-- Receitas Anteriores -->
+          <div class="mb-0" id="antigas-container-receituario">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div class="d-flex align-items-center gap-2">
+                <i class="fas fa-history text-secondary"></i>
+                <h6 class="fw-bold text-secondary mb-0">Receitas Anteriores</h6>
+              </div>
+              <span class="badge bg-secondary" id="contador-receitas-antigas">0</span>
+            </div>
+            <div id="listaReceitasAntigas">
+              <!-- Preenchido via JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seção: Atestado -->
+    <div id="atestadoSection" class="section">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-3">
+            <i class="fas fa-file-medical"></i>
+            <h5 class="mb-0">Atestados Médicos</h5>
+          </div>
+          <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalNovoAtestado">
+            <i class="fas fa-plus me-2"></i> Novo Atestado
+          </button>
+        </div>
+        <div class="card-body">
+          <!-- Atestados de Hoje -->
+          <div class="mb-4" id="hoje-container-atestado">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <i class="fas fa-calendar-day text-success"></i>
+              <h6 class="fw-bold text-success mb-0" id="titulo-atestados-hoje">Atestados de Hoje</h6>
+        </div>
+            <div id="listaAtestadosDoDia" class="loading-state">
+              <i class="fas fa-spinner fa-spin"></i>
+              <span>Carregando atestados de hoje...</span>
+      </div>
+    </div>
+
+          <!-- Atestados Anteriores -->
+          <div class="mb-0" id="antigas-container-atestado">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div class="d-flex align-items-center gap-2">
+                <i class="fas fa-history text-secondary"></i>
+                <h6 class="fw-bold text-secondary mb-0">Atestados Anteriores</h6>
+              </div>
+              <span class="badge bg-secondary" id="contador-atestados-antigos">0</span>
+            </div>
+            <div id="listaAtestadosAntigos">
+              <!-- Preenchido via JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seção: Ficha de Enfermagem -->
+    <div id="enfermagemSection" class="section">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-3">
+            <i class="fas fa-user-nurse"></i>
+            <h5 class="mb-0">Ficha de Enfermagem</h5>
+          </div>
+          <span class="badge bg-info">Visualização</span>
+        </div>
+        <div class="card-body">
+          <div class="alert alert-info border-0">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Em Desenvolvimento:</strong> A visualização integrada da ficha de enfermagem será implementada em breve.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <input type="hidden" id="ATENDIMENTO_ID" value="{{ atendimento.id }}">
+    <input type="hidden" id="user_id" value="{{ session.get('user_id', 0) }}">
+    </div>
+  </div>
+
+  <!-- Modal Nova Receita -->
+  <div class="modal fade" id="modalNovaReceita" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">Nova Receita</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formReceita">
+            <div class="mb-3">
+              <label class="form-label">Tipo de Receita</label>
+              <select class="form-select" id="tipo_receita" required>
+                <option value="">Selecione o tipo de receita</option>
+                <option value="normal">Receita Normal</option>
+                <option value="especial">Receita Especial</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Conteúdo da Receita</label>
+              <div id="editor-receita-container">
+                <!-- Editor Quill será inicializado aqui -->
+              </div>
+              <textarea id="conteudo_receita" name="conteudo_receita" style="display:none"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="btn_salvar_receita">Salvar Receita</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Novo Atestado -->
+  <div class="modal fade" id="modalNovoAtestado" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">Novo Atestado</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formAtestado">
+            <div class="mb-3">
+              <label class="form-label">Dias de Afastamento</label>
+              <input type="number" class="form-control" id="dias_afastamento" min="1" placeholder="Número de dias">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Conteúdo do Atestado</label>
+              <div id="editor-atestado-container">
+                <!-- Editor Quill será inicializado aqui -->
+              </div>
+              <textarea id="conteudo_atestado" name="conteudo_atestado" style="display:none"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="btn_salvar_atestado">Salvar Atestado</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function idade(data) {
+      if (!data) return '-';
+      const d = new Date(data); const h = new Date();
+      let i = h.getFullYear()-d.getFullYear(); const m=h.getMonth()-d.getMonth();
+      if (m<0 || (m===0 && h.getDate()<d.getDate())) i--; return i + ' anos';
+    }
+    function badgeRisco(r) {
+      if (!r) return '<span class="badge bg-secondary">-</span>';
+      const t=r.toLowerCase();
+      if (t.includes('vermelho')) return '<span class="badge bg-danger">Vermelho</span>';
+      if (t.includes('laranja')) return '<span class="badge bg-warning text-dark">Laranja</span>';
+      if (t.includes('amarelo')) return '<span class="badge bg-warning text-dark">Amarelo</span>';
+      if (t.includes('verde')) return '<span class="badge bg-success">Verde</span>';
+      if (t.includes('azul')) return '<span class="badge bg-primary">Azul</span>';
+      return '<span class="badge bg-info">'+r+'</span>';
+    }
+
+    $(function(){
+      // Navegação lateral simples
+      $('.sidebar .nav-link').on('click', function(e){
+        const target = $(this).data('target');
+        if (!target) return; e.preventDefault();
+        $('.sidebar .nav-link').removeClass('active');
+        $(this).addClass('active');
+        $('.section').removeClass('active');
+        $('#'+target).addClass('active');
+      });
+
+      const id = document.getElementById('ATENDIMENTO_ID').value;
+      fetch(`/api/atendimento/${id}`)
+        .then(r => r.json())
+        .then(d => {
+          if (!d.success) return;
+          const a = d.data.atendimento, p = d.data.paciente;
+          $('#pacienteNome').text(p.nome||'-');
+          $('#pacienteCpf').text(p.cpf||'-');
+          $('#pacienteTelefone').text(p.telefone||'-');
+          $('#pacienteEndereco').text(p.endereco||'-');
+          $('#pacienteMunicipio').text(p.municipio||'-');
+          $('#pacienteCns').text(p.cartao_sus||'-');
+          $('#pacienteIdade').text(p.data_nascimento ? idade(p.data_nascimento) : (p.idade!=null? (p.idade+' anos'):'-'));
+
+          $('#pa').text(a.pressao||'-');
+          $('#pulso').text(a.pulso||'-');
+          $('#sp02').text(a.sp02||'-');
+          $('#temp').text(a.temp||'-');
+          $('#fr').text(a.fr||'-');
+          $('#classificacao').text(a.classificacao_risco||'-');
+          $('#badgeRisco').html(badgeRisco(a.classificacao_risco));
+          $('#alergias').text(a.alergias||'-');
+          $('#triagemTexto').text(a.triagem||'-');
+          $('#anamneseExame').html(a.anamnese_exame_fisico ? a.anamnese_exame_fisico.replace(/\n/g,'<br>') : '-');
+          $('#condutaTexto').html(a.conduta ? a.conduta.replace(/\n/g,'<br>') : (a.conduta_final ? a.conduta_final.replace(/\n/g,'<br>') : '-'));
+          $('#reavaliacaoTexto').html(a.reavaliacao ? a.reavaliacao.replace(/\n/g,'<br>') : '-');
+          // badge de status removido da Anamnese; status geral segue exibido em outros contextos
+        })
+        .catch(()=>{});
+    });
+  </script>
+
+  <!-- Modal Edição Anamnese/Conduta -->
+  <div class="modal fade" id="modalEditarAnamneseConduta" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title"><i class="fas fa-notes-medical me-2"></i>Editar Anamnese e Conduta</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Anamnese e Exame Físico</label>
+            <textarea id="campoAnamnese" class="form-control" rows="6" placeholder="Descreva a anamnese e exame físico..."></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Reavaliação</label>
+            <textarea id="campoReavaliacao" class="form-control" rows="4" placeholder="Descreva a reavaliação..."></textarea>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Conduta</label>
+            <textarea id="campoConduta" class="form-control" rows="5" placeholder="Descreva a conduta médica..."></textarea>
+          </div>
+          <small class="text-muted">As alterações serão salvas no atendimento atual.</small>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-success" id="btnSalvarAnamneseConduta"><i class="fas fa-save me-1"></i>Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Handlers de edição
+    $(function(){
+      const modalEl = document.getElementById('modalEditarAnamneseConduta');
+      const bsModal = modalEl ? new bootstrap.Modal(modalEl) : null;
+      const atendimentoId = document.getElementById('ATENDIMENTO_ID').value;
+
+      // Event handlers para os botões individuais de cada aba
+      $('#btnEditarExameFisico, #btnEditarConduta, #btnEditarReavaliacao, #btnEditarAnamneseGeral').on('click', function(){
+        $('#campoAnamnese').val($('#anamneseExame').text() === '-' ? '' : $('#anamneseExame').text());
+        $('#campoConduta').val($('#condutaTexto').text() === '-' ? '' : $('#condutaTexto').text());
+        $('#campoReavaliacao').val($('#reavaliacaoTexto').text() === '-' ? '' : $('#reavaliacaoTexto').text());
+        if (bsModal) bsModal.show();
+      });
+
+      $('#btnSalvarAnamneseConduta').on('click', function(){
+        const payload = {
+          anamnese_exame_fisico: $('#campoAnamnese').val().trim() || null,
+          reavaliacao: $('#campoReavaliacao').val().trim() || null,
+          // conduta_final agora é manipulada apenas no fluxo de Encerrar Atendimento
+        };
+        const btn = $(this); const original = btn.html();
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Salvando...');
+        fetch(`/api/atendimento/${atendimentoId}/anamnese-conduta`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+        })
+        .then(r => r.json())
+        .then(data => {
+          if (data.success) {
+            $('#anamneseExame').html((payload.anamnese_exame_fisico||'-').replace(/\n/g,'<br>'));
+            $('#reavaliacaoTexto').html((payload.reavaliacao||'-').replace(/\n/g,'<br>'));
+            if (bsModal) bsModal.hide();
+          } else {
+            alert('Erro: ' + (data.message||'Falha ao salvar'));
+          }
+        })
+        .catch(err => alert('Erro ao salvar: ' + err))
+        .finally(() => btn.prop('disabled', false).html(original));
+      });
+    });
+  </script>
+
+  <!-- Modal Encerrar Atendimento -->
+  <div class="modal fade" id="modalEncerrarAtendimento" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title"><i class="fas fa-clipboard-check me-2"></i>Encerrar Atendimento</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Conduta Final</label>
+            <select id="encerrarCondutaFinal" class="form-select">
+              <option value="">Selecione...</option>
+              <option>ALTA</option>
+              <option>ALTA APOS MEDICAÇAO</option>
+              <option>REAVALIAÇAO APOS MEDICAÇAO</option>
+              <option>OBSERVAÇAO</option>
+              <option>EVASÃO POR CONTA PROPRIA</option>
+              <option>INTERNAMENTO</option>
+              <option>RECUSA TRANSFERENCIA APOS CONDUTA MEDICA</option>
+              <option>ASSINOU TERMO DE RESPONSABILIDADE</option>
+            </select>
+          </div>
+
+          <div id="blocoObservacao" style="display:none;">
+            <div class="alert alert-info">Preencha os dados para iniciar a observação.</div>
+            <div class="mb-2">
+              <label class="form-label">HDA</label>
+              <textarea id="obsHda" class="form-control" rows="3"></textarea>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Exame Físico</label>
+              <textarea id="obsExameFisico" class="form-control" rows="3"></textarea>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Diagnóstico Inicial</label>
+              <textarea id="obsDiagnosticoInicial" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="row g-2">
+              <div class="col">
+                <label class="form-label">CID Principal</label>
+                <input id="obsCidPrincipal" class="form-control" />
+              </div>
+              <div class="col">
+                <label class="form-label">CID Secundário</label>
+                <input id="obsCidSecundario" class="form-control" />
+              </div>
+            </div>
+          </div>
+
+          <div id="blocoInternamento" style="display:none;" class="mt-2">
+            <div class="alert alert-warning">Preencha os dados para iniciar o internamento.</div>
+            <div class="mb-2">
+              <label class="form-label">Leito (disponível)</label>
+              <select id="intLeito" class="form-select">
+                <option value="">Carregando leitos...</option>
+              </select>
+              <small class="text-muted">Mostrando apenas leitos com status "Disponível"</small>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Caráter da Internação</label>
+              <select id="intCarater" class="form-select">
+                <option value="">Selecione…</option>
+                <option>Urgência</option>
+                <option>Eletiva</option>
+                <option>Outros</option>
+              </select>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">HDA</label>
+              <textarea id="intHda" class="form-control" rows="3"></textarea>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Diagnóstico Inicial</label>
+              <textarea id="intDiagnosticoInicial" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Anamnese e Exame Físico</label>
+              <textarea id="intAnamnese" class="form-control" rows="3"></textarea>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Conduta Inicial</label>
+              <textarea id="intConduta" class="form-control" rows="3"></textarea>
+            </div>
+            <div class="row g-2">
+              <div class="col">
+                <label class="form-label">CID Principal</label>
+                <input id="intCidPrincipal" class="form-control" />
+              </div>
+              <div class="col">
+                <label class="form-label">CID Secundário</label>
+                <input id="intCidSecundario" class="form-control" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-success" id="btnConfirmarEncerramento">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    $(function(){
+      const ATENDIMENTO_ID = document.getElementById('ATENDIMENTO_ID').value;
+      const modalEnc = new bootstrap.Modal(document.getElementById('modalEncerrarAtendimento'));
+
+      $('#btnEncerrarAtendimento').on('click', function(){
+        $('#encerrarCondutaFinal').val('');
+        $('#blocoObservacao, #blocoInternamento').hide();
+        modalEnc.show();
+      });
+
+      $('#encerrarCondutaFinal').on('change', function(){
+        const v = ($(this).val()||'').toUpperCase();
+        $('#blocoObservacao').toggle(v === 'OBSERVAÇAO');
+        $('#blocoInternamento').toggle(v === 'INTERNAMENTO');
+        if (v === 'INTERNAMENTO'){
+          // Carregar leitos disponíveis
+          const sel = $('#intLeito');
+          sel.html('<option value="">Carregando leitos...</option>');
+          fetch('/api/leitos/opcoes')
+            .then(r=>r.json())
+            .then(lista=>{
+              sel.empty();
+              let disponiveis = 0;
+              lista.forEach(l => {
+                if ((l.status||'').toLowerCase().includes('dispon')){
+                  sel.append(`<option value="${l.nome}">${l.nome} (${l.status})</option>`);
+                  disponiveis++;
+                }
+              });
+              if (disponiveis === 0){ sel.append('<option value="">Sem leitos disponíveis</option>'); }
+            })
+            .catch(()=>{ sel.html('<option value="">Erro ao carregar leitos</option>'); });
+        }
+      });
+
+      $('#btnConfirmarEncerramento').on('click', function(){
+        const conduta = $('#encerrarCondutaFinal').val();
+        if (!conduta){ alert('Selecione a conduta final.'); return; }
+
+        const v = conduta.toUpperCase();
+        if (v === 'OBSERVAÇAO'){
+          // Criar observação via endpoint existente
+          const payload = {
+            hda: $('#obsHda').val()||'',
+            exame_fisico: $('#obsExameFisico').val()||'',
+            diagnostico_inicial: $('#obsDiagnosticoInicial').val()||'',
+            cid_principal: $('#obsCidPrincipal').val()||'',
+            cid_secundario: $('#obsCidSecundario').val()||'',
+            atendimento_id: ATENDIMENTO_ID
+          };
+          fetch('/api/observacao-paciente', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+            .then(r=>r.json())
+            .then(d=>{
+              if (d.success){
+                modalEnc.hide();
+                window.location.href = `/observacao/evolucao-paciente-medico/${ATENDIMENTO_ID}`;
+              } else { alert('Erro: ' + (d.message||'Falha ao criar observação')); }
+            })
+            .catch(err=>alert('Erro: '+err));
+          return;
+        }
+
+        if (v === 'INTERNAMENTO'){
+          const payload = {
+            atendimento_id: ATENDIMENTO_ID,
+            leito: $('#intLeito').val()||'',
+            carater_internacao: $('#intCarater').val()||'',
+            hda: $('#intHda').val()||'',
+            diagnostico_inicial: $('#intDiagnosticoInicial').val()||'',
+            folha_anamnese: $('#intAnamnese').val()||'',
+            conduta_inicial: $('#intConduta').val()||'',
+            cid_principal: $('#intCidPrincipal').val()||'',
+            cid_10_secundario: $('#intCidSecundario').val()||''
+          };
+          fetch('/api/internar-paciente', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+            .then(r=>r.json())
+            .then(d=>{
+              if (d.success){
+                modalEnc.hide();
+                window.location.href = '/clinica/pacientes-internados';
+              } else { alert('Erro: ' + (d.message||'Falha ao internar')); }
+            })
+            .catch(err=>alert('Erro: '+err));
+          return;
+        }
+
+        // ALTAS/EVASÃO/RECUSAS/TERMO -> encerrar direto
+        fetch(`/api/atendimento/${ATENDIMENTO_ID}/encerrar`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ conduta_final: conduta }) })
+          .then(r=>r.json())
+          .then(d=>{
+            if (d.success){
+              modalEnc.hide();
+              // Se for reavaliação, mantemos a ficha aberta e apenas informamos sucesso
+              if ((conduta||'').toUpperCase().indexOf('REAVALIA') >= 0){
+                alert('Conduta registrada: reavaliação. O atendimento permanece em aberto.');
+              } else {
+                window.location.href = '/medico/aguardando-medico';
+              }
+            } else { alert('Erro: ' + (d.message||'Falha ao encerrar')); }
+          })
+          .catch(err=>alert('Erro: '+err));
+      });
+    });
+  </script>
+
+  <!-- Modal Nova Prescrição -->
+  <div class="modal fade" id="modalNovaPrescricao" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">Nova Prescrição Médica</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formPrescricao">
+            <div class="mb-3">
+              <label class="form-label">Dieta</label>
+              <textarea class="form-control" id="texto_dieta" rows="2" placeholder="Descreva a dieta..."></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Medicamentos</label>
+              <div class="card mb-2">
+                <div class="card-body">
+                  <div class="row g-2">
+                    <div class="col-md-4">
+                      <input type="text" class="form-control" id="nome_medicamento" placeholder="Nome do medicamento">
+                    </div>
+                    <div class="col-md-6">
+                      <input type="text" class="form-control" id="descricao_uso" placeholder="Descrição/Posologia">
+                    </div>
+                    <div class="col-md-2">
+                      <button type="button" class="btn btn-success w-100" id="btn_adicionar_medicamento">
+                        <i class="fas fa-plus"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-sm" id="tabela_medicamentos">
+                  <thead>
+                    <tr>
+                      <th>Medicamento</th>
+                      <th>Descrição/Posologia</th>
+                      <th style="width:70px">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr id="sem_medicamentos"><td colspan="3" class="text-center text-muted">Nenhum medicamento adicionado</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Procedimentos Médicos</label>
+              <textarea class="form-control" id="texto_procedimento_medico" rows="3" placeholder="Descreva os procedimentos médicos..."></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Procedimentos Multiprofissionais</label>
+              <textarea class="form-control" id="texto_procedimento_multi" rows="3" placeholder="Descreva os procedimentos multiprofissionais..."></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="btn_salvar_prescricao">Salvar Prescrição</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Prescrição - lógica baseada na clínica, usando endpoints existentes
+    $(function(){
+      let internacaoId = null;
+      const ATENDIMENTO_ID = document.getElementById('ATENDIMENTO_ID').value;
+      window.medicamentosAdicionados = [];
+
+      function atualizarTabelaMedicamentos(){
+        const corpo = $('#tabela_medicamentos tbody');
+        corpo.empty();
+        if (!window.medicamentosAdicionados.length){
+          corpo.append('<tr id="sem_medicamentos"><td colspan="3" class="text-center text-muted">Nenhum medicamento adicionado</td></tr>');
+          return;
+        }
+        window.medicamentosAdicionados.forEach((m, idx) => {
+          const linha = $(`
+            <tr>
+              <td>${m.nome_medicamento}</td>
+              <td>${m.descricao_uso}</td>
+              <td class="text-end">
+                <button type="button" class="btn btn-sm btn-outline-danger" data-idx="${idx}"><i class="fas fa-trash"></i></button>
+              </td>
+            </tr>
+          `);
+          linha.find('button').on('click', function(){
+            const i = parseInt($(this).data('idx'));
+            window.medicamentosAdicionados.splice(i,1);
+            atualizarTabelaMedicamentos();
+          });
+          corpo.append(linha);
+        });
+      }
+
+      function renderizarPrescricoes(lista){
+        const cont = $('#listaPrescricoes');
+        if (!lista || !lista.length){
+          cont.html('<div class="text-center text-muted py-3">Nenhuma prescrição encontrada.</div>');
+          return;
+        }
+        let html = '';
+        lista.forEach(p => {
+          const dataTxt = p.horario_prescricao || p.data || '';
+          html += `
+            <div class="card prescricao-container mb-2">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <div><strong>Prescrição</strong></div>
+                <div class="d-flex align-items-center gap-2">
+                  <small class="text-muted me-2">${dataTxt}</small>
+                  ${p.id ? `<a class=\"btn btn-sm btn-outline-secondary\" href=\"/api/imprimir-prescricao-html/${p.id}\" target=\"_blank\"><i class=\"fas fa-print\"></i> Imprimir</a>` : ''}
+                </div>
+              </div>
+              <div class="card-body">
+                ${p.texto_dieta ? `<div class="mb-2"><strong>Dieta: </strong>${p.texto_dieta}</div>` : ''}
+                ${Array.isArray(p.medicamentos) ? (`<div class="mb-2"><strong>Medicamentos:</strong><ul>` + p.medicamentos.map(m=>`<li>${m.nome_medicamento} - ${m.descricao_uso}</li>`).join('') + `</ul></div>`) : ''}
+                ${p.texto_procedimento_medico ? `<div class="mb-2"><strong>Procedimentos Médicos: </strong>${p.texto_procedimento_medico}</div>` : ''}
+                ${p.texto_procedimento_multi ? `<div><strong>Procedimentos Multiprofissionais: </strong>${p.texto_procedimento_multi}</div>` : ''}
+              </div>
+            </div>`;
+        });
+        cont.html(html);
+      }
+
+      function carregarPrescricoes(){
+        if (!internacaoId){
+          $('#prescricaoAvisoSemInternacao').show();
+          $('#listaPrescricoes').html('');
+          return;
+        }
+        $('#prescricaoAvisoSemInternacao').hide();
+        $('#listaPrescricoes').html('<div class="text-center text-muted py-3"><i class="fas fa-spinner fa-spin"></i> Carregando prescrições...</div>');
+        fetch(`/api/prescricoes/${internacaoId}`)
+          .then(r => r.json())
+          .then(d => {
+            const lista = d.prescricoes || d.data || d || [];
+            renderizarPrescricoes(Array.isArray(lista) ? lista : []);
+          })
+          .catch(() => {
+            $('#listaPrescricoes').html('<div class="text-center text-danger">Erro ao carregar prescrições</div>');
+          });
+      }
+
+      // Obter internacao pelo atendimento (se não existir, permitirá criar durante POST)
+      fetch(`/api/internacao/${ATENDIMENTO_ID}`)
+        .then(r => r.json())
+        .then(d => {
+          const inter = d.internacao || d;
+          if (inter && inter.id){ internacaoId = inter.id; }
+          carregarPrescricoes();
+        })
+        .catch(()=> carregarPrescricoes());
+
+      // Abrir modal Nova Prescrição
+      const modalNP = new bootstrap.Modal(document.getElementById('modalNovaPrescricao'));
+      $('#btnNovaPrescricao').on('click', function(){
+        window.medicamentosAdicionados = [];
+        $('#formPrescricao')[0].reset();
+        atualizarTabelaMedicamentos();
+        modalNP.show();
+      });
+
+      // Adicionar medicamento
+      $('#btn_adicionar_medicamento').on('click', function(e){
+        e.preventDefault();
+        const nome = $('#nome_medicamento').val().trim();
+        const desc = $('#descricao_uso').val().trim();
+        if (!nome || !desc){ alert('Informe nome e descrição/posologia.'); return; }
+        window.medicamentosAdicionados.push({ nome_medicamento: nome, descricao_uso: desc });
+        $('#nome_medicamento').val(''); $('#descricao_uso').val('');
+        atualizarTabelaMedicamentos();
+        $('#nome_medicamento').focus();
+      });
+
+      // Salvar prescrição
+      $('#btn_salvar_prescricao').on('click', function(){
+        const dados = {
+          atendimento_id: ATENDIMENTO_ID,
+          atendimentos_clinica_id: internacaoId || null,
+          texto_dieta: $('#texto_dieta').val().trim() || null,
+          texto_procedimento_medico: $('#texto_procedimento_medico').val().trim() || null,
+          texto_procedimento_multi: $('#texto_procedimento_multi').val().trim() || null,
+          medicamentos: window.medicamentosAdicionados
+        };
+        const btn = $(this); const original = btn.html();
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Salvando...');
+        fetch('/api/prescricoes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dados) })
+          .then(r => r.json())
+          .then(resp => {
+            if (resp.success){
+              // Atualizar internacaoId se foi criada pela API
+              if (resp.atendimentos_clinica_id){ internacaoId = resp.atendimentos_clinica_id; }
+              modalNP.hide();
+              carregarPrescricoes();
+            } else {
+              alert('Erro ao salvar: ' + (resp.message||'Falha desconhecida'));
+            }
+          })
+          .catch(err => alert('Erro ao salvar: ' + err))
+          .finally(() => btn.prop('disabled', false).html(original));
+      });
+    });
+
+    // Funções para Receituário
+    function renderizarReceitas(lista) {
+      const contHoje = $('#listaReceitasDoDia');
+      const contAntigas = $('#listaReceitasAntigas');
+
+      if (!lista || !lista.length) {
+        contHoje.html('<div class="text-center text-muted py-4"><i class="fas fa-prescription fa-2x mb-3 d-block"></i>Nenhuma receita emitida hoje.</div>');
+        contAntigas.html('<div class="text-center text-muted py-4"><i class="fas fa-history fa-2x mb-3 d-block"></i>Nenhuma receita anterior encontrada.</div>');
+        $('#contador-receitas-antigas').text('0');
+        return;
+      }
+
+      const hoje = new Date().toISOString().split('T')[0];
+      const receitasHoje = [];
+      const receitasAntigas = [];
+
+      lista.forEach(r => {
+        const data = new Date(r.data_receita).toISOString().split('T')[0];
+        if (data === hoje) {
+          receitasHoje.push(r);
+        } else {
+          receitasAntigas.push(r);
+        }
+      });
+
+      // Renderizar receitas de hoje
+      if (receitasHoje.length > 0) {
+        let html = '';
+        receitasHoje.forEach(r => {
+          html += `
+            <div class="card receita-container mb-2">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <div><strong>${r.tipo_receita === 'especial' ? 'Receita Especial' : 'Receita Normal'}</strong></div>
+                <div class="d-flex align-items-center gap-2">
+                  <small class="text-muted">${new Date(r.data_receita).toLocaleString()}</small>
+                  <a class="btn btn-sm btn-outline-secondary" href="/clinica/receituario/${r.id}/imprimir_html" target="_blank">
+                    <i class="fas fa-print"></i>
+                  </a>
+                </div>
+              </div>
+              <div class="card-body">
+                <div>${r.conteudo_receita}</div>
+              </div>
+            </div>`;
+        });
+        contHoje.html(html);
+      } else {
+        contHoje.html('<div class="text-center text-muted py-4"><i class="fas fa-prescription fa-2x mb-3 d-block"></i>Nenhuma receita emitida hoje.</div>');
+      }
+
+      // Renderizar receitas antigas
+      if (receitasAntigas.length > 0) {
+        let html = '';
+        receitasAntigas.forEach(r => {
+          html += `
+            <div class="card receita-container mb-2">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <div><strong>${r.tipo_receita === 'especial' ? 'Receita Especial' : 'Receita Normal'}</strong></div>
+                <div class="d-flex align-items-center gap-2">
+                  <small class="text-muted">${new Date(r.data_receita).toLocaleString()}</small>
+                  <a class="btn btn-sm btn-outline-secondary" href="/clinica/receituario/${r.id}/imprimir_html" target="_blank">
+                    <i class="fas fa-print"></i>
+                  </a>
+                </div>
+              </div>
+              <div class="card-body">
+                <div>${r.conteudo_receita}</div>
+              </div>
+            </div>`;
+        });
+        contAntigas.html(html);
+        $('#contador-receitas-antigas').text(receitasAntigas.length);
+      } else {
+        contAntigas.html('<div class="text-center text-muted py-4"><i class="fas fa-history fa-2x mb-3 d-block"></i>Nenhuma receita anterior encontrada.</div>');
+        $('#contador-receitas-antigas').text('0');
+      }
+    }
+
+    function carregarReceitas() {
+      const atendimentoId = document.getElementById('ATENDIMENTO_ID').value;
+      $('#listaReceitasDoDia').html('<div class="loading-state"><i class="fas fa-spinner fa-spin"></i><span>Carregando receitas...</span></div>');
+
+      fetch(`/api/receituarios/${atendimentoId}`)
+        .then(r => r.json())
+        .then(d => {
+          const lista = d.receituarios || d.data || d || [];
+          renderizarReceitas(Array.isArray(lista) ? lista : []);
+        })
+        .catch(() => {
+          $('#listaReceitasDoDia').html('<div class="text-center text-danger py-4"><i class="fas fa-exclamation-triangle fa-2x mb-3 d-block"></i>Erro ao carregar receitas</div>');
+          $('#listaReceitasAntigas').html('');
+        });
+    }
+
+    // Funções para Atestado
+    function renderizarAtestados(lista) {
+      const contHoje = $('#listaAtestadosDoDia');
+      const contAntigas = $('#listaAtestadosAntigos');
+
+      if (!lista || !lista.length) {
+        contHoje.html('<div class="text-center text-muted py-4"><i class="fas fa-file-medical fa-2x mb-3 d-block"></i>Nenhum atestado emitido hoje.</div>');
+        contAntigas.html('<div class="text-center text-muted py-4"><i class="fas fa-history fa-2x mb-3 d-block"></i>Nenhum atestado anterior encontrado.</div>');
+        $('#contador-atestados-antigos').text('0');
+        return;
+      }
+
+      const hoje = new Date().toISOString().split('T')[0];
+      const atestadosHoje = [];
+      const atestadosAntigos = [];
+
+      lista.forEach(a => {
+        const data = new Date(a.data_atestado).toISOString().split('T')[0];
+        if (data === hoje) {
+          atestadosHoje.push(a);
+        } else {
+          atestadosAntigos.push(a);
+        }
+      });
+
+      // Renderizar atestados de hoje
+      if (atestadosHoje.length > 0) {
+        let html = '';
+        atestadosHoje.forEach(a => {
+          html += `
+            <div class="card atestado-container mb-2">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <div><strong>Atestado Médico</strong> ${a.dias_afastamento ? `(${a.dias_afastamento} dias)` : ''}</div>
+                <div class="d-flex align-items-center gap-2">
+                  <small class="text-muted">${new Date(a.data_atestado).toLocaleString()}</small>
+                  <a class="btn btn-sm btn-outline-secondary" href="/clinica/atestado/${a.id}/imprimir" target="_blank">
+                    <i class="fas fa-print"></i>
+                  </a>
+                </div>
+              </div>
+              <div class="card-body">
+                <div>${a.conteudo_atestado}</div>
+              </div>
+            </div>`;
+        });
+        contHoje.html(html);
+      } else {
+        contHoje.html('<div class="text-center text-muted py-4"><i class="fas fa-file-medical fa-2x mb-3 d-block"></i>Nenhum atestado emitido hoje.</div>');
+      }
+
+      // Renderizar atestados antigos
+      if (atestadosAntigos.length > 0) {
+        let html = '';
+        atestadosAntigos.forEach(a => {
+          html += `
+            <div class="card atestado-container mb-2">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <div><strong>Atestado Médico</strong> ${a.dias_afastamento ? `(${a.dias_afastamento} dias)` : ''}</div>
+                <div class="d-flex align-items-center gap-2">
+                  <small class="text-muted">${new Date(a.data_atestado).toLocaleString()}</small>
+                  <a class="btn btn-sm btn-outline-secondary" href="/clinica/atestado/${a.id}/imprimir" target="_blank">
+                    <i class="fas fa-print"></i>
+                  </a>
+                </div>
+              </div>
+              <div class="card-body">
+                <div>${a.conteudo_atestado}</div>
+              </div>
+            </div>`;
+        });
+        contAntigas.html(html);
+        $('#contador-atestados-antigos').text(atestadosAntigos.length);
+      } else {
+        contAntigas.html('<div class="text-center text-muted py-4"><i class="fas fa-history fa-2x mb-3 d-block"></i>Nenhum atestado anterior encontrado.</div>');
+        $('#contador-atestados-antigos').text('0');
+      }
+    }
+
+    function carregarAtestados() {
+      const atendimentoId = document.getElementById('ATENDIMENTO_ID').value;
+      $('#listaAtestadosDoDia').html('<div class="loading-state"><i class="fas fa-spinner fa-spin"></i><span>Carregando atestados...</span></div>');
+
+      fetch(`/api/atestados/${atendimentoId}`)
+        .then(r => r.json())
+        .then(d => {
+          const lista = d.atestados || d.data || d || [];
+          renderizarAtestados(Array.isArray(lista) ? lista : []);
+        })
+        .catch(() => {
+          $('#listaAtestadosDoDia').html('<div class="text-center text-danger py-4"><i class="fas fa-exclamation-triangle fa-2x mb-3 d-block"></i>Erro ao carregar atestados</div>');
+          $('#listaAtestadosAntigos').html('');
+        });
+    }
+
+    // Inicializar Quill para editores
+    let editorReceita, editorAtestado;
+
+    // Função para inicializar editor de receita
+    function inicializarEditorReceita() {
+      if (typeof Quill !== 'undefined' && !editorReceita) {
+        editorReceita = new Quill('#editor-receita-container', {
+          theme: 'snow',
+          placeholder: 'Digite o conteúdo da receita médica...',
+          modules: {
+            toolbar: [
+              ['bold', 'italic', 'underline'],
+              [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+              [{ 'header': [1, 2, 3, false] }],
+              ['clean']
+            ]
+          }
+        });
+      }
+    }
+
+    // Função para inicializar editor de atestado
+    function inicializarEditorAtestado() {
+      if (typeof Quill !== 'undefined' && !editorAtestado) {
+        editorAtestado = new Quill('#editor-atestado-container', {
+          theme: 'snow',
+          placeholder: 'Digite o conteúdo do atestado médico...',
+          modules: {
+            toolbar: [
+              ['bold', 'italic', 'underline'],
+              [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+              [{ 'header': [1, 2, 3, false] }],
+              ['clean']
+            ]
+          }
+        });
+      }
+    }
+
+    // Event listeners para navegação
+    $(document).on('click', 'a[data-target="receituarioSection"]', function() {
+      carregarReceitas();
+    });
+
+    $(document).on('click', 'a[data-target="atestadoSection"]', function() {
+      carregarAtestados();
+    });
+
+    // Event listeners para as abas da seção de anamnese
+    $('#anamneseTabs .nav-link').on('click', function() {
+      // Adicionar efeito visual de transição
+      const targetPane = $($(this).data('bs-target'));
+      targetPane.addClass('fade-in-active');
+      
+      setTimeout(() => {
+        targetPane.removeClass('fade-in-active');
+      }, 300);
+    });
+
+    // Event listeners para modais
+    $('#modalNovaReceita').on('shown.bs.modal', function() {
+      inicializarEditorReceita();
+    });
+
+    $('#modalNovoAtestado').on('shown.bs.modal', function() {
+      inicializarEditorAtestado();
+    });
+
+    // Salvar receita
+    $('#btn_salvar_receita').on('click', function() {
+      const atendimentoId = document.getElementById('ATENDIMENTO_ID').value;
+      const tipoReceita = $('#tipo_receita').val();
+      const conteudoReceita = editorReceita ? editorReceita.root.innerHTML : $('#conteudo_receita').val();
+
+      if (!tipoReceita || !conteudoReceita.trim()) {
+        alert('Preencha todos os campos obrigatórios.');
+        return;
+      }
+
+      // Obter o ID do médico atual da sessão
+      const medicoId = document.getElementById('user_id') ? document.getElementById('user_id').value : null;
+
+      const dados = {
+        atendimento_id: atendimentoId,
+        medico_id: medicoId,
+        tipo_receita: tipoReceita,
+        conteudo_receita: conteudoReceita
+      };
+
+      const btn = $(this);
+      const original = btn.html();
+      btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Salvando...');
+
+      fetch('/api/receituarios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+      })
+      .then(r => r.json())
+      .then(resp => {
+        if (resp.success) {
+          $('#modalNovaReceita').modal('hide');
+          $('#formReceita')[0].reset();
+          if (editorReceita) editorReceita.root.innerHTML = '';
+          carregarReceitas();
+        } else {
+          alert('Erro ao salvar receita: ' + (resp.message || 'Falha desconhecida'));
+        }
+      })
+      .catch(err => alert('Erro ao salvar receita: ' + err))
+      .finally(() => {
+        btn.prop('disabled', false).html(original);
+      });
+    });
+
+    // Salvar atestado
+    $('#btn_salvar_atestado').on('click', function() {
+      const atendimentoId = document.getElementById('ATENDIMENTO_ID').value;
+      const diasAfastamento = $('#dias_afastamento').val();
+      const conteudoAtestado = editorAtestado ? editorAtestado.root.innerHTML : $('#conteudo_atestado').val();
+
+      if (!conteudoAtestado.trim()) {
+        alert('O conteúdo do atestado é obrigatório.');
+        return;
+      }
+
+      // Obter o ID do médico atual da sessão
+      const medicoId = document.getElementById('user_id') ? document.getElementById('user_id').value : null;
+
+      const dados = {
+        atendimento_id: atendimentoId,
+        medico_id: medicoId,
+        conteudo_atestado: conteudoAtestado,
+        dias_afastamento: diasAfastamento ? parseInt(diasAfastamento) : null
+      };
+
+      const btn = $(this);
+      const original = btn.html();
+      btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Salvando...');
+
+      fetch('/api/atestados', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+      })
+      .then(r => r.json())
+      .then(resp => {
+        if (resp.success) {
+          $('#modalNovoAtestado').modal('hide');
+          $('#formAtestado')[0].reset();
+          if (editorAtestado) editorAtestado.root.innerHTML = '';
+          carregarAtestados();
+        } else {
+          alert('Erro ao salvar atestado: ' + (resp.message || 'Falha desconhecida'));
+        }
+      })
+      .catch(err => alert('Erro ao salvar atestado: ' + err))
+      .finally(() => {
+        btn.prop('disabled', false).html(original);
+      });
+    });
+
+  </script>
+
+  <!-- Adicionar Quill.js para editores ricos -->
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+  <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+</body>
+</html>
+
+
