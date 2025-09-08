@@ -989,12 +989,6 @@
         </div>
 
         <!-- Ações Rápidas -->
-        <div class="quick-actions">
-            <a class="nav-link action-btn" href="#" onclick="abrirImpressao('{{ internacao.atendimento_id }}'); return false;">
-                <i class="fas fa-print"></i>
-                <span>Imprimir</span>
-            </a>
-        </div>
     </nav>
 </div>
 
@@ -1507,7 +1501,7 @@
 </script>
 
 <!-- Campo oculto para o ID do atendimento -->
-<input type="hidden" id="atendimento_id" value="{{ internacao.atendimento_id }}">
+<input type="hidden" id="atendimento_id" value="{{ internacao.id }}">
 
 <script>
     // Variáveis globais
@@ -1517,6 +1511,9 @@
     // Extrair e validar o ID da internação
     const internacaoId = parseInt("{{ internacao.id }}", 10);
     console.log('ID da internação:', internacaoId);
+    
+    // Definir variável global para uso em outros scripts
+    window.internacaoId = internacaoId;
     
     // Verificar se internacaoId é um número válido
     if (isNaN(internacaoId)) {
