@@ -105,7 +105,7 @@ class Atendimento(db.Model):
     triagem = db.Column(db.Text)
     alergias = db.Column(db.Text)
     temp = db.Column(db.String(20))
-    status = db.Column(db.String(20))
+    status = db.Column(db.String(50))
     sp02 = db.Column(db.String(20))
     prescricao_medica = db.Column(db.Text)   
     pulso = db.Column(db.String(20))
@@ -558,3 +558,60 @@ class ListaInternacao(db.Model):
 
     atendimento = db.relationship('Atendimento', backref=db.backref('lista_internacao', lazy=True))
     paciente = db.relationship('Paciente', backref=db.backref('lista_internacao', lazy=True))
+
+class MedicacaoClasse(db.Model):
+    __tablename__ = 'medicacao_classe'
+    
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    nome = db.Column(db.String(255), nullable=False)
+    apresentacao = db.Column(db.String(100), nullable=False)
+    classe = db.Column(db.String(100), nullable=False)
+    codigo = db.Column(db.String(50), unique=True, nullable=False)
+    unidade = db.Column(db.String(20), nullable=False)
+    
+    # Relacionamento com MedicacaoItem
+    itens = relationship('MedicacaoItem', backref='medicacao_classe', lazy=True)
+    
+    def __repr__(self):
+        return f'<MedicacaoClasse {self.nome}>'
+    
+class MedicacaoItem(db.Model):
+    __tablename__ = 'medicacao_item'
+    
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id_med_classe = db.Column(db.Integer, db.ForeignKey('medicacao_classe.id'), nullable=False)
+    lote = db.Column(db.String(100), nullable=False)
+    validade = db.Column(db.Date, nullable=False)
+    local = db.Column(db.String(255), nullable=False)
+    quantidade = db.Column(db.Integer, nullable=False, default=0)
+    
+    def __repr__(self):
+        return f'<MedicacaoItem {self.lote} - Qty: {self.quantidade}>'
+
+class FluxoDisp(db.Model):
+    __tablename__ = 'fluxo_disp'
+    
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id_atendimento = db.Column(db.Integer, nullable=False)
+    id_medico = db.Column(db.Integer, nullable=False)
+    id_responsavel = db.Column(db.Integer, nullable=False)
+    id_prescricao = db.Column(db.Integer, nullable=False)
+    hora = db.Column(db.Time, nullable=False)
+    data = db.Column(db.Date, nullable=False)
+    medicamento = db.Column(db.String(255), nullable=False)
+    quantidade = db.Column(db.Integer, nullable=False, default=0)
+    status = db.Column(db.String(50), nullable=False, default='Pendente')
+    
+    def __repr__(self):
+        return f'<FluxoDisp {self.medicamento} - {self.status}>'
+
+class FluxoPaciente(db.Model):
+    __tablename__ = "fluxo_paciente"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id_atendimento = db.Column(db.String(20), nullable=False)
+    id_medico = db.Column(db.Integer, nullable=True)
+    id_enfermeiro = db.Column(db.Integer, nullable=True)
+    nome_paciente = db.Column(db.String(150), nullable=False)
+    mudanca_status = db.Column(db.Text, nullable=False)
+    mudanca_hora = db.Column(db.DateTime, default=datetime.utcnow)

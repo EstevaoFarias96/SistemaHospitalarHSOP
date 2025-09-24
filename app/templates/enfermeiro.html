@@ -152,6 +152,11 @@
       <!-- Sidebar -->
       <div class="sidebar" id="sidebar">
         <ul class="nav flex-column">
+          <li class="nav-item" data-title="Cadastrar Paciente">
+            <a class="nav-link" href="#" onclick="abrirModalCadastroPaciente()">
+              <i class="fas fa-user-plus"></i>
+            </a>
+          </li>
           <li class="nav-item" data-title="Buscar Pacientes">
             <a class="nav-link" href="#" onclick="abrirBuscaPacientes()">
               <i class="fas fa-search"></i>
@@ -251,6 +256,156 @@
             </div>
             <button type="submit" class="btn btn-primary">Alterar Senha</button>
           </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Cadastro de Paciente -->
+  <div class="modal fade" id="modalCadastroPaciente" tabindex="-1" role="dialog" aria-labelledby="modalCadastroPacienteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <!-- Header do Modal -->
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="modalCadastroPacienteLabel">
+            <i class="fas fa-user-plus mr-2"></i>Cadastrar Paciente
+          </h5>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Fechar">
+            <span>&times;</span>
+          </button>
+        </div>
+
+        <!-- Corpo do Modal -->
+        <div class="modal-body">
+          <form id="formCadastroPaciente" novalidate>
+            <!-- Informações Básicas -->
+            <div class="row mb-3">
+              <div class="col-md-8">
+                <label for="modalNome" class="form-label">
+                  <i class="fas fa-user mr-1"></i>Nome Completo <span class="text-danger">*</span>
+                </label>
+                <input type="text" class="form-control" id="modalNome" name="nome" placeholder="Digite o nome completo" required>
+                <div class="invalid-feedback">Nome é obrigatório</div>
+              </div>
+              <div class="col-md-4">
+                <label for="modalCpf" class="form-label">
+                  <i class="fas fa-id-card mr-1"></i>CPF <span class="text-danger">*</span>
+                </label>
+                <input type="text" class="form-control" id="modalCpf" name="cpf" placeholder="000.000.000-00" required>
+                <small class="text-muted">Digite 11 dígitos</small>
+                <div class="invalid-feedback">CPF é obrigatório</div>
+              </div>
+            </div>
+
+            <!-- Dados Pessoais -->
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <label for="modalDataNascimento" class="form-label">
+                  <i class="fas fa-calendar-alt mr-1"></i>Data Nascimento <span class="text-danger">*</span>
+                </label>
+                <input type="date" class="form-control" id="modalDataNascimento" name="data_nascimento" required>
+                <div class="invalid-feedback">Data é obrigatória</div>
+              </div>
+              <div class="col-md-4">
+                <label for="modalSexo" class="form-label">
+                  <i class="fas fa-venus-mars mr-1"></i>Sexo <span class="text-danger">*</span>
+                </label>
+                <select class="form-control" id="modalSexo" name="sexo" required>
+                  <option value="">Selecione</option>
+                  <option value="Masculino">Masculino</option>
+                  <option value="Feminino">Feminino</option>
+                </select>
+                <div class="invalid-feedback">Sexo é obrigatório</div>
+              </div>
+              <div class="col-md-4">
+                <label for="modalCor" class="form-label">
+                  <i class="fas fa-palette mr-1"></i>Cor/Raça
+                </label>
+                <select class="form-control" id="modalCor" name="cor">
+                  <option value="">Selecione</option>
+                  <option value="Branca">Branca</option>
+                  <option value="Preta">Preta</option>
+                  <option value="Parda">Parda</option>
+                  <option value="Amarela">Amarela</option>
+                  <option value="Indígena">Indígena</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Informações Adicionais -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="modalNomeSocial" class="form-label">
+                  <i class="fas fa-user-tag mr-1"></i>Nome Social
+                </label>
+                <input type="text" class="form-control" id="modalNomeSocial" name="nome_social" placeholder="Se houver">
+              </div>
+              <div class="col-md-6">
+                <label for="modalFiliacao" class="form-label">
+                  <i class="fas fa-female mr-1"></i>Nome da Mãe
+                </label>
+                <input type="text" class="form-control" id="modalFiliacao" name="filiacao" placeholder="Nome completo">
+              </div>
+            </div>
+
+            <!-- Contato -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="modalCartaoSus" class="form-label">
+                  <i class="fas fa-id-badge mr-1"></i>Cartão SUS
+                </label>
+                <input type="text" class="form-control" id="modalCartaoSus" name="cartao_sus" placeholder="000000000000000" maxlength="15">
+                <small class="text-muted">Opcional</small>
+              </div>
+              <div class="col-md-6">
+                <label for="modalTelefone" class="form-label">
+                  <i class="fas fa-phone mr-1"></i>Telefone
+                </label>
+                <input type="text" class="form-control" id="modalTelefone" name="telefone" placeholder="(00) 00000-0000">
+              </div>
+            </div>
+
+            <!-- Endereço -->
+            <div class="row mb-3">
+              <div class="col-md-8">
+                <label for="modalEndereco" class="form-label">
+                  <i class="fas fa-map-marker-alt mr-1"></i>Endereço
+                </label>
+                <input type="text" class="form-control" id="modalEndereco" name="endereco" placeholder="Rua, Avenida, etc.">
+              </div>
+              <div class="col-md-4">
+                <label for="modalBairro" class="form-label">
+                  <i class="fas fa-building mr-1"></i>Bairro
+                </label>
+                <input type="text" class="form-control" id="modalBairro" name="bairro" placeholder="Nome do bairro">
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-12">
+                <label for="modalMunicipio" class="form-label">
+                  <i class="fas fa-city mr-1"></i>Município
+                </label>
+                <input type="text" class="form-control" id="modalMunicipio" name="municipio" placeholder="Nome da cidade">
+              </div>
+            </div>
+
+            <!-- Info sobre campos obrigatórios -->
+            <div class="alert alert-light border text-muted small">
+              <i class="fas fa-info-circle mr-1"></i>
+              Campos marcados com <span class="text-danger">*</span> são obrigatórios
+            </div>
+          </form>
+        </div>
+
+        <!-- Footer do Modal -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
+            <i class="fas fa-times mr-1"></i>Cancelar
+          </button>
+          <button type="button" class="btn btn-primary" id="btnSalvarPaciente">
+            <i class="fas fa-save mr-1"></i>Cadastrar
+          </button>
         </div>
       </div>
     </div>
@@ -459,8 +614,11 @@
             var html = '';
             data.pacientes.forEach(function(paciente) {
               html += '<div class="patient-item d-flex justify-content-between align-items-center">';
-              html += '<span>' + paciente.nome + ' (' + paciente.cpf + ')</span>';
-              html += '<button class="btn btn-sm btn-info" onclick="mostrarHistoricoAtendimentos(' + paciente.id + ', \'' + paciente.nome + '\')">Histórico</button>';
+              html += '<span><a href="/ficha_geral_paciente?paciente_id=' + paciente.id + '" target="_blank" style="text-decoration:none;">' + paciente.nome + ' (' + paciente.cpf + ')</a></span>';
+              html += '<div>' +
+                '<a class="btn btn-sm btn-outline-info mr-2" href="/ficha_geral_paciente?paciente_id=' + paciente.id + '" target="_blank">Ficha</a>' +
+                '<button class="btn btn-sm btn-info" onclick="mostrarHistoricoAtendimentos(' + paciente.id + ', \'' + paciente.nome + '\')">Histórico</button>' +
+              '</div>';
               html += '</div>';
             });
             $('#listaIdentificados').html(html);
@@ -581,6 +739,172 @@
     window.onload = function() {
       console.log("Página carregada. Iniciando carregamento de dados...");
     };
+
+    // ============ MODAL CADASTRO DE PACIENTE ============
+    
+    // Função para abrir modal de cadastro de paciente
+    function abrirModalCadastroPaciente() {
+      $('#modalCadastroPaciente').modal('show');
+      $('#formCadastroPaciente')[0].reset();
+
+      // Pequeno delay para garantir que o modal esteja totalmente carregado
+      setTimeout(() => {
+        $('#modalNome').focus();
+      }, 500);
+    }
+
+    // Máscaras para os campos do modal
+    $(document).ready(function() {
+      $('#modalCadastroPaciente #modalCpf').mask('000.000.000-00');
+      $('#modalCadastroPaciente #modalTelefone').mask('(00) 00000-0000');
+      $('#modalCadastroPaciente #modalCartaoSus').mask('000000000000000');
+
+      // Limpar formulário quando modal for fechado
+      $('#modalCadastroPaciente').on('hidden.bs.modal', function () {
+        $('#formCadastroPaciente')[0].reset();
+        $('#btnSalvarPaciente').html('<i class="fas fa-save mr-1"></i>Cadastrar').prop('disabled', false);
+      });
+    });
+
+    // Função para salvar paciente
+    $('#btnSalvarPaciente').click(function() {
+      const form = document.getElementById('formCadastroPaciente');
+
+      // Adicionar classe de validação
+      form.classList.add('was-validated');
+
+      if (!form.checkValidity()) {
+        // Scroll para o primeiro campo inválido
+        const primeiroCampoInvalido = form.querySelector(':invalid');
+        if (primeiroCampoInvalido) {
+          primeiroCampoInvalido.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          primeiroCampoInvalido.focus();
+        }
+        return;
+      }
+
+      const formData = new FormData(form);
+      const dados = {};
+
+      // Coletar dados do formulário
+      for (let [key, value] of formData.entries()) {
+        if (value.trim() !== '') {
+          dados[key] = value.trim();
+        }
+      }
+
+      // Validações básicas - mais amigáveis
+      if (!dados.nome) {
+        $('#modalNome').focus();
+        alert('Por favor, preencha o nome completo');
+        return;
+      }
+
+      if (!dados.cpf) {
+        $('#modalCpf').focus();
+        alert('Por favor, preencha o CPF');
+        return;
+      }
+
+      // Validação básica do CPF (apenas se preenchido)
+      const cpfLimpo = dados.cpf.replace(/\D/g, '');
+      if (cpfLimpo.length > 0 && cpfLimpo.length < 11) {
+        $('#modalCpf').focus();
+        alert('CPF deve ter 11 dígitos');
+        return;
+      }
+      if (cpfLimpo.length === 11 && /^(\d)\1+$/.test(cpfLimpo)) {
+        $('#modalCpf').focus();
+        alert('CPF inválido (números repetidos)');
+        return;
+      }
+
+      if (!dados.data_nascimento) {
+        $('#modalDataNascimento').focus();
+        alert('Por favor, preencha a data de nascimento');
+        return;
+      }
+
+      if (!dados.sexo) {
+        $('#modalSexo').focus();
+        alert('Por favor, selecione o sexo');
+        return;
+      }
+
+      // Mostrar loading
+      const btnSalvar = $('#btnSalvarPaciente');
+      const textoOriginal = btnSalvar.html();
+      btnSalvar.html('<i class="fas fa-spinner fa-spin mr-1"></i>Cadastrando...').prop('disabled', true).addClass('disabled');
+
+      // Enviar dados para o servidor
+      fetch('/api/pacientes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dados)
+      })
+      .then(response => response.json())
+      .then(data => {
+        btnSalvar.html(textoOriginal).prop('disabled', false);
+        
+        if (data.success) {
+          // Sucesso no cadastro
+          alert('✓ Paciente cadastrado com sucesso!');
+
+          $('#modalCadastroPaciente').modal('hide');
+
+          // Limpar a classe de validação para próximos usos
+          $('#formCadastroPaciente')[0].classList.remove('was-validated');
+        } else {
+          // Mostrar erro de forma amigável
+          let mensagemErro = data.message || 'Erro ao cadastrar paciente';
+
+          // Simplificar mensagens de erro comuns
+          if (mensagemErro.includes('CPF já cadastrado')) {
+            mensagemErro = 'Este CPF já está cadastrado no sistema';
+            $('#modalCpf').focus();
+          } else if (mensagemErro.includes('obrigatório')) {
+            mensagemErro = 'Preencha todos os campos obrigatórios';
+          }
+
+          alert(mensagemErro);
+
+          // Resetar botão
+          btnSalvar.html(textoOriginal).prop('disabled', false).removeClass('disabled');
+        }
+      })
+      .catch(error => {
+        btnSalvar.html(textoOriginal).prop('disabled', false).removeClass('disabled');
+        console.error('Erro:', error);
+        alert('Erro de conexão. Verifique sua internet e tente novamente.');
+      });
+    });
+
+    // Pequena ajuda visual para CPF
+    $('#modalCadastroPaciente #modalCpf').on('input', function() {
+      const cpf = $(this).val().replace(/\D/g, '');
+      const helpText = $(this).siblings('small');
+
+      if (cpf.length === 0) {
+        helpText.text('Digite 11 dígitos');
+        helpText.removeClass('text-success text-danger');
+      } else if (cpf.length < 11) {
+        helpText.text(`Faltam ${11 - cpf.length} dígitos`);
+        helpText.removeClass('text-success').addClass('text-warning');
+      } else if (cpf.length === 11) {
+        if (/^(\d)\1+$/.test(cpf)) {
+          helpText.text('CPF inválido');
+          helpText.removeClass('text-success').addClass('text-danger');
+        } else {
+          helpText.text('CPF válido');
+          helpText.removeClass('text-danger text-warning').addClass('text-success');
+        }
+      } else {
+        helpText.text('CPF muito longo');
+        helpText.removeClass('text-success').addClass('text-danger');
+      }
+    });
   </script>
 </body>
 </html>

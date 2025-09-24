@@ -48,6 +48,34 @@
       position: relative;
       text-decoration: none;
     }
+    .menu-label {
+      display: none;
+      margin-left: 10px;
+      font-size: 16px;
+    }
+    .sidebar.expanded {
+      width: 220px;
+      align-items: flex-start;
+      padding-left: 10px;
+    }
+    .sidebar.expanded a {
+      justify-content: flex-start;
+    }
+    .sidebar.expanded .menu-label {
+      display: inline-block;
+    }
+    /* Expandir ao passar o mouse */
+    .sidebar:hover {
+      width: 220px;
+      align-items: flex-start;
+      padding-left: 10px;
+    }
+    .sidebar:hover a {
+      justify-content: flex-start;
+    }
+    .sidebar:hover .menu-label {
+      display: inline-block;
+    }
     .sidebar a:hover::after {
       content: attr(data-title);
       position: absolute;
@@ -208,24 +236,30 @@
       <!-- Sidebar -->
       <div class="sidebar" id="sidebar">
         <ul class="nav flex-column">
+          <li class="nav-item" data-title="Menu">
+            <a class="nav-link" href="#" id="toggleSidebarBtn" onclick="toggleSidebar(); return false;">
+              <i class="fas fa-bars"></i><span class="menu-label">Menu</span>
+            </a>
+          </li>
           <li class="nav-item" data-title="Menu Inicial">
             <a class="nav-link" href="#" onclick="onVoltarMenu()">
-              <i class="fas fa-home"></i>
+              <i class="fas fa-home"></i><span class="menu-label">Menu Inicial</span>
             </a>
-          </li>          <li class="nav-item" data-title="Cadastrar novo paciente">
+          </li>
+          <li class="nav-item" data-title="Cadastrar novo paciente">
             <a class="nav-link" href="#" onclick="abrirModalCadastroPaciente()" title="Cadastrar Paciente">
-              <i class="fas fa-user-plus"></i>
+              <i class="fas fa-user-plus"></i><span class="menu-label">Cadastrar Paciente</span>
             </a>
-          </li>          <li class="nav-item" data-title="Buscar Paciente">
+          </li>
+          <li class="nav-item" data-title="Buscar Paciente">
             <a class="nav-link" href="#" onclick="showBuscaPaciente()">
-              <i class="fas fa-search"></i>
+              <i class="fas fa-search"></i><span class="menu-label">Buscar Paciente</span>
             </a>
           </li>
           <li class="nav-item" data-title="Status de Pacientes">
             <a class="nav-link" href="/recepcionista/status-pacientes">
-              <i class="fas fa-chart-line"></i>
+              <i class="fas fa-chart-line"></i><span class="menu-label">Status de Pacientes</span>
             </a>
-          
         </ul>
         <!-- Menu do Usuário -->
         <div class="user-menu">
@@ -242,7 +276,18 @@
       <div class="col main-content">
         <!-- Dashboard -->
         <div id="dashboard">
-          <!-- As listas de atendimentos foram removidas -->
+          <!-- Ações rápidas -->
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body d-flex align-items-center justify-content-between">
+              <div>
+                <h5 class="mb-1">Criar Atendimento por CPF</h5>
+                <small class="text-muted">Busque o paciente pelo CPF para abrir um novo atendimento</small>
+              </div>
+              <button class="btn btn-primary" onclick="abrirModalCriarAtendimentoCPF()">
+                <i class="fas fa-notes-medical mr-1"></i>Novo Atendimento
+              </button>
+            </div>
+          </div>
         </div>        <!-- Tela de Cadastro -->
         <div id="cadastro-paciente" class="form-container hidden">
           <h2>Cadastrar Paciente</h2>
@@ -618,6 +663,59 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 
+  <!-- Modal: Criar Atendimento por CPF -->
+  <div class="modal fade" id="modalCriarAtendimentoCPF" tabindex="-1" role="dialog" aria-labelledby="modalCriarAtendimentoCPFLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalCriarAtendimentoCPFLabel">Criar Atendimento por CPF</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="cpfAtendimentoInput">CPF do Paciente</label>
+            <input type="text" class="form-control" id="cpfAtendimentoInput" placeholder="000.000.000-00">
+            <small class="form-text text-muted">Digite o CPF completo (11 dígitos)</small>
+          </div>
+          <div id="previewAtendimentoPaciente" class="mt-3" style="display:none;">
+            <hr>
+            <h6 class="mb-3">Confirmar dados do paciente</h6>
+            <div class="card">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-12"><strong>Nome:</strong> <span id="prevNome"></span></div>
+                </div>
+                <div class="row">
+                  <div class="col-6"><strong>CPF:</strong> <span id="prevCpf"></span></div>
+                  <div class="col-6"><strong>Data Nasc.:</strong> <span id="prevDataNasc"></span></div>
+                </div>
+                <div class="row">
+                  <div class="col-12"><strong>Nome da mãe:</strong> <span id="prevMae"></span></div>
+                </div>
+                <div class="row">
+                  <div class="col-6"><strong>Sexo:</strong> <span id="prevSexo"></span></div>
+                  <div class="col-6"><strong>Cartão SUS:</strong> <span id="prevSUS"></span></div>
+                </div>
+                <div class="row">
+                  <div class="col-12"><strong>Telefone:</strong> <span id="prevTelefone"></span></div>
+                </div>
+                <div class="row">
+                  <div class="col-12"><strong>Endereço:</strong> <span id="prevEndereco"></span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="btnConfirmarCriarAtendimento">Criar Atendimento</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>    $(document).ready(function () {
       $('#cpf').mask('000.000.000-00');
       document.getElementById('form-paciente').addEventListener('submit', cadastrarPaciente);
@@ -629,6 +727,10 @@
       });
       // As listas de atendimentos foram removidas
     });
+
+    function toggleSidebar() {
+      $('#sidebar').toggleClass('expanded');
+    }
 
     $('#userMenuButton').click(function() {
       $('#userDropdown').toggle();
@@ -876,7 +978,11 @@
                     ${paciente.nome ? paciente.nome.charAt(0).toUpperCase() : '?'}
                   </div>
                   <div>
-                    <h5 class="mb-1 font-weight-bold text-primary">${paciente.nome || 'Nome não informado'}</h5>
+                    <h5 class="mb-1 font-weight-bold text-primary">
+                      <a href="/ficha_geral_paciente?paciente_id=${paciente.id}" target="_blank" style="text-decoration:none;">
+                        ${paciente.nome || 'Nome não informado'}
+                      </a>
+                    </h5>
                     <p class="mb-1 text-muted small">
                       <i class="fas fa-id-card mr-1"></i>CPF: ${cpfFormatado || 'Não informado'} |
                       <i class="fas fa-birthday-cake mr-1"></i>${idade} anos |
@@ -891,6 +997,9 @@
               </div>
               <div class="col-md-4 text-right">
                 <div class="btn-group" role="group">
+                  <a class="btn btn-outline-info btn-sm" href="/ficha_geral_paciente?paciente_id=${paciente.id}" target="_blank" title="Abrir Ficha do Paciente">
+                    <i class="fas fa-file-alt mr-1"></i>Ficha
+                  </a>
                   <button class="btn btn-outline-success btn-sm" onclick="criarFichaAtendimento(${paciente.id})" title="Criar ficha de atendimento">
                     <i class="fas fa-plus-circle mr-1"></i>Atendimento
                   </button>
@@ -1479,6 +1588,132 @@
         $('#busca-cpf').val('');
         limparResultadosBusca();
       });
+    });
+
+    // ========== CRIAR ATENDIMENTO POR CPF ==========
+    function abrirModalCriarAtendimentoCPF() {
+      $('#modalCriarAtendimentoCPF').modal('show');
+      setTimeout(() => { $('#cpfAtendimentoInput').focus(); }, 300);
+    }
+
+    $('#modalCriarAtendimentoCPF').on('shown.bs.modal', function() {
+      $('#cpfAtendimentoInput').mask('000.000.000-00');
+    });
+
+    // Fluxo em duas etapas: buscar → confirmar
+    $('#btnConfirmarCriarAtendimento').on('click', function() {
+      const btn = $(this);
+      const estado = btn.data('state') || 'buscar';
+
+      if (estado === 'buscar') {
+        const cpf = ($('#cpfAtendimentoInput').val() || '').replace(/\D/g, '');
+        if (cpf.length !== 11) {
+          alert('CPF deve ter 11 dígitos.');
+          $('#cpfAtendimentoInput').focus();
+          return;
+        }
+
+        const textoOriginal = btn.html();
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Buscando...');
+
+        // Buscar paciente por CPF
+        fetch('/api/pacientes/buscar/cpf?valor=' + encodeURIComponent(cpf))
+          .then(r => r.json())
+          .then(data => {
+            if (!data.success || !data.pacientes || data.pacientes.length === 0) {
+              throw new Error('Paciente não encontrado para o CPF informado.');
+            }
+            const p = data.pacientes[0];
+
+            // Buscar detalhes completos do paciente
+            return fetch(`/api/pacientes/${p.id}`).then(r => r.json());
+          })
+          .then(det => {
+            if (!det.success || !det.paciente) throw new Error('Não foi possível carregar os dados do paciente.');
+            const paciente = det.paciente;
+
+            // Preencher prévia
+            $('#prevNome').text(paciente.nome || '-');
+            $('#prevCpf').text(formatarCPF(paciente.cpf) || '-');
+            $('#prevDataNasc').text(paciente.data_nascimento || '-');
+            $('#prevMae').text(paciente.filiacao || '-');
+            $('#prevSexo').text(paciente.sexo || '-');
+            $('#prevSUS').text(paciente.cartao_sus || '-');
+            $('#prevTelefone').text(paciente.telefone || '-');
+            const enderecoCompleto = [paciente.endereco, paciente.bairro, paciente.municipio].filter(Boolean).join(' - ');
+            $('#prevEndereco').text(enderecoCompleto || '-');
+
+            $('#previewAtendimentoPaciente').slideDown(150);
+            btn.data('state', 'confirmar');
+            btn.data('pacienteId', paciente.id);
+            btn.html('<i class="fas fa-check mr-1"></i>Confirmar criação da ficha');
+          })
+          .catch(err => {
+            alert(err.message || 'Erro ao buscar paciente.');
+          })
+          .finally(() => {
+            btn.prop('disabled', false);
+          });
+      } else {
+        // Confirmar criação
+        const pacienteId = btn.data('pacienteId');
+        if (!pacienteId) {
+          alert('Paciente não selecionado. Tente novamente.');
+          return;
+        }
+
+        const textoOriginal = btn.html();
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Criando...');
+
+        const agora = new Date();
+        const dataAtual = agora.toISOString().split('T')[0];
+        const horaAtual = agora.toTimeString().slice(0, 5);
+
+        fetch('/api/atendimentos/cadastrar', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify({
+            paciente_id: pacienteId,
+            data_atendimento: dataAtual,
+            hora_atendimento: horaAtual
+          })
+        })
+        .then(r => r.json())
+        .then(resp => {
+          if (resp && resp.success) {
+            alert('✓ Atendimento criado com sucesso! ID: ' + resp.atendimento.id);
+            $('#modalCriarAtendimentoCPF').modal('hide');
+            // reset
+            $('#cpfAtendimentoInput').val('');
+            $('#previewAtendimentoPaciente').hide();
+            btn.data('state', 'buscar').data('pacienteId', null).html('Criar Atendimento');
+          } else {
+            throw new Error((resp && resp.message) || 'Erro ao criar atendimento');
+          }
+        })
+        .catch(err => {
+          alert(err.message || 'Erro ao criar atendimento');
+        })
+        .finally(() => {
+          btn.prop('disabled', false).html(textoOriginal);
+        });
+      }
+    });
+
+    // Resetar pré-visualização ao alterar o CPF ou ao fechar o modal
+    $('#cpfAtendimentoInput').on('input', function() {
+      $('#previewAtendimentoPaciente').hide();
+      const btn = $('#btnConfirmarCriarAtendimento');
+      btn.data('state', 'buscar').data('pacienteId', null).html('Criar Atendimento');
+    });
+    $('#modalCriarAtendimentoCPF').on('hidden.bs.modal', function() {
+      $('#previewAtendimentoPaciente').hide();
+      const btn = $('#btnConfirmarCriarAtendimento');
+      btn.data('state', 'buscar').data('pacienteId', null).html('Criar Atendimento');
+      $('#cpfAtendimentoInput').val('');
     });
   </script>
 

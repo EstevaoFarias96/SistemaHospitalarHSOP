@@ -180,6 +180,11 @@
     .user-dropdown a:hover {
       color: #007bff;
     }
+
+    .menu-label { display: none; margin-left: 10px; font-size: 16px; }
+    .sidebar:hover { width: 220px; align-items: flex-start; padding-left: 10px; }
+    .sidebar:hover a { justify-content: flex-start; }
+    .sidebar:hover .menu-label { display: inline-block; }
   </style>
 </head>
 <body>
@@ -190,27 +195,27 @@
         <ul class="nav flex-column">
           <li class="nav-item" data-title="Menu Inicial">
             <a class="nav-link" href="/recepcionista">
-              <i class="fas fa-home"></i>
+              <i class="fas fa-home"></i><span class="menu-label">Menu Inicial</span>
             </a>
           </li>
           <li class="nav-item" data-title="Cadastrar Paciente">
             <a class="nav-link" href="#" onclick="abrirModalCadastroPaciente()">
-              <i class="fas fa-user-plus"></i>
+              <i class="fas fa-user-plus"></i><span class="menu-label">Cadastrar Paciente</span>
             </a>
           </li>
           <li class="nav-item" data-title="Buscar Paciente">
             <a class="nav-link" href="#" onclick="showBuscaPaciente()">
-              <i class="fas fa-search"></i>
+              <i class="fas fa-search"></i><span class="menu-label">Buscar Paciente</span>
             </a>
           </li>
           <li class="nav-item" data-title="Status de Pacientes">
             <a class="nav-link active" href="/recepcionista/status-pacientes">
-              <i class="fas fa-chart-line"></i>
+              <i class="fas fa-chart-line"></i><span class="menu-label">Status de Pacientes</span>
             </a>
           </li>
           <li class="nav-item" data-title="Listas">
             <a class="nav-link" href="/listas_recepcao">
-              <i class="fas fa-list"></i>
+              <i class="fas fa-list"></i><span class="menu-label">Listas</span>
             </a>
           </li>
         </ul>
@@ -482,6 +487,12 @@
                     <small class="text-muted d-block">${campoExtra2Label}</small>
                     <span class="font-weight-bold">${campoExtra2Valor}</span>
                   </div>
+                </div>
+
+                <div class="mt-3 text-right">
+                  <a class="btn btn-sm btn-outline-info" href="/ficha_geral_paciente?paciente_id=${paciente.id}" target="_blank">
+                    <i class="fas fa-file-alt mr-1"></i>Ficha
+                  </a>
                 </div>
               </div>
             </div>

@@ -1381,7 +1381,7 @@ function configurarSincronizacaoDiasAfastamento() {
             }
             
             // Gerar novo texto com o número de dias atualizado
-            const novoTexto = `Atesto que ${nomePaciente}, portador do CPF n: ${cpfPaciente}, deverá afastar-se do trabalho por um período de ${dias} dias, para tratamento de saúde. \n\n CID:_______`;
+            const novoTexto = `Atestado que o paciente "${nomePaciente}" portador do documento "${cpfPaciente}" deverá se afastar por um periodo de "${dias}" dias\n\nCID: `;
             
             // Atualizar o editor Quill se disponível
             if (window.quillAtestado && window.quillAtestado.setText) {
@@ -3827,7 +3827,7 @@ $(document).on('shown.bs.modal', '#modalNovoAtestado', function () {
     }
     
     // Texto pré-preenchido do atestado (inicial com placeholder)
-    const textoPrePreenchido = `Atesto que ${nomePaciente}, portador do CPF n: ${cpfPaciente}, deverá afastar-se do trabalho por um período de [dias] dias, para tratamento de saúde. \n\n CID:_______`;
+    const textoPrePreenchido = `Atestado que o paciente "${nomePaciente}" portador do documento "${cpfPaciente}" deverá se afastar por um periodo de "[dias]" dias\n\nCID: `;
     
     // Função para pré-preencher o editor
     const preencherEditor = function(texto = textoPrePreenchido) {

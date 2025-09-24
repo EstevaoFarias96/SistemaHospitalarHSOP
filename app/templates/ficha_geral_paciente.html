@@ -64,7 +64,7 @@
   <!-- Cabeçalho com botões -->
   <header>
     <div class="header-top">
-      <button class="btn btn-secondary" onclick="location.href='/enfermeiro'">Voltar para o Menu</button>
+      <button class="btn btn-secondary" id="btnVoltar">Voltar para o Menu</button>
       <img id="hospitalLogo" src="/static/imagem1.png" alt="Logotipo do Hospital" />
       <button class="btn btn-primary" onclick="gerarPdf()">Gerar PDF</button>
     </div>
@@ -130,113 +130,28 @@
       </div>
     </section>
 
-    <!-- Informações da Pré Consulta (Triagem) -->
-    <section id="triagemSection">
-      <h2 class="section-title">Pré Consulta - Triagem</h2>
-      <div class="card triagem-card">
-        <div class="card-body">
-          <div class="row info-row">
-            <div class="col-md-6">
-              <span class="info-label">Data de Atendimento:</span> <span id="dataAtendimento"></span>
-            </div>
-            <div class="col-md-6">
-              <span class="info-label">Hora de Atendimento:</span> <span id="horaAtendimento"></span>
-            </div>
-          </div>
-          <div class="row info-row">
-            <div class="col-md-6">
-              <span class="info-label">Pressão:</span> <span id="pressao"></span>
-            </div>
-            <div class="col-md-6">
-              <span class="info-label">Pulso:</span> <span id="pulso"></span>
-            </div>
-          </div>
-          <div class="row info-row">
-            <div class="col-md-6">
-              <span class="info-label">Temperatura:</span> <span id="temperatura"></span>
-            </div>
-            <div class="col-md-6">
-              <span class="info-label">Classificação de Risco:</span> <span id="classificacaoRisco"></span>
-            </div>
-          </div>
-          <!-- Campos específicos da Pré Consulta -->
-          <div class="row info-row">
-            <div class="col-md-4">
-              <span class="info-label">SpO₂:</span> <span id="sp02"></span>
-            </div>
-            <div class="col-md-4">
-              <span class="info-label">Peso:</span> <span id="peso"></span>
-            </div>
-            <div class="col-md-4">
-              <span class="info-label">Altura:</span> <span id="altura"></span>
-            </div>
-          </div>
-          <div class="row info-row">
-            <div class="col-md-6">
-              <span class="info-label">DX:</span> <span id="dx"></span>
-            </div>
-            <div class="col-md-6">
-              <span class="info-label">FR:</span> <span id="fr"></span>
-            </div>
-          </div>
-          <!-- Campos já existentes -->
-          <div class="row info-row">
-            <div class="col-md-12">
-              <span class="info-label">Triagem:</span> <span id="triagem"></span>
-            </div>
-          </div>
-          <div class="row info-row">
-            <div class="col-md-12">
-              <span class="info-label">Alergias:</span> <span id="alergias"></span>
-            </div>
-          </div>
-          <div class="row info-row">
-            <div class="col-md-12">
-              <span class="info-label">Observações:</span> <span id="observacoesTriagem"></span>
-            </div>
-          </div>
-          <!-- Caixa de assinatura posicionada no canto inferior direito -->
-          <div class="signature-box">
-            <div><strong>Enfermeiro:</strong> <span id="nomeEnfermeiro"></span></div>
-            <div><strong>Nº Profissional:</strong> <span id="numeroProfissional"></span></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Informações da Conduta Médica -->
-    <section id="condutaSection">
-      <h2 class="section-title">Conduta Médica</h2>
+    <!-- Histórico de Atendimentos -->
+    <section id="historicoSection">
+      <h2 class="section-title">Histórico de Atendimentos</h2>
       <div class="card">
         <div class="card-body">
-          <div class="row info-row">
-            <div class="col-md-12">
-              <span class="info-label">Anamnese / Exame Físico:</span> <span id="anamnese_exame_fisico"></span>
-            </div>
+          <div id="historicoVazio" class="alert alert-light text-center" style="display:none;">
+            Nenhum atendimento encontrado para este paciente.
           </div>
-          <div class="row info-row">
-            <div class="col-md-12">
-              <span class="info-label">Prescrição Médica:</span> <span id="prescricao_medica"></span>
-            </div>
+          <div class="table-responsive">
+            <table class="table table-sm table-striped" id="tabelaHistorico" style="display:none;">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Data</th>
+                  <th>Hora</th>
+                  <th>Status</th>
+                  <th>Classificação de Risco</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyHistorico"></tbody>
+            </table>
           </div>
-          <div class="row info-row">
-            <div class="col-md-6">
-              <span class="info-label">Reavaliação:</span> <span id="reavaliacao"></span>
-            </div>
-            <div class="col-md-6">
-              <span class="info-label">Conduta Final:</span> <span id="conduta_final"></span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Espaço para Informações da Consulta -->
-    <section id="consultaSection">
-      <h2 class="section-title">Consulta</h2>
-      <div class="card">
-        <div class="card-body">
-          <p>Informações da consulta serão disponibilizadas em breve.</p>
         </div>
       </div>
     </section>
@@ -253,12 +168,29 @@
     }
     
     $(document).ready(function() {
+      // Define o destino do botão Voltar conforme o cargo
+      $.getJSON('/api/usuario/cargo')
+        .done(function(resp){
+          if(resp && resp.success){
+            const cargo = (resp.cargo || '').toLowerCase();
+            let destino = '/enfermeiro';
+            if (cargo === 'recepcionista') destino = '/recepcionista';
+            else if (cargo === 'medico') destino = '/medico';
+            else if (cargo === 'multi') destino = '/multi';
+            $('#btnVoltar').off('click').on('click', function(){ window.location.href = destino; });
+          }
+        })
+        .fail(function(){
+          // fallback padrão para enfermeiro
+          $('#btnVoltar').off('click').on('click', function(){ window.location.href = '/enfermeiro'; });
+        });
+
       const pacienteId = getQueryParameter('paciente_id');
       if (!pacienteId) {
         alert('ID do paciente não especificado.');
         return;
       }
-      // Chama a API para obter os dados da ficha geral do paciente
+      // Carrega dados do paciente (dados cadastrais)
       $.ajax({
         url: '/api/enfermeiro/ficha_geral',
         method: 'GET',
@@ -278,47 +210,44 @@
             $('#endereco').text(paciente.endereco || '');
             $('#municipio').text(paciente.municipio || '');
             $('#bairro').text(paciente.bairro || '');
-            // Se houver triagem, preenche os campos
-            if (response.triagem) {
-              const triagem = response.triagem;
-              $('#dataAtendimento').text(triagem.data_atendimento || '');
-              $('#horaAtendimento').text(triagem.hora_atendimento || '');
-              $('#pressao').text(triagem.pressao || '');
-              $('#pulso').text(triagem.pulso || '');
-              $('#temperatura').text(triagem.temp || '');
-              $('#classificacaoRisco').text(triagem.classificacao_risco || '');
-              $('#triagem').text(triagem.triagem || '');
-              $('#alergias').text(triagem.alergias || '');
-              $('#observacoesTriagem').text(triagem.observacao || '');
-              // Campos da pré consulta
-              $('#sp02').text(triagem.sp02 || '');
-              $('#peso').text(triagem.peso || '');
-              $('#altura').text(triagem.altura || '');
-              $('#dx').text(triagem.dx || '');
-              $('#fr').text(triagem.fr || '');
-              // Campos da conduta médica
-              $('#anamnese_exame_fisico').text(triagem.anamnese_exame_fisico || '');
-              $('#prescricao_medica').text(triagem.prescricao_medica || '');
-              $('#reavaliacao').text(triagem.reavaliacao || '');
-              $('#conduta_final').text(triagem.conduta_final || '');
-              // Status do atendimento
-              $('#status').text(triagem.status || '');
-            } else {
-              $('#triagemSection').html('<p class="text-center">Sem informações de triagem.</p>');
-            }
-            
-            if (response.enfermeiro) {
-              $('#nomeEnfermeiro').text(response.enfermeiro.nome || '');
-              $('#numeroProfissional').text(response.enfermeiro.numero_profissional || '');
-            } else {
-              $('.signature-box').html('<p class="text-center">Sem assinatura de enfermeiro.</p>');
-            }
           } else {
-            alert(response.message || 'Erro ao carregar a ficha do paciente.');
+            alert(response.message || 'Erro ao carregar dados do paciente.');
           }
         },
         error: function() {
           alert('Erro ao conectar com o servidor.');
+        }
+      });
+
+      // Carrega histórico de atendimentos
+      $.ajax({
+        url: '/api/pacientes/' + pacienteId + '/atendimentos',
+        method: 'GET',
+        dataType: 'json',
+        success: function(resp) {
+          if (resp.success && resp.atendimentos && resp.atendimentos.length > 0) {
+            const tbody = document.getElementById('tbodyHistorico');
+            tbody.innerHTML = '';
+            resp.atendimentos.forEach(function(a) {
+              const tr = document.createElement('tr');
+              tr.innerHTML =
+                '<td>' + (a.id || '') + '</td>' +
+                '<td>' + (a.data_atendimento || '') + '</td>' +
+                '<td>' + (a.hora_atendimento || '') + '</td>' +
+                '<td>' + (a.status || '') + '</td>' +
+                '<td>' + (a.classificacao_risco || '') + '</td>';
+              tbody.appendChild(tr);
+            });
+            $('#historicoVazio').hide();
+            $('#tabelaHistorico').show();
+          } else {
+            $('#tabelaHistorico').hide();
+            $('#historicoVazio').show();
+          }
+        },
+        error: function() {
+          $('#tabelaHistorico').hide();
+          $('#historicoVazio').show();
         }
       });
     });

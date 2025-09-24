@@ -1,0 +1,1925 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Farmácia - Controle de Estoque</title>
+
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+
+  <style>
+    body { background: #f8f9fa; }
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .estoque-header {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: #fff;
+      border-radius: 8px;
+    }
+    .card-shadow { box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+    .filter-pill { border-radius: 20px; }
+    .badge-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .dot-central { background: #17a2b8; }
+    .dot-satelite { background: #fd7e14; }
+    .table thead th { white-space: nowrap; }
+    .table td, .table th { vertical-align: middle; }
+    .sticky-actions { position: sticky; right: 0; background: #fff; }
+
+    /* Estilos para toast notifications */
+    .toast-container { z-index: 1060; }
+    .toast { min-width: 300px; }
+    .toast.bg-success .toast-header { background-color: #28a745; color: white; }
+    .toast.bg-danger .toast-header { background-color: #dc3545; color: white; }
+    .toast.bg-warning .toast-header { background-color: #ffc107; color: #212529; }
+    .toast.bg-info .toast-header { background-color: #17a2b8; color: white; }
+
+    /* Ajustes para campos obrigatórios */
+    .text-danger { color: #dc3545 !important; }
+
+    /* Loading spinner */
+    .fa-spin { animation: fa-spin 1s infinite linear; }
+
+    @keyframes fa-spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Estilos para a tabela de medicamentos */
+    .table-hover tbody tr:hover {
+      background-color: #f8f9fa;
+    }
+
+    .table-hover .classe-row:hover {
+      background-color: #e3f2fd !important;
+      cursor: pointer;
+    }
+
+    .badge {
+      font-size: 0.75em;
+    }
+
+    .btn-group-sm .btn {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .table-info {
+      background-color: #d1ecf1 !important;
+    }
+
+    .table-info td {
+      border-color: #bee5eb;
+      font-weight: bold;
+    }
+
+    /* Estilos para cards de medicamentos minimalistas */
+    .medicamento-card {
+      transition: all 0.2s ease;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      overflow: hidden;
+      background: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .medicamento-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      border-color: #007bff;
+    }
+
+    .medicamento-header {
+      background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+      color: white;
+      padding: 0.75rem;
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+    }
+
+    .medicamento-header h6 {
+      margin: 0;
+      font-weight: 600;
+      font-size: 0.95rem;
+      line-height: 1.2;
+    }
+
+    .medicamento-badge {
+      font-size: 0.7rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .medicamento-body {
+      padding: 0.75rem;
+    }
+
+    .quantidade-central {
+      color: #28a745 !important;
+      font-weight: 600;
+    }
+
+    .quantidade-satelite {
+      color: #fd7e14 !important;
+      font-weight: 600;
+    }
+
+    .quantidade-total {
+      color: #007bff !important;
+      font-weight: 700;
+    }
+
+    .status-ativo {
+      background-color: #d4edda !important;
+      color: #155724 !important;
+      border-color: #c3e6cb !important;
+    }
+
+    .status-proximo {
+      background-color: #fff3cd !important;
+      color: #856404 !important;
+      border-color: #ffeaa7 !important;
+    }
+
+    .status-vencido {
+      background-color: #f8d7da !important;
+      color: #721c24 !important;
+      border-color: #f5c6cb !important;
+    }
+
+    .medicamento-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.25rem;
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid #f8f9fa;
+    }
+
+    .btn-card-action {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.8rem;
+      border-radius: 4px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-card-action i {
+      margin: 0;
+    }
+
+    /* Visualização toggle */
+    .view-toggle .btn.active {
+      background-color: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid py-3">
+    <div class="page-header">
+      <div>
+        <h3 class="mb-0"><i class="fas fa-boxes mr-2 text-success"></i>Controle de Estoque</h3>
+        <small class="text-muted">Farmácia Central e Farmácia Satélite 1</small>
+      </div>
+      <div>
+        <a class="btn btn-outline-secondary" href="/farmacia">
+          <i class="fas fa-arrow-left mr-1"></i>Voltar ao painel
+        </a>
+      </div>
+    </div>
+
+    <!-- Resumo -->
+    <div class="row">
+      <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card card-shadow estoque-header">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="small">Itens Cadastrados</div>
+                <div class="h3 mb-0" id="kpi-itens">--</div>
+              </div>
+              <i class="fas fa-pills fa-2x"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card card-shadow">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="small text-muted">Central</div>
+                <div class="h4 mb-0" id="kpi-central">--</div>
+              </div>
+              <span class="badge-dot dot-central"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card card-shadow">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="small text-muted">Satélite 1</div>
+                <div class="h4 mb-0" id="kpi-satelite">--</div>
+              </div>
+              <span class="badge-dot dot-satelite"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card card-shadow">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="small text-muted">Alertas</div>
+                <div class="h4 mb-0" id="kpi-alertas">--</div>
+              </div>
+              <i class="fas fa-exclamation-triangle text-warning"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros e Ações -->
+    <div class="card card-shadow mb-3">
+      <div class="card-body">
+        <div class="row align-items-end">
+          <div class="col-md-3 mb-2">
+            <label class="small text-muted">Estoque</label>
+            <select id="filtro-estoque" class="form-control">
+              <option value="todos">Todos</option>
+              <option value="central">Farmácia Central</option>
+              <option value="satelite1">Farmácia Satélite 1</option>
+            </select>
+          </div>
+          <div class="col-md-3 mb-2">
+            <label class="small text-muted">Busca</label>
+            <input id="filtro-busca" type="text" class="form-control" placeholder="Medicamento, apresentação ou código">
+          </div>
+          <div class="col-md-2 mb-2">
+            <label class="small text-muted">Classe</label>
+            <select id="filtro-classe" class="form-control">
+              <option value="">Todas</option>
+              <option>Antibiótico</option>
+              <option>Analgésico</option>
+              <option>Anti-inflamatório</option>
+              <option>Solução</option>
+            </select>
+          </div>
+          <div class="col-md-4 mb-2 text-right">
+            <button class="btn btn-success mr-1" id="btn-novo-item"><i class="fas fa-plus mr-1"></i>Novo Item</button>
+            <button class="btn btn-outline-primary mr-1" id="btn-entrada"><i class="fas fa-sign-in-alt mr-1"></i>Entrada</button>
+            <button class="btn btn-outline-warning mr-1" id="btn-saida"><i class="fas fa-sign-out-alt mr-1"></i>Saída</button>
+            <button class="btn btn-outline-secondary" id="btn-transferir"><i class="fas fa-exchange-alt mr-1"></i>Transferir</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Visualização de Medicamentos -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card card-shadow">
+          <div class="card-header bg-light">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">
+                <i class="fas fa-pills mr-2 text-primary"></i>
+                Medicamentos em Estoque
+                <span id="total-medicamentos" class="badge badge-primary ml-2">0</span>
+              </h5>
+              <div class="btn-group btn-group-sm">
+                <button class="btn btn-outline-secondary active" id="btn-view-cards">
+                  <i class="fas fa-th"></i> Cards
+                </button>
+                <button class="btn btn-outline-secondary" id="btn-view-table">
+                  <i class="fas fa-table"></i> Tabela
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+
+            <!-- Container para visualização em cards -->
+            <div id="medicamentos-cards" class="row">
+              <div class="col-12 text-center py-5">
+                <i class="fas fa-spinner fa-spin fa-2x text-primary mb-3"></i>
+                <p class="text-muted">Carregando medicamentos...</p>
+              </div>
+            </div>
+
+            <!-- Container para visualização em tabela (oculto por padrão) -->
+            <div id="medicamentos-table" class="d-none">
+              <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                  <thead class="thead-light">
+                    <tr>
+                      <th style="min-width: 200px;">Medicamento</th>
+                      <th>Classe</th>
+                      <th class="text-center">Lotes</th>
+                      <th class="text-center">Qtd. Total</th>
+                      <th class="text-center">Qtd. Central</th>
+                      <th class="text-center">Qtd. Satélite</th>
+                      <th class="text-center">Status</th>
+                      <th class="text-right">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tabela-itens">
+                    <tr>
+                      <td colspan="8" class="text-center text-muted py-5">
+                        <i class="fas fa-table fa-2x mb-2"></i><br/>
+                        Selecione a visualização em tabela para ver os dados.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Transferência entre Farmácias -->
+  <div class="modal fade" id="modalTransferencia" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-warning">
+          <h5 class="modal-title">
+            <i class="fas fa-exchange-alt mr-2"></i>
+            Transferência entre Farmácias
+          </h5>
+          <button type="button" class="close" data-dismiss="modal">
+            <span>&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- Informações do Medicamento -->
+          <div class="card mb-3">
+            <div class="card-body">
+              <h6 class="card-title">
+                <i class="fas fa-pills mr-2"></i>
+                <span id="transferencia-medicamento">Medicamento</span>
+              </h6>
+              <div class="row">
+                <div class="col-md-6">
+                  <small class="text-muted">Apresentação:</small>
+                  <div id="transferencia-apresentacao">...</div>
+                </div>
+                <div class="col-md-6">
+                  <small class="text-muted">Código:</small>
+                  <div id="transferencia-codigo">...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Estoque Atual -->
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <div class="card border-success">
+                <div class="card-body text-center">
+                  <h5 class="text-success" id="estoque-central">0</h5>
+                  <small class="text-muted">Farmácia Central</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card border-warning">
+                <div class="card-body text-center">
+                  <h5 class="text-warning" id="estoque-satelite">0</h5>
+                  <small class="text-muted">Farmácia Satélite</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Formulário de Transferência -->
+          <form id="form-transferencia">
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label>Origem <span class="text-danger">*</span></label>
+                <select class="form-control" id="transferencia-origem" required>
+                  <option value="">Selecione a origem</option>
+                  <option value="Farmácia Central">Farmácia Central</option>
+                  <option value="Farmácia Satélite 1">Farmácia Satélite 1</option>
+                </select>
+              </div>
+              <div class="form-group col-md-6">
+                <label>Destino <span class="text-danger">*</span></label>
+                <select class="form-control" id="transferencia-destino" required>
+                  <option value="">Selecione o destino</option>
+                  <option value="Farmácia Central">Farmácia Central</option>
+                  <option value="Farmácia Satélite 1">Farmácia Satélite 1</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-md-8">
+                <label>Lote <span class="text-danger">*</span></label>
+                <select class="form-control" id="transferencia-lote" required>
+                  <option value="">Selecione um lote</option>
+                  <!-- Opções serão carregadas dinamicamente -->
+                </select>
+              </div>
+              <div class="form-group col-md-4">
+                <label>Quantidade <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" id="transferencia-quantidade" min="1" required>
+                <small class="form-text text-muted">Disponível: <span id="disponivel-lote">0</span></small>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Observações</label>
+              <textarea class="form-control" id="transferencia-observacoes" rows="2" placeholder="Observações sobre a transferência (opcional)"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            <i class="fas fa-times mr-1"></i>Cancelar
+          </button>
+          <button type="button" class="btn btn-warning" id="btn-confirmar-transferencia">
+            <i class="fas fa-exchange-alt mr-1"></i>Confirmar Transferência
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Saída de Medicamentos -->
+  <div class="modal fade" id="modalSaida" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header bg-danger">
+          <h5 class="modal-title">
+            <i class="fas fa-exclamation-triangle mr-2"></i>
+            Retirada Forçada de Medicamentos
+          </h5>
+          <button type="button" class="close" data-dismiss="modal">
+            <span>&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- Informações do Medicamento -->
+          <div class="card mb-3">
+            <div class="card-body">
+              <h6 class="card-title">
+                <i class="fas fa-pills mr-2"></i>
+                <span id="saida-medicamento">Medicamento</span>
+              </h6>
+              <div class="row">
+                <div class="col-md-6">
+                  <small class="text-muted">Apresentação:</small>
+                  <div id="saida-apresentacao">...</div>
+                </div>
+                <div class="col-md-6">
+                  <small class="text-muted">Código:</small>
+                  <div id="saida-codigo">...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Estoque Atual -->
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <div class="card border-success">
+                <div class="card-body text-center">
+                  <h5 class="text-success" id="saida-estoque-central">0</h5>
+                  <small class="text-muted">Farmácia Central</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card border-warning">
+                <div class="card-body text-center">
+                  <h5 class="text-warning" id="saida-estoque-satelite">0</h5>
+                  <small class="text-muted">Farmácia Satélite</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Formulário de Saída -->
+          <form id="form-saida">
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label>Local de Saída <span class="text-danger">*</span></label>
+                <select class="form-control" id="saida-local" required>
+                  <option value="">Selecione o local</option>
+                  <option value="Farmácia Central">Farmácia Central</option>
+                  <option value="Farmácia Satélite 1">Farmácia Satélite 1</option>
+                </select>
+              </div>
+              <div class="form-group col-md-6">
+                <label>Lote <span class="text-danger">*</span></label>
+                <select class="form-control" id="saida-lote" required>
+                  <option value="">Selecione um lote</option>
+                  <!-- Opções serão carregadas dinamicamente -->
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-md-12">
+                <label>Quantidade <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" id="saida-quantidade" min="1" required>
+                <small class="form-text text-muted">Disponível: <span id="saida-disponivel-lote">0</span></small>
+              </div>
+            </div>
+
+            <!-- Alerta de confirmação forte -->
+            <div class="alert alert-danger">
+              <i class="fas fa-exclamation-triangle mr-2"></i>
+              <strong>ATENÇÃO IMPORTANTE:</strong><br>
+              Esta ação irá <strong>REMOVER PERMANENTEMENTE</strong> os medicamentos do estoque.<br>
+              <strong>TODOS OS DADOS desta operação ficam salvos e serão analisados.</strong><br>
+              Certifique-se de que possui <strong>justificativa válida</strong> para esta retirada.<br>
+              <small class="text-muted">Esta operação não pode ser desfeita.</small>
+            </div>
+
+            <!-- Informações adicionais -->
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle mr-2"></i>
+              <strong>Registro Automático:</strong> Esta retirada será registrada no sistema com data, hora, usuário responsável e todos os detalhes da operação para auditoria posterior.
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            <i class="fas fa-times mr-1"></i>Cancelar
+          </button>
+          <button type="button" class="btn btn-danger" id="btn-confirmar-saida">
+            <i class="fas fa-exclamation-triangle mr-1"></i>Confirmar Retirada Forçada
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Nova Classe de Medicação -->
+  <div class="modal fade" id="modalClasse" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-pills mr-2"></i>Nova Classe de Medicação</h5>
+          <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label>Nome do Medicamento <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="classe-nome" placeholder="Ex: Dipirona">
+            </div>
+            <div class="form-group col-md-6">
+              <label>Apresentação <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="classe-apresentacao" placeholder="Ex: 500mg comprimido">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-4">
+              <label>Classe <span class="text-danger">*</span></label>
+              <select class="form-control" id="classe-classe">
+                <option value="">Selecione uma classe</option>
+                <option>Antibiótico</option>
+                <option>Analgésico</option>
+                <option>Anti-inflamatório</option>
+                <option>Antitérmico</option>
+                <option>Antidepressivo</option>
+                <option>Ansiolítico</option>
+                <option>Anticoagulante</option>
+                <option>Anti-hipertensivo</option>
+                <option>Diurético</option>
+                <option>Antidiabético</option>
+                <option>Corticosteroide</option>
+                <option>Antiemético</option>
+                <option>Antialérgico</option>
+                <option>Solução</option>
+                <option>Vacina</option>
+                <option>Outros</option>
+              </select>
+            </div>
+            <div class="form-group col-md-4">
+              <label>Código <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="classe-codigo" placeholder="Ex: DIP500">
+              <small class="form-text text-muted">Código único para identificação</small>
+            </div>
+            <div class="form-group col-md-4">
+              <label>Unidade <span class="text-danger">*</span></label>
+              <select class="form-control" id="classe-unidade">
+                <option value="">Selecione uma unidade</option>
+                <option value="cx">Caixa (cx)</option>
+                <option value="fr">Frasco (fr)</option>
+                <option value="amp">Ampola (amp)</option>
+                <option value="un">Unidade (un)</option>
+                <option value="tub">Tubete (tub)</option>
+                <option value="env">Envelope (env)</option>
+                <option value="sac">Saco (sac)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="btn-salvar-classe">
+            <i class="fas fa-save mr-1"></i>Salvar Classe
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Entrada de Item -->
+  <div class="modal fade" id="modalEntrada" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-sign-in-alt mr-2"></i>Entrada de Medicamento</h5>
+          <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group col-md-12">
+              <label>Classe de Medicação <span class="text-danger">*</span></label>
+              <select class="form-control" id="entrada-classe">
+                <option value="">Carregando classes...</option>
+              </select>
+              <small class="form-text text-muted">Selecione a classe do medicamento</small>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-4">
+              <label>Lote <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="entrada-lote" placeholder="Ex: LT2025001">
+              <small class="form-text text-muted">Número do lote do fabricante</small>
+            </div>
+            <div class="form-group col-md-4">
+              <label>Validade <span class="text-danger">*</span></label>
+              <input type="date" class="form-control" id="entrada-validade">
+              <small class="form-text text-muted">Data de validade do medicamento</small>
+            </div>
+            <div class="form-group col-md-4">
+              <label>Local <span class="text-danger">*</span></label>
+              <select class="form-control" id="entrada-local">
+                <option value="">Selecione o local</option>
+                <option value="Farmácia Central">Farmácia Central</option>
+                <option value="Farmácia Satélite 1">Farmácia Satélite 1</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-12">
+              <label>Quantidade <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" id="entrada-quantidade" placeholder="Ex: 100" min="1">
+              <small class="form-text text-muted">Quantidade de unidades do medicamento neste lote</small>
+            </div>
+          </div>
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle mr-2"></i>
+            <strong>Informação:</strong> Este processo registra a entrada de um novo lote de medicamento no estoque.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-success" id="btn-salvar-entrada">
+            <i class="fas fa-sign-in-alt mr-1"></i>Registrar Entrada
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container para notificações -->
+  <div class="toast-container position-fixed" style="top: 20px; right: 20px; z-index: 1060;">
+    <div id="toast-notification" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <i class="fas fa-info-circle mr-2" id="toast-icon"></i>
+        <strong class="mr-auto" id="toast-title">Notificação</strong>
+        <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="toast-body" id="toast-message"></div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    $(function(){
+      // Funções utilitárias
+      function showToast(message, type = 'success', title = 'Notificação') {
+        const toast = $('#toast-notification');
+        const icon = $('#toast-icon');
+        const titleEl = $('#toast-title');
+        const messageEl = $('#toast-message');
+
+        // Remove classes anteriores
+        toast.removeClass('bg-success bg-danger bg-warning bg-info');
+        icon.removeClass('fa-check-circle fa-exclamation-triangle fa-info-circle fa-times-circle');
+
+        // Adiciona classe e ícone baseado no tipo
+        switch(type) {
+          case 'success':
+            toast.addClass('bg-success');
+            icon.addClass('fa-check-circle text-white');
+            break;
+          case 'error':
+            toast.addClass('bg-danger');
+            icon.addClass('fa-times-circle text-white');
+            break;
+          case 'warning':
+            toast.addClass('bg-warning');
+            icon.addClass('fa-exclamation-triangle text-dark');
+            break;
+          case 'info':
+            toast.addClass('bg-info');
+            icon.addClass('fa-info-circle text-white');
+            break;
+        }
+
+        titleEl.text(title);
+        messageEl.text(message);
+
+        toast.toast({ delay: 5000, autohide: true });
+        toast.toast('show');
+      }
+
+      function setLoading(button, loading = true) {
+        if (loading) {
+          button.prop('disabled', true);
+          button.html('<i class="fas fa-spinner fa-spin mr-1"></i>Aguarde...');
+        } else {
+          button.prop('disabled', false);
+          // Restaura o texto original baseado no ID do botão
+          if (button.attr('id') === 'btn-salvar-classe') {
+            button.html('<i class="fas fa-save mr-1"></i>Salvar Classe');
+          } else if (button.attr('id') === 'btn-salvar-entrada') {
+            button.html('<i class="fas fa-sign-in-alt mr-1"></i>Registrar Entrada');
+          }
+        }
+      }
+
+      function limparFormularioClasse() {
+        $('#classe-nome').val('');
+        $('#classe-apresentacao').val('');
+        $('#classe-classe').val('');
+        $('#classe-codigo').val('');
+        $('#classe-unidade').val('');
+      }
+
+      function limparFormularioEntrada() {
+        $('#entrada-lote').val('');
+        $('#entrada-validade').val('');
+        $('#entrada-local').val('');
+        $('#entrada-quantidade').val('');
+        $('#entrada-classe').val('');
+      }
+
+      // Carregar classes disponíveis para o modal de entrada
+      function carregarClasses() {
+        $.ajax({
+          url: '/api/medicamentos/classes',
+          method: 'GET',
+          success: function(response) {
+            if (response.success) {
+              const select = $('#entrada-classe');
+              select.empty();
+              select.append('<option value="">Selecione uma classe</option>');
+
+              response.data.forEach(function(classe) {
+                const option = `<option value="${classe.id}">${classe.nome} - ${classe.apresentacao} (${classe.codigo})</option>`;
+                select.append(option);
+              });
+            } else {
+              showToast('Erro ao carregar classes: ' + response.message, 'error');
+            }
+          },
+          error: function(xhr) {
+            const message = xhr.responseJSON ? xhr.responseJSON.message : 'Erro interno do servidor';
+            showToast('Erro ao carregar classes: ' + message, 'error');
+          }
+        });
+      }
+
+      // Event listeners dos botões principais
+      $('#btn-novo-item').on('click', function(){
+        limparFormularioClasse();
+        $('#modalClasse').modal('show');
+      });
+
+      $('#btn-entrada').on('click', function(){
+        limparFormularioEntrada();
+        carregarClasses();
+        $('#modalEntrada').modal('show');
+      });
+
+      $('#btn-saida').on('click', function(){
+        showToast('Fluxo de Saída será implementado em breve.', 'info', 'Em Desenvolvimento');
+      });
+
+      $('#btn-transferir').on('click', function(){
+        showToast('Fluxo de Transferência será implementado em breve.', 'info', 'Em Desenvolvimento');
+      });
+
+      // Salvar nova classe
+      $('#btn-salvar-classe').on('click', function(){
+        const button = $(this);
+        const dados = {
+          nome: $('#classe-nome').val().trim(),
+          apresentacao: $('#classe-apresentacao').val().trim(),
+          classe: $('#classe-classe').val(),
+          codigo: $('#classe-codigo').val().trim(),
+          unidade: $('#classe-unidade').val()
+        };
+
+        // Validações básicas
+        if (!dados.nome || !dados.apresentacao || !dados.classe || !dados.codigo || !dados.unidade) {
+          showToast('Por favor, preencha todos os campos obrigatórios.', 'warning');
+          return;
+        }
+
+        setLoading(button, true);
+
+        $.ajax({
+          url: '/api/medicamentos/classes',
+          method: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify(dados),
+          success: function(response) {
+            if (response.success) {
+              showToast(response.message, 'success');
+              $('#modalClasse').modal('hide');
+              limparFormularioClasse();
+              // Recarregar dados e filtros após cadastrar nova classe
+              carregarFiltroClasses();
+              carregarEstoque();
+            } else {
+              showToast(response.message, 'error');
+            }
+          },
+          error: function(xhr) {
+            const message = xhr.responseJSON ? xhr.responseJSON.message : 'Erro interno do servidor';
+            showToast(message, 'error');
+          },
+          complete: function() {
+            setLoading(button, false);
+          }
+        });
+      });
+
+      // Registrar entrada
+      $('#btn-salvar-entrada').on('click', function(){
+        const button = $(this);
+        const dados = {
+          id_med_classe: $('#entrada-classe').val(),
+          lote: $('#entrada-lote').val().trim(),
+          validade: $('#entrada-validade').val(),
+          local: $('#entrada-local').val(),
+          quantidade: $('#entrada-quantidade').val()
+        };
+
+        // Validações básicas
+        if (!dados.id_med_classe || !dados.lote || !dados.validade || !dados.local || !dados.quantidade) {
+          showToast('Por favor, preencha todos os campos obrigatórios.', 'warning');
+          return;
+        }
+
+        // Validação específica da quantidade
+        const quantidade = parseInt(dados.quantidade);
+        if (isNaN(quantidade) || quantidade <= 0) {
+          showToast('Quantidade deve ser um número maior que zero.', 'warning');
+          return;
+        }
+
+        setLoading(button, true);
+
+        $.ajax({
+          url: '/api/medicamentos/itens',
+          method: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify(dados),
+          success: function(response) {
+            if (response.success) {
+              showToast(response.message, 'success');
+              $('#modalEntrada').modal('hide');
+              limparFormularioEntrada();
+              // Recarregar dados após registrar entrada
+              carregarEstoque();
+            } else {
+              showToast(response.message, 'error');
+            }
+          },
+          error: function(xhr) {
+            const message = xhr.responseJSON ? xhr.responseJSON.message : 'Erro interno do servidor';
+            showToast(message, 'error');
+          },
+          complete: function() {
+            setLoading(button, false);
+          }
+        });
+      });
+
+      // Função para carregar e exibir dados na tabela (exemplo)
+      function carregarDadosEstoque() {
+        // Aqui você pode implementar a lógica para carregar e exibir
+        // os medicamentos cadastrados na tabela
+        // Por enquanto, apenas mostra uma mensagem informativa
+        showToast('Funcionalidade de carregamento de dados será implementada.', 'info', 'Em Desenvolvimento');
+      }
+
+      // Funcionalidade de filtros
+      $('#filtro-busca').on('input', function() {
+        aplicarFiltros();
+      });
+
+      $('#filtro-estoque, #filtro-classe').on('change', function() {
+        aplicarFiltros();
+      });
+
+      function aplicarFiltros() {
+        const busca = $('#filtro-busca').val().toLowerCase();
+        const estoque = $('#filtro-estoque').val();
+        const classeId = $('#filtro-classe').val();
+
+        // Se uma classe específica foi selecionada, carregar apenas seus itens
+        if (classeId) {
+          carregarEstoque(classeId);
+          return;
+        }
+
+        // Caso contrário, carregar todas as classes e aplicar filtros
+        carregarEstoque();
+
+        // Aplicar filtros visuais após um pequeno delay para garantir que os dados foram carregados
+        setTimeout(function() {
+          filtrarTabelaVisualmente(busca, estoque);
+        }, 100);
+      }
+
+      function filtrarTabelaVisualmente(busca, estoque) {
+        const rows = $('#tabela-itens tr');
+
+        rows.each(function() {
+          const row = $(this);
+          let mostrar = true;
+
+          // Filtro de busca (nome do medicamento)
+          if (busca) {
+            const nomeMedicamento = row.find('td:first').text().toLowerCase();
+            if (!nomeMedicamento.includes(busca)) {
+              mostrar = false;
+            }
+          }
+
+          // Filtro de estoque (local)
+          if (estoque && estoque !== 'todos') {
+            const qtdCentral = parseInt(row.find('td:nth-child(6)').text()) || 0;
+            const qtdSatelite = parseInt(row.find('td:nth-child(7)').text()) || 0;
+
+            if (estoque === 'central' && qtdCentral === 0) {
+              mostrar = false;
+            } else if (estoque === 'satelite1' && qtdSatelite === 0) {
+              mostrar = false;
+            }
+          }
+
+          if (mostrar) {
+            row.show();
+          } else {
+            row.hide();
+          }
+        });
+      }
+
+      // Limpar formulários quando os modais são fechados
+      $('#modalClasse').on('hidden.bs.modal', function() {
+        limparFormularioClasse();
+      });
+
+      $('#modalEntrada').on('hidden.bs.modal', function() {
+        limparFormularioEntrada();
+      });
+
+      // Carregar classes no filtro
+      function carregarFiltroClasses() {
+        $.ajax({
+          url: '/api/medicamentos/classes',
+          method: 'GET',
+          success: function(response) {
+            if (response.success) {
+              const select = $('#filtro-classe');
+              select.empty();
+              select.append('<option value="">Todas as Classes</option>');
+
+              // Agrupar por tipo de classe
+              const classesPorTipo = {};
+              response.data.forEach(function(classe) {
+                if (!classesPorTipo[classe.classe]) {
+                  classesPorTipo[classe.classe] = [];
+                }
+                classesPorTipo[classe.classe].push(classe);
+              });
+
+              // Adicionar opções agrupadas
+              Object.keys(classesPorTipo).sort().forEach(function(tipoClasse) {
+                const optgroup = $(`<optgroup label="${tipoClasse}"></optgroup>`);
+                classesPorTipo[tipoClasse].forEach(function(classe) {
+                  optgroup.append(`<option value="${classe.id}">${classe.nome} - ${classe.apresentacao}</option>`);
+                });
+                select.append(optgroup);
+              });
+            }
+          },
+          error: function(xhr) {
+            console.error('Erro ao carregar classes para filtro:', xhr.responseJSON);
+          }
+        });
+      }
+
+      // Função específica para voltar às classes
+      function voltarParaClasses() {
+        console.log('Voltando para visualização das classes...');
+
+        // Feedback visual imediato
+        showToast('Voltando para a lista de medicamentos...', 'info', 'Carregando');
+
+        $('#medicamentos-cards').html(`
+          <div class="col-12 text-center py-5">
+            <i class="fas fa-spinner fa-spin fa-2x text-primary mb-3"></i>
+            <p class="text-muted">Voltando para lista de medicamentos...</p>
+          </div>
+        `);
+
+        $.ajax({
+          url: '/api/medicamentos/classes',
+          method: 'GET',
+          success: function(response) {
+            console.log('Resposta da API de classes:', response);
+            if (response.success) {
+              exibirTodasClasses(response.data);
+              atualizarKPIs(response.data);
+
+              // Mostrar confirmação de carregamento concluído
+              setTimeout(function() {
+                showToast('Lista de medicamentos carregada com sucesso!', 'success', 'Pronto');
+              }, 500);
+            }
+          },
+          error: function(xhr) {
+            console.error('Erro ao carregar classes:', xhr);
+            $('#medicamentos-cards').html(`
+              <div class="col-12 text-center py-5">
+                <i class="fas fa-exclamation-triangle fa-2x text-danger mb-3"></i>
+                <p class="text-muted">Erro ao carregar medicamentos.</p>
+                <button class="btn btn-primary" onclick="voltarParaClasses()">Tentar Novamente</button>
+              </div>
+            `);
+          }
+        });
+      }
+
+      // Carregar medicamentos do estoque
+      function carregarEstoque(filtroClasse = '') {
+        $('#medicamentos-cards').html(`
+          <div class="col-12 text-center py-5">
+            <i class="fas fa-spinner fa-spin fa-2x text-primary mb-3"></i>
+            <p class="text-muted">Carregando medicamentos...</p>
+          </div>
+        `);
+
+        let url = '/api/medicamentos/classes';
+        if (filtroClasse) {
+          url = `/api/medicamentos/itens/${filtroClasse}`;
+        }
+
+        $.ajax({
+          url: url,
+          method: 'GET',
+          success: function(response) {
+            console.log('Resposta da API:', url, response);
+            if (response.success) {
+              if (filtroClasse) {
+                // Carregando itens de uma classe específica
+                exibirItensClasse(response.data);
+              } else {
+                // Carregando todas as classes
+                exibirTodasClasses(response.data);
+              }
+              atualizarKPIs(response.data);
+            }
+          },
+          error: function(xhr) {
+            console.error('Erro ao carregar estoque:', xhr);
+            $('#medicamentos-cards').html(`
+              <div class="col-12 text-center py-5">
+                <i class="fas fa-exclamation-triangle fa-2x text-danger mb-3"></i>
+                <p class="text-muted">Erro ao carregar medicamentos.</p>
+                <button class="btn btn-primary" onclick="carregarEstoque()">Tentar Novamente</button>
+              </div>
+            `);
+            showToast('Erro ao carregar dados do estoque.', 'error');
+          }
+        });
+      }
+
+      // Exibir todas as classes
+      function exibirTodasClasses(classes) {
+        const container = $('#medicamentos-cards');
+        const tabelaContainer = $('#tabela-itens');
+
+        container.empty();
+        tabelaContainer.empty();
+
+        if (classes.length === 0) {
+          container.html(`
+            <div class="col-12 text-center py-5">
+              <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+              <h5 class="text-muted">Nenhum medicamento cadastrado</h5>
+              <p class="text-muted">Comece cadastrando uma nova classe de medicamento.</p>
+              <button class="btn btn-primary" onclick="$('#modalClasse').modal('show')">
+                <i class="fas fa-plus mr-1"></i>Cadastrar Primeiro Medicamento
+              </button>
+            </div>
+          `);
+          return;
+        }
+
+        // Gerar cards para cada classe (por enquanto sem estatísticas detalhadas)
+        classes.forEach(function(classe) {
+          const card = criarCardMedicamento(classe, null);
+          container.append(card);
+        });
+
+        // Após gerar os cards, carregar estatísticas detalhadas para cada classe
+        classes.forEach(function(classe) {
+          carregarEstatisticasClasse(classe.id);
+        });
+
+        // Também atualizar a tabela se estiver visível
+        if (!$('#medicamentos-table').hasClass('d-none')) {
+          exibirTabelaClasses(classes);
+        }
+      }
+
+      // Carregar estatísticas de uma classe específica
+      function carregarEstatisticasClasse(classeId) {
+        $.ajax({
+          url: `/api/medicamentos/itens/${classeId}`,
+          method: 'GET',
+          success: function(response) {
+            if (response.success && response.data.itens) {
+              atualizarCardEstatisticas(classeId, response.data.itens);
+            }
+          },
+          error: function(xhr) {
+            console.log('Erro ao carregar estatísticas da classe:', classeId);
+          }
+        });
+      }
+
+      // Atualizar estatísticas de um card específico
+      function atualizarCardEstatisticas(classeId, itens) {
+        const card = $(`.medicamento-card[data-classe-id="${classeId}"]`);
+
+        if (card.length === 0) return;
+
+        // Calcular estatísticas
+        let qtdTotal = 0;
+        let qtdCentral = 0;
+        let qtdSatelite = 0;
+        let lotesAtivos = 0;
+        let lotesProximos = 0;
+        let lotesVencidos = 0;
+        let statusGeral = 'sem-itens';
+
+        if (itens && itens.length > 0) {
+          itens.forEach(function(item) {
+            qtdTotal += item.quantidade;
+            if (item.local === 'Farmácia Central') {
+              qtdCentral += item.quantidade;
+            } else if (item.local === 'Farmácia Satélite 1') {
+              qtdSatelite += item.quantidade;
+            }
+
+            // Verificar status do lote
+            const hoje = new Date();
+            const validade = new Date(item.validade);
+            const diasParaVencer = Math.ceil((validade - hoje) / (1000 * 60 * 60 * 24));
+
+            if (diasParaVencer < 0) {
+              lotesVencidos++;
+            } else if (diasParaVencer <= 30) {
+              lotesProximos++;
+            } else {
+              lotesAtivos++;
+            }
+          });
+
+          // Determinar status geral
+          if (lotesVencidos > 0) {
+            statusGeral = 'vencido';
+          } else if (lotesProximos > 0) {
+            statusGeral = 'proximo';
+          } else if (lotesAtivos > 0) {
+            statusGeral = 'ativo';
+          }
+        }
+
+        // Atualizar valores no card
+        card.find('.quantidade-total').text(qtdTotal || 0);
+        card.find('.quantidade-central').text(qtdCentral || 0);
+        card.find('.quantidade-satelite').text(qtdSatelite || 0);
+
+        // Atualizar status
+        const statusBadge = card.find('.medicamento-badge');
+        const statusClass = statusGeral === 'ativo' ? 'status-ativo' :
+                           statusGeral === 'proximo' ? 'status-proximo' :
+                           statusGeral === 'vencido' ? 'status-vencido' : '';
+
+        statusBadge.removeClass('status-ativo status-proximo status-vencido');
+        statusBadge.addClass(statusClass);
+
+        const statusText = statusGeral === 'ativo' ? 'Ativo' :
+                          statusGeral === 'proximo' ? 'Atenção' :
+                          statusGeral === 'vencido' ? 'Vencido' : 'Sem Estoque';
+        statusBadge.text(statusText);
+      }
+
+      // Exibir itens de uma classe específica
+      function exibirItensClasse(data) {
+        const container = $('#medicamentos-cards');
+        container.empty();
+
+        const { classe, itens, total_itens } = data;
+
+        if (total_itens === 0) {
+          container.html(`
+            <div class="col-12">
+              <div class="card">
+                <div class="card-body text-center py-5">
+                  <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                  <h5 class="text-muted">Nenhum item em estoque</h5>
+                  <p class="text-muted">Não há itens cadastrados para a classe <strong>${classe.nome}</strong>.</p>
+                  <div class="mt-3">
+                    <button class="btn btn-outline-primary mr-2 btn-voltar-classes" onclick="voltarParaClasses()">
+                      <i class="fas fa-arrow-left mr-1"></i>Voltar às Classes
+                    </button>
+                    <button class="btn btn-success" onclick="$('#modalEntrada').modal('show')">
+                      <i class="fas fa-plus mr-1"></i>Registrar Entrada
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `);
+          return;
+        }
+
+        // Criar cabeçalho com informações da classe
+        const cabecalho = `
+          <div class="col-12 mb-4">
+            <div class="card">
+              <div class="card-header bg-info text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h5 class="mb-0">
+                      <i class="fas fa-pills mr-2"></i>
+                      ${classe.nome} - ${classe.apresentacao}
+                    </h5>
+                    <small>${total_itens} lote${total_itens !== 1 ? 's' : ''} em estoque</small>
+                  </div>
+                  <div>
+                    <button class="btn btn-light btn-sm mr-2 btn-voltar-classes" onclick="voltarParaClasses()">
+                      <i class="fas fa-arrow-left mr-1"></i>Voltar
+                    </button>
+                    <button class="btn btn-success btn-sm" onclick="$('#modalEntrada').modal('show')">
+                      <i class="fas fa-plus mr-1"></i>Entrada
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        container.append(cabecalho);
+
+        // Criar cards para cada item/lote
+        itens.forEach(function(item) {
+          const statusBadge = getStatusBadge(item.status);
+          const validadeFormatada = formatarData(item.validade);
+
+          // Calcular dias para vencer
+          const hoje = new Date();
+          const validade = new Date(item.validade);
+          const diasParaVencer = Math.ceil((validade - hoje) / (1000 * 60 * 60 * 24));
+          const diasTexto = diasParaVencer < 0 ? `${Math.abs(diasParaVencer)} dias vencido` :
+                           diasParaVencer === 0 ? 'Vence hoje' :
+                           `${diasParaVencer} dias`;
+
+          const itemCard = `
+            <div class="col-lg-6 col-xl-4 mb-4">
+              <div class="medicamento-card">
+                <div class="medicamento-header">
+                  <h6>Lote: ${item.lote}</h6>
+                  <span class="badge ${item.status === 'ativo' ? 'status-ativo' :
+                                     item.status === 'proximo_vencimento' ? 'status-proximo' :
+                                     item.status === 'vencido' ? 'status-vencido' : ''} medicamento-badge">
+                    ${item.status === 'ativo' ? 'Ativo' :
+                      item.status === 'proximo_vencimento' ? 'Atenção' :
+                      item.status === 'vencido' ? 'Vencido' : 'Desconhecido'}
+                  </span>
+                </div>
+                <div class="medicamento-body">
+                  <div class="medicamento-info">
+                    <span class="info-label">Local:</span>
+                    <span class="info-value">${item.local}</span>
+                  </div>
+                  <div class="medicamento-info">
+                    <span class="info-label">Validade:</span>
+                    <span class="info-value">${validadeFormatada}</span>
+                  </div>
+                  <div class="medicamento-info">
+                    <span class="info-label">Prazo:</span>
+                    <span class="info-value ${diasParaVencer <= 30 ? 'text-warning' : diasParaVencer < 0 ? 'text-danger' : 'text-success'}">${diasTexto}</span>
+                  </div>
+                  <div class="medicamento-info">
+                    <span class="info-label">Quantidade:</span>
+                    <span class="info-value quantidade-total font-weight-bold">${item.quantidade}</span>
+                  </div>
+                  <div class="medicamento-actions">
+                    <button class="btn btn-outline-info btn-card-action btn-detalhes-item" data-item-id="${item.id}">
+                      <i class="fas fa-info-circle mr-1"></i>Detalhes
+                    </button>
+                    <button class="btn btn-outline-warning btn-card-action btn-editar-item" data-item-id="${item.id}">
+                      <i class="fas fa-edit mr-1"></i>Editar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+          container.append(itemCard);
+        });
+      }
+
+      // Criar card para medicamento
+      function criarCardMedicamento(classe, itens) {
+        // Calcular estatísticas se houver itens
+        let qtdTotal = 0;
+        let qtdCentral = 0;
+        let qtdSatelite = 0;
+        let lotesAtivos = 0;
+        let lotesProximos = 0;
+        let lotesVencidos = 0;
+        let statusGeral = 'sem-itens';
+
+        if (itens && itens.length > 0) {
+          itens.forEach(function(item) {
+            qtdTotal += item.quantidade;
+            if (item.local === 'Farmácia Central') {
+              qtdCentral += item.quantidade;
+            } else if (item.local === 'Farmácia Satélite 1') {
+              qtdSatelite += item.quantidade;
+            }
+
+            // Verificar status do lote
+            const hoje = new Date();
+            const validade = new Date(item.validade);
+            const diasParaVencer = Math.ceil((validade - hoje) / (1000 * 60 * 60 * 24));
+
+            if (diasParaVencer < 0) {
+              lotesVencidos++;
+            } else if (diasParaVencer <= 30) {
+              lotesProximos++;
+            } else {
+              lotesAtivos++;
+            }
+          });
+
+          // Determinar status geral
+          if (lotesVencidos > 0) {
+            statusGeral = 'vencido';
+          } else if (lotesProximos > 0) {
+            statusGeral = 'proximo';
+          } else if (lotesAtivos > 0) {
+            statusGeral = 'ativo';
+          }
+        }
+
+        const statusClass = statusGeral === 'ativo' ? 'status-ativo' :
+                           statusGeral === 'proximo' ? 'status-proximo' :
+                           statusGeral === 'vencido' ? 'status-vencido' : '';
+
+        const statusText = statusGeral === 'ativo' ? 'Ativo' :
+                          statusGeral === 'proximo' ? 'Atenção' :
+                          statusGeral === 'vencido' ? 'Vencido' : 'Sem Estoque';
+
+        return `
+          <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+            <div class="medicamento-card" data-classe-id="${classe.id}">
+              <div class="medicamento-header">
+                <div class="d-flex justify-content-between align-items-start">
+                  <div class="flex-grow-1">
+                    <h6 class="mb-1">${classe.nome}</h6>
+                    <small class="text-white-50">${classe.apresentacao}</small>
+                  </div>
+                  <span class="badge ${statusClass} medicamento-badge ml-2">${statusText}</span>
+                </div>
+              </div>
+              <div class="medicamento-body">
+                <div class="row text-center mb-2">
+                  <div class="col-6">
+                    <div class="quantidade-total font-weight-bold text-primary h5 mb-0">${qtdTotal || 0}</div>
+                    <small class="text-muted">Total</small>
+                  </div>
+                  <div class="col-3">
+                    <div class="quantidade-central text-success font-weight-bold">${qtdCentral || 0}</div>
+                    <small class="text-muted">Central</small>
+                  </div>
+                  <div class="col-3">
+                    <div class="quantidade-satelite text-warning font-weight-bold">${qtdSatelite || 0}</div>
+                    <small class="text-muted">Satélite</small>
+                  </div>
+                </div>
+
+                <div class="text-center mb-2">
+                  <span class="badge badge-light">${classe.classe}</span>
+                  <small class="text-muted d-block">${classe.codigo}</small>
+                </div>
+
+                <div class="medicamento-actions d-flex justify-content-between">
+                  <button class="btn btn-sm btn-outline-primary btn-ver-detalhes" data-classe-id="${classe.id}" title="Ver detalhes">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-success btn-registrar-entrada" data-classe-id="${classe.id}" title="Registrar entrada">
+                    <i class="fas fa-plus"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-warning btn-transferir-item" data-classe-id="${classe.id}" title="Transferir">
+                    <i class="fas fa-exchange-alt"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger btn-saida-item" data-classe-id="${classe.id}" title="Saída">
+                    <i class="fas fa-minus"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // Exibir tabela de classes
+      function exibirTabelaClasses(classes) {
+        const tbody = $('#tabela-itens');
+        tbody.empty();
+
+        classes.forEach(function(classe) {
+          // Calcular totais da classe (se necessário, buscar via API)
+          const row = `
+            <tr>
+              <td>
+                <strong>${classe.nome}</strong><br/>
+                <small class="text-muted">${classe.apresentacao}</small>
+              </td>
+              <td><span class="badge badge-secondary">${classe.classe}</span></td>
+              <td class="text-center">--</td>
+              <td class="text-center">--</td>
+              <td class="text-center">--</td>
+              <td class="text-center">--</td>
+              <td class="text-center">
+                <span class="badge badge-secondary">Ver Detalhes</span>
+              </td>
+              <td class="text-right">
+                <button class="btn btn-sm btn-outline-primary btn-ver-detalhes" data-classe-id="${classe.id}">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </td>
+            </tr>
+          `;
+          tbody.append(row);
+        });
+      }
+
+      // Funções auxiliares
+      function getStatusBadge(status) {
+        switch(status) {
+          case 'ativo':
+            return '<span class="badge badge-success">Ativo</span>';
+          case 'proximo_vencimento':
+            return '<span class="badge badge-warning">Próximo Venc.</span>';
+          case 'vencido':
+            return '<span class="badge badge-danger">Vencido</span>';
+          default:
+            return '<span class="badge badge-secondary">Desconhecido</span>';
+        }
+      }
+
+      function formatarData(dataString) {
+        const data = new Date(dataString);
+        return data.toLocaleDateString('pt-BR');
+      }
+
+      function atualizarKPIs(data) {
+        // Atualizar KPIs baseado nos dados carregados
+        if (Array.isArray(data)) {
+          // Dados de classes
+          $('#kpi-itens').text(data.length);
+          $('#total-medicamentos').text(data.length);
+        } else if (data.itens) {
+          // Dados de itens de uma classe
+          $('#kpi-itens').text(data.total_itens);
+          $('#total-medicamentos').text(data.total_itens);
+        }
+        // Outros KPIs podem ser calculados conforme necessário
+      }
+
+      // Event listeners para alternar visualizações
+      $('#btn-view-cards').on('click', function() {
+        $('#btn-view-cards').addClass('active');
+        $('#btn-view-table').removeClass('active');
+        $('#medicamentos-cards').removeClass('d-none');
+        $('#medicamentos-table').addClass('d-none');
+      });
+
+      $('#btn-view-table').on('click', function() {
+        $('#btn-view-table').addClass('active');
+        $('#btn-view-cards').removeClass('active');
+        $('#medicamentos-table').removeClass('d-none');
+        $('#medicamentos-cards').addClass('d-none');
+
+        // Se ainda não carregou a tabela, carregar agora
+        if ($('#tabela-itens tr').length <= 1) {
+          carregarEstoque();
+        }
+      });
+
+      // Event listeners para botões dos cards
+      $(document).on('click', '.btn-ver-detalhes', function() {
+        const classeId = $(this).data('classe-id');
+        carregarEstoque(classeId);
+      });
+
+      $(document).on('click', '.btn-registrar-entrada', function() {
+        const classeId = $(this).data('classe-id');
+
+        // Buscar informações da classe para pré-preencher o modal
+        $.ajax({
+          url: '/api/medicamentos/classes',
+          method: 'GET',
+          success: function(response) {
+            if (response.success) {
+              const classe = response.data.find(c => c.id == classeId);
+              if (classe) {
+                // Pré-selecionar a classe no modal de entrada
+                $('#entrada-classe').val(classeId);
+                $('#modalEntrada').modal('show');
+              }
+            }
+          }
+        });
+      });
+
+      // Event listeners para botões dinâmicos
+      $(document).on('click', '.btn-voltar-classes', function(e) {
+        e.preventDefault();
+        console.log('Botão voltar clicado');
+        voltarParaClasses();
+      });
+
+      // Event listener para botão de transferência
+      $(document).on('click', '.btn-transferir-item', function(e) {
+        e.preventDefault();
+        const classeId = $(this).data('classe-id');
+        abrirModalTransferencia(classeId);
+      });
+
+      // Event listener para botão de saída
+      $(document).on('click', '.btn-saida-item', function(e) {
+        e.preventDefault();
+        const classeId = $(this).data('classe-id');
+        abrirModalSaida(classeId);
+      });
+
+      // Função para abrir modal de transferência
+      function abrirModalTransferencia(classeId) {
+        console.log('Abrindo modal de transferência para classe:', classeId);
+
+        // Resetar formulário
+        $('#form-transferencia')[0].reset();
+        $('#transferencia-lote').empty().append('<option value="">Carregando lotes...</option>');
+
+        // Buscar informações da classe e itens
+        $.ajax({
+          url: `/api/medicamentos/itens/${classeId}`,
+          method: 'GET',
+          success: function(response) {
+            if (response.success && response.data.classe) {
+              const classe = response.data.classe;
+              const itens = response.data.itens || [];
+
+              // Preencher informações do medicamento
+              $('#transferencia-medicamento').text(classe.nome);
+              $('#transferencia-apresentacao').text(classe.apresentacao);
+              $('#transferencia-codigo').text(classe.codigo);
+
+              // Calcular estoques
+              let estoqueCentral = 0;
+              let estoqueSatelite = 0;
+
+              itens.forEach(function(item) {
+                if (item.local === 'Farmácia Central') {
+                  estoqueCentral += item.quantidade;
+                } else if (item.local === 'Farmácia Satélite 1') {
+                  estoqueSatelite += item.quantidade;
+                }
+              });
+
+              $('#estoque-central').text(estoqueCentral);
+              $('#estoque-satelite').text(estoqueSatelite);
+
+              // Preencher lotes disponíveis
+              $('#transferencia-lote').empty().append('<option value="">Selecione um lote</option>');
+              itens.forEach(function(item) {
+                const option = `<option value="${item.id}" data-quantidade="${item.quantidade}" data-local="${item.local}">
+                  Lote ${item.lote} - ${item.local} (${item.quantidade} un)
+                </option>`;
+                $('#transferencia-lote').append(option);
+              });
+
+              // Armazenar classeId no modal para uso posterior
+              $('#modalTransferencia').data('classe-id', classeId);
+
+              $('#modalTransferencia').modal('show');
+            }
+          },
+          error: function(xhr) {
+            console.error('Erro ao carregar dados para transferência:', xhr);
+            showToast('Erro ao carregar dados do medicamento.', 'error');
+          }
+        });
+      }
+
+      // Função para confirmar transferência
+      $('#btn-confirmar-transferencia').on('click', function() {
+        const classeId = $('#modalTransferencia').data('classe-id');
+        const origem = $('#transferencia-origem').val();
+        const destino = $('#transferencia-destino').val();
+        const loteId = $('#transferencia-lote').val();
+        const quantidade = parseInt($('#transferencia-quantidade').val());
+        const observacoes = $('#transferencia-observacoes').val();
+
+        // Validações
+        if (!origem || !destino || !loteId || !quantidade) {
+          showToast('Por favor, preencha todos os campos obrigatórios.', 'warning');
+          return;
+        }
+
+        if (origem === destino) {
+          showToast('Origem e destino devem ser diferentes.', 'warning');
+          return;
+        }
+
+        const loteOption = $(`#transferencia-lote option[value="${loteId}"]`);
+        const quantidadeDisponivel = parseInt(loteOption.data('quantidade'));
+        const localLote = loteOption.data('local');
+
+        if (localLote !== origem) {
+          showToast('O lote selecionado não está no local de origem escolhido.', 'warning');
+          return;
+        }
+
+        if (quantidade > quantidadeDisponivel) {
+          showToast('Quantidade solicitada maior que a disponível no lote.', 'warning');
+          return;
+        }
+
+        // Confirmar transferência
+        const confirmacao = confirm(`Confirmar transferência de ${quantidade} unidade(s) de "${$('#transferencia-medicamento').text()}" do lote ${loteOption.text().split(' - ')[0]}?\n\nOrigem: ${origem}\nDestino: ${destino}`);
+
+        if (!confirmacao) return;
+
+        // Executar transferência
+        setLoading($(this), true);
+
+        const dadosTransferencia = {
+          classe_id: classeId,
+          lote_id: loteId,
+          origem: origem,
+          destino: destino,
+          quantidade: quantidade,
+          observacoes: observacoes
+        };
+
+        $.ajax({
+          url: '/api/medicamentos/transferir',
+          method: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify(dadosTransferencia),
+          success: function(response) {
+            if (response.success) {
+              showToast(response.message || 'Transferência realizada com sucesso!', 'success');
+              $('#modalTransferencia').modal('hide');
+
+              // Atualizar dados após transferência
+              carregarEstoque();
+            } else {
+              showToast(response.message || 'Erro ao realizar transferência.', 'error');
+            }
+          },
+          error: function(xhr) {
+            const message = xhr.responseJSON ? xhr.responseJSON.message : 'Erro interno do servidor';
+            showToast('Erro ao realizar transferência: ' + message, 'error');
+          },
+          complete: function() {
+            setLoading($('#btn-confirmar-transferencia'), false);
+          }
+        });
+      });
+
+      // Event listener para mudança de lote (atualizar quantidade disponível)
+      $('#transferencia-lote').on('change', function() {
+        const selectedOption = $(this).find('option:selected');
+        const quantidade = selectedOption.data('quantidade') || 0;
+        $('#disponivel-lote').text(quantidade);
+
+        // Atualizar quantidade máxima no input
+        $('#transferencia-quantidade').attr('max', quantidade);
+      });
+
+      // Função para abrir modal de saída
+      function abrirModalSaida(classeId) {
+        console.log('Abrindo modal de saída para classe:', classeId);
+
+        // Resetar formulário
+        $('#form-saida')[0].reset();
+        $('#saida-lote').empty().append('<option value="">Carregando lotes...</option>');
+
+        // Buscar informações da classe e itens
+        $.ajax({
+          url: `/api/medicamentos/itens/${classeId}`,
+          method: 'GET',
+          success: function(response) {
+            if (response.success && response.data.classe) {
+              const classe = response.data.classe;
+              const itens = response.data.itens || [];
+
+              // Preencher informações do medicamento
+              $('#saida-medicamento').text(classe.nome);
+              $('#saida-apresentacao').text(classe.apresentacao);
+              $('#saida-codigo').text(classe.codigo);
+
+              // Calcular estoques
+              let estoqueCentral = 0;
+              let estoqueSatelite = 0;
+
+              itens.forEach(function(item) {
+                if (item.local === 'Farmácia Central') {
+                  estoqueCentral += item.quantidade;
+                } else if (item.local === 'Farmácia Satélite 1') {
+                  estoqueSatelite += item.quantidade;
+                }
+              });
+
+              $('#saida-estoque-central').text(estoqueCentral);
+              $('#saida-estoque-satelite').text(estoqueSatelite);
+
+              // Preencher lotes disponíveis (todos os lotes)
+              $('#saida-lote').empty().append('<option value="">Selecione um lote</option>');
+              itens.forEach(function(item) {
+                const option = `<option value="${item.id}" data-quantidade="${item.quantidade}" data-local="${item.local}">
+                  Lote ${item.lote} - ${item.local} (${item.quantidade} un)
+                </option>`;
+                $('#saida-lote').append(option);
+              });
+
+              // Armazenar classeId no modal para uso posterior
+              $('#modalSaida').data('classe-id', classeId);
+
+              $('#modalSaida').modal('show');
+            }
+          },
+          error: function(xhr) {
+            console.error('Erro ao carregar dados para saída:', xhr);
+            showToast('Erro ao carregar dados do medicamento.', 'error');
+          }
+        });
+      }
+
+      // Função para confirmar saída
+      $('#btn-confirmar-saida').on('click', function() {
+        const classeId = $('#modalSaida').data('classe-id');
+        const local = $('#saida-local').val();
+        const loteId = $('#saida-lote').val();
+        const quantidade = parseInt($('#saida-quantidade').val());
+
+        // Validações
+        if (!local || !loteId || !quantidade) {
+          showToast('Por favor, preencha todos os campos obrigatórios.', 'warning');
+          return;
+        }
+
+        const loteOption = $(`#saida-lote option[value="${loteId}"]`);
+        const quantidadeDisponivel = parseInt(loteOption.data('quantidade'));
+        const localLote = loteOption.data('local');
+
+        if (localLote !== local) {
+          showToast('O lote selecionado não está no local especificado.', 'warning');
+          return;
+        }
+
+        if (quantidade > quantidadeDisponivel) {
+          showToast('Quantidade solicitada maior que a disponível no lote.', 'warning');
+          return;
+        }
+
+        // Confirmação mais forte
+        const medicamentoNome = $('#saida-medicamento').text();
+        const loteNumero = loteOption.text().split(' - ')[0];
+
+        const confirmacao = confirm(`⚠️ ATENÇÃO: RETIRADA FORÇADA DE MEDICAMENTOS ⚠️\n\n` +
+                                   `Você está prestes a remover PERMANENTEMENTE:\n` +
+                                   `• ${quantidade} unidade(s) de "${medicamentoNome}"\n` +
+                                   `• Lote: ${loteNumero}\n` +
+                                   `• Local: ${local}\n\n` +
+                                   `❌ ESTA AÇÃO NÃO PODE SER DESFEITA!\n` +
+                                   `📊 TODOS OS DADOS ficam salvos e serão analisados.\n\n` +
+                                   `Tem certeza de que deseja continuar?`);
+
+        if (!confirmacao) return;
+
+        // Executar saída
+        setLoading($(this), true);
+
+        const dadosSaida = {
+          classe_id: classeId,
+          lote_id: loteId,
+          local: local,
+          quantidade: quantidade
+        };
+
+        $.ajax({
+          url: '/api/medicamentos/saida',
+          method: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify(dadosSaida),
+          success: function(response) {
+            if (response.success) {
+              showToast('✅ Retirada realizada com sucesso! Dados salvos para análise.', 'success');
+              $('#modalSaida').modal('hide');
+
+              // Atualizar dados após saída
+              carregarEstoque();
+            } else {
+              showToast(response.message || 'Erro ao realizar retirada.', 'error');
+            }
+          },
+          error: function(xhr) {
+            const message = xhr.responseJSON ? xhr.responseJSON.message : 'Erro interno do servidor';
+            showToast('Erro ao realizar retirada: ' + message, 'error');
+          },
+          complete: function() {
+            setLoading($('#btn-confirmar-saida'), false);
+          }
+        });
+      });
+
+      // Event listener para mudança de lote na saída (atualizar quantidade disponível)
+      $('#saida-lote').on('change', function() {
+        const selectedOption = $(this).find('option:selected');
+        const quantidade = selectedOption.data('quantidade') || 0;
+        $('#saida-disponivel-lote').text(quantidade);
+
+        // Atualizar quantidade máxima no input
+        $('#saida-quantidade').attr('max', quantidade);
+      });
+
+      // Garantir que a função voltarParaClasses esteja disponível globalmente
+      window.voltarParaClasses = voltarParaClasses;
+
+      // Carregar dados iniciais (opcional)
+      carregarFiltroClasses();
+      carregarEstoque();
+    });
+  </script>
+</body>
+</html>
+

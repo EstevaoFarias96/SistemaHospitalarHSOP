@@ -3562,7 +3562,7 @@
                                         <input type="text" class="form-control" id="nome_medicamento" placeholder="Nome do medicamento">
                                     </div>
                                     <div class="col-md-6">
-                                        <input type="text" class="form-control" id="descricao_uso" placeholder="Descrição/Posologia">
+                                        <input type="text" class="form-control" id="descricao_posologia" placeholder="Descrição de uso / Posologia">
                                     </div>
                                     <div class="col-md-2">
                                         <button type="button" class="btn btn-success w-100" id="btn_adicionar_medicamento">
@@ -3634,30 +3634,22 @@
     
     // Evento para adicionar medicamento
     $('#btn_adicionar_medicamento').on('click', function(e) {
-        e.preventDefault(); // Previne o comportamento padrão do botão
-        e.stopPropagation(); // Impede a propagação do evento
-        
+        e.preventDefault();
+        e.stopPropagation();
         const nome_medicamento = $('#nome_medicamento').val().trim();
-        const descricao_uso = $('#descricao_uso').val().trim();
-        
-        if (!nome_medicamento || !descricao_uso) {
-            alert('Por favor, preencha o nome do medicamento e a descrição de uso.');
+        const descricao = $('#descricao_posologia').val().trim();
+        if (!nome_medicamento) {
+            alert('Por favor, informe o nome do medicamento.');
             return;
         }
-        
         window.medicamentosAdicionados.push({
             nome_medicamento: nome_medicamento,
-            descricao_uso: descricao_uso
+            descricao_uso: descricao
         });
-        
         // Limpar campos
         $('#nome_medicamento').val('');
-        $('#descricao_uso').val('');
-        
-        // Atualizar tabela
+        $('#descricao_posologia').val('');
         atualizarTabelaMedicamentos();
-        
-        // Focar no campo de nome do medicamento
         $('#nome_medicamento').focus();
     });
     
@@ -3753,15 +3745,15 @@
     // Adicionar evento de tecla para os campos de medicamento
     
     // Adicionar evento de tecla para os campos de medicamento
-    $('#nome_medicamento, #descricao_uso').on('keypress', function(e) {
+    $('#nome_medicamento, #descricao_posologia').on('keypress', function(e) {
         // Se pressionar Enter
         if (e.which === 13) {
             e.preventDefault(); // Previne o comportamento padrão
-            // Se estiver no campo nome, vai para descrição
+            // Se estiver no campo nome, vai para quantidade
             if ($(this).attr('id') === 'nome_medicamento') {
-                $('#descricao_uso').focus();
+                $('#descricao_posologia').focus();
             } else {
-                // Se estiver na descrição, aciona o botão adicionar
+                // Se estiver na quantidade, aciona o botão adicionar
                 $('#btn_adicionar_medicamento').click();
             }
         }

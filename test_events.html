@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teste Event Listeners</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Teste de Event Listeners</h1>
+    <input type="text" id="busca_medicamento_nome" placeholder="Digite aqui...">
+    <div id="resultado"></div>
+
+    <script>
+        console.log('Página carregada');
+        
+        // Teste 1: Event listener direto
+        $('#busca_medicamento_nome').on('input', function(){
+            console.log('Evento direto funcionou:', $(this).val());
+            $('#resultado').html('Evento direto: ' + $(this).val());
+        });
+        
+        // Teste 2: Event listener delegado
+        $(document).on('input', '#busca_medicamento_nome', function(){
+            console.log('Evento delegado funcionou:', $(this).val());
+        });
+        
+        // Teste 3: Verificar se elemento existe
+        setTimeout(() => {
+            console.log('Elemento existe?', $('#busca_medicamento_nome').length > 0);
+        }, 1000);
+    </script>
+</body>
+</html>

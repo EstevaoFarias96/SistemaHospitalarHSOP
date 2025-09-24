@@ -1401,7 +1401,7 @@ function configurarSincronizacaoDiasAfastamento() {
             }
             
             // Gerar novo texto com o número de dias atualizado
-            const novoTexto = `Atesto que ${nomePaciente}, portador do CPF n: ${cpfPaciente}, deverá afastar-se do trabalho por um período de ${dias} dias, para tratamento de saúde. \n\n CID:_______`;
+            const novoTexto = `Atestado que o paciente "${nomePaciente}" portador do documento "${cpfPaciente}" deverá se afastar por um periodo de "${dias}" dias\n\nCID: `;
             
             // Atualizar o editor Quill se disponível
             if (window.quillAtestado && window.quillAtestado.setText) {
@@ -2037,8 +2037,8 @@ function atualizarTabelaMedicamentos() {
     window.medicamentosAdicionados.forEach((med, index) => {
         tbody.append(`
             <tr>
-                <td>${med.nome_medicamento}</td>
-                <td>${med.descricao_uso}</td>
+                <td>${med.nome_medicamento || ''}</td>
+                <td>${(med.descricao_uso || med.quantidade || '').toString()}</td>
                 <td>
                     <button type="button" class="btn btn-danger btn-sm" onclick="removerMedicamento(${index})">
                         <i class="fas fa-trash"></i>
@@ -2057,6 +2057,7 @@ function limparFormularioPrescricao() {
     $('#texto_procedimento_multi').val('');
     $('#nome_medicamento').val('');
     $('#descricao_uso').val('');
+    $('#descricao_posologia').val('');
     
     // Limpar medicamentos adicionados
     medicamentosAdicionados = [];
@@ -2514,11 +2515,11 @@ function inicializarModuloPrescrições() {
         e.preventDefault(); // Previne o comportamento padrão do botão
         e.stopPropagation(); // Impede a propagação do evento
         
-        const nome_medicamento = $('#nome_medicamento').val().trim();
-        const descricao_uso = $('#descricao_uso').val().trim();
+        const nome_medicamento = ($('#nome_medicamento').val() || '').trim();
+        const descricao_uso = (($('#descricao_uso').val() || $('#descricao_posologia').val()) || '').trim();
         
-        if (!nome_medicamento || !descricao_uso) {
-            alert('Por favor, preencha o nome do medicamento e a descrição de uso.');
+        if (!nome_medicamento) {
+            alert('Por favor, preencha o nome do medicamento.');
             return;
         }
         
@@ -2530,6 +2531,7 @@ function inicializarModuloPrescrições() {
         // Limpar campos
         $('#nome_medicamento').val('');
         $('#descricao_uso').val('');
+        $('#descricao_posologia').val('');
         
         // Atualizar tabela
         atualizarTabelaMedicamentos();
@@ -2648,13 +2650,13 @@ function inicializarModuloPrescrições() {
     });
     
     // Adicionar evento de tecla para os campos de medicamento
-    $(document).on('keypress', '#nome_medicamento, #descricao_uso', function(e) {
+    $(document).on('keypress', '#nome_medicamento, #descricao_uso, #descricao_posologia', function(e) {
         // Se pressionar Enter
         if (e.which === 13) {
             e.preventDefault(); // Previne o comportamento padrão
             // Se estiver no campo nome, vai para descrição
             if ($(this).attr('id') === 'nome_medicamento') {
-                $('#descricao_uso').focus();
+                if ($('#descricao_uso').length) { $('#descricao_uso').focus(); } else { $('#descricao_posologia').focus(); }
             } else {
                 // Se estiver na descrição, aciona o botão adicionar
                 $('#btn_adicionar_medicamento').click();
@@ -3828,7 +3830,7 @@ $(document).on('shown.bs.modal', '#modalNovoAtestado', function () {
     }
     
     // Texto pré-preenchido do atestado (inicial com placeholder)
-    const textoPrePreenchido = `Atesto que ${nomePaciente}, portador do CPF n: ${cpfPaciente}, deverá afastar-se do trabalho por um período de [dias] dias, para tratamento de saúde. \n\n CID:_______`;
+    const textoPrePreenchido = `Atestado que o paciente "${nomePaciente}" portador do documento "${cpfPaciente}" deverá se afastar por um periodo de "[dias]" dias\n\nCID: `;
     
     // Função para pré-preencher o editor
     const preencherEditor = function(texto = textoPrePreenchido) {

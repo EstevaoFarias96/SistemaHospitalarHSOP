@@ -700,6 +700,28 @@
       }
     }
 
+    /* ===== Prescrições - visual aprimorado ===== */
+    .prescricao-container { 
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      background: var(--bg-primary);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+    .prescricao-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px;
+      background: linear-gradient(135deg, var(--primary-main), var(--primary-light));
+      color: #fff;
+    }
+    .prescricao-header .titulo { font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .prescricao-header .acoes { display: flex; align-items: center; gap: 8px; }
+    .prescricao-body { padding: 16px; }
+    .prescricao-section { margin-bottom: 10px; border-left: 4px solid var(--border-light); padding-left: 12px; }
+    .prescricao-section h6 { margin: 0 0 6px 0; font-size: 13px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .3px; }
+    .prescricao-meds ul { margin: 0; padding-left: 18px; }
+
     /* ===== CORES ESPECÍFICAS PARA CADA ABA ===== */
     #exame-fisico-tab.active {
       color: var(--primary-main) !important;
@@ -742,6 +764,7 @@
       <a class="nav-link" href="#" data-target="atestadoSection"><i class="fas fa-file-medical"></i><span>Atestado</span></a>
       <a class="nav-link" href="#" data-target="enfermagemSection"><i class="fas fa-user-nurse"></i><span>Ficha de Enfermagem</span></a>
       <hr class="mx-3 my-2" style="opacity:.2">
+      <a class="nav-link" href="/imprimir/ficha_atendimento/{{ atendimento.id }}" target="_blank" aria-label="Imprimir ficha de atendimento"><i class="fas fa-print"></i><span>Imprimir Ficha</span></a>
       <a class="nav-link" href="/medico/aguardando-medico"><i class="fas fa-arrow-left"></i><span>Voltar Lista</span></a>
     </nav>
   </div>
@@ -907,11 +930,6 @@
               </button>
             </li>
             <li class="nav-item" role="presentation">
-              <button class="nav-link" id="conduta-medica-tab" data-bs-toggle="tab" data-bs-target="#conduta-medica-pane" type="button" role="tab">
-                <i class="fas fa-clipboard-check me-2"></i>Conduta Médica
-              </button>
-            </li>
-            <li class="nav-item" role="presentation">
               <button class="nav-link" id="reavaliacao-medica-tab" data-bs-toggle="tab" data-bs-target="#reavaliacao-medica-pane" type="button" role="tab">
                 <i class="fas fa-redo me-2"></i>Reavaliação Médica
               </button>
@@ -936,22 +954,7 @@
               </div>
             </div>
 
-            <!-- Aba: Conduta Médica -->
-            <div class="tab-pane fade p-4" id="conduta-medica-pane" role="tabpanel">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="text-success fw-bold mb-0">
-                  <i class="fas fa-clipboard-check me-2"></i>Conduta Médica
-                </h6>
-                <button class="btn btn-outline-success btn-sm" id="btnEditarConduta">
-                  <i class="fas fa-edit me-1"></i> Editar
-                </button>
-              </div>
-              <div class="card border-success">
-                <div class="card-body">
-                  <div class="texto-bloco" id="condutaTexto">-</div>
-                </div>
-              </div>
-            </div>
+            
 
             <!-- Aba: Reavaliação Médica -->
             <div class="tab-pane fade p-4" id="reavaliacao-medica-pane" role="tabpanel">
@@ -1230,7 +1233,7 @@
           $('#alergias').text(a.alergias||'-');
           $('#triagemTexto').text(a.triagem||'-');
           $('#anamneseExame').html(a.anamnese_exame_fisico ? a.anamnese_exame_fisico.replace(/\n/g,'<br>') : '-');
-          $('#condutaTexto').html(a.conduta ? a.conduta.replace(/\n/g,'<br>') : (a.conduta_final ? a.conduta_final.replace(/\n/g,'<br>') : '-'));
+          
           $('#reavaliacaoTexto').html(a.reavaliacao ? a.reavaliacao.replace(/\n/g,'<br>') : '-');
           // badge de status removido da Anamnese; status geral segue exibido em outros contextos
         })
@@ -1276,20 +1279,51 @@
       const bsModal = modalEl ? new bootstrap.Modal(modalEl) : null;
       const atendimentoId = document.getElementById('ATENDIMENTO_ID').value;
 
-      // Event handlers para os botões individuais de cada aba
-      $('#btnEditarExameFisico, #btnEditarConduta, #btnEditarReavaliacao, #btnEditarAnamneseGeral').on('click', function(){
-        $('#campoAnamnese').val($('#anamneseExame').text() === '-' ? '' : $('#anamneseExame').text());
-        $('#campoConduta').val($('#condutaTexto').text() === '-' ? '' : $('#condutaTexto').text());
-        $('#campoReavaliacao').val($('#reavaliacaoTexto').text() === '-' ? '' : $('#reavaliacaoTexto').text());
+      // Event handlers: abrir modal focado apenas no campo da aba clicada
+      function abrirModalEdicao(tipo){
+        // Limpar todos os campos e esconder os desnecessários via CSS inline
+        const blocoAna = $('#campoAnamnese').closest('.mb-3');
+        const blocoRea = $('#campoReavaliacao').closest('.mb-3');
+        const blocoCon = $('#campoConduta').closest('.mb-2');
+        blocoAna.hide(); blocoRea.hide(); blocoCon.hide();
+
+        if (tipo === 'exame'){
+          $('#campoAnamnese').val($('#anamneseExame').text() === '-' ? '' : $('#anamneseExame').text());
+          blocoAna.show();
+        } else if (tipo === 'reavaliacao'){
+          $('#campoReavaliacao').val($('#reavaliacaoTexto').text() === '-' ? '' : $('#reavaliacaoTexto').text());
+          blocoRea.show();
+        } else if (tipo === 'conduta'){
+          // Conduta final é definida no fluxo "Encerrar Atendimento"
+          try {
+            const enc = new bootstrap.Modal(document.getElementById('modalEncerrarAtendimento'));
+            enc.show();
+          } catch(e) {}
+          return; // Não abrir o modal de anamnese neste caso
+        } else if (tipo === 'todos'){
+          blocoAna.show(); blocoRea.show();
+          $('#campoAnamnese').val($('#anamneseExame').text() === '-' ? '' : $('#anamneseExame').text());
+          $('#campoReavaliacao').val($('#reavaliacaoTexto').text() === '-' ? '' : $('#reavaliacaoTexto').text());
+        }
+        $('#modalEditarAnamneseConduta').data('tipo-edicao', tipo);
         if (bsModal) bsModal.show();
-      });
+      }
+
+      $('#btnEditarExameFisico').on('click', function(){ abrirModalEdicao('exame'); });
+      $('#btnEditarReavaliacao').on('click', function(){ abrirModalEdicao('reavaliacao'); });
+      $('#btnEditarAnamneseGeral').on('click', function(){ abrirModalEdicao('todos'); });
 
       $('#btnSalvarAnamneseConduta').on('click', function(){
-        const payload = {
-          anamnese_exame_fisico: $('#campoAnamnese').val().trim() || null,
-          reavaliacao: $('#campoReavaliacao').val().trim() || null,
-          // conduta_final agora é manipulada apenas no fluxo de Encerrar Atendimento
-        };
+        const tipo = $('#modalEditarAnamneseConduta').data('tipo-edicao');
+        const payload = {};
+        if (tipo === 'exame') {
+          payload.anamnese_exame_fisico = $('#campoAnamnese').val().trim() || null;
+        } else if (tipo === 'reavaliacao') {
+          payload.reavaliacao = $('#campoReavaliacao').val().trim() || null;
+        } else {
+          payload.anamnese_exame_fisico = $('#campoAnamnese').val().trim() || null;
+          payload.reavaliacao = $('#campoReavaliacao').val().trim() || null;
+        }
         const btn = $(this); const original = btn.html();
         btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Salvando...');
         fetch(`/api/atendimento/${atendimentoId}/anamnese-conduta`, {
@@ -1298,8 +1332,12 @@
         .then(r => r.json())
         .then(data => {
           if (data.success) {
-            $('#anamneseExame').html((payload.anamnese_exame_fisico||'-').replace(/\n/g,'<br>'));
-            $('#reavaliacaoTexto').html((payload.reavaliacao||'-').replace(/\n/g,'<br>'));
+            if ('anamnese_exame_fisico' in payload) {
+              $('#anamneseExame').html((payload.anamnese_exame_fisico||'-').replace(/\n/g,'<br>'));
+            }
+            if ('reavaliacao' in payload) {
+              $('#reavaliacaoTexto').html((payload.reavaliacao||'-').replace(/\n/g,'<br>'));
+            }
             if (bsModal) bsModal.hide();
           } else {
             alert('Erro: ' + (data.message||'Falha ao salvar'));
@@ -1322,17 +1360,17 @@
         <div class="modal-body">
           <div class="mb-3">
             <label class="form-label">Conduta Final</label>
-            <select id="encerrarCondutaFinal" class="form-select">
-              <option value="">Selecione...</option>
-              <option>ALTA</option>
-              <option>ALTA APOS MEDICAÇAO</option>
-              <option>REAVALIAÇAO APOS MEDICAÇAO</option>
-              <option>OBSERVAÇAO</option>
-              <option>EVASÃO POR CONTA PROPRIA</option>
-              <option>INTERNAMENTO</option>
-              <option>RECUSA TRANSFERENCIA APOS CONDUTA MEDICA</option>
-              <option>ASSINOU TERMO DE RESPONSABILIDADE</option>
-            </select>
+              <select id="encerrarCondutaFinal" class="form-select">
+                <option value="">Selecione...</option>
+                <option>ALTA</option>
+                <option>ALTA APOS MEDICACAO</option>
+                <option>REAVALIACAO</option>
+                <option>OBSERVACAO</option>
+                <option>EVASAO POR CONTA PROPRIA</option>
+                <option>INTERNAMENTO</option>
+                <option>RECUSA TRANSFERENCIA APOS CONDUTA MEDICA</option>
+                <option>ASSINOU TERMO DE RESPONSABILIDADE</option>
+              </select>
           </div>
 
           <div id="blocoObservacao" style="display:none;">
@@ -1428,7 +1466,7 @@
 
       $('#encerrarCondutaFinal').on('change', function(){
         const v = ($(this).val()||'').toUpperCase();
-        $('#blocoObservacao').toggle(v === 'OBSERVAÇAO');
+        $('#blocoObservacao').toggle(v === 'OBSERVACAO');
         $('#blocoInternamento').toggle(v === 'INTERNAMENTO');
         if (v === 'INTERNAMENTO'){
           // Carregar leitos disponíveis
@@ -1456,7 +1494,7 @@
         if (!conduta){ alert('Selecione a conduta final.'); return; }
 
         const v = conduta.toUpperCase();
-        if (v === 'OBSERVAÇAO'){
+        if (v === 'OBSERVACAO'){
           // Criar observação via endpoint existente
           const payload = {
             hda: $('#obsHda').val()||'',
@@ -1539,21 +1577,24 @@
               <label class="form-label">Medicamentos</label>
               <div class="card mb-2">
                 <div class="card-body">
-                  <div class="row g-2">
-                    <div class="col-md-4">
-                      <input type="text" class="form-control" id="nome_medicamento" placeholder="Nome do medicamento">
+                  <div class="row g-2 align-items-end">
+                    <div class="col-md-5">
+                      <label class="form-label">Nome do medicamento</label>
+                      <input type="text" class="form-control" id="nome_medicamento_simples" placeholder="Ex.: Dipirona 500 mg">
                     </div>
                     <div class="col-md-6">
-                      <input type="text" class="form-control" id="descricao_uso" placeholder="Descrição/Posologia">
+                      <label class="form-label">Descrição de uso / Posologia</label>
+                      <input type="text" class="form-control" id="descricao_posologia" placeholder="Ex.: 1 comp de 8/8h por 3 dias">
                     </div>
-                    <div class="col-md-2">
-                      <button type="button" class="btn btn-success w-100" id="btn_adicionar_medicamento">
+                    <div class="col-md-1">
+                      <button type="button" class="btn btn-success w-100" id="btn_adicionar_medicamento_simples">
                         <i class="fas fa-plus"></i>
                       </button>
                     </div>
                   </div>
                 </div>
               </div>
+
               <div class="table-responsive">
                 <table class="table table-sm" id="tabela_medicamentos">
                   <thead>
@@ -1605,7 +1646,7 @@
           const linha = $(`
             <tr>
               <td>${m.nome_medicamento}</td>
-              <td>${m.descricao_uso}</td>
+              <td>${m.descricao_uso || '-'}</td>
               <td class="text-end">
                 <button type="button" class="btn btn-sm btn-outline-danger" data-idx="${idx}"><i class="fas fa-trash"></i></button>
               </td>
@@ -1620,6 +1661,55 @@
         });
       }
 
+      // Função para carregar medicamentos disponíveis
+      function carregarMedicamentosDisponiveis(){
+        $('#medicamento_selecionado').html('<option value="">Carregando...</option>');
+
+        fetch('/api/medicamentos/disponiveis')
+          .then(r => r.json())
+          .then(data => {
+            if (data.success && data.medicamentos){
+              let options = '<option value="">Selecione um medicamento</option>';
+              data.medicamentos.forEach(med => {
+                options += `<option value="${med.id}" data-nome="${med.nome}" data-apresentacao="${med.apresentacao}" data-estoque="${med.quantidade_total}" data-unidade="${med.unidade}">${med.nome} (${med.apresentacao}) - ${med.quantidade_total} ${med.unidade}</option>`;
+              });
+              $('#medicamento_selecionado').html(options);
+            } else {
+              $('#medicamento_selecionado').html('<option value="">Erro ao carregar medicamentos</option>');
+            }
+          })
+          .catch(() => {
+            $('#medicamento_selecionado').html('<option value="">Erro ao carregar medicamentos</option>');
+          });
+      }
+
+      // Função para buscar medicamentos
+      function buscarMedicamentos(termo){
+        if (!termo.trim()){
+          carregarMedicamentosDisponiveis();
+          return;
+        }
+
+        $('#medicamento_selecionado').html('<option value="">Buscando...</option>');
+
+        fetch('/api/medicamentos/buscar?q=' + encodeURIComponent(termo))
+          .then(r => r.json())
+          .then(data => {
+            if (data.success && data.medicamentos){
+              let options = '<option value="">Selecione um medicamento</option>';
+              data.medicamentos.forEach(med => {
+                options += `<option value="${med.id}" data-nome="${med.nome}" data-apresentacao="${med.apresentacao}" data-estoque="${med.quantidade_total}" data-unidade="${med.unidade}">${med.nome} (${med.apresentacao}) - ${med.quantidade_total} ${med.unidade}</option>`;
+              });
+              $('#medicamento_selecionado').html(options);
+            } else {
+              $('#medicamento_selecionado').html('<option value="">Nenhum medicamento encontrado</option>');
+            }
+          })
+          .catch(() => {
+            $('#medicamento_selecionado').html('<option value="">Erro na busca</option>');
+          });
+      }
+
       function renderizarPrescricoes(lista){
         const cont = $('#listaPrescricoes');
         if (!lista || !lista.length){
@@ -1629,20 +1719,38 @@
         let html = '';
         lista.forEach(p => {
           const dataTxt = p.horario_prescricao || p.data || '';
+          const titulo = 'Prescrição Médica';
+          const temMeds = Array.isArray(p.medicamentos) && p.medicamentos.length > 0;
           html += `
-            <div class="card prescricao-container mb-2">
-              <div class="card-header d-flex justify-content-between align-items-center">
-                <div><strong>Prescrição</strong></div>
-                <div class="d-flex align-items-center gap-2">
-                  <small class="text-muted me-2">${dataTxt}</small>
-                  ${p.id ? `<a class=\"btn btn-sm btn-outline-secondary\" href=\"/api/imprimir-prescricao-html/${p.id}\" target=\"_blank\"><i class=\"fas fa-print\"></i> Imprimir</a>` : ''}
+            <div class="prescricao-container">
+              <div class="prescricao-header">
+                <div class="titulo"><i class="fas fa-pills"></i> ${titulo}</div>
+                <div class="acoes">
+                  <small class="text-white-50">${dataTxt}</small>
+                  ${p.id ? `<a class=\"btn btn-sm btn-light\" href=\"/api/imprimir-prescricao-html/${p.id}\" target=\"_blank\"><i class=\"fas fa-print\"></i></a>` : ''}
                 </div>
               </div>
-              <div class="card-body">
-                ${p.texto_dieta ? `<div class="mb-2"><strong>Dieta: </strong>${p.texto_dieta}</div>` : ''}
-                ${Array.isArray(p.medicamentos) ? (`<div class="mb-2"><strong>Medicamentos:</strong><ul>` + p.medicamentos.map(m=>`<li>${m.nome_medicamento} - ${m.descricao_uso}</li>`).join('') + `</ul></div>`) : ''}
-                ${p.texto_procedimento_medico ? `<div class="mb-2"><strong>Procedimentos Médicos: </strong>${p.texto_procedimento_medico}</div>` : ''}
-                ${p.texto_procedimento_multi ? `<div><strong>Procedimentos Multiprofissionais: </strong>${p.texto_procedimento_multi}</div>` : ''}
+              <div class="prescricao-body">
+                ${p.texto_dieta ? `
+                  <div class="prescricao-section">
+                    <h6><i class=\"fas fa-utensils me-1\"></i>Dieta</h6>
+                    <div>${p.texto_dieta}</div>
+                  </div>` : ''}
+                ${temMeds ? `
+                  <div class="prescricao-section prescricao-meds">
+                    <h6><i class=\"fas fa-capsules me-1\"></i>Medicamentos</h6>
+                    <ul>${p.medicamentos.map(m=>`<li>${m.nome_medicamento}${m.descricao_uso? ' - ' + m.descricao_uso : ''}</li>`).join('')}</ul>
+                  </div>` : ''}
+                ${p.texto_procedimento_medico ? `
+                  <div class="prescricao-section">
+                    <h6><i class=\"fas fa-user-md me-1\"></i>Procedimentos Médicos</h6>
+                    <div>${p.texto_procedimento_medico}</div>
+                  </div>` : ''}
+                ${p.texto_procedimento_multi ? `
+                  <div class="prescricao-section">
+                    <h6><i class=\"fas fa-users me-1\"></i>Procedimentos Multiprofissionais</h6>
+                    <div>${p.texto_procedimento_multi}</div>
+                  </div>` : ''}
               </div>
             </div>`;
         });
@@ -1683,20 +1791,28 @@
       $('#btnNovaPrescricao').on('click', function(){
         window.medicamentosAdicionados = [];
         $('#formPrescricao')[0].reset();
+        $('#nome_medicamento_simples').val('');
+        $('#descricao_posologia').val('');
         atualizarTabelaMedicamentos();
         modalNP.show();
       });
 
-      // Adicionar medicamento
-      $('#btn_adicionar_medicamento').on('click', function(e){
+      // Adicionar medicamento simples (nome + posologia)
+      $('#btn_adicionar_medicamento_simples').on('click', function(e){
         e.preventDefault();
-        const nome = $('#nome_medicamento').val().trim();
-        const desc = $('#descricao_uso').val().trim();
-        if (!nome || !desc){ alert('Informe nome e descrição/posologia.'); return; }
-        window.medicamentosAdicionados.push({ nome_medicamento: nome, descricao_uso: desc });
-        $('#nome_medicamento').val(''); $('#descricao_uso').val('');
+        const nome = ($('#nome_medicamento_simples').val()||'').trim();
+        const desc = ($('#descricao_posologia').val()||'').trim();
+        if (!nome){
+          alert('Informe o nome do medicamento.');
+          return;
+        }
+        window.medicamentosAdicionados.push({
+          nome_medicamento: nome,
+          descricao_uso: desc
+        });
+        $('#nome_medicamento_simples').val('');
+        $('#descricao_posologia').val('');
         atualizarTabelaMedicamentos();
-        $('#nome_medicamento').focus();
       });
 
       // Salvar prescrição
@@ -1980,8 +2096,38 @@
       inicializarEditorReceita();
     });
 
-    $('#modalNovoAtestado').on('shown.bs.modal', function() {
+    $('#modalNovoAtestado').on('shown.bs.modal', function () {
       inicializarEditorAtestado();
+
+      const nomePaciente = ($('#pacienteNome').text() || 'NOME DO PACIENTE').trim();
+      const cpfPaciente = ($('#pacienteCpf').text() || 'CPF DO PACIENTE').trim();
+      const diasInput = document.getElementById('dias_afastamento');
+
+      const gerarTextoAtestado = function(diasValor) {
+        const diasNumerico = parseInt(diasValor, 10);
+        const diasStr = diasNumerico > 0 ? `"${diasNumerico}"` : '"[dias]"';
+        return `Atestado que o paciente "${nomePaciente}" portador do documento "${cpfPaciente}" deverá se afastar por um periodo de ${diasStr} dias\n\nCID: `;
+      };
+
+      const textoInicial = gerarTextoAtestado(diasInput ? diasInput.value : null);
+      if (editorAtestado && editorAtestado.setText) {
+        editorAtestado.setText(textoInicial);
+      } else {
+        $('#conteudo_atestado').val(textoInicial);
+      }
+
+      if (diasInput) {
+        $(diasInput)
+          .off('input.atestado change.atestado')
+          .on('input.atestado change.atestado', function () {
+            const texto = gerarTextoAtestado(this.value);
+            if (editorAtestado && editorAtestado.setText) {
+              editorAtestado.setText(texto);
+            } else {
+              $('#conteudo_atestado').val(texto);
+            }
+          });
+      }
     });
 
     // Salvar receita
