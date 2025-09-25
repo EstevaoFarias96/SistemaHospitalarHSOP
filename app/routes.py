@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 import pdfkit
 from datetime import datetime, timezone, timedelta, date, time
 from sqlalchemy.orm import joinedload
-from sqlalchemy import or_
+from sqlalchemy import or_, func
 import logging
 import traceback
 import re
@@ -111,8 +111,13 @@ def observacao_paciente():
                             'message': f'Campo obrigatório não informado: {campo}'
                         }), 400
         
-                # Verificar se o paciente já existe
-                paciente_existente = Paciente.query.filter_by(cpf=dados['cpf']).first()
+                # Normalizar CPF (remover pontos, traços e quaisquer não dígitos)
+                cpf_raw = (dados.get('cpf') or '').strip()
+                cpf_limpo = re.sub(r'\D', '', cpf_raw)
+                dados['cpf'] = cpf_limpo
+
+                # Verificar se o paciente já existe com o CPF normalizado
+                paciente_existente = Paciente.query.filter_by(cpf=cpf_limpo).first()
         
                 if paciente_existente:
                     paciente = paciente_existente
@@ -595,6 +600,58 @@ def pagina_medico_aguardando_medico():
         logging.error(traceback.format_exc())
         return render_template_string('<h3>Erro ao carregar a página</h3>'), 500
 
+
+# Lista pacientes aguardando triagem (visão do médico)
+@bp.route('/api/medico/atendimentos/aguardando-triagem', methods=['GET'])
+@login_required
+def api_medico_aguardando_triagem():
+    try:
+        current_user = get_current_user()
+        if not current_user:
+            return jsonify({'success': False, 'message': 'Usuário não autenticado'}), 401
+        if current_user.cargo.lower() not in ['medico', 'multi', 'admin']:
+            return jsonify({'success': False, 'message': 'Acesso não autorizado'}), 403
+
+        atendimentos = Atendimento.query.filter(
+            Atendimento.status.ilike('%aguardando triagem%')
+        ).all()
+
+        def calc_idade(dn):
+            if not dn:
+                return None
+            hoje = date.today()
+            return hoje.year - dn.year - ((hoje.month, hoje.day) < (dn.month, dn.day))
+
+        resultado = []
+        for a in atendimentos:
+            paciente = Paciente.query.get(a.paciente_id)
+            if not paciente:
+                continue
+            # Usar data/hora de criação da ficha como referência de "entrada"
+            criado_em = None
+            try:
+                if a.data_atendimento and a.hora_atendimento:
+                    criado_em = datetime.combine(a.data_atendimento, a.hora_atendimento).strftime('%Y-%m-%d %H:%M:%S')
+            except Exception:
+                criado_em = None
+
+            resultado.append({
+                'atendimento_id': a.id,
+                'paciente_id': paciente.id,
+                'nome': paciente.nome,
+                'data_nascimento': paciente.data_nascimento.strftime('%Y-%m-%d') if paciente.data_nascimento else None,
+                'idade': calc_idade(paciente.data_nascimento) if paciente.data_nascimento else None,
+                'classificacao_risco': a.classificacao_risco,
+                'triagem': a.triagem,
+                'horario_triagem': a.horario_triagem.strftime('%Y-%m-%d %H:%M:%S') if a.horario_triagem else criado_em,
+            })
+
+        return jsonify({'success': True, 'atendimentos': resultado, 'total': len(resultado)})
+
+    except Exception as e:
+        logging.error(f"Erro ao listar aguardando triagem (médico): {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
 
 # FICHA DE ATENDIMENTO MÉDICO (visualização principal do atendimento)
 @bp.route('/medico/atendimento/<string:atendimento_id>', methods=['GET'])
@@ -1121,6 +1178,138 @@ def get_enfermeiro_nome():
         logging.error(f"Erro ao obter nome do enfermeiro: {str(e)}")
         logging.error(traceback.format_exc())
         return jsonify({'error': 'Erro interno do servidor'}), 500
+
+
+# Dashboard do enfermeiro: contagens rápidas
+@bp.route('/api/enfermeiro/dashboard', methods=['GET'])
+@login_required
+def api_enfermeiro_dashboard():
+    try:
+        current_user = get_current_user()
+        if current_user.cargo.lower() not in ['enfermeiro', 'multi']:
+            return jsonify({'success': False, 'message': 'Acesso não autorizado'}), 403
+
+        # Determinar janelas de plantão (07-19 e 19-07) na data atual
+        now = datetime.now()
+        today = now.date()
+        seven_am = time(7, 0, 0)
+        seven_pm = time(19, 0, 0)
+
+        if now.time() >= seven_pm:
+            start_shift = datetime.combine(today, seven_pm)
+            end_shift = datetime.combine(today + timedelta(days=1), seven_am)
+        elif now.time() >= seven_am:
+            start_shift = datetime.combine(today, seven_am)
+            end_shift = datetime.combine(today, seven_pm)
+        else:
+            start_shift = datetime.combine(today - timedelta(days=1), seven_pm)
+            end_shift = datetime.combine(today, seven_am)
+
+        # Contagem de internados ativos (exclui observação)
+        internados_count = Internacao.query.filter(
+            Internacao.data_alta.is_(None),
+            ~Internacao.carater_internacao.ilike('%observa%')
+        ).count()
+
+        # Contagem de pacientes em observação ativos
+        observacao_count = Internacao.query.filter(
+            Internacao.data_alta.is_(None),
+            Internacao.carater_internacao.ilike('%observa%')
+        ).count()
+
+        # Contagem de triagens realizadas pelo enfermeiro no plantão atual
+        triagens_count = Atendimento.query.filter(
+            Atendimento.enfermeiro_id == current_user.id,
+            Atendimento.horario_triagem.isnot(None),
+            Atendimento.horario_triagem >= start_shift,
+            Atendimento.horario_triagem < end_shift
+        ).count()
+
+        return jsonify({
+            'success': True,
+            'nome': current_user.nome,
+            'internados': internados_count,
+            'observacao': observacao_count,
+            'triagens_plantao': triagens_count,
+            'plantao_inicio': start_shift.isoformat(),
+            'plantao_fim': end_shift.isoformat()
+        })
+
+    except Exception as e:
+        logging.error(f"Erro no dashboard do enfermeiro: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
+
+
+# Dashboard do médico: KPIs e plantão
+@bp.route('/api/medico/dashboard', methods=['GET'])
+@login_required
+def api_medico_dashboard():
+    try:
+        current_user = get_current_user()
+        if current_user.cargo.strip().lower() != 'medico':
+            return jsonify({'success': False, 'message': 'Acesso não autorizado'}), 403
+
+        # Janela de plantão (07-19 e 19-07) com base no horário atual
+        now = datetime.now()
+        today = now.date()
+        seven_am = time(7, 0, 0)
+        seven_pm = time(19, 0, 0)
+
+        if now.time() >= seven_pm:
+            start_shift = datetime.combine(today, seven_pm)
+            end_shift = datetime.combine(today + timedelta(days=1), seven_am)
+        elif now.time() >= seven_am:
+            start_shift = datetime.combine(today, seven_am)
+            end_shift = datetime.combine(today, seven_pm)
+        else:
+            start_shift = datetime.combine(today - timedelta(days=1), seven_pm)
+            end_shift = datetime.combine(today, seven_am)
+
+        # Internados ativos (exclui observação)
+        internados_count = Internacao.query.filter(
+            Internacao.data_alta.is_(None),
+            ~Internacao.carater_internacao.ilike('%observa%')
+        ).count()
+
+        # Em observação ativos
+        observacao_count = Internacao.query.filter(
+            Internacao.data_alta.is_(None),
+            Internacao.carater_internacao.ilike('%observa%')
+        ).count()
+
+        # Consultas do médico no plantão atual
+        consultas_count = Atendimento.query.filter(
+            Atendimento.medico_id == current_user.id,
+            Atendimento.horario_consulta_medica.isnot(None),
+            Atendimento.horario_consulta_medica >= start_shift,
+            Atendimento.horario_consulta_medica < end_shift
+        ).count()
+
+        # Observação aguardando conduta (lista_observacao sem médico_conduta e sem data_saida)
+        try:
+            obs_aguardando_conduta = ListaObservacao.query.filter(
+                ListaObservacao.data_saida.is_(None),
+                (ListaObservacao.medico_conduta.is_(None) | (ListaObservacao.medico_conduta == ''))
+            ).count()
+        except Exception:
+            obs_aguardando_conduta = 0
+
+        return jsonify({
+            'success': True,
+            'nome': current_user.nome,
+            'internados': internados_count,
+            'observacao': observacao_count,
+            'consultas_plantao': consultas_count,
+            'obs_aguardando_conduta': obs_aguardando_conduta,
+            'plantao_inicio': start_shift.isoformat(),
+            'plantao_fim': end_shift.isoformat()
+        })
+
+    except Exception as e:
+        logging.error(f"Erro no dashboard do médico: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
 
 # Rota para impressão das evoluções de fisioterapia
 @bp.route('/impressao_fisio/<string:atendimento_id>')
@@ -5701,8 +5890,10 @@ def buscar_paciente_por_cpf():
         if len(cpf_limpo) != 11:
             return jsonify({'success': False, 'message': 'CPF deve ter 11 dígitos'})
         
-        # Buscar paciente pelo CPF exato
-        paciente = Paciente.query.filter_by(cpf=cpf_limpo).first()
+        # Buscar paciente pelo CPF comparando ignorando máscara no banco também
+        paciente = Paciente.query.filter(
+            func.replace(func.replace(Paciente.cpf, '.', ''), '-', '') == cpf_limpo
+        ).first()
         
         pacientes_data = []
         if paciente:
@@ -5896,7 +6087,10 @@ def buscar_paciente():
 
         if cpf:
             cpf_limpo = re.sub(r'\D', '', cpf)  # Remove pontos e traços
-            paciente = query.filter_by(cpf=cpf_limpo).first()
+            # Comparar ignorando máscara no banco também
+            paciente = query.filter(
+                func.replace(func.replace(Paciente.cpf, '.', ''), '-', '') == cpf_limpo
+            ).first()
         else:
             # Usar a mesma lógica avançada de busca por nome
             import unicodedata
@@ -9971,13 +10165,35 @@ def api_enfermeiro_pacientes_triagem():
             if paciente:
                 recepcionista = Funcionario.query.get(atendimento.funcionario_id)
 
+                # Calcular idade em anos
+                idade = None
+                try:
+                    if paciente.data_nascimento:
+                        hoje = date.today()
+                        dn = paciente.data_nascimento
+                        idade = hoje.year - dn.year - ((hoje.month, hoje.day) < (dn.month, dn.day))
+                except Exception:
+                    idade = None
+
+                # Combinar data e hora de criação da ficha
+                criado_em = None
+                try:
+                    if atendimento.data_atendimento and atendimento.hora_atendimento:
+                        criado_dt = datetime.combine(atendimento.data_atendimento, atendimento.hora_atendimento)
+                        criado_em = criado_dt.isoformat()
+                except Exception:
+                    criado_em = None
+
                 pacientes_data.append({
                     'id': paciente.id,
                     'nome': paciente.nome,
                     'cpf': paciente.cpf,
+                    'sexo': paciente.sexo,
+                    'idade': idade,
                     'data_nascimento': paciente.data_nascimento.strftime('%Y-%m-%d') if paciente.data_nascimento else None,
                     'data_entrada': atendimento.data_atendimento.isoformat() if atendimento.data_atendimento else None,
                     'hora_entrada': atendimento.hora_atendimento.strftime('%H:%M') if atendimento.hora_atendimento else None,
+                    'criado_em': criado_em,
                     'recepcionista_nome': recepcionista.nome if recepcionista else None,
                     'atendimento_id': atendimento.id
                 })

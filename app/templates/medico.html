@@ -62,6 +62,18 @@
       padding: 20px;
       position: relative;
     }
+    /* Dashboard */
+    .dashboard-cards { display:none; max-width: 80%; margin: 10px auto 20px auto; }
+    .dashboard-cards .card { border:0; border-radius:12px; box-shadow:0 6px 16px rgba(0,0,0,0.08); color:#333; }
+    .card-metric { text-align:center; padding:24px 12px; }
+    .card-metric h3 { font-size:36px; margin:0; font-weight:700; }
+    .card-metric span { display:block; margin-top:6px; font-size:14px; color:#666; }
+    .quick-actions { display:none; max-width: 80%; margin: 0 auto 10px auto; }
+    .quick-actions .btn { margin: 6px 8px 6px 0; }
+    .subtle-alert { display:none; max-width: 80%; margin: 0 auto 10px auto; }
+    .subtle-alert .card { border:0; border-left: 6px solid #ffc107; border-radius: 10px; box-shadow:0 6px 16px rgba(0,0,0,0.05); }
+    .subtle-alert .card-body { padding: 12px 16px; }
+    .subtle-alert .badge-pill { font-weight: 600; }
     .user-menu {
       position: absolute;
       bottom: 20px;
@@ -117,6 +129,11 @@
       <!-- Sidebar -->
       <div class="sidebar">
         <ul class="nav flex-column">
+          <li class="nav-item" data-title="Início">
+            <a class="nav-link" href="#" onclick="abrirHomeMedico()">
+              <i class="fas fa-home"></i>
+            </a>
+          </li>
           <li class="nav-item" data-title="Aguardando Médico">
             <a class="nav-link" href="/medico/aguardando-medico">
               <i class="fas fa-clipboard-list"></i>
@@ -157,17 +174,63 @@
         </div>
       </div>      <!-- Conteúdo Principal -->
       <div class="col main-content">
-        <!-- Botão de Internar Paciente -->
-        <button id="btnInternarPaciente" class="btn btn-primary btn-internar">
-          <i class="fas fa-procedures"></i> Internar Paciente
-        </button>
+        <!-- Home/Dashboard do Médico -->
+        <div id="home-medico">
+          <div class="quick-actions">
+            <div class="d-flex flex-wrap align-items-center">
+              <a class="btn btn-primary" href="/medico/aguardando-medico"><i class="fas fa-clipboard-list mr-1"></i> Aguardando</a>
+              <a class="btn btn-secondary" href="#" onclick="abrirObservacao()"><i class="fas fa-eye mr-1"></i> Observação</a>
+              <a class="btn btn-outline-dark" href="#" onclick="abrirClinica()"><i class="fas fa-procedures mr-1"></i> Clínica</a>
+              <button id="btnInternarPacienteHome" class="btn btn-success"><i class="fas fa-procedures mr-1"></i> Internar Paciente</button>
+              <button id="btnObservacaoPaciente" class="btn btn-outline-success"><i class="fas fa-eye mr-1"></i> Adicionar Observação</button>
+            </div>
+          </div>
+
+          <div class="subtle-alert" id="alert-observacao-conduta">
+            <div class="card bg-light">
+              <div class="card-body d-flex align-items-center">
+                <i class="fas fa-info-circle text-warning mr-2"></i>
+                <div class="flex-fill">
+                  <strong>Pacientes em observação aguardando conduta</strong>
+                  <span class="text-muted ml-1">verifique a fila de observação</span>
+                </div>
+                <span class="badge badge-pill badge-warning ml-2" id="badge-obs-conduta">0</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-cards">
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <div class="card bg-light">
+                  <div class="card-body card-metric">
+                    <h3 id="kpi-med-internados">--</h3>
+                    <span>Internados</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <div class="card" style="background:#e8f4ff;">
+                  <div class="card-body card-metric">
+                    <h3 id="kpi-med-observacao">--</h3>
+                    <span>Em Observação</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <div class="card" style="background:#eaf9ef;">
+                  <div class="card-body card-metric">
+                    <h3 id="kpi-med-consultas">--</h3>
+                    <span>Consultas no Plantão</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="text-center text-muted small" id="med-plantao-range"></div>
+          </div>
+        </div>
+
         
-        <!-- Botão de Adicionar Paciente em Observação -->
-        <button id="btnObservacaoPaciente" class="btn btn-success btn-internar" style="top: 70px;">
-          <i class="fas fa-eye"></i> Adicionar Paciente em Observação
-        </button>
-        
-        <h1 id="saudacao">Bem-vindo, Doutor(a)</h1>
       </div>
     </div>
   </div>
@@ -679,6 +742,16 @@
 
   <script>
     $(document).ready(function () {
+      // Iniciar na Home
+      abrirHomeMedico();
+      $('#home-medico .quick-actions, #home-medico .dashboard-cards').show();
+
+      // Abrir modais diretamente a partir das ações rápidas
+      $('#btnInternarPacienteHome').on('click', function(){ $('#internarPacienteModal').modal('show'); });
+      $('#btnObservacaoPaciente').on('click', function(){ $('#observacaoPacienteModal').modal('show'); });
+
+      // Carregar dashboard
+      carregarDashboardMedico();
       // Carrega nome do médico
       $.getJSON('/api/medico/nome', function(data) {
         if (data.nome) {
@@ -753,11 +826,16 @@
           btnBuscar.html(textoOriginal);
           btnBuscar.prop('disabled', false);
           
-          if (data.success && data.paciente) {
-            // Paciente encontrado
-            mostrarPacienteEncontrado(data.paciente);
+          if (data && data.success) {
+            const paciente = data.paciente || (Array.isArray(data.pacientes) && data.pacientes.length > 0 ? data.pacientes[0] : null);
+            if (paciente) {
+              // Paciente encontrado
+              mostrarPacienteEncontrado(paciente);
+            } else {
+              // Paciente não encontrado
+              $('#pacienteNaoEncontrado').show();
+            }
           } else {
-            // Paciente não encontrado
             $('#pacienteNaoEncontrado').show();
           }
         })
@@ -1145,11 +1223,16 @@
           btnBuscar.html(textoOriginal);
           btnBuscar.prop('disabled', false);
           
-          if (data.success && data.paciente) {
-            // Paciente encontrado
-            mostrarPacienteEncontradoObs(data.paciente);
+          if (data && data.success) {
+            const paciente = data.paciente || (Array.isArray(data.pacientes) && data.pacientes.length > 0 ? data.pacientes[0] : null);
+            if (paciente) {
+              // Paciente encontrado
+              mostrarPacienteEncontradoObs(paciente);
+            } else {
+              // Paciente não encontrado
+              $('#pacienteNaoEncontradoObs').show();
+            }
           } else {
-            // Paciente não encontrado
             $('#pacienteNaoEncontradoObs').show();
           }
         })
@@ -1419,6 +1502,41 @@
         }
       });
     });
+
+    function abrirHomeMedico(){
+      $('.main-content > div').hide();
+      $('#home-medico').show();
+      $('#home-medico .quick-actions, #home-medico .dashboard-cards').show();
+    }
+
+    function carregarDashboardMedico(){
+      fetch('/api/medico/dashboard')
+        .then(r => r.json())
+        .then(data => {
+          if(!data.success) return;
+          $('#kpi-med-internados').text(data.internados);
+          $('#kpi-med-observacao').text(data.observacao);
+          $('#kpi-med-consultas').text(data.consultas_plantao);
+          // Aviso sutil para observação aguardando conduta
+          if (typeof data.obs_aguardando_conduta === 'number') {
+            $('#badge-obs-conduta').text(data.obs_aguardando_conduta);
+            if (data.obs_aguardando_conduta > 0) {
+              $('#alert-observacao-conduta').show();
+            } else {
+              $('#alert-observacao-conduta').hide();
+            }
+          }
+          try{
+            const ini = new Date(data.plantao_inicio);
+            const fim = new Date(data.plantao_fim);
+            const pad = n=> String(n).padStart(2,'0');
+            const iniStr = `${pad(ini.getDate())}/${pad(ini.getMonth()+1)}/${ini.getFullYear()} ${pad(ini.getHours())}:${pad(ini.getMinutes())}`;
+            const fimStr = `${pad(fim.getDate())}/${pad(fim.getMonth()+1)}/${fim.getFullYear()} ${pad(fim.getHours())}:${pad(fim.getMinutes())}`;
+            $('#med-plantao-range').text(`Plantão atual: ${iniStr} até ${fimStr}`);
+          } catch(e) {}
+        })
+        .catch(() => {});
+    }
 
     // Toggle do menu do usuário
     $('#userMenuButton').click(function () {

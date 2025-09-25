@@ -8,6 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Google Fonts (Roboto) -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome (icons opcionais) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
     <style>
         body {
             padding-top: 58px; /* Adjusted for fixed navbar height */
@@ -90,6 +92,11 @@
             padding: 0.5em 0.8em;
         }
         .btn-outline-primary {
+            border-radius: 20px;
+            font-weight: 500;
+            padding: 0.375rem 1rem;
+        }
+        .btn-outline-success {
             border-radius: 20px;
             font-weight: 500;
             padding: 0.375rem 1rem;
@@ -308,6 +315,16 @@
     <div class="main-content-wrapper">
         <!-- Original Main Content Area -->
         <div class="container-fluid main-content">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <button class="btn btn-outline-primary btn-sm" onclick="forcarAtualizacao()">
+                        <i class="fas fa-sync-alt"></i> Atualizar
+                    </button>
+                </div>
+                <div class="text-muted small">
+                    Atualizado em: <span id="ts-atualizacao">--:--:--</span>
+                </div>
+            </div>
             {% set total_ocupados = leitos|sum(attribute='ocupacao_atual') %}
             {% set total_capacidade = leitos|sum(attribute='capacidade_maxima') %}
             {% set ocupacao_percentual = (total_ocupados / total_capacidade * 100) if total_capacidade else 0 %}
@@ -395,12 +412,8 @@
                                 </p>
                                 
                                 <div class="mt-auto">
-                                    <button class="btn btn-outline-primary btn-sm w-100"
-                                            onclick="mostrarPacientes('{{ leito.nome }}', this)">
-                                        Ver Pacientes
-                                    </button>
-                                    <div id="pacientes-{{ leito.nome|replace(' ', '-') }}" class="mt-2 pacientes-list" style="display:none;">
-                                        <!-- Patient list will be injected here -->
+                                    <div class="leito-drop-zone pacientes-list" data-leito="{{ leito.nome }}">
+                                        <p class="text-muted small m-0 p-2 text-center">Carregando...</p>
                                     </div>
                                 </div>
                             </div>
@@ -879,6 +892,68 @@
                 todosPacientesInternados = [];
             });
     }
+
+    // Auto-refresh das listas e atualização de timestamp
+    let autoRefreshInterval = null;
+    function atualizarTimestamp() {
+        const now = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        document.getElementById('ts-atualizacao').textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    }
+
+    function carregarPacientesPorLeito(leitoNome, container) {
+        fetch(`/api/internacoes/leito/${encodeURIComponent(leitoNome)}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!Array.isArray(data) || data.length === 0) {
+                    container.innerHTML = '<p class="text-muted small m-0 p-2 text-center">Nenhum paciente internado.</p>';
+                    return;
+                }
+                const listItems = data.map(p => {
+                    const idade = calcularIdade(p.data_nascimento);
+                    return `<div class="paciente-draggable" draggable="true" data-paciente-id="${p.id || p.paciente_id}" data-atendimento-id="${p.atendimento_id}" data-paciente-nome="${p.nome}" data-leito-origem="${leitoNome}">
+                      <div class=\"d-flex justify-content-between align-items-start\">
+                        <div class=\"paciente-info\">
+                          <div class=\"paciente-nome\">${p.nome}</div>
+                          <div class=\"paciente-diagnostico\">${p.diagnostico || 'Sem diagnóstico'}</div>
+                          <div class=\"paciente-idade\">Idade: ${idade}</div>
+                        </div>
+                        <div class=\"ml-2\">
+                          <span class=\"badge bg-info\">${p.atendimento_id}</span>
+                        </div>
+                      </div>
+                    </div>`;
+                }).join('');
+                container.innerHTML = listItems;
+                configurarDragAndDrop();
+            })
+            .catch(() => {
+                container.innerHTML = '<p class="text-danger small m-0 p-2 text-center">Erro ao buscar pacientes.</p>';
+            });
+    }
+
+    function carregarTodosLeitos() {
+        document.querySelectorAll('.leito-drop-zone').forEach(zone => {
+            const leito = zone.getAttribute('data-leito');
+            zone.innerHTML = '<p class="text-muted small m-0 p-2 text-center">Carregando...</p>';
+            carregarPacientesPorLeito(leito, zone);
+        });
+        atualizarTimestamp();
+    }
+
+    function forcarAtualizacao() {
+        carregarTodosLeitos();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        carregarTodosLeitos();
+        autoRefreshInterval = setInterval(carregarTodosLeitos, 60000);
+    });
     </script>
 </body>
 </html>

@@ -62,6 +62,41 @@
     .main-content {
       padding: 20px;
     }
+    /* Cards do dashboard */
+    .dashboard-cards {
+      display: none;
+      max-width: 80%;
+      margin: 10px auto 20px auto;
+    }
+    .dashboard-cards .card {
+      border: 0;
+      border-radius: 12px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+      color: #333;
+    }
+    .card-metric {
+      text-align: center;
+      padding: 24px 12px;
+    }
+    .card-metric h3 {
+      font-size: 36px;
+      margin: 0;
+      font-weight: 700;
+    }
+    .card-metric span {
+      display: block;
+      margin-top: 6px;
+      font-size: 14px;
+      color: #666;
+    }
+    .quick-actions {
+      display: none;
+      max-width: 80%;
+      margin: 0 auto 10px auto;
+    }
+    .quick-actions .btn {
+      margin: 6px 8px 6px 0;
+    }
     .hidden {
       display: none;
     }
@@ -110,7 +145,7 @@
     /* Seção de Triagem */
     #triagem-section {
       display: none;
-      max-width: 50%;
+      max-width: 80%;
       margin: 20px auto;
     }
     #triagem-section h2 {
@@ -130,14 +165,33 @@
     .search-group {
       margin-bottom: 15px;
     }
-    /* Itens de paciente e atendimento com layout em linha */
-    .patient-item, .atendimento-item {
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      margin-bottom: 10px;
-      background-color: #fff;
+    /* Cards modernos para pacientes de triagem */
+    .patient-card {
+      border: 0;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+      background: #fff;
+      padding: 14px 16px;
+      margin-bottom: 14px;
     }
+    .patient-card .title {
+      font-weight: 600;
+      font-size: 18px;
+      color: #222;
+    }
+    .patient-card .meta {
+      color: #666;
+      font-size: 14px;
+    }
+    .patient-card .badge-info {
+      background: #e7f0ff;
+      color: #2254d3;
+      font-weight: 600;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+    .patient-card .actions .btn { margin-left: 8px; }
     /* Submenu para histórico */
     .submenu {
       border: 1px solid #ddd;
@@ -152,6 +206,11 @@
       <!-- Sidebar -->
       <div class="sidebar" id="sidebar">
         <ul class="nav flex-column">
+          <li class="nav-item" data-title="Início">
+            <a class="nav-link" href="#" onclick="abrirHome()">
+              <i class="fas fa-home"></i>
+            </a>
+          </li>
           <li class="nav-item" data-title="Cadastrar Paciente">
             <a class="nav-link" href="#" onclick="abrirModalCadastroPaciente()">
               <i class="fas fa-user-plus"></i>
@@ -197,6 +256,49 @@
 
       <!-- Main Content -->
       <div class="col main-content">
+        <!-- Home/Dashboard do Enfermeiro -->
+        <div id="home-section">
+          <div class="quick-actions">
+            <div class="d-flex flex-wrap align-items-center">
+              <button class="btn btn-primary" onclick="abrirTriagem()"><i class="fas fa-notes-medical mr-1"></i> Triagem</button>
+              <button class="btn btn-outline-info" onclick="abrirBuscaPacientes()"><i class="fas fa-search mr-1"></i> Buscar Paciente</button>
+              <a class="btn btn-outline-secondary" href="/observacao"><i class="fas fa-eye mr-1"></i> Observação</a>
+              <a class="btn btn-outline-dark" href="/clinica"><i class="fas fa-procedures mr-1"></i> Clínica</a>
+              <button class="btn btn-outline-success" onclick="abrirModalCadastroPaciente()"><i class="fas fa-user-plus mr-1"></i> Cadastrar Paciente</button>
+            </div>
+          </div>
+
+          <div class="dashboard-cards">
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <div class="card bg-light">
+                  <div class="card-body card-metric">
+                    <h3 id="kpi-internados">--</h3>
+                    <span>Internados</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <div class="card" style="background:#e8f4ff;">
+                  <div class="card-body card-metric">
+                    <h3 id="kpi-observacao">--</h3>
+                    <span>Em Observação</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <div class="card" style="background:#eaf9ef;">
+                  <div class="card-body card-metric">
+                    <h3 id="kpi-triagens">--</h3>
+                    <span>Triagens no Plantão</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="text-center text-muted small" id="plantao-range"></div>
+          </div>
+        </div>
+
         <!-- Seção de Triagem -->
         <div id="triagem-section">
           <h2>Pacientes Aguardando Triagem</h2>
@@ -209,12 +311,26 @@
         <!-- Seção de Busca de Pacientes -->
         <div id="patient-search-section">
           <h2>Busca de Pacientes</h2>
-          <div class="form-group search-group">
-            <input type="text" class="form-control" id="buscaIdentificados" placeholder="Buscar por CPF ou nome" onkeyup="buscarPacientesIdentificados()">
+          <div class="search-group">
+            <div class="row">
+              <div class="col-md-5 mb-2">
+                <input type="text" class="form-control" id="buscaCpf" placeholder="CPF (000.000.000-00)">
+              </div>
+              <div class="col-md-5 mb-2">
+                <input type="text" class="form-control" id="buscaNome" placeholder="Nome do paciente">
+              </div>
+              <div class="col-md-2 mb-2">
+                <button class="btn btn-primary btn-block w-100" id="btnBuscarPacientes" onclick="buscarPacientes()">
+                  <i class="fas fa-search mr-1"></i> Buscar
+                </button>
+              </div>
+            </div>
+            <small class="text-muted">Preencha CPF ou Nome para buscar. CPF tem prioridade se ambos forem informados.</small>
           </div>
+
           <div id="listaIdentificados"></div>
 
-          <!-- Novo submenu para histórico de atendimentos -->
+          <!-- Submenu para histórico de atendimentos -->
           <div id="submenuAtendimentos" class="submenu" style="display:none;">
             <h3>Histórico de Atendimentos</h3>
             <div id="listaAtendimentos"></div>
@@ -429,10 +545,41 @@
         }
       });
 
-      // Carrega automaticamente os pacientes aguardando triagem
-      console.log("Carregando automaticamente pacientes aguardando triagem...");
-      abrirTriagem();
+      // Inicia na Home com Dashboard
+      carregarDashboardEnfermeiro();
+      $('#home-section .quick-actions, #home-section .dashboard-cards').show();
     });
+
+    // Alterna para Home
+    function abrirHome() {
+      console.log('Abrindo Home do enfermeiro');
+      $('.main-content > div').hide();
+      $('#home-section').show();
+      $('#home-section .quick-actions, #home-section .dashboard-cards').show();
+      carregarDashboardEnfermeiro();
+    }
+
+     // Carrega KPIs do dashboard
+    function carregarDashboardEnfermeiro() {
+      console.log('Carregando dashboard do enfermeiro...');
+      fetch('/api/enfermeiro/dashboard')
+        .then(r => r.json())
+        .then(data => {
+          if (!data.success) return;
+          $('#kpi-internados').text(data.internados);
+          $('#kpi-observacao').text(data.observacao);
+          $('#kpi-triagens').text(data.triagens_plantao);
+          try {
+            const ini = new Date(data.plantao_inicio);
+            const fim = new Date(data.plantao_fim);
+            const pad = n=> String(n).padStart(2,'0');
+            const iniStr = `${pad(ini.getDate())}/${pad(ini.getMonth()+1)}/${ini.getFullYear()} ${pad(ini.getHours())}:${pad(ini.getMinutes())}`;
+            const fimStr = `${pad(fim.getDate())}/${pad(fim.getMonth()+1)}/${fim.getFullYear()} ${pad(fim.getHours())}:${pad(fim.getMinutes())}`;
+            $('#plantao-range').text(`Plantão atual: ${iniStr} até ${fimStr}`);
+          } catch(e) { console.warn('Falha ao formatar range do plantão'); }
+        })
+        .catch(err => console.error('Erro ao carregar dashboard:', err));
+    }
 
     // Toggle do menu do usuário
     $('#userMenuButton').click(function() {
@@ -546,14 +693,35 @@
     // Renderiza a lista de triagem
     function renderTriageList(patients) {
       let html = '';
-      if(patients.length === 0) {
+      if(!patients || patients.length === 0) {
         html = '<p>Nenhum paciente aguardando triagem.</p>';
       } else {
-        patients.forEach(function(patient) {
-          html += '<div class="patient-item d-flex justify-content-between align-items-center">';
-          html += '<span>' + patient.nome + '</span>';
-          html += '<button class="btn btn-sm btn-primary" onclick="iniciarTriagem(' + patient.id + ')">Iniciar triagem</button>';
-          html += '</div>';
+        patients.forEach(function(p) {
+          const sexo = p.sexo ? p.sexo : '—';
+          const idade = (p.idade !== null && p.idade !== undefined) ? p.idade + ' anos' : '—';
+          let criado = '—';
+          if (p.criado_em) {
+            try {
+              const d = new Date(p.criado_em);
+              const pad = n=> String(n).padStart(2,'0');
+              criado = `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+            } catch(e) { criado = p.hora_entrada ? p.hora_entrada : '—'; }
+          } else if (p.hora_entrada) {
+            criado = p.hora_entrada;
+          }
+
+          html += '\n<div class="patient-card">\n'
+            + '  <div class="d-flex justify-content-between align-items-start">\n'
+            + '    <div>\n'
+            + '      <div class="title">' + (p.nome || 'Paciente') + '</div>\n'
+            + '      <div class="meta">Idade: ' + idade + ' • Sexo: ' + sexo + '</div>\n'
+            + '      <div class="meta">Ficha criada: <span class="badge-info">' + criado + '</span></div>\n'
+            + '    </div>\n'
+            + '    <div class="actions">\n'
+            + '      <button class="btn btn-sm btn-primary" onclick="iniciarTriagem(' + p.id + ')"><i class="fas fa-play"></i> Iniciar triagem</button>\n'
+            + '    </div>\n'
+            + '  </div>\n'
+            + '</div>';
         });
       }
       $('#triagem-list').html(html);
@@ -587,7 +755,8 @@
       console.log("Abrindo seção de busca de pacientes.");
       $('.main-content > div').hide();
       $('#patient-search-section').show();
-      $('#buscaIdentificados').val('');
+      $('#buscaCpf').val('');
+      $('#buscaNome').val('');
       $('#listaIdentificados').html('');
       $('#mostrarNaoIdentificados').prop('checked', false);
       $('#listaNaoIdentificados').html('');
@@ -633,6 +802,81 @@
       });
     }
 
+    // Máscara e busca por CPF/Nome (Enter)
+    $(document).ready(function() {
+      try { $('#buscaCpf').mask('000.000.000-00'); } catch(e) {}
+      $('#buscaCpf, #buscaNome').on('keyup', function(e){ if(e.key === 'Enter'){ buscarPacientes(); }});
+    });
+
+    // Busca de pacientes por CPF (prioridade) ou nome, exibindo cards
+    function buscarPacientes() {
+      const cpf = ($('#buscaCpf').val() || '').trim();
+      const nome = ($('#buscaNome').val() || '').trim();
+      console.log('Buscando pacientes por', { cpf, nome });
+
+      let ajaxOptions = { url: '/api/pacientes/buscar', method: 'GET', dataType: 'json' };
+      if (cpf || nome) {
+        if (cpf && !nome) {
+          ajaxOptions.data = { filtro: cpf };
+        } else if (!cpf && nome) {
+          ajaxOptions.data = { filtro: nome };
+        } else {
+          ajaxOptions.method = 'POST';
+          ajaxOptions.contentType = 'application/json; charset=utf-8';
+          ajaxOptions.data = JSON.stringify({ cpf: cpf, nome: nome });
+        }
+      } else {
+        $('#listaIdentificados').html('<p>Informe CPF ou nome para buscar.</p>');
+        return;
+      }
+
+      $('#btnBuscarPacientes').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Buscando...');
+
+      $.ajax(ajaxOptions)
+        .done(function(data){
+          console.log('Resultado da busca:', data);
+          if(data.success && data.pacientes && data.pacientes.length > 0){
+            let html = '';
+            data.pacientes.forEach(function(p){
+              const sexo = p.sexo || '—';
+              let idade = '—';
+              if (p.data_nascimento) {
+                try {
+                  const dn = new Date(p.data_nascimento);
+                  const now = new Date();
+                  let years = now.getFullYear() - dn.getFullYear();
+                  const m = now.getMonth() - dn.getMonth();
+                  if (m < 0 || (m === 0 && now.getDate() < dn.getDate())) years--;
+                  idade = years + ' anos';
+                } catch(e) {}
+              }
+              const cpfTxt = p.cpf ? p.cpf : '—';
+              const safeNome = (p.nome || 'Paciente').replace(/'/g, "\\'");
+              html += '\n<div class="patient-card">\n'
+                + '  <div class="d-flex justify-content-between align-items-start">\n'
+                + '    <div>\n'
+                + '      <div class="title">' + (p.nome || 'Paciente') + '</div>\n'
+                + '      <div class="meta">CPF: ' + cpfTxt + ' • Idade: ' + idade + ' • Sexo: ' + sexo + '</div>\n'
+                + '    </div>\n'
+                + '    <div class="actions">\n'
+                + '      <a class="btn btn-sm btn-outline-info mr-2" href="/ficha_geral_paciente?paciente_id=' + p.id + '" target="_blank">Ficha</a>\n'
+                + '      <button class="btn btn-sm btn-info" onclick="mostrarHistoricoAtendimentos(' + p.id + ', \'" + safeNome + "\')">Histórico</button>\n'
+                + '    </div>\n'
+                + '  </div>\n'
+                + '</div>';
+            });
+            $('#listaIdentificados').html(html);
+          } else {
+            $('#listaIdentificados').html('<p>Nenhum paciente encontrado.</p>');
+          }
+        })
+        .fail(function(){
+          $('#listaIdentificados').html('<p>Erro ao buscar pacientes.</p>');
+        })
+        .always(function(){
+          $('#btnBuscarPacientes').prop('disabled', false).html('<i class="fas fa-search mr-1"></i> Buscar');
+        });
+    }
     // Exibe o submenu com o histórico de atendimentos do paciente
     function mostrarHistoricoAtendimentos(pacienteId, pacienteNome) {
       // Armazena o id do paciente para uso na função de imprimir ficha

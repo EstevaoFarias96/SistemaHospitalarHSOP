@@ -34,6 +34,9 @@
             <a class="nav-link active" id="tab-aguardando" data-toggle="tab" href="#pane-aguardando" role="tab" aria-controls="pane-aguardando" aria-selected="true">Aguardando Médico</a>
           </li>
           <li class="nav-item" role="presentation">
+            <a class="nav-link" id="tab-triagem" data-toggle="tab" href="#pane-triagem" role="tab" aria-controls="pane-triagem" aria-selected="false">Aguardando Triagem</a>
+          </li>
+          <li class="nav-item" role="presentation">
             <a class="nav-link" id="tab-alta" data-toggle="tab" href="#pane-alta" role="tab" aria-controls="pane-alta" aria-selected="false">Alta após medicação</a>
           </li>
           <li class="nav-item" role="presentation">
@@ -52,6 +55,14 @@
       </div>
         </div>
       </div>
+        <div class="tab-pane fade" id="pane-triagem" role="tabpanel" aria-labelledby="tab-triagem">
+          <div id="lista-triagem">
+            <div class="text-center py-5">
+              <div class="spinner-border text-primary" role="status"><span class="sr-only">Carregando...</span></div>
+              <p class="text-muted mt-3">Carregando pacientes aguardando triagem...</p>
+            </div>
+          </div>
+        </div>
       <div class="tab-pane fade" id="pane-alta" role="tabpanel" aria-labelledby="tab-alta">
         <div id="lista-alta">
           <div class="text-center py-5">
@@ -129,6 +140,14 @@
             renderLista('#lista-aguardando', data.atendimentos, '<div class="text-center py-5"><i class="fas fa-check-circle fa-3x text-success mb-3"></i><h5>Nenhum atendimento aguardando</h5></div>');
           })
           .catch(() => { $('#lista-aguardando').html('<p class="text-danger">Erro ao carregar dados</p>'); });
+      } else if (tipo === 'triagem') {
+        fetch('/api/medico/atendimentos/aguardando-triagem')
+          .then(r => r.json())
+          .then(data => {
+            if (!data.success) { $('#lista-triagem').html('<p class="text-danger">Erro ao carregar</p>'); return; }
+            renderLista('#lista-triagem', data.atendimentos, '<div class="text-center py-5"><i class="fas fa-info-circle fa-3x text-secondary mb-3"></i><h5>Sem pacientes aguardando triagem</h5></div>');
+          })
+          .catch(() => { $('#lista-triagem').html('<p class="text-danger">Erro ao carregar dados</p>'); });
       } else if (tipo === 'alta') {
         fetch('/api/medico/atendimentos/alta-medicacao')
           .then(r => r.json())
@@ -153,6 +172,7 @@
       $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
         const id = $(e.target).attr('id');
         if (id === 'tab-aguardando') carregarAba('aguardando');
+        if (id === 'tab-triagem') carregarAba('triagem');
         if (id === 'tab-alta') carregarAba('alta');
         if (id === 'tab-reavaliacao') carregarAba('reavaliacao');
       });
@@ -161,6 +181,7 @@
         btn.prop('disabled', true); icon.addClass('fa-spin');
         const activeId = $('.nav-link.active').attr('id');
         if (activeId === 'tab-aguardando') carregarAba('aguardando');
+        if (activeId === 'tab-triagem') carregarAba('triagem');
         if (activeId === 'tab-alta') carregarAba('alta');
         if (activeId === 'tab-reavaliacao') carregarAba('reavaliacao');
         setTimeout(()=>{ btn.prop('disabled', false); icon.removeClass('fa-spin'); }, 800);
