@@ -1211,10 +1211,9 @@ def api_enfermeiro_dashboard():
             ~Internacao.carater_internacao.ilike('%observa%')
         ).count()
 
-        # Contagem de pacientes em observação ativos
-        observacao_count = Internacao.query.filter(
-            Internacao.data_alta.is_(None),
-            Internacao.carater_internacao.ilike('%observa%')
+        # Contagem de pacientes em observação (com base no status do atendimento)
+        observacao_count = Atendimento.query.filter(
+            Atendimento.status == 'Em Observação'
         ).count()
 
         # Contagem de triagens realizadas pelo enfermeiro no plantão atual
@@ -1272,10 +1271,9 @@ def api_medico_dashboard():
             ~Internacao.carater_internacao.ilike('%observa%')
         ).count()
 
-        # Em observação ativos
-        observacao_count = Internacao.query.filter(
-            Internacao.data_alta.is_(None),
-            Internacao.carater_internacao.ilike('%observa%')
+        # Em observação (com base no status do atendimento)
+        observacao_count = Atendimento.query.filter(
+            Atendimento.status == 'Em Observação'
         ).count()
 
         # Consultas do médico no plantão atual
