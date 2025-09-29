@@ -724,11 +724,18 @@
             </div>
             <div class="card-body">
               <div class="row">
-                <div class="col-md-8">
+                <div class="col-md-4">
+                  <label class="font-weight-bold">Setor do Estoque:</label>
+                  <select class="form-control" id="select-setor-fluxo">
+                    <option value="">Selecione o setor...</option>
+                  </select>
+                  <small class="text-muted">Obrigatório para buscar medicamentos.</small>
+                </div>
+                <div class="col-md-5">
                   <label class="font-weight-bold">Buscar Medicamento:</label>
                   <input type="text" class="form-control" id="busca-medicamento-fluxo" placeholder="Digite o nome do medicamento...">
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                   <label class="font-weight-bold">&nbsp;</label>
                   <button class="btn btn-outline-primary btn-block" id="btn-buscar-medicamento-fluxo">
                     <i class="fas fa-search mr-1"></i>Buscar
@@ -818,6 +825,9 @@
 
       // Carregar prescrições pendentes do fluxo
       carregarPrescricoesFluxo();
+
+      // Carregar lista de setores para o modal
+      carregarSetoresEstoque();
     });
 
 
@@ -954,6 +964,41 @@
 
     function toggleSidebar() {
       $('#sidebar').toggleClass('expanded');
+    }
+
+    // Carrega setores disponíveis do estoque
+    function carregarSetoresEstoque() {
+      const select = $('#select-setor-fluxo');
+      if (!select.length) return;
+
+      // Exibe um estado de carregamento básico
+      select.prop('disabled', true);
+      select.html('<option value="">Carregando setores...</option>');
+
+      $.ajax({
+        url: '/api/estoque/setores',
+        method: 'GET'
+      })
+      .done(function(resp) {
+        const setores = (resp && resp.setores) ? resp.setores : [];
+        if (!Array.isArray(setores) || setores.length === 0) {
+          select.html('<option value="">Nenhum setor disponível</option>');
+          return;
+        }
+        let opts = '<option value="">Selecione o setor...</option>';
+        setores.forEach(function(s) {
+          const valor = (typeof s === 'string') ? s : (s.nome || s.valor || '');
+          const label = (typeof s === 'string') ? s : (s.label || s.nome || s.valor || 'Sem nome');
+          opts += `<option value="${valor}">${label}</option>`;
+        });
+        select.html(opts);
+      })
+      .fail(function() {
+        select.html('<option value="">Erro ao carregar setores</option>');
+      })
+      .always(function() {
+        select.prop('disabled', false);
+      });
     }
 
     // Função para mostrar toast notifications
@@ -1227,6 +1272,12 @@
     // Função para buscar medicamentos
     function buscarMedicamentosFluxo() {
       const termoBusca = $('#busca-medicamento-fluxo').val().trim();
+      const setor = $('#select-setor-fluxo').val();
+
+      if (!setor) {
+        showToast('Selecione o setor do estoque antes de buscar.', 'warning');
+        return;
+      }
 
       if (!termoBusca) {
         showToast('Digite o nome do medicamento para buscar.', 'warning');
@@ -1241,7 +1292,7 @@
       $.ajax({
         url: '/api/medicamentos/buscar',
         method: 'GET',
-        data: { q: termoBusca },
+        data: { q: termoBusca, setor: setor },
         success: function(response) {
           if (response.success) {
             exibirResultadosBuscaMedicamentos(response.medicamentos);
@@ -1326,15 +1377,21 @@
         return;
       }
 
+      const setor = $('#select-setor-fluxo').val();
+      if (!setor) {
+        showToast('Selecione o setor do estoque antes de adicionar.', 'warning');
+        return;
+      }
+
       $.ajax({
         url: '/api/medicamentos/buscar',
         method: 'GET',
-        data: { medicamento_id: medicamentoId },
+        data: { medicamento_id: medicamentoId, setor: setor },
         success: function(response) {
           if (response.success && response.medicamento) {
             const med = response.medicamento;
             const quantidadeSolicitada = prescricaoAtualFluxo ? (prescricaoAtualFluxo.quantidade || 1) : 1;
-            const quantidadeDefault = Math.min(quantidadeSolicitada, med.quantidade_total || 0) || 1;
+            const quantidadeDefault = Math.min(quantidadeSolicitada, med.quantidade_total || 0);
 
             const item = {
               id: med.id,
@@ -1504,6 +1561,7 @@
         contentType: 'application/json',
         data: JSON.stringify({
           prescricao_id: prescricaoAtualFluxo.id,
+          setor: $('#select-setor-fluxo').val() || '',
           itens: itensValidos.map(i => ({
             medicamento_id: i.id,
             quantidade_confirmada: i.quantidade,
@@ -1529,7 +1587,12 @@
             processarSequencialmente(itensValidos);
           } else {
             console.error('Erro na dispensação em lote:', xhr);
-            showToast('Erro ao processar dispensação.', 'error');
+            let msg = 'Erro ao processar dispensação.';
+            try {
+              const resp = xhr && xhr.responseJSON ? xhr.responseJSON : JSON.parse(xhr.responseText);
+              if (resp && resp.message) msg = resp.message;
+            } catch (e) {}
+            showToast(msg, 'error');
             $('#btn-confirmar-dispensacao-fluxo').prop('disabled', false).html('<i class="fas fa-check mr-1"></i>Confirmar Dispensação');
           }
         }
@@ -1562,6 +1625,7 @@
           contentType: 'application/json',
           data: JSON.stringify({
             prescricao_id: prescricaoAtualFluxo.id,
+            setor: $('#select-setor-fluxo').val() || '',
             medicamento_id: i.id,
             quantidade_confirmada: i.quantidade,
             status: i.status,
@@ -1572,6 +1636,12 @@
           resultados.push({ success: !!(resp && resp.success), item: i, response: resp });
         })
         .fail(function(xhr) {
+          let msg = 'Falha ao processar item.';
+          try {
+            const resp = xhr && xhr.responseJSON ? xhr.responseJSON : JSON.parse(xhr.responseText);
+            if (resp && resp.message) msg = resp.message;
+          } catch (e) {}
+          showToast(`${i.nome}: ${msg}`, 'error');
           resultados.push({ success: false, item: i, error: xhr });
         })
         .always(function() {

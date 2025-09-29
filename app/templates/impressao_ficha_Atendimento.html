@@ -240,7 +240,7 @@
     <!-- FRENTE DA FICHA -->
     <div class="page-front">
         <div class="header">
-            FICHA DE ATENDIMENTO MÉDICO
+            FICHA DE ATENDIMENTO
         </div>
         
         <!-- Dados de Identificação -->
@@ -324,20 +324,6 @@
                     {{ atendimento_triagem or '-' }}
                 </div>
             </div>
-            <table style="width: 100%; border-collapse: collapse; margin-top: 4px; font-size: 8pt;">
-                <tr>
-                    <td style="border: 1px solid #000; padding: 2px;">PA: {{ atendimento_pressao or '-' }} mmHg</td>
-                    <td style="border: 1px solid #000; padding: 2px;">Pulso: {{ atendimento_pulso or '-' }} bpm</td>
-                    <td style="border: 1px solid #000; padding: 2px;">SpO₂: {{ atendimento_sp02 or '-' }}%</td>
-                    <td style="border: 1px solid #000; padding: 2px;">Temp: {{ atendimento_temp or '-' }}°C</td>
-                </tr>
-                <tr>
-                    <td style="border: 1px solid #000; padding: 2px;">Peso: {{ atendimento_peso or '-' }} Kg</td>
-                    <td style="border: 1px solid #000; padding: 2px;">Altura: {{ atendimento_altura or '-' }} cm</td>
-                    <td style="border: 1px solid #000; padding: 2px;">Glicemia: {{ atendimento_dx or '-' }} mg/dL</td>
-                    <td style="border: 1px solid #000; padding: 2px;">FR: {{ atendimento_fr or '-' }} rpm</td>
-                </tr>
-            </table>
         </div>
 
         <!-- Anamnese e Exame Físico -->
@@ -432,25 +418,6 @@
             {{ atendimento_conduta_final or '-' }}
         </div>
 
-        <!-- Assinaturas -->
-        <div style="margin-top: 15px; display: flex; justify-content: space-between; page-break-inside: avoid;">
-            <div style="width: 45%; text-align: center; border-top: 1px solid #000; padding-top: 4px; margin-top: 20px;">
-                <div style="margin-bottom: 8px; font-weight: bold; font-size: 9pt;">Médico Responsável</div>
-                <div style="font-size: 7pt; line-height: 1.2;">
-                    Nome: {{ medico_nome or '-' }}<br>
-                    CRM: {{ medico_crm or '-' }}<br>
-                    Data: ___/___/______
-                </div>
-            </div>
-            <div style="width: 45%; text-align: center; border-top: 1px solid #000; padding-top: 4px; margin-top: 20px;">
-                <div style="margin-bottom: 8px; font-weight: bold; font-size: 9pt;">Enfermeiro(a)</div>
-                <div style="font-size: 7pt; line-height: 1.2;">
-                    Nome: ________________________<br>
-                    COREN: ______________________<br>
-                    Data: ___/___/______
-                </div>
-            </div>
-        </div>
 
         <!-- Rodapé -->
         <div style="text-align: center; margin-top: 20px; font-size: 7pt; border-top: 1px solid #ccc; padding-top: 6px; page-break-inside: avoid;">

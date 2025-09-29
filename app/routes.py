@@ -8343,6 +8343,50 @@ def buscar_ficha_por_id(id):
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@bp.route('/api/fichas-referencia/ativas', methods=['GET'])
+@login_required
+def listar_fichas_referencia_ativas():
+    """
+    Lista fichas de referência cujos atendimentos associados estão ativos
+    (status "Internado" ou "Em Observação").
+    """
+    try:
+        # Buscar fichas com seus atendimentos
+        query = (
+            db.session.query(FichaReferencia, Atendimento)
+            .join(Atendimento, FichaReferencia.atendimento_id == Atendimento.id)
+            .order_by(FichaReferencia.data.desc(), FichaReferencia.hora.desc())
+        )
+
+        fichas_data = []
+        for ficha, atendimento in query.all():
+            status_norm = normalize_status(atendimento.status or '')
+            if status_norm in ['INTERNADO', 'EM OBSERVACAO']:
+                medico = Funcionario.query.get(ficha.medico_id)
+                paciente = Paciente.query.get(atendimento.paciente_id)
+
+                fichas_data.append({
+                    'id': ficha.id,
+                    'atendimento_id': ficha.atendimento_id,
+                    'paciente_id': atendimento.paciente_id,
+                    'paciente_nome': (paciente.nome if paciente else None),
+                    'medico_id': ficha.medico_id,
+                    'medico_nome': (medico.nome if medico else None),
+                    'texto_referencia': ficha.texto_referencia,
+                    'encaminhamento_atendimento': ficha.encaminhamento_atendimento,
+                    'procedimento': ficha.procedimento,
+                    'unidade_referencia': ficha.unidade_referencia,
+                    'data': ficha.data.strftime('%Y-%m-%d'),
+                    'hora': ficha.hora.strftime('%H:%M'),
+                    'status_atendimento': atendimento.status,
+                })
+
+        return jsonify({'success': True, 'total': len(fichas_data), 'fichas': fichas_data}), 200
+
+    except Exception as e:
+        current_app.logger.error(f'Erro ao listar fichas de referência ativas: {str(e)}')
+        return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
+
 @bp.route('/api/fichas-referencia/<int:id>', methods=['PUT'])
 def atualizar_ficha_referencia(id):
     dados = request.get_json()
@@ -9305,9 +9349,12 @@ def processar_dispensacao_fluxo():
             dispensacoes_processadas = []
         else:
             # Verificar se há quantidade suficiente no estoque (apenas para Dispensado e Parcial)
-            itens_disponiveis = MedicacaoItem.query.filter_by(id_med_classe=medicamento_classe.id)\
-                .filter(MedicacaoItem.quantidade > 0)\
-                .order_by(MedicacaoItem.validade.asc()).all()
+            setor = dados.get('setor')
+            itens_query = MedicacaoItem.query.filter_by(id_med_classe=medicamento_classe.id)\
+                .filter(MedicacaoItem.quantidade > 0)
+            if setor and str(setor).strip() != '':
+                itens_query = itens_query.filter(MedicacaoItem.local.ilike(f"%{setor}%"))
+            itens_disponiveis = itens_query.order_by(MedicacaoItem.validade.asc()).all()
 
             quantidade_total_disponivel = sum(item.quantidade for item in itens_disponiveis)
 
@@ -9377,6 +9424,164 @@ def processar_dispensacao_fluxo():
         return jsonify({'success': False, 'message': 'Erro interno do servidor.', 'error': str(e)}), 500
 
 
+@bp.route('/api/dispensacoes/fluxo-processar-multiplos', methods=['POST'])
+@login_required
+def processar_dispensacao_fluxo_multiplos():
+    """
+    Processa múltiplos itens de uma mesma prescrição (tabela fluxo_disp) em uma única operação.
+    Espera JSON: {
+      prescricao_id: int,
+      setor?: str,
+      itens: [ { medicamento_id, quantidade_confirmada, status, observacoes? }, ... ]
+    }
+    """
+    try:
+        usuario_atual = get_current_user()
+        if not usuario_atual:
+            return jsonify({'success': False, 'message': 'Sessão expirada. Faça login novamente.'}), 401
+
+        if usuario_atual.cargo.strip().lower() != 'farmacia':
+            return jsonify({'success': False, 'message': 'Acesso restrito à Farmácia.'}), 403
+
+        dados = request.get_json() or {}
+        prescricao_id = dados.get('prescricao_id')
+        itens_payload = dados.get('itens') or []
+        setor = dados.get('setor')
+
+        if not prescricao_id or not isinstance(itens_payload, list) or len(itens_payload) == 0:
+            return jsonify({'success': False, 'message': 'Parâmetros inválidos: prescricao_id e itens são obrigatórios.'}), 400
+
+        from app.models import FluxoDisp, MedicacaoClasse, MedicacaoItem
+
+        prescricao = FluxoDisp.query.get(prescricao_id)
+        if not prescricao:
+            return jsonify({'success': False, 'message': 'Prescrição não encontrada.'}), 404
+
+        if prescricao.id_responsavel != 0:
+            return jsonify({'success': False, 'message': 'Esta prescrição já foi processada.'}), 400
+
+        resultados = []
+        houve_dispensado = False
+        houve_parcial = False
+        houve_cancelado = True  # assume cancelado até achar algo diferente
+
+        for item in itens_payload:
+            try:
+                med_id = item.get('medicamento_id')
+                qtd = item.get('quantidade_confirmada')
+                status = item.get('status')
+                observacoes = item.get('observacoes') or ''
+
+                if med_id is None or qtd is None or status not in ['Dispensado', 'Parcial', 'Cancelado']:
+                    resultados.append({'success': False, 'medicamento_id': med_id, 'message': 'Item inválido.'})
+                    continue
+
+                medicamento_classe = MedicacaoClasse.query.get(med_id)
+                if not medicamento_classe:
+                    resultados.append({'success': False, 'medicamento_id': med_id, 'message': 'Medicamento não encontrado.'})
+                    continue
+
+                dispensacoes_processadas = []
+
+                if status == 'Cancelado':
+                    resultados.append({
+                        'success': True,
+                        'medicamento': medicamento_classe.nome,
+                        'status': status,
+                        'quantidade': 0,
+                        'dispensacoes': []
+                    })
+                else:
+                    itens_query = MedicacaoItem.query.filter_by(id_med_classe=medicamento_classe.id) \
+                        .filter(MedicacaoItem.quantidade > 0)
+                    if setor and str(setor).strip() != '':
+                        itens_query = itens_query.filter(MedicacaoItem.local.ilike(f"%{setor}%"))
+                    itens_disponiveis = itens_query.order_by(MedicacaoItem.validade.asc()).all()
+
+                    quantidade_total_disponivel = sum(itm.quantidade for itm in itens_disponiveis)
+
+                    if quantidade_total_disponivel < int(qtd):
+                        resultados.append({
+                            'success': False,
+                            'medicamento': medicamento_classe.nome,
+                            'message': f'Quantidade insuficiente em estoque. Disponível: {quantidade_total_disponivel}, Necessário: {qtd}'
+                        })
+                        continue
+
+                    quantidade_restante = int(qtd)
+                    for itm in itens_disponiveis:
+                        if quantidade_restante <= 0:
+                            break
+                        quantidade_deste_lote = min(quantidade_restante, itm.quantidade)
+                        itm.quantidade -= quantidade_deste_lote
+                        quantidade_restante -= quantidade_deste_lote
+                        dispensacoes_processadas.append({
+                            'lote': itm.lote,
+                            'quantidade': quantidade_deste_lote,
+                            'local': itm.local
+                        })
+                        if itm.quantidade == 0:
+                            db.session.delete(itm)
+
+                    resultados.append({
+                        'success': True,
+                        'medicamento': medicamento_classe.nome,
+                        'status': status,
+                        'quantidade': int(qtd),
+                        'dispensacoes': dispensacoes_processadas,
+                        'observacoes': observacoes
+                    })
+
+                    if status == 'Parcial':
+                        houve_parcial = True
+                        houve_cancelado = False
+                    elif status == 'Dispensado':
+                        houve_dispensado = True
+                        houve_cancelado = False
+
+            except Exception as ie:
+                logging.error(f"Erro ao processar item em lote: {str(ie)}")
+                logging.error(traceback.format_exc())
+                resultados.append({'success': False, 'message': 'Erro ao processar item.', 'error': str(ie)})
+
+        # Determinar status geral
+        if houve_cancelado and not houve_dispensado and not houve_parcial:
+            status_geral = 'Cancelado'
+        elif houve_parcial or (houve_dispensado and any((r.get('status') != 'Dispensado') for r in resultados if r.get('success'))):
+            status_geral = 'Parcial'
+        else:
+            status_geral = 'Dispensado'
+
+        # Atualiza prescrição e responsável
+        prescricao.id_responsavel = usuario_atual.id
+        prescricao.status = status_geral
+
+        # Logs
+        logging.info(f"DISPENSAÇÃO FLUXO (LOTE) - Prescrição: {prescricao.id} - Status: {status_geral} - Farmacêutico: {usuario_atual.nome}")
+        for r in resultados:
+            if r.get('success') and r.get('dispensacoes'):
+                for disp in r['dispensacoes']:
+                    logging.info(f"  • {r.get('medicamento')} - Lote: {disp['lote']} - Qtd: {disp['quantidade']} - Local: {disp['local']}")
+
+        db.session.commit()
+
+        total_ok = len([r for r in resultados if r.get('success')])
+        total_fail = len([r for r in resultados if not r.get('success')])
+        mensagem = f"Processados {total_ok} item(ns); falhas em {total_fail}."
+
+        return jsonify({
+            'success': True,
+            'message': mensagem,
+            'status': status_geral,
+            'resultados': resultados
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Erro ao processar dispensação do fluxo (lote): {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro interno do servidor.', 'error': str(e)}), 500
+
 @bp.route('/api/medicamentos/buscar', methods=['GET'])
 @login_required
 def buscar_medicamentos():
@@ -9388,6 +9593,7 @@ def buscar_medicamentos():
 
         termo_busca = request.args.get('q', '').strip()
         medicamento_id = request.args.get('medicamento_id', type=int)
+        setor = request.args.get('setor', type=str)
 
         # Se foi passado um ID específico de medicamento
         if medicamento_id:
@@ -9396,9 +9602,11 @@ def buscar_medicamentos():
                 return jsonify({'success': False, 'message': 'Medicamento não encontrado.'}), 404
 
             # Buscar itens disponíveis deste medicamento
-            itens = MedicacaoItem.query.filter_by(id_med_classe=medicamento_id)\
-                .filter(MedicacaoItem.quantidade > 0)\
-                .order_by(MedicacaoItem.validade.asc()).all()
+            itens_query = MedicacaoItem.query.filter_by(id_med_classe=medicamento_id)\
+                .filter(MedicacaoItem.quantidade > 0)
+            if setor and str(setor).strip() != '':
+                itens_query = itens_query.filter(MedicacaoItem.local.ilike(f"%{setor}%"))
+            itens = itens_query.order_by(MedicacaoItem.validade.asc()).all()
 
             quantidade_total = sum(item.quantidade for item in itens)
 
@@ -9432,7 +9640,10 @@ def buscar_medicamentos():
         medicamentos_data = []
         for med in medicamentos:
             # Calcular quantidade total disponível
-            quantidade_total = sum(item.quantidade for item in med.itens if item.quantidade > 0)
+            if setor and str(setor).strip() != '':
+                quantidade_total = sum(item.quantidade for item in med.itens if item.quantidade > 0 and item.local and setor.lower() in item.local.lower())
+            else:
+                quantidade_total = sum(item.quantidade for item in med.itens if item.quantidade > 0)
 
             if quantidade_total > 0:  # Só mostrar medicamentos com estoque
                 medicamentos_data.append({
@@ -9498,6 +9709,35 @@ def buscar_medicamentos_disponiveis():
 
     except Exception as e:
         logging.error(f"Erro ao buscar medicamentos disponíveis: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro interno do servidor.', 'error': str(e)}), 500
+# Listagem de setores do estoque (locais)
+@bp.route('/api/estoque/setores', methods=['GET'])
+@login_required
+def listar_setores_estoque():
+    try:
+        usuario_atual = get_current_user()
+        if not usuario_atual:
+            return jsonify({'success': False, 'message': 'Sessão expirada. Faça login novamente.'}), 401
+
+        # Opcional: restringe a Farmácia
+        if usuario_atual.cargo.strip().lower() != 'farmacia':
+            return jsonify({'success': False, 'message': 'Acesso restrito à Farmácia.'}), 403
+
+        from app.models import MedicacaoItem
+
+        setores_rows = db.session.query(MedicacaoItem.local) \
+            .filter(MedicacaoItem.local.isnot(None)) \
+            .filter(MedicacaoItem.local != '') \
+            .filter(MedicacaoItem.quantidade > 0) \
+            .distinct() \
+            .all()
+
+        setores = sorted([row[0] for row in setores_rows if row and row[0]])
+
+        return jsonify({'success': True, 'setores': setores}), 200
+    except Exception as e:
+        logging.error(f"Erro ao listar setores do estoque: {str(e)}")
         logging.error(traceback.format_exc())
         return jsonify({'success': False, 'message': 'Erro interno do servidor.', 'error': str(e)}), 500
 
@@ -9605,6 +9845,62 @@ def listar_medicacao_classes():
         logging.error(traceback.format_exc())
         return jsonify({'success': False, 'message': 'Erro interno do servidor.', 'error': str(e)}), 500
 
+
+@bp.route('/api/medicamentos/classes/<int:classe_id>', methods=['PUT'])
+@login_required
+def atualizar_medicacao_classe(classe_id):
+    """
+    Endpoint para atualizar uma classe de medicação existente
+    """
+    try:
+        usuario_atual = get_current_user()
+        if not usuario_atual:
+            return jsonify({'success': False, 'message': 'Sessão expirada. Faça login novamente.'}), 401
+
+        if usuario_atual.cargo.strip().lower() != 'farmacia':
+            return jsonify({'success': False, 'message': 'Acesso restrito à Farmácia.'}), 403
+
+        from app.models import MedicacaoClasse
+
+        classe = MedicacaoClasse.query.get(classe_id)
+        if not classe:
+            return jsonify({'success': False, 'message': 'Classe de medicação não encontrada.'}), 404
+
+        dados = request.get_json() or {}
+
+        # Atualiza somente campos permitidos
+        campos_permitidos = ['nome', 'apresentacao', 'classe', 'codigo', 'unidade']
+
+        # Se for alterar código, verificar duplicidade
+        if 'codigo' in dados and dados['codigo'] and dados['codigo'].strip() != classe.codigo:
+            existente = MedicacaoClasse.query.filter_by(codigo=dados['codigo'].strip()).first()
+            if existente and existente.id != classe.id:
+                return jsonify({'success': False, 'message': 'Código já cadastrado para outra medicação.'}), 400
+
+        for campo in campos_permitidos:
+            if campo in dados and dados[campo] is not None and str(dados[campo]).strip() != '':
+                setattr(classe, campo, str(dados[campo]).strip())
+
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Classe de medicação atualizada com sucesso!',
+            'data': {
+                'id': classe.id,
+                'nome': classe.nome,
+                'apresentacao': classe.apresentacao,
+                'classe': classe.classe,
+                'codigo': classe.codigo,
+                'unidade': classe.unidade
+            }
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Erro ao atualizar classe de medicação: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro interno do servidor.', 'error': str(e)}), 500
 @bp.route('/api/medicamentos/itens', methods=['POST'])
 @login_required
 def criar_medicacao_item():
@@ -9762,6 +10058,144 @@ def listar_medicacao_itens(id_classe):
 
     except Exception as e:
         logging.error(f"Erro ao listar itens de medicação: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro interno do servidor.', 'error': str(e)}), 500
+
+@bp.route('/api/medicamentos/itens/item/<int:item_id>', methods=['GET'])
+@login_required
+def obter_medicacao_item(item_id):
+    """
+    Endpoint para obter detalhes de um item (lote) específico
+    """
+    try:
+        usuario_atual = get_current_user()
+        if not usuario_atual:
+            return jsonify({'success': False, 'message': 'Sessão expirada. Faça login novamente.'}), 401
+
+        if usuario_atual.cargo.strip().lower() != 'farmacia':
+            return jsonify({'success': False, 'message': 'Acesso restrito à Farmácia.'}), 403
+
+        from app.models import MedicacaoClasse, MedicacaoItem
+        item = MedicacaoItem.query.get(item_id)
+        if not item:
+            return jsonify({'success': False, 'message': 'Item de medicação não encontrado.'}), 404
+
+        classe = MedicacaoClasse.query.get(item.id_med_classe)
+
+        return jsonify({
+            'success': True,
+            'data': {
+                'id': item.id,
+                'id_med_classe': item.id_med_classe,
+                'lote': item.lote,
+                'validade': item.validade.strftime('%Y-%m-%d') if item.validade else None,
+                'local': item.local,
+                'quantidade': item.quantidade,
+                'classe': {
+                    'id': classe.id if classe else None,
+                    'nome': classe.nome if classe else None,
+                    'apresentacao': classe.apresentacao if classe else None,
+                    'codigo': classe.codigo if classe else None
+                }
+            }
+        }), 200
+
+    except Exception as e:
+        logging.error(f"Erro ao obter item de medicação: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro interno do servidor.', 'error': str(e)}), 500
+
+@bp.route('/api/medicamentos/itens/<int:item_id>', methods=['PUT'])
+@login_required
+def atualizar_medicacao_item(item_id):
+    """
+    Endpoint para atualizar dados de um item (lote) de medicação
+    """
+    try:
+        usuario_atual = get_current_user()
+        if not usuario_atual:
+            return jsonify({'success': False, 'message': 'Sessão expirada. Faça login novamente.'}), 401
+
+        if usuario_atual.cargo.strip().lower() != 'farmacia':
+            return jsonify({'success': False, 'message': 'Acesso restrito à Farmácia.'}), 403
+
+        from app.models import MedicacaoItem
+        item = MedicacaoItem.query.get(item_id)
+        if not item:
+            return jsonify({'success': False, 'message': 'Item de medicação não encontrado.'}), 404
+
+        dados = request.get_json() or {}
+
+        # Validar e preparar campos
+        if 'lote' in dados and str(dados['lote']).strip() != '':
+            novo_lote = str(dados['lote']).strip()
+            # Verificar duplicidade de lote na mesma classe
+            existente = MedicacaoItem.query.filter(
+                MedicacaoItem.id_med_classe == item.id_med_classe,
+                MedicacaoItem.lote == novo_lote,
+                MedicacaoItem.id != item.id
+            ).first()
+            if existente:
+                return jsonify({'success': False, 'message': 'Já existe um item com este lote para esta medicação.'}), 400
+            item.lote = novo_lote
+
+        if 'validade' in dados and str(dados['validade']).strip() != '':
+            from datetime import datetime
+            try:
+                nova_validade = datetime.strptime(str(dados['validade']).strip(), '%Y-%m-%d').date()
+                item.validade = nova_validade
+            except ValueError:
+                return jsonify({'success': False, 'message': 'Formato de data inválido. Use YYYY-MM-DD.'}), 400
+
+        if 'local' in dados and str(dados['local']).strip() != '':
+            item.local = str(dados['local']).strip()
+
+        if 'quantidade' in dados:
+            try:
+                nova_qtd = int(dados['quantidade'])
+                if nova_qtd <= 0:
+                    return jsonify({'success': False, 'message': 'Quantidade deve ser maior que zero.'}), 400
+                item.quantidade = nova_qtd
+            except (ValueError, TypeError):
+                return jsonify({'success': False, 'message': 'Quantidade deve ser um número válido.'}), 400
+
+        db.session.commit()
+
+        return jsonify({'success': True, 'message': 'Item atualizado com sucesso.'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Erro ao atualizar item de medicação: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro interno do servidor.', 'error': str(e)}), 500
+
+@bp.route('/api/medicamentos/itens/<int:item_id>', methods=['DELETE'])
+@login_required
+def excluir_medicacao_item(item_id):
+    """
+    Endpoint para excluir um item (lote) de medicação
+    """
+    try:
+        usuario_atual = get_current_user()
+        if not usuario_atual:
+            return jsonify({'success': False, 'message': 'Sessão expirada. Faça login novamente.'}), 401
+
+        if usuario_atual.cargo.strip().lower() != 'farmacia':
+            return jsonify({'success': False, 'message': 'Acesso restrito à Farmácia.'}), 403
+
+        from app.models import MedicacaoItem
+        item = MedicacaoItem.query.get(item_id)
+        if not item:
+            return jsonify({'success': False, 'message': 'Item de medicação não encontrado.'}), 404
+
+        db.session.delete(item)
+        db.session.commit()
+
+        return jsonify({'success': True, 'message': 'Item excluído com sucesso.'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Erro ao excluir item de medicação: {str(e)}")
         logging.error(traceback.format_exc())
         return jsonify({'success': False, 'message': 'Erro interno do servidor.', 'error': str(e)}), 500
 

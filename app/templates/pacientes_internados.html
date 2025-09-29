@@ -59,6 +59,10 @@
         color: #495057;
         font-size: 0.95rem;
     }
+    
+    /* Cabeçalhos ordenáveis */
+    th.sortable { cursor: pointer; user-select: none; }
+    th.sortable i { margin-left: 6px; color: #6c757d; }
 </style>
 {% endblock %}
 
@@ -99,10 +103,10 @@
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
                         <tr>
-                            <th>Nome do Paciente</th>
+                            <th id="thNome" class="sortable">Nome do Paciente <i class="fas fa-sort"></i></th>
                             <th>CPF</th>
                             <th>Data de Nascimento</th>
-                            <th>Leito</th>
+                            <th id="thLeito" class="sortable">Leito <i class="fas fa-sort"></i></th>
                             <th>Data de Internação</th>
                             <th>Data de Alta</th>
                             <th>Diagnóstico</th>
@@ -335,6 +339,8 @@ const CONFIG = {
 class PacientesInternadosManager {
     constructor() {
         this.cargoUsuario = document.getElementById("page-data").dataset.cargo?.toLowerCase().trim() || "medico"; console.log("Cargo detectado:", this.cargoUsuario);
+        this.pacientes = [];
+        this.ordenacao = { coluna: null, direcao: 'asc' };
         this.inicializarEventListeners();
         this.fetchPacientesInternados();
     }
@@ -356,6 +362,9 @@ class PacientesInternadosManager {
                 this.confirmarFecharProntuario(internacaoId);
             });
         });
+
+        // Ordenação por Nome e Leito
+        this.inicializarOrdenacao();
     }
 
     navegarVoltar() {
@@ -374,8 +383,9 @@ class PacientesInternadosManager {
             const data = await response.json();
 
             if (data.success) {
-                this.renderizarTabelaPacientes(data.pacientes);
-                return data.pacientes;
+                this.pacientes = data.pacientes || [];
+                this.renderizarTabelaPacientes(this.pacientes);
+                return this.pacientes;
             } else {
                 throw new Error(data.message || 'Erro ao carregar pacientes');
             }
@@ -396,6 +406,12 @@ class PacientesInternadosManager {
         });
 
         this.initializeAltaButtons();
+
+        // Reaplicar filtro atual, se existir
+        const termo = document.getElementById('searchInput')?.value || '';
+        if (termo.trim()) {
+            this.filtrarTabela(termo);
+        }
     }
 
     criarLinhaPaciente(paciente) {
@@ -477,6 +493,53 @@ class PacientesInternadosManager {
         });
     }
 
+    inicializarOrdenacao() {
+        const thNome = document.getElementById('thNome');
+        const thLeito = document.getElementById('thLeito');
+        if (thNome) {
+            thNome.addEventListener('click', () => this.ordenarPor('nome'));
+        }
+        if (thLeito) {
+            thLeito.addEventListener('click', () => this.ordenarPor('leito'));
+        }
+    }
+
+    ordenarPor(campo) {
+        if (!Array.isArray(this.pacientes)) return;
+
+        // Alternar direção se a mesma coluna for clicada
+        if (this.ordenacao.coluna === campo) {
+            this.ordenacao.direcao = this.ordenacao.direcao === 'asc' ? 'desc' : 'asc';
+        } else {
+            this.ordenacao.coluna = campo;
+            this.ordenacao.direcao = 'asc';
+        }
+
+        const direcao = this.ordenacao.direcao;
+        this.pacientes.sort((a, b) => {
+            const va = (a[campo] ?? '').toString();
+            const vb = (b[campo] ?? '').toString();
+            const cmp = va.localeCompare(vb, 'pt-BR', { numeric: true, sensitivity: 'base' });
+            return direcao === 'asc' ? cmp : -cmp;
+        });
+
+        this.renderizarTabelaPacientes(this.pacientes);
+        this.atualizarIndicadoresOrdenacao();
+    }
+
+    atualizarIndicadoresOrdenacao() {
+        const thNome = document.getElementById('thNome');
+        const thLeito = document.getElementById('thLeito');
+        const atualizar = (th, ativo) => {
+            if (!th) return;
+            const icon = th.querySelector('i');
+            if (!icon) return;
+            icon.className = 'fas ' + (ativo ? (this.ordenacao.direcao === 'asc' ? 'fa-sort-up' : 'fa-sort-down') : 'fa-sort');
+        };
+        atualizar(thNome, this.ordenacao.coluna === 'nome');
+        atualizar(thLeito, this.ordenacao.coluna === 'leito');
+    }
+
     formatarData(dataString) {
         if (!dataString) return '-';
         return new Date(dataString).toLocaleDateString('pt-BR');
@@ -492,18 +555,36 @@ class PacientesInternadosManager {
         });
     }
 
+    // Utilitário para obter valor textual de uma coluna da linha (para ordenação sem recarregar)
+    _valorColuna(linha, index) {
+        const cell = linha.cells[index];
+        return (cell ? cell.textContent : '').trim();
+    }
+
     async abrirModalAlta(internacaoId) {
         try {
-            // Buscar dados da internação
-            const response = await fetch(`/api/internacao/${internacaoId}/alta`);
-            const dados = await response.json();
+            // Buscar dados da alta e, em paralelo, dados da internação (para fallback do diagnóstico)
+            const [respAlta, respInternacao] = await Promise.all([
+                fetch(`/api/internacao/${internacaoId}/alta`),
+                fetch(`/api/internacao/${internacaoId}`)
+            ]);
 
-            if (!dados.success) {
-                throw new Error(dados.message || 'Erro ao carregar dados');
+            const dadosAlta = await respAlta.json();
+            const dadosInternacao = await respInternacao.json().catch(() => ({}));
+
+            if (!dadosAlta.success) {
+                throw new Error(dadosAlta.message || 'Erro ao carregar dados');
             }
 
+            const diagnosticoInicial = dadosInternacao?.internacao?.diagnostico_inicial || '';
+            const diagAltaValido = dadosAlta.diagnostico && dadosAlta.diagnostico !== 'Não informado';
+            const dadosCombinados = {
+                ...dadosAlta,
+                diagnostico: diagAltaValido ? dadosAlta.diagnostico : (diagnosticoInicial || '')
+            };
+
             // Preencher formulário
-            this.preencherFormularioAlta(dados, internacaoId);
+            this.preencherFormularioAlta(dadosCombinados, internacaoId);
 
         } catch (error) {
             console.error('Erro ao carregar dados da internação:', error);
@@ -526,7 +607,7 @@ class PacientesInternadosManager {
 
         // Preencher campos simples
         const campos = {
-            'diagnostico': dados.diagnostico || '',
+            'diagnostico': (dados.diagnostico && dados.diagnostico !== 'Não informado') ? dados.diagnostico : (dados.diagnostico_inicial || ''),
             'cuidadosGerais': dados.cuidados_gerais || '',
             'historico': this.formatarHistoricoParaTexto(dados.historico_internacao || 'Histórico será montado automaticamente...')
         };

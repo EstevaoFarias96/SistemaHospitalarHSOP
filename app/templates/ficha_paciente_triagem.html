@@ -9,6 +9,14 @@
       body {
         background-color: #f8f9fa;
       }
+      .required-asterisk {
+        color: #dc3545;
+        margin-left: 2px;
+      }
+      .required-hint {
+        font-size: 0.9rem;
+        color: #6c757d;
+      }
       .card-header {
         font-weight: bold;
         font-size: 1.5rem;
@@ -99,33 +107,39 @@
           </div>
           
           <!-- Formulário de triagem -->
-          <form id="triagemForm">
+          <form id="triagemForm" class="needs-validation" novalidate>
             <!-- Campo oculto para id do atendimento -->
             <input type="hidden" id="atendimento_id" name="atendimento_id">
+            <p class="required-hint mb-2"><span class="required-asterisk">*</span> Campos obrigatórios</p>
             
             <!-- Sinais Vitais -->
             <div class="row mb-3">
               <div class="col-md-4">
-                <label for="pressao" class="form-label">Pressão</label>
-                <input type="text" class="form-control" id="pressao" name="pressao" placeholder="Ex: 120/80">
+                <label for="pressao" class="form-label">Pressão <span class="required-asterisk">*</span></label>
+                <input type="text" class="form-control" id="pressao" name="pressao" placeholder="Ex: 120/80" required>
+                <div class="invalid-feedback">Campo obrigatório.</div>
               </div>
               <div class="col-md-4">
-                <label for="pulso" class="form-label">Pulso</label>
-                <input type="text" class="form-control" id="pulso" name="pulso" placeholder="Ex: 72 bpm">
+                <label for="pulso" class="form-label">Pulso <span class="required-asterisk">*</span></label>
+                <input type="text" class="form-control" id="pulso" name="pulso" placeholder="Ex: 72 bpm" required>
+                <div class="invalid-feedback">Campo obrigatório.</div>
               </div>
               <div class="col-md-4">
-                <label for="sp02" class="form-label">SpO₂</label>
-                <input type="text" class="form-control" id="sp02" name="sp02" placeholder="Ex: 98%">
+                <label for="sp02" class="form-label">SpO₂ <span class="required-asterisk">*</span></label>
+                <input type="text" class="form-control" id="sp02" name="sp02" placeholder="Ex: 98%" required>
+                <div class="invalid-feedback">Campo obrigatório.</div>
               </div>
             </div>
             <div class="row mb-3">
               <div class="col-md-4">
-                <label for="temp" class="form-label">Temperatura</label>
-                <input type="text" class="form-control" id="temp" name="temp" placeholder="Ex: 36.5">
+                <label for="temp" class="form-label">Temperatura <span class="required-asterisk">*</span></label>
+                <input type="text" class="form-control" id="temp" name="temp" placeholder="Ex: 36.5" required>
+                <div class="invalid-feedback">Campo obrigatório.</div>
               </div>
               <div class="col-md-4">
-                <label for="peso" class="form-label">Peso</label>
-                <input type="number" class="form-control" id="peso" name="peso" placeholder="70" step="any">
+                <label for="peso" class="form-label">Peso <span class="required-asterisk">*</span></label>
+                <input type="number" class="form-control" id="peso" name="peso" placeholder="70" step="any" required>
+                <div class="invalid-feedback">Campo obrigatório.</div>
               </div>
               <div class="col-md-4">
                 <label for="altura" class="form-label">Altura</label>
@@ -479,6 +493,14 @@
       // Submissão do formulário com validação e cálculo da idade gestacional em dias
       document.getElementById('triagemForm').addEventListener('submit', function(e) {
         e.preventDefault();
+        const formEl = document.getElementById('triagemForm');
+        if (!formEl.checkValidity()) {
+          formEl.classList.add('was-validated');
+          const firstInvalid = formEl.querySelector(':invalid');
+          if (firstInvalid) { firstInvalid.focus(); }
+          alert('Preencha os campos obrigatórios.');
+          return;
+        }
         const atendimentoId = document.getElementById('atendimento_id').value;
         if (!atendimentoId) {
           alert("Atendimento não identificado.");

@@ -260,6 +260,17 @@
             <a class="nav-link" href="/recepcionista/status-pacientes">
               <i class="fas fa-chart-line"></i><span class="menu-label">Status de Pacientes</span>
             </a>
+          </li>
+          <li class="nav-item" data-title="Fichas de Referência">
+            <a class="nav-link" href="#" onclick="showFichasReferenciaAtivas()">
+              <i class="fas fa-share-square"></i><span class="menu-label">Fichas de Referência</span>
+            </a>
+          </li>
+          <li class="nav-item" data-title="Buscar Fichas de Atendimento">
+            <a class="nav-link" href="#" onclick="showBuscaFichasAtendimento()">
+              <i class="fas fa-file-medical"></i><span class="menu-label">Buscar Fichas</span>
+            </a>
+          </li>
         </ul>
         <!-- Menu do Usuário -->
         <div class="user-menu">
@@ -288,7 +299,111 @@
               </button>
             </div>
           </div>
-        </div>        <!-- Tela de Cadastro -->
+
+          <!-- Menu Rápido -->
+          <div class="row">
+            <div class="col-md-3 mb-4">
+              <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column align-items-start">
+                  <div class="mb-3 text-primary" style="font-size: 2rem;">
+                    <i class="fas fa-user-plus"></i>
+                  </div>
+                  <h5 class="card-title">Cadastrar Paciente</h5>
+                  <p class="card-text text-muted">Abra o formulário para novo cadastro.</p>
+                  <button class="btn btn-outline-primary mt-auto" onclick="abrirModalCadastroPaciente()">
+                    Abrir
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+              <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column align-items-start">
+                  <div class="mb-3 text-success" style="font-size: 2rem;">
+                    <i class="fas fa-search"></i>
+                  </div>
+                  <h5 class="card-title">Buscar Paciente</h5>
+                  <p class="card-text text-muted">Localize pacientes por nome ou CPF.</p>
+                  <button class="btn btn-outline-success mt-auto" onclick="showBuscaPaciente()">
+                    Abrir
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+              <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column align-items-start">
+                  <div class="mb-3 text-info" style="font-size: 2rem;">
+                    <i class="fas fa-chart-line"></i>
+                  </div>
+                  <h5 class="card-title">Status de Pacientes</h5>
+                  <p class="card-text text-muted">Acompanhe o status geral.</p>
+                  <a class="btn btn-outline-info mt-auto" href="/recepcionista/status-pacientes">
+                    Abrir
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+              <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column align-items-start">
+                  <div class="mb-3 text-secondary" style="font-size: 2rem;">
+                    <i class="fas fa-share-square"></i>
+                  </div>
+                  <h5 class="card-title">Fichas de Referência</h5>
+                  <p class="card-text text-muted">Veja fichas para atendimentos ativos.</p>
+                  <button class="btn btn-outline-secondary mt-auto" onclick="showFichasReferenciaAtivas()">
+                    Abrir
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+              <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column align-items-start">
+                  <div class="mb-3 text-warning" style="font-size: 2rem;">
+                    <i class="fas fa-file-medical"></i>
+                  </div>
+                  <h5 class="card-title">Buscar Fichas</h5>
+                  <p class="card-text text-muted">Liste e imprima fichas por paciente.</p>
+                  <button class="btn btn-outline-warning mt-auto" onclick="showBuscaFichasAtendimento()">
+                    Abrir
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Submenu: Fichas de Referência (Atendimentos Ativos) -->
+        <div id="submenu-fichas-referencia" class="hidden">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">
+              <i class="fas fa-share-square mr-2 text-info"></i>Fichas de Referência - Atendimentos Ativos
+            </h2>
+            <button class="btn btn-outline-secondary" onclick="onVoltarMenu()">
+              <i class="fas fa-arrow-left mr-1"></i>Voltar ao Menu
+            </button>
+          </div>
+          <div class="card border-0 shadow-sm">
+            <div class="card-header bg-info text-white d-flex align-items-center justify-content-between">
+              <h6 class="mb-0 font-weight-bold">Lista de fichas</h6>
+              <span class="badge badge-light" id="badgeTotalFichasAtivas">0</span>
+            </div>
+            <div class="card-body p-0">
+              <div id="fichas-referencia-ativas">
+                <div class="p-3 text-muted">Carregando...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tela de Cadastro -->
         <div id="cadastro-paciente" class="form-container hidden">
           <h2>Cadastrar Paciente</h2>
           <button class="btn btn-secondary mb-3" onclick="onVoltarMenu()">Voltar ao Menu</button>
@@ -473,6 +588,42 @@
 
           <!-- Resultado da Busca -->
           <div id="resultado-busca"></div>
+        </div>
+
+        <!-- Tela: Buscar Fichas de Atendimento -->
+        <div id="busca-fichas-atendimento" class="hidden">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">
+              <i class="fas fa-file-medical mr-2 text-primary"></i>Buscar Fichas de Atendimento
+            </h2>
+            <button class="btn btn-outline-secondary" onclick="onVoltarMenu()">
+              <i class="fas fa-arrow-left mr-1"></i>Voltar ao Menu
+            </button>
+          </div>
+
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-gradient-primary text-white">
+              <h6 class="mb-0 font-weight-bold">
+                <i class="fas fa-search mr-2"></i>Pesquisar por Nome ou CPF
+              </h6>
+            </div>
+            <div class="card-body">
+              <div class="input-group input-group-lg mb-2">
+                <input type="text" class="form-control" id="input-busca-fichas" placeholder="Digite nome (mín. 3 letras) ou CPF completo">
+                <div class="input-group-append">
+                  <button class="btn btn-success" type="button" id="btn-busca-fichas" onclick="buscarFichasAtendimento()">
+                    <i class="fas fa-search mr-1"></i>Buscar
+                  </button>
+                </div>
+              </div>
+              <small class="form-text text-muted">
+                <i class="fas fa-info-circle mr-1"></i>Para nome, digite pelo menos 3 caracteres. Para CPF, use 11 dígitos.
+              </small>
+            </div>
+          </div>
+
+          <!-- Resultado da busca de fichas -->
+          <div id="resultado-fichas"></div>
         </div>
       </div>
     </div>
@@ -726,6 +877,17 @@
         }
       });
       // As listas de atendimentos foram removidas
+      // Atualização periódica apenas quando a seção estiver visível
+      setInterval(function() {
+        if ($('#submenu-fichas-referencia').is(':visible')) {
+          carregarFichasReferenciaAtivas();
+        }
+      }, 30000);
+
+      // Máscara e Enter na busca de fichas
+      $('#input-busca-fichas').on('keypress', function(e){
+        if (e.key === 'Enter') { buscarFichasAtendimento(); }
+      });
     });
 
     function toggleSidebar() {
@@ -809,16 +971,22 @@
       $('#dashboard').show();
       $('#cadastro-paciente').hide();
       $('#busca-paciente').hide();
+      $('#submenu-fichas-referencia').hide();
+      $('#busca-fichas-atendimento').hide();
     }
     function showCadastroPaciente() {
       $('#dashboard').hide();
       $('#cadastro-paciente').show();
       $('#busca-paciente').hide();
+      $('#submenu-fichas-referencia').hide();
+      $('#busca-fichas-atendimento').hide();
     }
     function showBuscaPaciente() {
       $('#dashboard').hide();
       $('#cadastro-paciente').hide();
       $('#busca-paciente').show();
+      $('#submenu-fichas-referencia').hide();
+      $('#busca-fichas-atendimento').hide();
     }    function onVoltarMenu() {
       if($('#cadastro-paciente').is(':visible')) {
         if(!confirm('Deseja cancelar o cadastro e voltar ao menu? Todos os dados serão perdidos.')) return;
@@ -829,8 +997,30 @@
         $('#filtro-busca').val('');
         $('#resultado-busca').html('');
       }
+      if($('#busca-fichas-atendimento').is(':visible')) {
+        $('#input-busca-fichas').val('');
+        $('#resultado-fichas').html('');
+      }
       showDashboard();
     }// Função removida - não precisamos mais alternar identificação
+
+    function showFichasReferenciaAtivas() {
+      $('#dashboard').hide();
+      $('#cadastro-paciente').hide();
+      $('#busca-paciente').hide();
+      $('#submenu-fichas-referencia').show();
+      $('#busca-fichas-atendimento').hide();
+      carregarFichasReferenciaAtivas();
+    }
+
+    function showBuscaFichasAtendimento() {
+      $('#dashboard').hide();
+      $('#cadastro-paciente').hide();
+      $('#busca-paciente').hide();
+      $('#submenu-fichas-referencia').hide();
+      $('#busca-fichas-atendimento').show();
+      setTimeout(() => { $('#input-busca-fichas').focus(); }, 200);
+    }
 
     function validarCPF(cpf) {
       cpf = cpf.replace(/\D/g, '');
@@ -1596,6 +1786,21 @@
       setTimeout(() => { $('#cpfAtendimentoInput').focus(); }, 300);
     }
 
+    // Abre o cadastro de paciente já preenchendo o CPF informado
+    function abrirCadastroComCPF(cpfSomenteDigitos) {
+      // Fechar modal de atendimento por CPF
+      $('#modalCriarAtendimentoCPF').modal('hide');
+
+      // Abrir modal de cadastro e preencher o CPF
+      setTimeout(() => {
+        abrirModalCadastroPaciente();
+        const cpfFormatado = formatarCPF(cpfSomenteDigitos);
+        $('#modalCpf').val(cpfFormatado).trigger('input');
+        // Focar no nome para acelerar o cadastro
+        setTimeout(() => { $('#modalNome').focus(); }, 200);
+      }, 200);
+    }
+
     $('#modalCriarAtendimentoCPF').on('shown.bs.modal', function() {
       $('#cpfAtendimentoInput').mask('000.000.000-00');
     });
@@ -1621,7 +1826,10 @@
           .then(r => r.json())
           .then(data => {
             if (!data.success || !data.pacientes || data.pacientes.length === 0) {
-              throw new Error('Paciente não encontrado para o CPF informado.');
+              // Não encontrou: oferecer cadastro imediato com CPF preenchido
+              abrirCadastroComCPF(cpf);
+              // Interromper cadeia sem exibir alerta de erro
+              return Promise.reject({ skipAlert: true });
             }
             const p = data.pacientes[0];
 
@@ -1649,7 +1857,8 @@
             btn.html('<i class="fas fa-check mr-1"></i>Confirmar criação da ficha');
           })
           .catch(err => {
-            alert(err.message || 'Erro ao buscar paciente.');
+            if (err && err.skipAlert) return; // fluxo já tratado (cadastro aberto)
+            alert(err && err.message ? err.message : 'Erro ao buscar paciente.');
           })
           .finally(() => {
             btn.prop('disabled', false);
@@ -1717,6 +1926,157 @@
     });
   </script>
 
+  <script>
+    function carregarFichasReferenciaAtivas() {
+      const container = $('#fichas-referencia-ativas');
+      const badge = $('#badgeTotalFichasAtivas');
+      if (!container.length) return;
+
+      container.html('<div class="p-3"><i class="fas fa-spinner fa-spin mr-2"></i>Carregando...</div>');
+
+      fetch('/api/fichas-referencia/ativas')
+        .then(r => r.json())
+        .then(data => {
+          if (!data || data.success !== true) {
+            throw new Error('Falha ao carregar fichas ativas');
+          }
+
+          const fichas = data.fichas || [];
+          badge.text(fichas.length);
+
+          if (fichas.length === 0) {
+            container.html('<div class="p-3 text-muted">Nenhuma ficha de referência pendente para atendimentos ativos.</div>');
+            return;
+          }
+
+          let html = '<ul class="list-group list-group-flush">';
+          fichas.forEach(f => {
+            const dataHora = `${f.data} ${f.hora}`;
+            const pacienteNome = f.paciente_nome || 'Paciente';
+            const medicoNome = f.medico_nome || 'Médico';
+            const status = f.status_atendimento || '-';
+            html += `
+              <li class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <div class="font-weight-bold text-primary">${pacienteNome}</div>
+                    <div class="small text-muted">Atendimento: ${f.atendimento_id} • ${dataHora} • ${status}</div>
+                    <div class="small">${f.procedimento || f.texto_referencia || ''}</div>
+                    ${f.unidade_referencia ? `<div class="small text-muted">Unidade de Referência: ${f.unidade_referencia}</div>` : ''}
+                    <div class="small text-muted">Médico: ${medicoNome}</div>
+                  </div>
+                  <div class="btn-group btn-group-sm" role="group">
+                    <a class="btn btn-outline-info" href="/ficha_geral_paciente?paciente_id=${f.paciente_id}" target="_blank" title="Abrir ficha do paciente">
+                      <i class="fas fa-file-alt"></i>
+                    </a>
+                    <button class="btn btn-outline-success" onclick="criarFichaAtendimento(${f.paciente_id})" title="Criar ficha de atendimento">
+                      <i class="fas fa-plus-circle"></i>
+                    </button>
+                  </div>
+                </div>
+              </li>`;
+          });
+          html += '</ul>';
+          container.html(html);
+        })
+        .catch(err => {
+          container.html('<div class="p-3 text-danger">Erro ao carregar fichas de referência ativas.</div>');
+          console.error(err);
+        });
+    }
+
+    // ====== BUSCAR FICHAS DE ATENDIMENTO ======
+    function buscarFichasAtendimento() {
+      const termo = ($('#input-busca-fichas').val() || '').trim();
+      if (!termo) {
+        alert('Digite um nome (mín. 3 letras) ou CPF completo.');
+        $('#input-busca-fichas').focus();
+        return;
+      }
+
+      const cpfSomenteDigitos = termo.replace(/\D/g, '');
+      let urlPacientes;
+      if (cpfSomenteDigitos.length === 11) {
+        urlPacientes = '/api/pacientes/buscar/cpf?valor=' + encodeURIComponent(cpfSomenteDigitos);
+      } else if (termo.length >= 3) {
+        urlPacientes = '/api/pacientes/buscar/nome?valor=' + encodeURIComponent(termo);
+      } else {
+        alert('Para busca por nome, digite ao menos 3 caracteres.');
+        return;
+      }
+
+      const $btn = $('#btn-busca-fichas');
+      const btnOriginal = $btn.html();
+      $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Buscando...');
+      $('#resultado-fichas').html('<div class="text-center py-4"><div class="spinner-border text-primary"></div><div class="mt-2 small text-muted">Buscando...</div></div>');
+
+      fetch(urlPacientes)
+        .then(r => r.json())
+        .then(data => {
+          if (!data.success || !data.pacientes || data.pacientes.length === 0) {
+            $('#resultado-fichas').html('<div class="alert alert-warning">Nenhum paciente encontrado.</div>');
+            return;
+          }
+
+          // Para cada paciente, buscar seus atendimentos
+          const pacientes = data.pacientes;
+          const promises = pacientes.map(p => 
+            fetch(`/api/pacientes/${p.id}/atendimentos`).then(r => r.json()).then(at => ({ paciente: p, atendimentos: (at && at.success && at.atendimentos) ? at.atendimentos : [] }))
+          );
+
+          return Promise.all(promises).then(lista => {
+            if (!lista || lista.length === 0) {
+              $('#resultado-fichas').html('<div class="alert alert-warning">Nenhum atendimento encontrado.</div>');
+              return;
+            }
+
+            let html = '';
+            lista.forEach(item => {
+              const paciente = item.paciente;
+              const atendimentos = item.atendimentos || [];
+              const cpfFmt = paciente.cpf ? paciente.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : 'Não informado';
+
+              html += '<div class="card border-0 shadow-sm mb-3">';
+              html += '  <div class="card-header bg-light d-flex justify-content-between align-items-center">';
+              html += `    <div><strong>${paciente.nome || 'Paciente'}</strong><br><small class="text-muted">CPF: ${cpfFmt}</small></div>`;
+              html += `    <span class="badge badge-primary">${atendimentos.length} atendimento${atendimentos.length !== 1 ? 's' : ''}</span>`;
+              html += '  </div>';
+              html += '  <div class="card-body p-0">';
+
+              if (atendimentos.length === 0) {
+                html += '<div class="p-3 text-muted">Sem atendimentos.</div>';
+              } else {
+                html += '<div class="list-group list-group-flush">';
+                atendimentos.forEach(a => {
+                  const data = a.data_atendimento ? a.data_atendimento.split('-').reverse().join('/') : '-';
+                  const hora = a.hora_atendimento || '-';
+                  const status = a.status || '-';
+                  const risco = a.classificacao_risco || '-';
+                  const urlImp = `/imprimir/ficha_atendimento/${a.id}`;
+                  html += '<div class="list-group-item d-flex justify-content-between align-items-center">';
+                  html += `  <div><div class="font-weight-bold">Atendimento #${a.id}</div><div class="small text-muted">${data} ${hora} • Status: ${status} • Risco: ${risco}</div></div>`;
+                  html += `  <div><a class="btn btn-sm btn-outline-primary" href="${urlImp}" target="_blank" title="Imprimir ficha"><i class="fas fa-print mr-1"></i>Imprimir</a></div>`;
+                  html += '</div>';
+                });
+                html += '</div>';
+              }
+
+              html += '  </div>';
+              html += '</div>';
+            });
+
+            $('#resultado-fichas').html(html || '<div class="alert alert-warning">Nenhum atendimento encontrado.</div>');
+          });
+        })
+        .catch(err => {
+          console.error(err);
+          $('#resultado-fichas').html('<div class="alert alert-danger">Erro ao buscar fichas de atendimento.</div>');
+        })
+        .finally(() => {
+          $btn.prop('disabled', false).html(btnOriginal);
+        });
+    }
+  </script>
   <!-- Modal Buscar Paciente -->
   <div class="modal fade" id="modalBuscarPaciente" tabindex="-1" role="dialog" aria-labelledby="modalBuscarPacienteLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">

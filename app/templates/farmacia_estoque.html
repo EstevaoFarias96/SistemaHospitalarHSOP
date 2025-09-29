@@ -357,6 +357,55 @@
     </div>
   </div>
 
+  <!-- Modal Detalhes/Edição de Lote -->
+  <div class="modal fade" id="modalItem" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-box-open mr-2"></i>Detalhes do Lote</h5>
+          <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <form id="form-item">
+            <input type="hidden" id="item-id">
+            <div class="form-group">
+              <label>Lote</label>
+              <input type="text" class="form-control" id="item-lote">
+            </div>
+            <div class="form-group">
+              <label>Validade</label>
+              <input type="date" class="form-control" id="item-validade">
+            </div>
+            <div class="form-group">
+              <label>Local</label>
+              <select class="form-control" id="item-local">
+                <option value="Farmácia Central">Farmácia Central</option>
+                <option value="Farmácia Satélite 1">Farmácia Satélite 1</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Quantidade</label>
+              <input type="number" min="1" class="form-control" id="item-quantidade">
+            </div>
+          </form>
+          <div class="alert alert-warning small mb-0">
+            <i class="fas fa-info-circle mr-1"></i>
+            Alterar dados do lote atualiza imediatamente o estoque.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+          <button type="button" class="btn btn-danger" id="btn-excluir-item-modal">
+            <i class="fas fa-trash mr-1"></i>Excluir
+          </button>
+          <button type="button" class="btn btn-primary" id="btn-salvar-item">
+            <i class="fas fa-save mr-1"></i>Salvar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal Transferência entre Farmácias -->
   <div class="modal fade" id="modalTransferencia" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
@@ -772,7 +821,12 @@
           button.prop('disabled', false);
           // Restaura o texto original baseado no ID do botão
           if (button.attr('id') === 'btn-salvar-classe') {
-            button.html('<i class="fas fa-save mr-1"></i>Salvar Classe');
+            const mode = button.data('mode') || $('#modalClasse').data('mode') || 'create';
+            if (mode === 'edit') {
+              button.html('<i class="fas fa-save mr-1"></i>Atualizar Classe');
+            } else {
+              button.html('<i class="fas fa-save mr-1"></i>Salvar Classe');
+            }
           } else if (button.attr('id') === 'btn-salvar-entrada') {
             button.html('<i class="fas fa-sign-in-alt mr-1"></i>Registrar Entrada');
           }
@@ -824,6 +878,10 @@
       // Event listeners dos botões principais
       $('#btn-novo-item').on('click', function(){
         limparFormularioClasse();
+        // Modo criação
+        $('#modalClasse').data('mode', 'create').removeData('edit-id');
+        $('#modalClasse .modal-title').html('<i class="fas fa-pills mr-2"></i>Nova Classe de Medicação');
+        $('#btn-salvar-classe').data('mode', 'create').html('<i class="fas fa-save mr-1"></i>Salvar Classe');
         $('#modalClasse').modal('show');
       });
 
@@ -860,16 +918,29 @@
 
         setLoading(button, true);
 
+        // Detecta modo (criar/editar)
+        const mode = $('#modalClasse').data('mode') || button.data('mode') || 'create';
+        const editId = $('#modalClasse').data('edit-id');
+        let url = '/api/medicamentos/classes';
+        let method = 'POST';
+        if (mode === 'edit' && editId) {
+          url = `/api/medicamentos/classes/${editId}`;
+          method = 'PUT';
+        }
+
         $.ajax({
-          url: '/api/medicamentos/classes',
-          method: 'POST',
+          url: url,
+          method: method,
           contentType: 'application/json',
           data: JSON.stringify(dados),
           success: function(response) {
             if (response.success) {
-              showToast(response.message, 'success');
+              showToast(response.message || (mode === 'edit' ? 'Classe atualizada com sucesso.' : 'Classe criada com sucesso.'), 'success');
               $('#modalClasse').modal('hide');
               limparFormularioClasse();
+              // Resetar modo após operação
+              $('#modalClasse').data('mode', 'create').removeData('edit-id');
+              $('#btn-salvar-classe').data('mode', 'create');
               // Recarregar dados e filtros após cadastrar nova classe
               carregarFiltroClasses();
               carregarEstoque();
@@ -1014,6 +1085,9 @@
       // Limpar formulários quando os modais são fechados
       $('#modalClasse').on('hidden.bs.modal', function() {
         limparFormularioClasse();
+        $('#modalClasse').data('mode', 'create').removeData('edit-id');
+        $('#modalClasse .modal-title').html('<i class="fas fa-pills mr-2"></i>Nova Classe de Medicação');
+        $('#btn-salvar-classe').data('mode', 'create').html('<i class="fas fa-save mr-1"></i>Salvar Classe');
       });
 
       $('#modalEntrada').on('hidden.bs.modal', function() {
@@ -1367,11 +1441,14 @@
                     <span class="info-value quantidade-total font-weight-bold">${item.quantidade}</span>
                   </div>
                   <div class="medicamento-actions">
-                    <button class="btn btn-outline-info btn-card-action btn-detalhes-item" data-item-id="${item.id}">
-                      <i class="fas fa-info-circle mr-1"></i>Detalhes
+                    <button class="btn btn-outline-info btn-card-action btn-detalhes-item" data-item-id="${item.id}" title="Detalhes do lote">
+                      <i class="fas fa-info-circle"></i>
                     </button>
-                    <button class="btn btn-outline-warning btn-card-action btn-editar-item" data-item-id="${item.id}">
-                      <i class="fas fa-edit mr-1"></i>Editar
+                    <button class="btn btn-outline-warning btn-card-action btn-editar-item" data-item-id="${item.id}" title="Editar lote">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-outline-danger btn-card-action btn-excluir-item" data-item-id="${item.id}" title="Excluir lote">
+                      <i class="fas fa-trash"></i>
                     </button>
                   </div>
                 </div>
@@ -1474,6 +1551,9 @@
                   <button class="btn btn-sm btn-outline-success btn-registrar-entrada" data-classe-id="${classe.id}" title="Registrar entrada">
                     <i class="fas fa-plus"></i>
                   </button>
+                  <button class="btn btn-sm btn-outline-secondary btn-editar-classe" data-classe-id="${classe.id}" title="Editar classe">
+                    <i class="fas fa-edit"></i>
+                  </button>
                   <button class="btn btn-sm btn-outline-warning btn-transferir-item" data-classe-id="${classe.id}" title="Transferir">
                     <i class="fas fa-exchange-alt"></i>
                   </button>
@@ -1511,6 +1591,9 @@
               <td class="text-right">
                 <button class="btn btn-sm btn-outline-primary btn-ver-detalhes" data-classe-id="${classe.id}">
                   <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-secondary btn-editar-classe ml-1" data-classe-id="${classe.id}" title="Editar classe">
+                  <i class="fas fa-edit"></i>
                 </button>
               </td>
             </tr>
@@ -1578,6 +1661,121 @@
         carregarEstoque(classeId);
       });
 
+      // Detalhes do lote (abre modal em modo somente leitura inicial, mas com botões)
+      $(document).on('click', '.btn-detalhes-item', function(){
+        const itemId = $(this).data('item-id');
+        carregarItemNoModal(itemId);
+      });
+
+      // Editar lote (abre o mesmo modal já pronto para edição)
+      $(document).on('click', '.btn-editar-item', function(){
+        const itemId = $(this).data('item-id');
+        carregarItemNoModal(itemId);
+      });
+
+      // Excluir lote
+      $(document).on('click', '.btn-excluir-item', function(){
+        const itemId = $(this).data('item-id');
+        excluirItem(itemId);
+      });
+
+      function carregarItemNoModal(itemId) {
+        $.ajax({
+          url: `/api/medicamentos/itens/item/${itemId}`,
+          method: 'GET',
+          success: function(response) {
+            if (response.success && response.data) {
+              const it = response.data;
+              $('#item-id').val(it.id);
+              $('#item-lote').val(it.lote || '');
+              $('#item-validade').val(it.validade || '');
+              $('#item-local').val(it.local || 'Farmácia Central');
+              $('#item-quantidade').val(it.quantidade || 1);
+              $('#modalItem').modal('show');
+              // Guardar classe para recarregar depois
+              $('#modalItem').data('classe-id', it.id_med_classe);
+            } else {
+              showToast(response.message || 'Erro ao carregar item.', 'error');
+            }
+          },
+          error: function() {
+            showToast('Erro ao carregar dados do item.', 'error');
+          }
+        });
+      }
+
+      $('#btn-salvar-item').on('click', function(){
+        const id = $('#item-id').val();
+        const dados = {
+          lote: $('#item-lote').val().trim(),
+          validade: $('#item-validade').val(),
+          local: $('#item-local').val(),
+          quantidade: $('#item-quantidade').val()
+        };
+
+        // Validações básicas
+        if (!dados.lote || !dados.validade || !dados.local || !dados.quantidade) {
+          showToast('Preencha todos os campos do lote.', 'warning');
+          return;
+        }
+
+        const btn = $(this);
+        setLoading(btn, true);
+
+        $.ajax({
+          url: `/api/medicamentos/itens/${id}`,
+          method: 'PUT',
+          contentType: 'application/json',
+          data: JSON.stringify(dados),
+          success: function(response) {
+            if (response.success) {
+              showToast('Lote atualizado com sucesso.', 'success');
+              const classeId = $('#modalItem').data('classe-id');
+              $('#modalItem').modal('hide');
+              if (classeId) {
+                carregarEstoque(classeId);
+              } else {
+                carregarEstoque();
+              }
+            } else {
+              showToast(response.message || 'Erro ao atualizar lote.', 'error');
+            }
+          },
+          error: function(xhr) {
+            const msg = xhr.responseJSON ? xhr.responseJSON.message : 'Erro interno do servidor';
+            showToast(msg, 'error');
+          },
+          complete: function(){
+            setLoading(btn, false);
+          }
+        });
+      });
+
+      function excluirItem(itemId) {
+        if (!confirm('Confirmar exclusão deste lote? Esta ação não pode ser desfeita.')) return;
+        $.ajax({
+          url: `/api/medicamentos/itens/${itemId}`,
+          method: 'DELETE',
+          success: function(response) {
+            if (response.success) {
+              showToast('Lote excluído com sucesso.', 'success');
+              const classeId = $('#modalItem').data('classe-id');
+              $('#modalItem').modal('hide');
+              if (classeId) {
+                carregarEstoque(classeId);
+              } else {
+                carregarEstoque();
+              }
+            } else {
+              showToast(response.message || 'Erro ao excluir lote.', 'error');
+            }
+          },
+          error: function(xhr) {
+            const msg = xhr.responseJSON ? xhr.responseJSON.message : 'Erro interno do servidor';
+            showToast(msg, 'error');
+          }
+        });
+      }
       $(document).on('click', '.btn-registrar-entrada', function() {
         const classeId = $(this).data('classe-id');
 
@@ -1597,6 +1795,45 @@
           }
         });
       });
+
+      // Editar classe: abrir modal com dados
+      $(document).on('click', '.btn-editar-classe', function(e) {
+        e.preventDefault();
+        const classeId = $(this).data('classe-id');
+        abrirModalEditarClasse(classeId);
+      });
+
+      function abrirModalEditarClasse(classeId) {
+        limparFormularioClasse();
+        $('#modalClasse').data('mode', 'edit').data('edit-id', classeId);
+        $('#modalClasse .modal-title').html('<i class="fas fa-pills mr-2"></i>Editar Classe de Medicação');
+        $('#btn-salvar-classe').data('mode', 'edit').html('<i class="fas fa-save mr-1"></i>Atualizar Classe');
+
+        $.ajax({
+          url: '/api/medicamentos/classes',
+          method: 'GET',
+          success: function(response) {
+            if (response.success) {
+              const classe = (response.data || []).find(c => c.id == classeId);
+              if (classe) {
+                $('#classe-nome').val(classe.nome || '');
+                $('#classe-apresentacao').val(classe.apresentacao || '');
+                $('#classe-classe').val(classe.classe || '');
+                $('#classe-codigo').val(classe.codigo || '');
+                if (classe.unidade) { $('#classe-unidade').val(classe.unidade); }
+                $('#modalClasse').modal('show');
+              } else {
+                showToast('Classe não encontrada.', 'error');
+              }
+            } else {
+              showToast('Erro ao carregar classe: ' + (response.message || ''), 'error');
+            }
+          },
+          error: function() {
+            showToast('Erro ao carregar dados da classe.', 'error');
+          }
+        });
+      }
 
       // Event listeners para botões dinâmicos
       $(document).on('click', '.btn-voltar-classes', function(e) {
