@@ -3406,8 +3406,8 @@ function abrirImpressoesEnfermagem() {
 <input type="hidden" id="cargo_usuario" value="{{ session.get('cargo', '') }}">
 
 <script>
-    // Extrair ID da internação - será atribuído ao carregar o documento
-    const internacaoIdRaw = "{{ internacao.id }}";
+    // Extrair ID da internação - serialização segura sem quebrar o linter
+    const internacaoIdRaw = JSON.parse(`{{ internacao.id|tojson }}`);
     console.log('Valor raw de internacao.id:', internacaoIdRaw);
     
     // Atribuir à variável global do módulo de enfermagem
@@ -3454,8 +3454,8 @@ function abrirImpressoesEnfermagem() {
         }
     });
     
-    // Declarar funcionarioId globalmente
-    const funcionarioId = "{{ session.get('user_id', 0) }}";
+    // Declarar funcionarioId globalmente (JSON seguro sem quebrar o linter)
+    const funcionarioId = JSON.parse(`{{ session.get('user_id', 0)|tojson }}`);
     console.log('ID do funcionário:', funcionarioId);
     
     // Garantir que a função formatarAprazamentoLegivel esteja disponível
@@ -3490,10 +3490,10 @@ function abrirImpressoesEnfermagem() {
     // Array global para armazenar os medicamentos adicionados
     let medicamentosAdicionados = [];
     
-    // Inicializar alergias do paciente com verificação de segurança
+    // Inicializar alergias do paciente com serialização segura
     let alergiasPaciente = '';
     try {
-        const alergiasRaw = '{{ (paciente.alergias or "")|e }}';
+        const alergiasRaw = JSON.parse(`{{ (paciente.alergias or "")|tojson }}`);
         alergiasPaciente = (alergiasRaw || '').toLowerCase();
     } catch(e) {
         console.warn('Erro ao carregar alergias do paciente:', e);
@@ -3567,8 +3567,9 @@ function abrirImpressoesEnfermagem() {
         window.internacaoId = parseInt(internacaoIdRaw, 10);
         console.log('💡 Definindo window.internacaoId:', window.internacaoId);
         
-        // Debugar cargo do usuário
-        console.log("Cargo do usuário na sessão:", "{{ session.get('cargo') }}");
+        // Debugar cargo do usuário (serialização segura sem quebrar o linter)
+        try { window.CARGO_SESSAO = JSON.parse(`{{ session.get('cargo')|tojson }}`); } catch (e) { window.CARGO_SESSAO = ''; }
+        console.log("Cargo do usuário na sessão:", window.CARGO_SESSAO);
         
         // Inicializar Quill editor apenas se o container existir (para página médica)
         const editorContainer = document.getElementById('editor-container');
@@ -5083,8 +5084,11 @@ function abrirImpressoesEnfermagem() {
         });
         
         $('#btn-cancelar-admissao').on('click', function() {
-            // Restaurar o texto original e esconder o formulário
-            const admissaoTexto = '{{ (internacao.admissao_enfermagem or "")|e }}';
+            // Restaurar o texto original e esconder o formulário (serialização segura)
+            let admissaoTexto = '';
+            try {
+                admissaoTexto = JSON.parse(`{{ (internacao.admissao_enfermagem or "")|tojson }}`);
+            } catch (e) { admissaoTexto = ''; }
             $('#admissao_enfermagem').val(admissaoTexto);
             $('#admissao-form-container').hide();
             $('#admissao-texto-container').show();
@@ -5487,7 +5491,7 @@ function renderizarMedicamentosPrescricao(medicamentos, prescricao) {
             <td>${medicamento.enfermeiro_nome || ''}</td>
             <td>`;
 
-        if ("{{ session.get('cargo') }}".toLowerCase().trim() === "enfermeiro") {
+        if (((window.CARGO_SESSAO || '') + '').toLowerCase().trim() === "enfermeiro") {
             html += `<button class="btn btn-primary btn-sm btn-aprazamento" 
                 data-prescricao-id="${prescricao.id}" 
                 data-medicamento-index="${medicamentos.indexOf(medicamento)}" 
