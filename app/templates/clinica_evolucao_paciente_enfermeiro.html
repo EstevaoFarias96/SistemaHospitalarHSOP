@@ -1803,6 +1803,10 @@ function abrirImpressoesEnfermagem() {
                 <i class="fas fa-vial"></i>
                 <span>Exames Lab.</span>
             </a>
+            <a class="nav-link" href="#" data-target="fichaReferenciaSection">
+                <i class="fas fa-file-export"></i>
+                <span>Fichas Ref.</span>
+            </a>
         </div>
 
         <!-- Ações Rápidas -->
@@ -2365,7 +2369,25 @@ function abrirImpressoesEnfermagem() {
                     </div>
                 </div>
             </div>
-        </div>        <div id="examesSection" class="content-section">
+        </div>
+
+        <div id="fichaReferenciaSection" class="content-section">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-file-export me-2"></i>Fichas de Referência</h5>
+                </div>
+                <div class="card-body">
+                    <div id="listaFichasReferencia">
+                        <div class="text-center py-4">
+                            <i class="fas fa-spinner fa-spin text-primary"></i>
+                            Carregando fichas de referência...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="examesSection" class="content-section">
             <div class="card shadow-sm">
                 <div class="card-header bg-secondary text-white">
                     <h5 class="mb-0">Exames Laboratoriais</h5>
@@ -3378,6 +3400,7 @@ function abrirImpressoesEnfermagem() {
 
 <!-- Adicionar o novo módulo completo de enfermagem -->
 <script src="/static/js/enfermagem_completo.js"></script>
+<script src="/static/js/modal_ficha_fix.js"></script>
 
 <!-- Campo hidden para armazenar o cargo do usuário -->
 <input type="hidden" id="cargo_usuario" value="{{ session.get('cargo', '') }}">
@@ -3732,6 +3755,17 @@ function abrirImpressoesEnfermagem() {
             carregarEvolucoesEnfermagem();
         } else {
             console.error('Função carregarEvolucoesEnfermagem não encontrada no módulo externo');
+        }
+
+        // Inicializar módulo de Fichas de Referência (somente visualização)
+        if (typeof inicializarModuloFichasReferencia === 'function') {
+            try {
+                inicializarModuloFichasReferencia({ somenteLeitura: true });
+            } catch (e) {
+                console.error('Erro ao inicializar módulo de Fichas de Referência:', e);
+            }
+        } else {
+            console.warn('Módulo de Fichas de Referência não encontrado. Verifique modal_ficha_fix.js');
         }
         
         // Configurar handler para editar admissão

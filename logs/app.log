@@ -30419,3 +30419,21 @@ IndentationError: unexpected unindent
 2025-10-09 15:47:55,395 [INFO] __init__:72 - LoginManager inicializado com sucesso
 2025-10-09 15:47:55,576 [INFO] __init__:90 - Blueprints registrados com sucesso
 2025-10-09 15:47:55,586 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-09 15:58:05,472 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-10-09 15:58:05,472 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-09 15:58:05,472 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-09 15:58:05,472 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-09 15:58:05,473 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-09 15:58:05,498 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-09 15:58:05,498 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-09 15:58:05,683 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-10-09 15:58:05,699 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-09 16:10:39,229 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-10-09 16:10:39,229 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-09 16:10:39,229 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-09 16:10:39,229 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-10-09 16:10:39,229 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-09 16:10:39,235 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-09 16:10:39,235 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-09 16:10:39,447 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-10-09 16:10:39,450 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
