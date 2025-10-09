@@ -30446,3 +30446,12 @@ IndentationError: unexpected unindent
 2025-10-09 16:25:18,490 [INFO] __init__:72 - LoginManager inicializado com sucesso
 2025-10-09 16:25:18,684 [INFO] __init__:90 - Blueprints registrados com sucesso
 2025-10-09 16:25:18,703 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-09 16:29:22,803 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/logs/app.log
+2025-10-09 16:29:22,803 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-09 16:29:22,803 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-09 16:29:22,803 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/app/app.db
+2025-10-09 16:29:22,803 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-09 16:29:22,809 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-09 16:29:22,809 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-09 16:29:22,988 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-10-09 16:29:22,991 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
