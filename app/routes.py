@@ -1703,6 +1703,77 @@ def registrar_sae():
             'message': f'Erro interno do servidor: {str(e)}'
         }), 500
 
+# API para listar evoluções de enfermagem por data (individual)
+@bp.route('/api/enfermagem/evolucoes/lista/<string:atendimento_id>', methods=['GET'])
+@login_required
+def listar_evolucoes_enfermagem_por_data(atendimento_id):
+    """
+    Lista as evoluções de enfermagem de um atendimento em uma data específica.
+    Retorna metadados para seleção e impressão individual.
+    """
+    try:
+        current_user = get_current_user()
+        if current_user.cargo.lower() not in ['enfermeiro', 'medico']:
+            return jsonify({
+                'success': False,
+                'message': 'Acesso permitido apenas para enfermeiros e médicos'
+            }), 403
+
+        data_str = request.args.get('data')
+        if not data_str:
+            return jsonify({'success': False, 'message': 'Parâmetro "data" é obrigatório (YYYY-MM-DD)'}), 400
+
+        try:
+            data_selecionada = datetime.strptime(data_str, '%Y-%m-%d').date()
+        except ValueError:
+            return jsonify({'success': False, 'message': 'Formato de data inválido. Use YYYY-MM-DD.'}), 400
+
+        internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
+        if not internacao:
+            return jsonify({'success': False, 'message': 'Internação não encontrada'}), 404
+
+        inicio_dia = datetime.combine(data_selecionada, datetime.min.time())
+        fim_dia = datetime.combine(data_selecionada, datetime.max.time())
+
+        evolucoes = EvolucaoEnfermagem.query \
+            .filter_by(atendimentos_clinica_id=internacao.id) \
+            .filter(EvolucaoEnfermagem.data_evolucao >= inicio_dia) \
+            .filter(EvolucaoEnfermagem.data_evolucao <= fim_dia) \
+            .join(Funcionario, EvolucaoEnfermagem.funcionario_id == Funcionario.id) \
+            .add_columns(
+                EvolucaoEnfermagem.id,
+                EvolucaoEnfermagem.data_evolucao,
+                EvolucaoEnfermagem.texto,
+                Funcionario.nome.label('enfermeiro_nome'),
+                Funcionario.numero_profissional.label('enfermeiro_coren')
+            ) \
+            .order_by(EvolucaoEnfermagem.data_evolucao.asc()) \
+            .all()
+
+        lista = []
+        for ev in evolucoes:
+            preview_texto = ''
+            if ev.texto:
+                preview_texto = ev.texto.strip()
+                if len(preview_texto) > 150:
+                    preview_texto = preview_texto[:150] + '…'
+
+            lista.append({
+                'id': ev.id,
+                'data_hora': ev.data_evolucao.strftime('%Y-%m-%d %H:%M') if ev.data_evolucao else None,
+                'data_display': ev.data_evolucao.strftime('%d/%m/%Y %H:%M') if ev.data_evolucao else None,
+                'enfermeiro_nome': ev.enfermeiro_nome,
+                'enfermeiro_coren': ev.enfermeiro_coren,
+                'preview': preview_texto
+            })
+
+        return jsonify({'success': True, 'evolucoes': lista}), 200
+
+    except Exception as e:
+        logging.error(f'Erro ao listar evoluções de enfermagem por data: {str(e)}')
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': f'Erro interno do servidor: {str(e)}'}), 500
+
 # API para listar admissões de enfermagem de uma internação
 @bp.route('/api/enfermagem/admissoes/<int:internacao_id>', methods=['GET'])
 @login_required
@@ -6580,6 +6651,49 @@ def imprimir_evolucao_html(evolucao_id):
         logging.error(f"Erro ao gerar impressão de evolução: {str(e)}")
         abort(500, f'Erro interno: {str(e)}')
 
+
+# Impressão de evolução individual de enfermagem
+@bp.route('/api/imprimir-evolucao-enfermagem-html/<int:evolucao_id>', methods=['GET'])
+@login_required
+def imprimir_evolucao_enfermagem_html(evolucao_id):
+    """
+    Gera uma página HTML para impressão de uma evolução de enfermagem individual
+    """
+    try:
+        # Buscar a evolução de enfermagem
+        evolucao = EvolucaoEnfermagem.query.get(evolucao_id)
+        if not evolucao:
+            abort(404, 'Evolução de enfermagem não encontrada.')
+
+        # Buscar a internação relacionada
+        internacao = Internacao.query.get(evolucao.atendimentos_clinica_id)
+        if not internacao:
+            abort(404, 'Internação não vinculada à evolução de enfermagem.')
+
+        # Buscar o atendimento
+        atendimento = Atendimento.query.get(internacao.atendimento_id)
+        if not atendimento:
+            abort(404, 'Atendimento não encontrado.')
+
+        # Buscar o paciente
+        paciente = atendimento.paciente
+        if not paciente:
+            abort(404, 'Paciente não encontrado.')
+
+        # Buscar o profissional de enfermagem que fez a evolução
+        enfermeiro = Funcionario.query.get(evolucao.funcionario_id) if evolucao.funcionario_id else None
+
+        # Renderizar template HTML para impressão
+        return render_template('impressao_evolucao_enfermagem.html',
+                               evolucao=evolucao,
+                               internacao=internacao,
+                               atendimento=atendimento,
+                               paciente=paciente,
+                               enfermeiro=enfermeiro)
+
+    except Exception as e:
+        logging.error(f"Erro ao gerar impressão de evolução de enfermagem: {str(e)}")
+        abort(500, f'Erro interno: {str(e)}')
 
 @bp.route('/api/ultima-evolucao-id/<string:atendimento_id>', methods=['GET'])
 @login_required

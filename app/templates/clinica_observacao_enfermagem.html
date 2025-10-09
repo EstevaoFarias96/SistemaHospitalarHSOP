@@ -4335,16 +4335,19 @@ function abrirImpressoesEnfermagem() {
 
         // Função para carregar evoluções da internação
         function carregarEvolucoes() {
-            console.log('Carregando evoluções para internacaoId:', internacaoId);
+            // Usar window.ATENDIMENTO_ID (da URL) como prioridade, depois internacaoId
+            const idParaUsar = window.ATENDIMENTO_ID || internacaoId;
             
-            if (!internacaoId || isNaN(internacaoId)) {
-                console.error('ID de internação inválido ao carregar evoluções:', internacaoId);
+            console.log('Carregando evoluções - ATENDIMENTO_ID:', window.ATENDIMENTO_ID, 'internacaoId:', internacaoId, 'Usando:', idParaUsar);
+            
+            if (!idParaUsar || isNaN(parseInt(idParaUsar))) {
+                console.error('ID de internação inválido ao carregar evoluções. ATENDIMENTO_ID:', window.ATENDIMENTO_ID, 'internacaoId:', internacaoId);
                 $('#listaEvolucoesMedicasHoje').html('<div class="evolucao-vazia"><i class="fas fa-exclamation-triangle"></i><p>Erro: ID de internação inválido</p></div>');
                 return;
             }
             
             $.ajax({
-                url: `/api/evolucoes/${internacaoId}`,
+                url: `/api/evolucoes/${idParaUsar}`,
                 method: 'GET',
                 success: function(response) {
                     console.log('Resposta da API de evoluções:', response);
@@ -4451,9 +4454,32 @@ function abrirImpressoesEnfermagem() {
                     }
                 },
                 error: function(xhr, status, error) {
-                    console.error('Erro ao carregar evoluções:', xhr.responseText);
-                    $('#listaEvolucoesMedicasHoje').html('<div class="evolucao-erro"><i class="fas fa-exclamation-triangle"></i><p>Erro ao carregar evoluções médicas.</p></div>');
-                    $('#listaEvolucoesMedicasAntigas').html('<div class="evolucao-erro"><i class="fas fa-exclamation-triangle"></i><p>Erro ao carregar evoluções médicas.</p></div>');
+                    console.error('Erro ao carregar evoluções médicas:');
+                    console.error('Status:', status);
+                    console.error('Erro:', error);
+                    console.error('Response:', xhr.responseText);
+                    console.error('Status Code:', xhr.status);
+                    
+                    let mensagemErro = 'Erro ao carregar evoluções médicas.';
+                    
+                    if (xhr.status === 404) {
+                        mensagemErro = 'Nenhuma evolução médica encontrada para este paciente.';
+                        $('#listaEvolucoesMedicasHoje').html('<div class="evolucao-vazia"><i class="fas fa-info-circle"></i><p>' + mensagemErro + '</p></div>');
+                        $('#listaEvolucoesMedicasAntigas').html('');
+                        $('#contador-evolucoes-hoje').text('0');
+                        $('#contador-evolucoes-antigas-medicas').text('0');
+                    } else if (xhr.status === 500) {
+                        mensagemErro = 'Erro no servidor ao buscar evoluções. Tente novamente.';
+                        $('#listaEvolucoesMedicasHoje').html('<div class="evolucao-erro"><i class="fas fa-exclamation-triangle"></i><p>' + mensagemErro + '</p></div>');
+                        $('#listaEvolucoesMedicasAntigas').html('');
+                    } else if (xhr.status === 0) {
+                        mensagemErro = 'Erro de conexão. Verifique sua internet.';
+                        $('#listaEvolucoesMedicasHoje').html('<div class="evolucao-erro"><i class="fas fa-wifi"></i><p>' + mensagemErro + '</p></div>');
+                        $('#listaEvolucoesMedicasAntigas').html('');
+                    } else {
+                        $('#listaEvolucoesMedicasHoje').html('<div class="evolucao-erro"><i class="fas fa-exclamation-triangle"></i><p>' + mensagemErro + '</p></div>');
+                        $('#listaEvolucoesMedicasAntigas').html('');
+                    }
                 }
             });
         }
@@ -5979,11 +6005,15 @@ $(document).on('click', '.btn-ver-aprazamentos', function() {
     // Função para carregar dados de diagnóstico
     function carregarDadosDiagnostico() {
         const atendimentoId = window.ATENDIMENTO_ID || internacaoId;
-        console.log('Carregando diagnóstico para atendimento:', atendimentoId);
+        console.log('Carregando diagnóstico - ATENDIMENTO_ID:', window.ATENDIMENTO_ID, 'internacaoId:', internacaoId, 'Usando:', atendimentoId);
         
         
-        if (!atendimentoId) {
-            console.error('ID do atendimento não encontrado');
+        if (!atendimentoId || isNaN(parseInt(atendimentoId))) {
+            console.error('ID do atendimento não encontrado ou inválido:', atendimentoId);
+            const errorMsg = '<div class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i>ID do paciente inválido</div>';
+            $('#diagnostico-inicial-display').html(errorMsg);
+            $('#cid-principal-display').html(errorMsg);
+            $('#diagnostico-atual-display').html(errorMsg);
             return;
         }
 
@@ -6062,7 +6092,15 @@ $(document).on('click', '.btn-ver-aprazamentos', function() {
     // Função para carregar dados de anamnese e conduta
     function carregarDadosAnamneseConduta() {
         const atendimentoId = window.ATENDIMENTO_ID || internacaoId;
-        if (!atendimentoId) return;
+        console.log('Carregando anamnese - ATENDIMENTO_ID:', window.ATENDIMENTO_ID, 'internacaoId:', internacaoId, 'Usando:', atendimentoId);
+        
+        if (!atendimentoId || isNaN(parseInt(atendimentoId))) {
+            console.error('ID do atendimento não encontrado ou inválido:', atendimentoId);
+            const errorMsg = '<div class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i>ID do paciente inválido</div>';
+            $('#anamnese-exame-fisico-display').html(errorMsg);
+            $('#conduta-medica-display').html(errorMsg);
+            return;
+        }
 
         $('#anamnese-conduta-loading').show();
         
@@ -6111,7 +6149,16 @@ $(document).on('click', '.btn-ver-aprazamentos', function() {
     // Função para carregar dados de justificativas
     function carregarDadosJustificativas() {
         const atendimentoId = window.ATENDIMENTO_ID || internacaoId;
-        if (!atendimentoId) return;
+        console.log('Carregando justificativas - ATENDIMENTO_ID:', window.ATENDIMENTO_ID, 'internacaoId:', internacaoId, 'Usando:', atendimentoId);
+        
+        if (!atendimentoId || isNaN(parseInt(atendimentoId))) {
+            console.error('ID do atendimento não encontrado ou inválido:', atendimentoId);
+            const errorMsg = '<div class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i>ID do paciente inválido</div>';
+            $('#sinais-sintomas-display').html(errorMsg);
+            $('#condicoes-display').html(errorMsg);
+            $('#resultados-diagnosticos-display').html(errorMsg);
+            return;
+        }
 
         $('#justificativas-loading').show();
         

@@ -49,15 +49,15 @@ app = create_app()
 
 def registrar_medico_teste():
     medico_teste = {
-    "nome": "Testerecep",
-    "data_nascimento": datetime.strptime("1987-05-02", "%Y-%m-%d").date(),
-    "cpf": "000.000.000-10",
-    "email": "toi23ereira@gmail.com",
-    "telefone": "88992741233602",
+    "nome": "Isabely Azevedo Frota Mont Alverne",
+    "data_nascimento": datetime.strptime("1987-11-09", "%Y-%m-%d").date(),
+    "cpf": "600.173.953-64",
+    "email": "draisabelymontalverne@gmail.com",
+    "telefone": "(21)979085878",
     "senha": "123",
-    "cargo": "recepcionista",
-    "tipo_contrato": "Comissionado",
-    "numero_profissional": "888.012"
+    "cargo": "Medico",
+    "tipo_contrato": "Contratado",
+    "numero_profissional": "29885"
 }
 
 

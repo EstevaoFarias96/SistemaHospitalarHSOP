@@ -2267,9 +2267,14 @@
                     <div class="tab-pane fade" id="justificativas-pane" role="tabpanel">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h6 class="mb-0 text-success fw-bold">Justificativas da Internação</h6>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-warning btn-sm" id="btnGerarAIHPadrao" title="Preenche automaticamente os campos com dados padrão para AIH">
+                                    <i class="fas fa-file-medical me-1"></i> Gerar AIH Padrão
+                                </button>
                             <button type="button" class="btn btn-success btn-sm" id="btnEditarJustificativas">
                                 <i class="fas fa-edit"></i> Editar
                             </button>
+                            </div>
                         </div>
 
                         <div id="justificativas-loading" class="text-center my-4" style="display:none;">
@@ -4655,6 +4660,13 @@
         }
     });
 
+    // Evento para gerar AIH padrão
+    $('#btnGerarAIHPadrao').on('click', function() {
+        if (confirm('Deseja gerar automaticamente as justificativas padrão para AIH?\n\nIsso irá preencher os campos com:\n• Sinais e Sintomas: HDA + Anamnese\n• Condições: RISCO DE COMPLICAÇÃO\n• Resultados: ANAMNESE + EXAME FÍSICO')) {
+            gerarAIHPadrao();
+        }
+    });
+
     // Eventos para edição de justificativas
     $('#btnEditarJustificativas').on('click', function() {
         if (!dadosJustificativasCache) {
@@ -4689,7 +4701,7 @@
             justificativa_internacao_principais_resultados_diagnostico: $('#resultados-diagnosticos-edit').val()
         };
         
-        fetch(`/api/internacao/${atendimentoId}/justificativas`, {
+        fetch(`/api/internacao/${atendimentoId}/diagnostico`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -4743,9 +4755,126 @@
 
     // Função para atualizar visualização de justificativas
     function atualizarVisualizacaoJustificativas(dados) {
-        $('#sinais-sintomas-display').text(dados.justificativa_internacao_sinais_e_sintomas || 'Não informado');
-        $('#condicoes-display').text(dados.justificativa_internacao_condicoes || 'Não informado');
-        $('#resultados-diagnosticos-display').text(dados.justificativa_internacao_principais_resultados_diagnostico || 'Não informado');
+        $('#sinais-sintomas-display').html(
+            dados.justificativa_internacao_sinais_e_sintomas ? 
+            `<div class="text-dark">${dados.justificativa_internacao_sinais_e_sintomas.replace(/\n/g, '<br>')}</div>` : 
+            '<div class="text-muted"><i class="fas fa-info-circle me-1"></i>Não informado</div>'
+        );
+        $('#condicoes-display').html(
+            dados.justificativa_internacao_condicoes ? 
+            `<div class="text-dark">${dados.justificativa_internacao_condicoes.replace(/\n/g, '<br>')}</div>` : 
+            '<div class="text-muted"><i class="fas fa-info-circle me-1"></i>Não informado</div>'
+        );
+        $('#resultados-diagnosticos-display').html(
+            dados.justificativa_internacao_principais_resultados_diagnostico ? 
+            `<div class="text-dark">${dados.justificativa_internacao_principais_resultados_diagnostico.replace(/\n/g, '<br>')}</div>` : 
+            '<div class="text-muted"><i class="fas fa-info-circle me-1"></i>Não informado</div>'
+        );
+    }
+    
+    // Função para gerar AIH padrão
+    function gerarAIHPadrao() {
+        console.log('🏥 Gerando AIH Padrão...');
+        
+        const atendimentoId = $('#atendimento_id').val();
+        if (!atendimentoId) {
+            alert('Erro: ID do atendimento não encontrado.');
+            return;
+        }
+        
+        // Mostrar loading
+        const btnGerar = $('#btnGerarAIHPadrao');
+        const textoOriginal = btnGerar.html();
+        btnGerar.html('<i class="fas fa-spinner fa-spin me-1"></i> Gerando...').prop('disabled', true);
+        
+        // Buscar dados da internação
+        $.ajax({
+            url: `/api/internacao/${atendimentoId}`,
+            method: 'GET',
+            success: function(response) {
+                console.log('Dados da internação recebidos:', response);
+                
+                const dados = response.success ? response.internacao : response;
+                
+                // Montar o texto de Sinais e Sintomas (HDA + Anamnese e Exame Físico)
+                let sinaisSintomas = '';
+                
+                if (dados.hda) {
+                    sinaisSintomas += dados.hda.trim();
+                }
+                
+                if (dados.anamnese_exame_fisico) {
+                    if (sinaisSintomas) {
+                        sinaisSintomas += '\n\n';
+                    }
+                    sinaisSintomas += dados.anamnese_exame_fisico.trim();
+                }
+                
+                // Se não houver nenhum dos dois, usar mensagem padrão
+                if (!sinaisSintomas) {
+                    alert('⚠️ Atenção: Não há HDA ou Anamnese cadastrada. Por favor, preencha esses dados primeiro nas abas "Evoluções" e "Anamnese & Conduta".');
+                    btnGerar.html(textoOriginal).prop('disabled', false);
+                    return;
+                }
+                
+                // Preparar dados para salvar
+                const dadosJustificativas = {
+                    justificativa_internacao_sinais_e_sintomas: sinaisSintomas,
+                    justificativa_internacao_condicoes: 'RISCO DE COMPLICAÇÃO',
+                    justificativa_internacao_principais_resultados_diagnostico: 'ANMNESE + EXAME FISICO'
+                };
+                
+                console.log('Salvando justificativas AIH padrão:', dadosJustificativas);
+                
+                // Salvar os dados
+                $.ajax({
+                    url: `/api/internacao/${atendimentoId}/diagnostico`,
+                    method: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dadosJustificativas),
+                    success: function(saveResponse) {
+                        console.log('Resposta do salvamento:', saveResponse);
+                        
+                        if (saveResponse.success) {
+                            // Atualizar cache
+                            dadosJustificativasCache = { ...dadosJustificativasCache, ...dadosJustificativas };
+                            
+                            // Atualizar visualização
+                            atualizarVisualizacaoJustificativas(dadosJustificativas);
+                            
+                            // Mostrar mensagem de sucesso
+                            const alertHtml = `
+                                <div class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3" role="alert" style="z-index: 1060">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    AIH Padrão gerada com sucesso!
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            `;
+                            $('body').append(alertHtml);
+                            
+                            // Remover o alerta após 3 segundos
+                            setTimeout(function() {
+                                $('.alert-success').alert('close');
+                            }, 3000);
+                        } else {
+                            alert('Erro ao salvar AIH padrão: ' + (saveResponse.message || 'Erro desconhecido'));
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Erro ao salvar AIH padrão:', xhr.responseText);
+                        alert('Erro ao salvar AIH padrão: ' + (xhr.responseJSON?.message || error));
+                    },
+                    complete: function() {
+                        btnGerar.html(textoOriginal).prop('disabled', false);
+                    }
+                });
+            },
+            error: function(xhr, status, error) {
+                console.error('Erro ao buscar dados da internação:', xhr.responseText);
+                alert('Erro ao buscar dados da internação. Tente novamente.');
+                btnGerar.html(textoOriginal).prop('disabled', false);
+            }
+        });
     }
 
     // Função para carregar dados de diagnóstico (versão final otimizada)

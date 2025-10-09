@@ -63,6 +63,10 @@
       #dstTextContainer {
         display: none;
       }
+      .bg-orange {
+        background-color: #fd7e14;
+        color: #fff;
+      }
     </style>
   </head>
   <body>
@@ -70,7 +74,7 @@
       <!-- Botão de voltar ao menu principal -->
       <button class="btn btn-secondary back-btn" onclick="window.location.href='/enfermeiro'">Voltar ao Menu Principal</button>
       
-      <div class="card">
+      <div class="card shadow-sm">
         <div class="card-header text-center">
           Ficha de Triagem
         </div>
@@ -116,53 +120,80 @@
             <div class="row mb-3">
               <div class="col-md-4">
                 <label for="pressao" class="form-label">Pressão <span class="required-asterisk">*</span></label>
-                <input type="text" class="form-control" id="pressao" name="pressao" placeholder="Ex: 120/80" required>
-                <div class="invalid-feedback">Campo obrigatório.</div>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="pressao" name="pressao" required inputmode="numeric" maxlength="6" pattern="^\\d{3}/\\d{2}$" title="Formato: NNN/NN" oninput="var v=this.value.replace(/[^0-9]/g,'').slice(0,5); this.value = v.length>3 ? v.slice(0,3)+'/'+v.slice(3) : v;">
+                  <span class="input-group-text">mmHg</span>
+                </div>
+                <div class="invalid-feedback">Informe no formato NNN/NN.</div>
               </div>
               <div class="col-md-4">
                 <label for="pulso" class="form-label">Pulso <span class="required-asterisk">*</span></label>
-                <input type="text" class="form-control" id="pulso" name="pulso" placeholder="Ex: 72 bpm" required>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="pulso" name="pulso" required>
+                  <span class="input-group-text">bpm</span>
+                </div>
                 <div class="invalid-feedback">Campo obrigatório.</div>
               </div>
               <div class="col-md-4">
                 <label for="sp02" class="form-label">SpO₂ <span class="required-asterisk">*</span></label>
-                <input type="text" class="form-control" id="sp02" name="sp02" placeholder="Ex: 98%" required>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="sp02" name="sp02" required>
+                  <span class="input-group-text">%</span>
+                </div>
                 <div class="invalid-feedback">Campo obrigatório.</div>
               </div>
             </div>
             <div class="row mb-3">
               <div class="col-md-4">
                 <label for="temp" class="form-label">Temperatura <span class="required-asterisk">*</span></label>
-                <input type="text" class="form-control" id="temp" name="temp" placeholder="Ex: 36.5" required>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="temp" name="temp" required inputmode="numeric" maxlength="4" pattern="^\\d{2},\\d$" title="Formato: NN,N" oninput="var v=this.value.replace(/[^0-9]/g,'').slice(0,3); this.value = v.length>2 ? v.slice(0,2)+','+v.slice(2,3) : v;">
+                  <span class="input-group-text">°C</span>
+                </div>
                 <div class="invalid-feedback">Campo obrigatório.</div>
               </div>
               <div class="col-md-4">
                 <label for="peso" class="form-label">Peso <span class="required-asterisk">*</span></label>
-                <input type="number" class="form-control" id="peso" name="peso" placeholder="70" step="any" required>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="peso" name="peso" required inputmode="decimal" pattern="^\\d*(\\.\\d+)?$" title="Use apenas números e ponto (.)" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\\..*)\\./g, '$1')">
+                  <span class="input-group-text">kg</span>
+                </div>
                 <div class="invalid-feedback">Campo obrigatório.</div>
               </div>
               <div class="col-md-4">
-                <label for="altura" class="form-label">Altura</label>
-                <input type="text" class="form-control" id="altura" name="altura" placeholder="Ex: 1.75">
+                <label for="altura" class="form-label">Altura (cm)</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="altura" name="altura" inputmode="numeric" pattern="\\d+" title="Informe apenas números (cm)" oninput="this.value = this.value.replace(/\\D/g, '')">
+                  <span class="input-group-text">cm</span>
+                </div>
+                <div class="invalid-feedback">Informe apenas números (cm).</div>
               </div>
             </div>
             <div class="row mb-3">
               <div class="col-md-6">
                 <label for="fr" class="form-label">Frequência Respiratória (FR)</label>
-                <input type="text" class="form-control" id="fr" name="fr" placeholder="Ex: 18">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="fr" name="fr">
+                  <span class="input-group-text">/min</span>
+                </div>
               </div>
               <div class="col-md-6">
                 <label for="dx" class="form-label">DX</label>
-                <input type="text" class="form-control" id="dx" name="dx" placeholder="Observações iniciais">
+                <div class="input-group">
+                  <input type="text" class="form-control" id="dx" name="dx">
+                  <span class="input-group-text">mg/dL</span>
+                </div>
               </div>
             </div>
             <div class="mb-3">
-              <label for="triagem" class="form-label">Triagem</label>
-              <textarea class="form-control" id="triagem" name="triagem" rows="2" placeholder="Descreva a triagem"></textarea>
+              <label for="triagem" class="form-label">Triagem <span class="required-asterisk">*</span></label>
+              <textarea class="form-control" id="triagem" name="triagem" rows="2" required></textarea>
+              <div class="invalid-feedback">Campo obrigatório.</div>
             </div>
             <div class="mb-3">
-              <label for="alergias" class="form-label">Alergias</label>
-              <textarea class="form-control" id="alergias" name="alergias" rows="2" placeholder="Informe alergias conhecidas"></textarea>
+              <label for="alergias" class="form-label">Alergias <span class="required-asterisk">*</span></label>
+              <textarea class="form-control" id="alergias" name="alergias" rows="2" required></textarea>
+              <div class="invalid-feedback">Campo obrigatório.</div>
             </div>
             
             <!-- Informações de Gestante (exibidas somente se marcado) -->
@@ -171,19 +202,22 @@
               <div class="row mb-3">
                 <div class="col-md-2">
                   <label for="idade_gestacional_semanas" class="form-label">Semanas</label>
-                  <input type="number" class="form-control" id="idade_gestacional_semanas" name="idade_gestacional_semanas" placeholder="Ex: 24">
+                  <input type="number" class="form-control" id="idade_gestacional_semanas" name="idade_gestacional_semanas">
                 </div>
                 <div class="col-md-2">
                   <label for="idade_gestacional_dias" class="form-label">Dias</label>
-                  <input type="number" class="form-control" id="idade_gestacional_dias" name="idade_gestacional_dias" placeholder="Ex: 5">
+                  <input type="number" class="form-control" id="idade_gestacional_dias" name="idade_gestacional_dias">
                 </div>
                 <div class="col-md-4">
                   <label for="altura_uterina" class="form-label">Altura Uterina (cm)</label>
-                  <input type="text" class="form-control" id="altura_uterina" name="altura_uterina" placeholder="Ex: 30">
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="altura_uterina" name="altura_uterina">
+                    <span class="input-group-text">cm</span>
+                  </div>
                 </div>
                 <div class="col-md-4">
                   <label for="quantidade_de_gestacoes" class="form-label">Quantidade de Gestacoes</label>
-                  <input type="number" class="form-control" id="quantidade_de_gestacoes" name="quantidade_de_gestacoes" placeholder="Ex: 2">
+                  <input type="number" class="form-control" id="quantidade_de_gestacoes" name="quantidade_de_gestacoes">
                 </div>
               </div>
               <div class="row mb-3">
@@ -193,7 +227,10 @@
                 </div>
                 <div class="col-md-4">
                   <label for="bcf" class="form-label">BCF</label>
-                  <input type="text" class="form-control" id="bcf" name="bcf" placeholder="Ex: Valor">
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="bcf" name="bcf">
+                    <span class="input-group-text">bpm</span>
+                  </div>
                 </div>
                 <div class="col-md-4">
                   <label for="data_primeira_ultrassom" class="form-label">Data do 1º Ultrassom</label>
@@ -204,7 +241,7 @@
               <div class="row mb-3">
                 <div class="col-md-4">
                   <label for="abo_rh" class="form-label">Abo/RH</label>
-                  <input type="text" class="form-control" id="abo_rh" name="abo_rh" placeholder="Ex: A+">
+                  <input type="text" class="form-control" id="abo_rh" name="abo_rh">
                 </div>
               </div>
             </div>
@@ -284,7 +321,7 @@
                   </div>
                 </div>
                 <div class="col-md-4" id="dstTextContainer">
-                  <input type="text" class="form-control" id="dst_text" name="dst_text" placeholder="Nome da DST">
+                  <input type="text" class="form-control" id="dst_text" name="dst_text">
                 </div>
               </div>
             </div>
@@ -292,8 +329,8 @@
             <!-- Resto do formulário -->
             <div class="row mb-3">
               <div class="col-md-6">
-                <label for="classificacao_risco" class="form-label">Classificação de Risco (Manchester)</label>
-                <select class="form-select" id="classificacao_risco" name="classificacao_risco">
+                <label for="classificacao_risco" class="form-label">Classificação de Risco (Manchester) <span class="required-asterisk">*</span></label>
+                <select class="form-select" id="classificacao_risco" name="classificacao_risco" required>
                   <option value="">Selecione</option>
                   <option value="Azul">Azul</option>
                   <option value="Verde">Verde</option>
@@ -301,15 +338,26 @@
                   <option value="Laranja">Laranja</option>
                   <option value="Vermelho">Vermelho</option>
                 </select>
+                <div class="invalid-feedback">Campo obrigatório.</div>
+                <div class="form-text mt-1">
+                  <span class="badge bg-primary me-1">Azul</span>
+                  <span class="badge bg-success me-1">Verde</span>
+                  <span class="badge bg-warning text-dark me-1">Amarelo</span>
+                  <span class="badge bg-orange me-1">Laranja</span>
+                  <span class="badge bg-danger">Vermelho</span>
+                </div>
+                <div class="mt-2">
+                  <span id="riscoBadge" class="badge"></span>
+                </div>
               </div>
               <div class="col-md-6">
                 <label for="anamnese_exame_fisico" class="form-label">Anamnese/Exame Físico</label>
-                <textarea class="form-control" id="anamnese_exame_fisico" name="anamnese_exame_fisico" rows="2" placeholder="Observações do exame"></textarea>
+                <textarea class="form-control" id="anamnese_exame_fisico" name="anamnese_exame_fisico" rows="2"></textarea>
               </div>
             </div>
             <div class="mb-3">
               <label for="observacao" class="form-label">Observações Adicionais</label>
-              <textarea class="form-control" id="observacao" name="observacao" rows="3" placeholder="Outras observações"></textarea>
+              <textarea class="form-control" id="observacao" name="observacao" rows="3"></textarea>
             </div>
             <button type="submit" class="btn btn-primary">Salvar Triagem</button>
           </form>
@@ -640,6 +688,25 @@
       window.onload = function() {
         carregarDadosPaciente();
         carregarDadosEnfermeiro();
+        const select = document.getElementById('classificacao_risco');
+        const badge = document.getElementById('riscoBadge');
+        function updateBadge() {
+          const val = select.value;
+          badge.className = 'badge';
+          badge.textContent = '';
+          if (!val) return;
+          const map = {
+            'Azul': 'bg-primary',
+            'Verde': 'bg-success',
+            'Amarelo': 'bg-warning text-dark',
+            'Laranja': 'bg-orange',
+            'Vermelho': 'bg-danger'
+          };
+          badge.className = 'badge ' + (map[val] || 'bg-secondary');
+          badge.textContent = val;
+        }
+        select.addEventListener('change', updateBadge);
+        updateBadge();
       };
     </script>
   </body>

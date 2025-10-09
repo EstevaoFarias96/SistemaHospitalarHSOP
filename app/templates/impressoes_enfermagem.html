@@ -445,18 +445,21 @@
                                 </p>
                                 <div class="list-group" id="listaDatas">
                                     ${datas.map(data => `
-                                        <button type="button" 
-                                                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-                                                onclick="imprimirEvolucaoData('${data.data}')">
+                                        <div class="list-group-item d-flex justify-content-between align-items-center">
                                             <div>
                                                 <i class="fas fa-calendar-day text-primary me-2"></i>
                                                 <strong>${data.data_display}</strong>
+                                                <span class="text-muted ms-2">(${data.quantidade} evolução${data.quantidade > 1 ? 'ões' : 'ão'})</span>
                                             </div>
-                                            <div>
-                                                <span class="badge bg-primary rounded-pill">${data.quantidade} evolução${data.quantidade > 1 ? 'ões' : 'ão'}</span>
-                                                <i class="fas fa-chevron-right text-muted ms-2"></i>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="imprimirEvolucaoData('${data.data}')">
+                                                    <i class="fas fa-print me-1"></i> Imprimir todas
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-primary" onclick="selecionarEvolucaoIndividual('${data.data}')">
+                                                    <i class="fas fa-list me-1"></i> Selecionar evolução
+                                                </button>
                                             </div>
-                                        </button>
+                                        </div>
                                     `).join('')}
                                 </div>
                             </div>
@@ -479,6 +482,83 @@
             // Mostrar modal
             const modal = new bootstrap.Modal(document.getElementById('modalSelecaoData'));
             modal.show();
+        }
+
+        // Abrir seleção de evolução individual de uma data
+        function selecionarEvolucaoIndividual(data) {
+            $.ajax({
+                url: `/api/enfermagem/evolucoes/lista/${atendimentoId}?data=${data}`,
+                method: 'GET',
+                success: function(response) {
+                    if (response.success && response.evolucoes && response.evolucoes.length > 0) {
+                        mostrarModalSelecaoEvolucao(response.evolucoes, data);
+                    } else {
+                        alert('Nenhuma evolução encontrada para a data selecionada.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('❌ Erro ao carregar evoluções:', error);
+                    alert('Erro ao carregar evoluções. Tente novamente.');
+                }
+            });
+        }
+
+        // Modal para escolher qual evolução imprimir
+        function mostrarModalSelecaoEvolucao(evolucoes, data) {
+            let evolucoesHtml = evolucoes.map(ev => `
+                <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                        onclick="imprimirEvolucaoIndividual(${ev.id})">
+                    <div class="text-start">
+                        <div><strong><i class="fas fa-clock me-2"></i>${ev.data_display}</strong></div>
+                        <div class="small text-muted"><i class="fas fa-user-nurse me-1"></i>${ev.enfermeiro_nome || 'Enfermagem'}</div>
+                        ${ev.preview ? `<div class="small text-truncate" style="max-width: 420px;">${ev.preview}</div>` : ''}
+                    </div>
+                    <i class="fas fa-print text-primary"></i>
+                </button>
+            `).join('');
+
+            let modalHtml = `
+                <div class="modal fade" id="modalSelecaoEvolucao" tabindex="-1" aria-labelledby="modalSelecaoEvolucaoLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header" style="background: linear-gradient(135deg, #2878a7, #2878a7); color: white;">
+                                <h5 class="modal-title" id="modalSelecaoEvolucaoLabel">
+                                    <i class="fas fa-list me-2"></i>Escolher Evolução do dia ${new Date(data).toLocaleDateString('pt-BR')}
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="list-group">
+                                    ${evolucoesHtml}
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fas fa-times me-2"></i>Fechar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            $('#modalSelecaoEvolucao').remove();
+            $('body').append(modalHtml);
+            const modal = new bootstrap.Modal(document.getElementById('modalSelecaoEvolucao'));
+            modal.show();
+        }
+
+        // Abrir impressão individual de evolução de enfermagem
+        function imprimirEvolucaoIndividual(evolucaoId) {
+            try {
+                const url = `/api/imprimir-evolucao-enfermagem-html/${evolucaoId}`;
+                $('#modalSelecaoEvolucao').modal('hide');
+                $('#modalSelecaoData').modal('hide');
+                window.open(url, '_blank');
+            } catch (error) {
+                console.error('❌ Erro ao abrir impressão individual:', error);
+                alert('Erro ao abrir a página de impressão. Tente novamente.');
+            }
         }
 
         // Função para imprimir evoluções de uma data específica

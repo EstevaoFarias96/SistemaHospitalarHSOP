@@ -740,9 +740,10 @@
               </div>
               <div class="col-md-6">
                 <label for="modalFiliacao" class="form-label">
-                  <i class="fas fa-female mr-1"></i>Nome da Mãe
+                  <i class="fas fa-female mr-1"></i>Nome da Mãe <span class="text-danger">*</span>
                 </label>
-                <input type="text" class="form-control" id="modalFiliacao" name="filiacao" placeholder="Nome completo">
+                <input type="text" class="form-control" id="modalFiliacao" name="filiacao" placeholder="Nome completo" required>
+                <div class="invalid-feedback">Nome da mãe é obrigatório</div>
               </div>
             </div>
 
@@ -813,6 +814,27 @@
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+
+  <!-- Modal: Pergunta criar atendimento após cadastro -->
+  <div class="modal fade" id="modalPerguntaCriarAtendimento" tabindex="-1" role="dialog" aria-labelledby="modalPerguntaCriarAtendimentoLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalPerguntaCriarAtendimentoLabel">Criar atendimento agora?</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Deseja criar um atendimento para <strong id="nomePacienteCriado">o paciente</strong> agora?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Não</button>
+          <button type="button" class="btn btn-primary" id="btnConfirmarCriarAtendimentoPosCadastro">Sim, criar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Modal: Criar Atendimento por CPF -->
   <div class="modal fade" id="modalCriarAtendimentoCPF" tabindex="-1" role="dialog" aria-labelledby="modalCriarAtendimentoCPFLabel" aria-hidden="true">
@@ -2300,7 +2322,18 @@
           // Sucesso no cadastro
           alert('✓ Paciente cadastrado com sucesso!');
 
+          // Guardar dados do paciente recém criado
+          const pacienteIdCriado = data.paciente_id || (data.paciente && data.paciente.id);
+          const pacienteNomeCriado = (data.paciente && data.paciente.nome) || dados.nome || '';
+
+          // Fechar modal de cadastro
           $('#modalCadastroPaciente').modal('hide');
+
+          // Perguntar se deseja criar atendimento
+          if (pacienteIdCriado) {
+            $('#nomePacienteCriado').text(pacienteNomeCriado || 'o paciente');
+            $('#modalPerguntaCriarAtendimento').data('pacienteId', pacienteIdCriado).modal('show');
+          }
 
           // Limpar a classe de validação para próximos usos
           $('#formCadastroPaciente')[0].classList.remove('was-validated');
@@ -2331,6 +2364,48 @@
         btnSalvar.html(textoOriginal).prop('disabled', false).removeClass('disabled');
         console.error('Erro:', error);
         alert('Erro de conexão. Verifique sua internet e tente novamente.');
+      });
+    });
+
+    // Confirmar criação de atendimento após cadastro
+    $('#btnConfirmarCriarAtendimentoPosCadastro').off('click').on('click', function() {
+      const btn = $(this);
+      const original = btn.html();
+      const pacienteId = $('#modalPerguntaCriarAtendimento').data('pacienteId');
+      if (!pacienteId) { $('#modalPerguntaCriarAtendimento').modal('hide'); return; }
+
+      btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Criando...');
+
+      const agora = new Date();
+      const dataAtual = agora.toISOString().split('T')[0];
+      const horaAtual = agora.toTimeString().slice(0, 5);
+
+      fetch('/api/atendimentos/cadastrar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+          paciente_id: pacienteId,
+          data_atendimento: dataAtual,
+          hora_atendimento: horaAtual
+        })
+      })
+      .then(r => r.json())
+      .then(resp => {
+        if (resp && resp.success) {
+          alert('✓ Atendimento criado com sucesso! ID: ' + resp.atendimento.id);
+          $('#modalPerguntaCriarAtendimento').modal('hide');
+        } else {
+          throw new Error((resp && resp.message) || 'Erro ao criar atendimento');
+        }
+      })
+      .catch(err => {
+        alert(err.message || 'Erro ao criar atendimento');
+      })
+      .finally(() => {
+        btn.prop('disabled', false).html(original);
       });
     });
 
