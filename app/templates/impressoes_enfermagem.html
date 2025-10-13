@@ -358,6 +358,48 @@
                 </div>
             </div>
         </div>
+
+        <!-- Lobby para Impressões Médicas (adiantamento pela Enfermagem) -->
+        <div class="row mt-2">
+            <div class="col-12">
+                <div class="impressao-section">
+                    <div class="section-header" style="background: linear-gradient(135deg, #6f42c1, #6f42c1);">
+                        <i class="fas fa-user-md me-2"></i>Lobby de Impressões Médicas (adiantadas pela Enfermagem)
+                    </div>
+                    <div class="section-content">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h6 class="mb-2 text-primary"><i class="fas fa-file-medical me-2"></i>Ficha de Admissão Hospitalar</h6>
+                                        <p class="text-muted small mb-3">Documento médico. A enfermagem pode adiantar a impressão com os dados já disponíveis.</p>
+                                        <div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-impressao" onclick="abrirFichaAdmissao()">
+                                                <i class="fas fa-print me-2"></i>Imprimir Ficha de Admissão
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-body">
+                                        <h6 class="mb-2 text-primary"><i class="fas fa-file-invoice me-2"></i>AIH - Autorização de Internação Hospitalar</h6>
+                                        <p class="text-muted small mb-3">Documento médico (AIH). A enfermagem pode gerar a visualização/impressão com os dados do prontuário.</p>
+                                        <div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-impressao" onclick="abrirAIH()">
+                                                <i class="fas fa-print me-2"></i>Imprimir AIH
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="alert alert-info mb-0 small"><i class="fas fa-info-circle me-2"></i>Estes documentos são de responsabilidade médica. A impressão aqui é apenas para adiantamento/apoio, conforme normas internas.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->
@@ -790,6 +832,27 @@
                     alert('Erro ao buscar a última evolução. Tente novamente.');
                 }
             });
+        }
+
+        // ==== Lobby: Ações de impressão médica auxiliadas pela Enfermagem ====
+        function abrirFichaAdmissao() {
+            try {
+                const url = `/imprimir/ficha_admissao/${atendimentoId}`;
+                window.open(url, '_blank');
+            } catch (e) {
+                console.error('Erro ao abrir Ficha de Admissão:', e);
+                alert('Erro ao abrir a Ficha de Admissão.');
+            }
+        }
+
+        function abrirAIH() {
+            try {
+                const url = `/imprimir/aih/${atendimentoId}`;
+                window.open(url, '_blank');
+            } catch (e) {
+                console.error('Erro ao abrir AIH:', e);
+                alert('Erro ao abrir a AIH.');
+            }
         }
 
         // Carregar informações do paciente se não estiverem disponíveis do backend

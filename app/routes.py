@@ -5892,12 +5892,12 @@ def imprimir_aih(atendimento_id):
         if not internacao:
             return abort(404, description="Internação não encontrada")
 
-        # Verifica se o usuário logado é médico
+        # Verifica permissão: permitir médico e enfermeiro imprimir (enfermeiro não assina)
         current_user = get_current_user()
-        if not current_user or current_user.cargo.lower() != 'medico':
-            return abort(403, description="Somente médicos podem imprimir AIH.")
+        if not current_user or current_user.cargo.lower() not in ['medico', 'enfermeiro']:
+            return abort(403, description="Acesso não autorizado para imprimir AIH.")
         
-        medico = current_user
+        medico = current_user if current_user.cargo.lower() == 'medico' else None
 
         # Carrega template HTML
         caminho_template = os.path.join(current_app.root_path, 'static', 'impressos', 'AIH.html')
@@ -5933,8 +5933,8 @@ def imprimir_aih(atendimento_id):
                 'codigo_procedimento': internacao.codigo_procedimento or '',
                 'leito': internacao.leito or '',
                 'carater_de_internacao': internacao.carater_internacao or '',
-                'funcionario_nome': medico.nome or '',
-                'medico_cpf': medico.cpf or '',
+                'funcionario_nome': (medico.nome if medico and getattr(medico, 'nome', None) else '') or '',
+                'medico_cpf': (medico.cpf if medico and getattr(medico, 'cpf', None) else '') or '',
                 'data_atual': datetime.now(ZoneInfo("America/Sao_Paulo")).strftime('%d/%m/%Y')
             }
         except Exception as e:

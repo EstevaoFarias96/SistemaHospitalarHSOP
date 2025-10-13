@@ -539,8 +539,8 @@
             .row-clinical-vertical .info-item:nth-child(1) .clinical-field-large {
                 min-height: 60px !important;
                 height: auto !important;
-                max-height: 150px !important;
-                overflow: hidden !important;
+                max-height: none !important;
+                overflow: visible !important;
             }
             
             .row-clinical-vertical .info-item:nth-child(2) {
@@ -845,7 +845,7 @@
                 <div class="row-clinical-vertical">
                     <div class="info-item">
                         <span class="info-label">Anamnese e Exame Físico</span>
-                        <textarea class="text-area clinical-field-large dynamic-content" readonly>{{ internacao.folha_anamnese or '' }}</textarea>
+                        <textarea class="text-area clinical-field-large dynamic-content" readonly>{{ (internacao.folha_anamnese or '') | replace('\r\n', ' ') | replace('\n', ' ') | replace('\r', ' ') }}</textarea>
                     </div>
                     
                     <div class="info-item">

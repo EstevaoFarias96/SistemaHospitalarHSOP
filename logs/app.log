@@ -30635,3 +30635,145 @@ SyntaxError: invalid decimal literal
 2025-10-13 12:03:00,461 [INFO] __init__:72 - LoginManager inicializado com sucesso
 2025-10-13 12:03:00,624 [INFO] __init__:90 - Blueprints registrados com sucesso
 2025-10-13 12:03:00,626 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-13 12:08:39,073 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-13 12:08:39,073 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-13 12:08:39,073 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-13 12:08:39,073 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-13 12:08:39,073 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-13 12:08:39,092 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-13 12:08:39,092 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-13 12:08:39,231 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-10-13 12:08:39,245 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-13 12:15:11,804 [ERROR] __init__:135 - Erro 500: 500 Internal Server Error: Erro interno: 403 Forbidden: Somente médicos podem imprimir AIH.
+2025-10-13 12:15:11,805 [ERROR] __init__:136 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 5898, in imprimir_aih
+    return abort(403, description="Somente médicos podem imprimir AIH.")
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/helpers.py", line 284, in abort
+    current_app.aborter(code, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.Forbidden: 403 Forbidden: Somente médicos podem imprimir AIH.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 50, in decorated_function
+    return f(*args, **kwargs)
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 5955, in imprimir_aih
+    return abort(500, description=f"Erro interno: {str(e)}")
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/helpers.py", line 284, in abort
+    current_app.aborter(code, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.InternalServerError: 500 Internal Server Error: Erro interno: 403 Forbidden: Somente médicos podem imprimir AIH.
+
+2025-10-13 12:15:41,412 [ERROR] __init__:135 - Erro 500: 500 Internal Server Error: Erro interno: 403 Forbidden: Somente médicos podem imprimir AIH.
+2025-10-13 12:15:41,413 [ERROR] __init__:136 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 5898, in imprimir_aih
+    return abort(403, description="Somente médicos podem imprimir AIH.")
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/helpers.py", line 284, in abort
+    current_app.aborter(code, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.Forbidden: 403 Forbidden: Somente médicos podem imprimir AIH.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 50, in decorated_function
+    return f(*args, **kwargs)
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 5955, in imprimir_aih
+    return abort(500, description=f"Erro interno: {str(e)}")
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/helpers.py", line 284, in abort
+    current_app.aborter(code, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.InternalServerError: 500 Internal Server Error: Erro interno: 403 Forbidden: Somente médicos podem imprimir AIH.
+
+2025-10-13 12:17:25,421 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-13 12:17:25,422 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-13 12:17:25,422 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-13 12:17:25,422 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-13 12:17:25,422 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-13 12:17:25,445 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-13 12:17:25,445 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-13 12:17:25,661 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-10-13 12:17:25,677 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-13 12:17:40,153 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-13 12:17:40,153 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-13 12:17:40,153 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-13 12:17:40,153 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-13 12:17:40,153 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-13 12:17:40,174 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-13 12:17:40,174 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-13 12:17:40,378 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-10-13 12:17:40,394 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-13 12:21:00,093 [ERROR] __init__:135 - Erro 500: 500 Internal Server Error: Erro interno: 500 Internal Server Error: Erro ao montar contexto: 'NoneType' object has no attribute 'nome'
+2025-10-13 12:21:00,093 [ERROR] __init__:136 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 5936, in imprimir_aih
+    'funcionario_nome': medico.nome or '',
+AttributeError: 'NoneType' object has no attribute 'nome'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 5942, in imprimir_aih
+    return abort(500, description=f"Erro ao montar contexto: {str(e)}")
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/helpers.py", line 284, in abort
+    current_app.aborter(code, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.InternalServerError: 500 Internal Server Error: Erro ao montar contexto: 'NoneType' object has no attribute 'nome'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 50, in decorated_function
+    return f(*args, **kwargs)
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 5955, in imprimir_aih
+    return abort(500, description=f"Erro interno: {str(e)}")
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/helpers.py", line 284, in abort
+    current_app.aborter(code, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/werkzeug/exceptions.py", line 876, in __call__
+    raise self.mapping[code](*args, **kwargs)
+werkzeug.exceptions.InternalServerError: 500 Internal Server Error: Erro interno: 500 Internal Server Error: Erro ao montar contexto: 'NoneType' object has no attribute 'nome'
+
+2025-10-13 12:22:25,913 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-13 12:22:25,913 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-13 12:22:25,913 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-13 12:22:25,913 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-13 12:22:25,913 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-13 12:22:25,938 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-13 12:22:25,939 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-13 12:22:26,175 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-10-13 12:22:26,192 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-13 12:22:40,672 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-13 12:22:40,672 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-13 12:22:40,672 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-13 12:22:40,672 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-13 12:22:40,672 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-13 12:22:40,694 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-13 12:22:40,694 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-13 12:22:40,903 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-10-13 12:22:40,920 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-13 12:45:53,279 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-13 12:45:53,279 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-13 12:45:53,279 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-13 12:45:53,279 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-13 12:45:53,279 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-13 12:45:53,283 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-13 12:45:53,283 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-13 12:45:53,421 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-10-13 12:45:53,423 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
