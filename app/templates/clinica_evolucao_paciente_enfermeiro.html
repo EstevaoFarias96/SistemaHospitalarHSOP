@@ -1692,6 +1692,181 @@
         }
 
         /* === FIM DOS ESTILOS PARA SISTEMA DE BUSCA === */
+        
+        /* === ESTILOS PARA FICHAS DE REFERÊNCIA === */
+        .fichas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 0.5rem;
+        }
+        .ficha-card {
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+        .ficha-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+            border-color: #cfe2ff;
+        }
+        .ficha-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #edf2f7;
+            background: linear-gradient(180deg, #fafbff 0%, #ffffff 100%);
+        }
+        .ficha-titulo .titulo-texto {
+            font-weight: 600;
+            color: #2d3748;
+        }
+        .ficha-metadados {
+            display: flex;
+            gap: 0.75rem;
+            color: #6c757d;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+        .ficha-actions {
+            display: flex;
+            gap: 0.4rem;
+        }
+        .btn-action {
+            width: 34px;
+            height: 34px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #fff;
+            color: #4a5568;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .btn-action:hover {
+            background: #f8fafc;
+            border-color: #cbd5e0;
+            color: #2b6cb0;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(43,108,176,0.15);
+        }
+        .btn-action.btn-print {
+            color: #198754;
+            border-color: #d1e7dd;
+        }
+        .btn-action.btn-print:hover {
+            background: #e9f7ef;
+            color: #146c43;
+            border-color: #badbcc;
+        }
+        .ficha-content {
+            padding: 0.85rem 1rem 1rem;
+        }
+        .campo-principal {
+            margin-bottom: 0.5rem;
+        }
+        .campo-label {
+            color: #6c757d;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+        .campo-valor {
+            color: #2d3748;
+            background: #f8fafc;
+            border: 1px solid #edf2f7;
+            border-radius: 8px;
+            padding: 0.5rem 0.75rem;
+        }
+        .destaque-unidade {
+            border-left: 4px solid #0d6efd;
+            background: linear-gradient(90deg, rgba(13,110,253,0.05), transparent 70%);
+        }
+        .campo-secundario {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .campo-label-pequeno {
+            color: #6c757d;
+            font-size: 0.8rem;
+            min-width: 110px;
+        }
+        .campo-valor-pequeno {
+            color: #495057;
+            font-size: 0.9rem;
+        }
+        .tem-mais-conteudo {
+            margin-top: 0.5rem;
+            color: #6c757d;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        #listaFichasReferencia .empty-state i { opacity: 0.5; }
+        #listaFichasReferencia .empty-state h6 { font-weight: 600; }
+        
+        /* Painel de estatísticas das fichas */
+        .stats-panel { margin-bottom: 0.75rem; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+        }
+        .stat-item {
+            background: #f8fafc;
+            border: 1px solid #edf2f7;
+            border-radius: 10px;
+            padding: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .stat-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: #e7f1ff;
+            color: #0d6efd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .stat-number { font-weight: 700; font-size: 1.1rem; color: #2d3748; }
+        .stat-label { color: #6c757d; font-size: 0.8rem; }
+        
+        /* Modal da Ficha de Referência */
+        .ficha-visualizacao .ficha-header-modal {
+            border-bottom: 1px solid #edf2f7;
+            margin-bottom: 0.75rem;
+        }
+        .ficha-visualizacao .campo-titulo-modal {
+            color: #6c757d;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .ficha-visualizacao .campo-conteudo-modal {
+            background: #f8fafc;
+            border: 1px solid #edf2f7;
+            border-radius: 8px;
+            padding: 0.75rem;
+            color: #2d3748;
+        }
+        .destaque-unidade-modal {
+            border-left: 4px solid #0d6efd;
+            background: linear-gradient(90deg, rgba(13,110,253,0.05), transparent 70%);
+        }
     </style>
     <script>
         // Ajuste global de fuso-horário
@@ -1806,6 +1981,14 @@ function abrirImpressoesEnfermagem() {
             <a class="nav-link" href="#" data-target="fichaReferenciaSection">
                 <i class="fas fa-file-export"></i>
                 <span>Fichas Ref.</span>
+            </a>
+            <a class="nav-link" href="#" data-target="receituariosSection">
+                <i class="fas fa-file-prescription"></i>
+                <span>Receituários</span>
+            </a>
+            <a class="nav-link" href="#" data-target="atestadosSection">
+                <i class="fas fa-file-signature"></i>
+                <span>Atestados</span>
             </a>
         </div>
 
@@ -2382,6 +2565,69 @@ function abrirImpressoesEnfermagem() {
                             <i class="fas fa-spinner fa-spin text-primary"></i>
                             Carregando fichas de referência...
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="receituariosSection" class="content-section">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-file-prescription me-2"></i>Receituários</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th style="width: 20%">Data</th>
+                                    <th style="width: 20%">Tipo</th>
+                                    <th style="width: 50%">Conteúdo</th>
+                                    <th style="width: 10%" class="text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaReceituarios">
+                                <tr>
+                                    <td colspan="4" class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visualmente-hidden">Carregando...</span>
+                                        </div>
+                                        <p class="mt-2 text-muted mb-0">Carregando receituários...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="atestadosSection" class="content-section">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-file-signature me-2"></i>Atestados</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-secondary">
+                                <tr>
+                                    <th style="width: 25%">Data</th>
+                                    <th style="width: 65%">Conteúdo</th>
+                                    <th style="width: 10%" class="text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaAtestados">
+                                <tr>
+                                    <td colspan="3" class="text-center py-4">
+                                        <div class="spinner-border text-secondary" role="status">
+                                            <span class="visualmente-hidden">Carregando...</span>
+                                        </div>
+                                        <p class="mt-2 text-muted mb-0">Carregando atestados...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -3382,8 +3628,29 @@ function abrirImpressoesEnfermagem() {
                 </div>
             </div>
         </div>
-    </div>
-</div>
+ </div>
+ </div>
+
+ <!-- Modal de Visualização de Ficha de Referência -->
+ <div class="modal fade" id="modalVisualizarFichaReferencia" tabindex="-1" aria-labelledby="modalVisualizarFichaReferenciaLabel" aria-hidden="true">
+     <div class="modal-dialog modal-lg">
+         <div class="modal-content">
+             <div class="modal-header">
+                 <h5 class="modal-title" id="modalVisualizarFichaReferenciaLabel">Ficha de Referência</h5>
+                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+             </div>
+             <div class="modal-body">
+                 <div class="text-center py-4">
+                     <i class="fas fa-spinner fa-spin fa-2x text-primary mb-3"></i>
+                     <p class="text-muted mb-0">Carregando ficha de referência...</p>
+                 </div>
+             </div>
+             <div class="modal-footer">
+                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+             </div>
+         </div>
+     </div>
+ </div>
 
 <!-- Bootstrap Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -3400,10 +3667,13 @@ function abrirImpressoesEnfermagem() {
 
 <!-- Adicionar o novo módulo completo de enfermagem -->
 <script src="/static/js/enfermagem_completo.js"></script>
+<script src="/static/js/clinica_medico.js"></script>
 <script src="/static/js/modal_ficha_fix.js"></script>
 
 <!-- Campo hidden para armazenar o cargo do usuário -->
 <input type="hidden" id="cargo_usuario" value="{{ session.get('cargo', '') }}">
+<!-- Campo hidden com o ID do atendimento para carregar fichas de referência corretamente -->
+<input type="hidden" id="atendimento_id" value="{{ internacao.atendimento_id }}">
 
 <script>
     // Extrair ID da internação - serialização segura sem quebrar o linter
@@ -3729,6 +3999,12 @@ function abrirImpressoesEnfermagem() {
                     document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
                     // Mostra a seção alvo
                     document.getElementById(target).classList.add('active');
+                    // Carregar dados on-demand
+                    if (target === 'receituariosSection') {
+                        carregarReceituariosSomenteLeitura();
+                    } else if (target === 'atestadosSection') {
+                        carregarAtestadosSomenteLeitura();
+                    }
                 }
             });
         });
@@ -3741,6 +4017,12 @@ function abrirImpressoesEnfermagem() {
         
         // Carregar evoluções ao iniciar
         carregarEvolucoes();
+
+        // Pré-carregar listas em background (somente leitura)
+        setTimeout(() => {
+            try { carregarReceituariosSomenteLeitura(); } catch (e) { console.warn('Erro preloading receituarios:', e); }
+            try { carregarAtestadosSomenteLeitura(); } catch (e) { console.warn('Erro preloading atestados:', e); }
+        }, 500);
         
         // Garantir que os botões de prescrição fichem sempre visíveis
         $('.prescricao-actions, .btn-print-discreto').css({
@@ -6268,6 +6550,97 @@ $(document).on('click', '.btn-ver-aprazamentos', function() {
                 }
             }, 1000); // Aguarda 1 segundo para garantir que a página carregou completamente
         };
+    }
+
+    // === RECEITUÁRIOS E ATESTADOS - SOMENTE LEITURA ===
+    function carregarReceituariosSomenteLeitura() {
+        const atendimentoId = window.ATENDIMENTO_ID || internacaoId;
+        if (!atendimentoId) return;
+        const tbody = document.getElementById('tabelaReceituarios');
+        if (!tbody) return;
+        // Evitar recarga se já carregado
+        if (tbody.dataset.loaded === '1') return;
+        $.ajax({
+            url: `/api/receituarios/${atendimentoId}`,
+            method: 'GET',
+            success: function(resp) {
+                if (!resp.success || !Array.isArray(resp.receituarios)) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Nenhum receituário encontrado.</td></tr>`;
+                    return;
+                }
+                if (resp.receituarios.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">Nenhum receituário encontrado.</td></tr>`;
+                    return;
+                }
+                // Mais recentes primeiro por data_receita
+                const items = resp.receituarios.slice().sort((a,b) => new Date(b.data_receita) - new Date(a.data_receita));
+                let html = '';
+                items.forEach(r => {
+                    const data = r.data_receita ? new Date(r.data_receita).toLocaleString('pt-BR') : '-';
+                    const tipo = (r.tipo_receita || '').toUpperCase();
+                    const preview = (r.conteudo_receita || '').replace(/<[^>]*>/g,'').slice(0,140) + (r.conteudo_receita && r.conteudo_receita.length>140 ? '...' : '');
+                    html += `
+                        <tr>
+                            <td class="align-middle">${data}</td>
+                            <td class="align-middle"><span class="badge bg-info-subtle text-info border">${tipo || '—'}</span></td>
+                            <td class="align-middle text-truncate" style="max-width: 520px;">${preview || '—'}</td>
+                            <td class="align-middle text-center">
+                                <button class="btn btn-sm btn-outline-primary" onclick="window.open('/clinica/receituario/${r.id}/imprimir_html', '_blank')">
+                                    <i class="fas fa-print"></i>
+                                </button>
+                            </td>
+                        </tr>`;
+                });
+                tbody.innerHTML = html;
+                tbody.dataset.loaded = '1';
+            },
+            error: function() {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center text-danger py-3">Erro ao carregar receituários.</td></tr>`;
+            }
+        });
+    }
+
+    function carregarAtestadosSomenteLeitura() {
+        const atendimentoId = window.ATENDIMENTO_ID || internacaoId;
+        if (!atendimentoId) return;
+        const tbody = document.getElementById('tabelaAtestados');
+        if (!tbody) return;
+        if (tbody.dataset.loaded === '1') return;
+        $.ajax({
+            url: `/api/atestados/${atendimentoId}`,
+            method: 'GET',
+            success: function(resp) {
+                if (!resp.success || !Array.isArray(resp.atestados)) {
+                    tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-3">Nenhum atestado encontrado.</td></tr>`;
+                    return;
+                }
+                if (resp.atestados.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-3">Nenhum atestado encontrado.</td></tr>`;
+                    return;
+                }
+                const items = resp.atestados.slice().sort((a,b) => new Date(b.data_atestado) - new Date(a.data_atestado));
+                let html = '';
+                items.forEach(a => {
+                    const data = a.data_atestado ? new Date(a.data_atestado).toLocaleString('pt-BR') : '-';
+                    const preview = (a.conteudo_atestado || '').replace(/<[^>]*>/g,'').slice(0,160) + (a.conteudo_atestado && a.conteudo_atestado.length>160 ? '...' : '');
+                    html += `
+                        <tr>
+                            <td class="align-middle">${data}</td>
+                            <td class="align-middle text-truncate" style="max-width: 560px;">${preview || '—'}</td>
+                            <td class="align-middle text-center">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="window.open('/clinica/atestado/${a.id}/imprimir', '_blank')">
+                                    <i class="fas fa-print"></i>
+                                </button>
+                            </td>
+                        </tr>`;
+                });
+                tbody.innerHTML = html;
+                tbody.dataset.loaded = '1';
+            },
+            error: function() {
+                tbody.innerHTML = `<tr><td colspan="3" class="text-center text-danger py-3">Erro ao carregar atestados.</td></tr>`;
+            }
+        });
     }
 </script>
 

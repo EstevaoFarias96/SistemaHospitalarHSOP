@@ -30455,3 +30455,183 @@ IndentationError: unexpected unindent
 2025-10-09 16:29:22,809 [INFO] __init__:72 - LoginManager inicializado com sucesso
 2025-10-09 16:29:22,988 [INFO] __init__:90 - Blueprints registrados com sucesso
 2025-10-09 16:29:22,991 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-13 11:21:52,607 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-13 11:21:52,607 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-13 11:21:52,607 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-13 11:21:52,607 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-13 11:21:52,607 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-13 11:21:52,612 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-13 11:21:52,612 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-13 11:21:52,660 [ERROR] __init__:92 - Erro ao registrar blueprint: invalid decimal literal (routes.py, line 1529)
+2025-10-13 11:21:52,660 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 87, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 1529
+    >>>>>>> 8e0a9307ce7a5ca3c7e6940ea0e842be5e351bbc
+              ^
+SyntaxError: invalid decimal literal
+
+2025-10-13 11:21:52,662 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-13 11:21:52,867 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-13 11:21:52,867 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-13 11:21:52,867 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-13 11:21:52,867 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-13 11:21:52,867 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-13 11:21:52,872 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-13 11:21:52,872 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-13 11:21:52,919 [ERROR] __init__:92 - Erro ao registrar blueprint: invalid decimal literal (routes.py, line 1529)
+2025-10-13 11:21:52,919 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 87, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 1529
+    >>>>>>> 8e0a9307ce7a5ca3c7e6940ea0e842be5e351bbc
+              ^
+SyntaxError: invalid decimal literal
+
+2025-10-13 11:21:52,922 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-13 11:22:04,346 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-13 11:22:04,346 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-13 11:22:04,346 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-13 11:22:04,346 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-13 11:22:04,346 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-13 11:22:04,372 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-13 11:22:04,372 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-13 11:22:04,419 [ERROR] __init__:92 - Erro ao registrar blueprint: invalid decimal literal (routes.py, line 1529)
+2025-10-13 11:22:04,420 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 87, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 1529
+    >>>>>>> 8e0a9307ce7a5ca3c7e6940ea0e842be5e351bbc
+              ^
+SyntaxError: invalid decimal literal
+
+2025-10-13 11:22:04,440 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-13 11:22:12,839 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-13 11:22:12,839 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-13 11:22:12,839 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-13 11:22:12,839 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-13 11:22:12,839 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-13 11:22:12,864 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-13 11:22:12,864 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-13 11:22:12,916 [ERROR] __init__:92 - Erro ao registrar blueprint: invalid decimal literal (routes.py, line 1529)
+2025-10-13 11:22:12,916 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 87, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 1529
+    >>>>>>> 8e0a9307ce7a5ca3c7e6940ea0e842be5e351bbc
+              ^
+SyntaxError: invalid decimal literal
+
+2025-10-13 11:22:12,930 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-13 11:22:21,216 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-13 11:22:21,216 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-13 11:22:21,216 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-13 11:22:21,216 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-13 11:22:21,216 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-13 11:22:21,241 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-13 11:22:21,241 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-13 11:22:21,292 [ERROR] __init__:92 - Erro ao registrar blueprint: invalid decimal literal (routes.py, line 1529)
+2025-10-13 11:22:21,292 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 87, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 1529
+    >>>>>>> 8e0a9307ce7a5ca3c7e6940ea0e842be5e351bbc
+              ^
+SyntaxError: invalid decimal literal
+
+2025-10-13 11:22:21,313 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-13 11:22:21,503 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-13 11:22:21,503 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-13 11:22:21,503 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-13 11:22:21,503 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-13 11:22:21,503 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-13 11:22:21,525 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-13 11:22:21,525 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-13 11:22:21,573 [ERROR] __init__:92 - Erro ao registrar blueprint: invalid decimal literal (routes.py, line 1529)
+2025-10-13 11:22:21,574 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 87, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 1529
+    >>>>>>> 8e0a9307ce7a5ca3c7e6940ea0e842be5e351bbc
+              ^
+SyntaxError: invalid decimal literal
+
+2025-10-13 11:22:21,588 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-13 11:23:04,819 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-13 11:23:04,819 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-13 11:23:04,819 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-13 11:23:04,819 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-13 11:23:04,819 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-13 11:23:04,839 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-13 11:23:04,839 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-13 11:23:04,878 [ERROR] __init__:92 - Erro ao registrar blueprint: invalid decimal literal (routes.py, line 1529)
+2025-10-13 11:23:04,879 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 87, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 1529
+    >>>>>>> 8e0a9307ce7a5ca3c7e6940ea0e842be5e351bbc
+              ^
+SyntaxError: invalid decimal literal
+
+2025-10-13 11:23:04,893 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-13 11:23:05,097 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-13 11:23:05,097 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-13 11:23:05,097 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-13 11:23:05,097 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-13 11:23:05,097 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-13 11:23:05,120 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-13 11:23:05,120 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-13 11:23:05,167 [ERROR] __init__:92 - Erro ao registrar blueprint: invalid decimal literal (routes.py, line 1529)
+2025-10-13 11:23:05,167 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 87, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 1529
+    >>>>>>> 8e0a9307ce7a5ca3c7e6940ea0e842be5e351bbc
+              ^
+SyntaxError: invalid decimal literal
+
+2025-10-13 11:23:05,181 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-13 11:24:04,258 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-13 11:24:04,258 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-13 11:24:04,258 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-13 11:24:04,258 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-13 11:24:04,258 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-13 11:24:04,282 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-13 11:24:04,282 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-13 11:24:04,375 [ERROR] __init__:92 - Erro ao registrar blueprint: invalid decimal literal (routes.py, line 8573)
+2025-10-13 11:24:04,375 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 87, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 8573
+    >>>>>>> 8e0a9307ce7a5ca3c7e6940ea0e842be5e351bbc
+              ^
+SyntaxError: invalid decimal literal
+
+2025-10-13 11:24:04,391 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-13 11:24:13,845 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-13 11:24:13,845 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-13 11:24:13,845 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-13 11:24:13,845 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-13 11:24:13,845 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-13 11:24:13,873 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-13 11:24:13,873 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-13 11:24:14,130 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-10-13 11:24:14,148 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-13 11:24:27,625 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-13 11:24:27,625 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-13 11:24:27,625 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-13 11:24:27,625 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-13 11:24:27,625 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-13 11:24:27,649 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-13 11:24:27,649 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-13 11:24:27,875 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-10-13 11:24:27,889 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-13 12:03:00,456 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-13 12:03:00,456 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-13 12:03:00,456 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-13 12:03:00,456 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-13 12:03:00,456 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-13 12:03:00,461 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-13 12:03:00,461 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-13 12:03:00,624 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-10-13 12:03:00,626 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas

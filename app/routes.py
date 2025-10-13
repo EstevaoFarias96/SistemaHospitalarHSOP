@@ -1107,7 +1107,6 @@ def painel_multi():
         flash('Erro ao acessar o painel. Por favor, tente novamente.', 'danger')
         return redirect(url_for('main.index'))
 
-<<<<<<< HEAD
 @bp.route('/administrador')
 @login_required
 def painel_administrador():
@@ -1525,8 +1524,6 @@ def visualizar_relatorio():
         flash('Erro ao visualizar relatório.', 'danger')
         return redirect(url_for('main.relatorios_admin'))
 
-=======
->>>>>>> 8e0a9307ce7a5ca3c7e6940ea0e842be5e351bbc
 @bp.route('/api/pacientes/internados')
 @login_required
 def listar_pacientes_internados():
@@ -8570,10 +8567,7 @@ def imprimir_receita(receita_id):
             paciente_endereco=paciente.endereco,
             paciente_filiacao=paciente.filiacao,
             paciente_cartao_sus=paciente.cartao_sus,
-<<<<<<< HEAD
             paciente_data_nascimento=paciente.data_nascimento.strftime('%d/%m/%Y') if paciente.data_nascimento else None,
-=======
->>>>>>> 8e0a9307ce7a5ca3c7e6940ea0e842be5e351bbc
             receituario_receita=Markup(conteudo_receita),
             data_hoje=data_hoje
         )
@@ -8642,10 +8636,7 @@ def imprimir_receita_comum(receita_id):
         paciente_endereco=paciente.endereco,
         paciente_filiacao=paciente.filiacao,
         paciente_cartao_sus=paciente.cartao_sus,
-<<<<<<< HEAD
         paciente_data_nascimento=paciente.data_nascimento.strftime('%d/%m/%Y') if paciente.data_nascimento else None,
-=======
->>>>>>> 8e0a9307ce7a5ca3c7e6940ea0e842be5e351bbc
         receituario_receita=Markup(conteudo_receita),
         data_hoje=data_hoje
     )
