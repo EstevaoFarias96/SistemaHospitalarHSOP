@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+<<<<<<< HEAD
 import argparse
 from urllib.parse import urlparse, urlunparse
 
@@ -36,11 +37,24 @@ def mask_uri(uri: str) -> str:
 def create_app(database_uri: str) -> Flask:
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
+=======
+
+DATABASE_URL = "postgresql://hsop_db_user:KuCEMigzHdk8JW1Ku0shmR0pRZH1t44x@dpg-d11q0pruibrs73eg3o60-a.virginia-postgres.render.com/hsop_db?sslmode=require"
+
+db = SQLAlchemy()
+
+def create_app():
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+>>>>>>> 8e0a9307ce7a5ca3c7e6940ea0e842be5e351bbc
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
     return app
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 8e0a9307ce7a5ca3c7e6940ea0e842be5e351bbc
 class Funcionario(db.Model):
     __tablename__ = 'funcionarios'
     id = db.Column(db.Integer, primary_key=True)
@@ -72,6 +86,7 @@ class Funcionario(db.Model):
     def is_anonymous(self):
         return False
 
+<<<<<<< HEAD
 
 def registrar_medico_teste():
     medico_teste = {
@@ -88,6 +103,26 @@ def registrar_medico_teste():
 
     existente = Funcionario.query.filter_by(cpf=medico_teste["cpf"]).first()
     if existente:
+=======
+app = create_app()
+
+def registrar_medico_teste():
+    medico_teste = {
+    "nome": "Isabely Azevedo Frota Mont Alverne",
+    "data_nascimento": datetime.strptime("1987-11-09", "%Y-%m-%d").date(),
+    "cpf": "600.173.953-64",
+    "email": "draisabelymontalverne@gmail.com",
+    "telefone": "(21)979085878",
+    "senha": "123",
+    "cargo": "Medico",
+    "tipo_contrato": "Contratado",
+    "numero_profissional": "29885"
+}
+
+
+
+    if Funcionario.query.filter_by(cpf=medico_teste["cpf"]).first():
+>>>>>>> 8e0a9307ce7a5ca3c7e6940ea0e842be5e351bbc
         print("Médico já registrado.")
         return
 
@@ -106,7 +141,10 @@ def registrar_medico_teste():
     db.session.commit()
     print("Médico registrado com sucesso!")
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 8e0a9307ce7a5ca3c7e6940ea0e842be5e351bbc
 def listar_funcionarios():
     funcionarios = Funcionario.query.all()
     if funcionarios:
@@ -116,6 +154,7 @@ def listar_funcionarios():
     else:
         print("Nenhum funcionário cadastrado.")
 
+<<<<<<< HEAD
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Registrar médico de teste na base (prod/dev)")
@@ -128,6 +167,9 @@ if __name__ == "__main__":
 
     print(f"Conectando ao banco ({args.env}): {mask_uri(uri)}")
     app = create_app(uri)
+=======
+if __name__ == "__main__":
+>>>>>>> 8e0a9307ce7a5ca3c7e6940ea0e842be5e351bbc
     with app.app_context():
         registrar_medico_teste()
         listar_funcionarios()

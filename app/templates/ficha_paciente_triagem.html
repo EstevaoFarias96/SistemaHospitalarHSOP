@@ -121,10 +121,17 @@
               <div class="col-md-4">
                 <label for="pressao" class="form-label">Pressão <span class="required-asterisk">*</span></label>
                 <div class="input-group">
+<<<<<<< HEAD
                   <input type="text" class="form-control" id="pressao" name="pressao" required inputmode="numeric" maxlength="7" pattern="^\d{2,3}/\d{2,3}$" title="Formato: NN/NN ou NNN/NN (use /)" oninput="let v=this.value.replace(/[^0-9]/g,'').slice(0,6); if(v.length<=2){ this.value=v; } else if(v.length<=4){ this.value=v.slice(0,2)+'/'+v.slice(2); } else { this.value=v.slice(0,3)+'/'+v.slice(3,5); }">
                   <span class="input-group-text">mmHg</span>
                 </div>
                 <div class="invalid-feedback">Informe no formato NN/NN ou NNN/NN.</div>
+=======
+                  <input type="text" class="form-control" id="pressao" name="pressao" required inputmode="numeric" maxlength="6" pattern="^\\d{3}/\\d{2}$" title="Formato: NNN/NN" oninput="var v=this.value.replace(/[^0-9]/g,'').slice(0,5); this.value = v.length>3 ? v.slice(0,3)+'/'+v.slice(3) : v;">
+                  <span class="input-group-text">mmHg</span>
+                </div>
+                <div class="invalid-feedback">Informe no formato NNN/NN.</div>
+>>>>>>> 8e0a9307ce7a5ca3c7e6940ea0e842be5e351bbc
               </div>
               <div class="col-md-4">
                 <label for="pulso" class="form-label">Pulso <span class="required-asterisk">*</span></label>
@@ -147,7 +154,11 @@
               <div class="col-md-4">
                 <label for="temp" class="form-label">Temperatura <span class="required-asterisk">*</span></label>
                 <div class="input-group">
+<<<<<<< HEAD
                   <input type="text" class="form-control" id="temp" name="temp" required inputmode="numeric" maxlength="4" pattern="^\d{2},\d$" title="Formato: NN,N" oninput="let d=this.value.replace(/\D/g,'').slice(0,3); this.value = d.length<=2 ? d : d.slice(0,2)+','+d.slice(2);">
+=======
+                  <input type="text" class="form-control" id="temp" name="temp" required inputmode="numeric" maxlength="4" pattern="^\\d{2},\\d$" title="Formato: NN,N" oninput="var v=this.value.replace(/[^0-9]/g,'').slice(0,3); this.value = v.length>2 ? v.slice(0,2)+','+v.slice(2,3) : v;">
+>>>>>>> 8e0a9307ce7a5ca3c7e6940ea0e842be5e351bbc
                   <span class="input-group-text">°C</span>
                 </div>
                 <div class="invalid-feedback">Campo obrigatório.</div>
@@ -155,7 +166,11 @@
               <div class="col-md-4">
                 <label for="peso" class="form-label">Peso <span class="required-asterisk">*</span></label>
                 <div class="input-group">
+<<<<<<< HEAD
                   <input type="text" class="form-control" id="peso" name="peso" required inputmode="decimal" pattern="^\d*(\.\d+)?$" title="Use apenas números, ponto ou vírgula" oninput="this.value = this.value.replace(/[^0-9,\\.]/g, '').replace(/,/g,'.').replace(/(\\..*)\\./g, '$1')">
+=======
+                  <input type="text" class="form-control" id="peso" name="peso" required inputmode="decimal" pattern="^\\d*(\\.\\d+)?$" title="Use apenas números e ponto (.)" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\\..*)\\./g, '$1')">
+>>>>>>> 8e0a9307ce7a5ca3c7e6940ea0e842be5e351bbc
                   <span class="input-group-text">kg</span>
                 </div>
                 <div class="invalid-feedback">Campo obrigatório.</div>
@@ -163,7 +178,11 @@
               <div class="col-md-4">
                 <label for="altura" class="form-label">Altura (cm)</label>
                 <div class="input-group">
+<<<<<<< HEAD
                   <input type="text" class="form-control" id="altura" name="altura" inputmode="numeric" pattern="\d+" title="Informe apenas números (cm)" oninput="this.value = this.value.replace(/\D/g, '')">
+=======
+                  <input type="text" class="form-control" id="altura" name="altura" inputmode="numeric" pattern="\\d+" title="Informe apenas números (cm)" oninput="this.value = this.value.replace(/\\D/g, '')">
+>>>>>>> 8e0a9307ce7a5ca3c7e6940ea0e842be5e351bbc
                   <span class="input-group-text">cm</span>
                 </div>
                 <div class="invalid-feedback">Informe apenas números (cm).</div>

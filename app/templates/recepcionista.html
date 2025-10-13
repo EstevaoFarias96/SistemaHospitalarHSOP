@@ -228,10 +228,13 @@
     .sidebar .nav-link:active {
       transform: translateX(2px);
     }
+<<<<<<< HEAD
     /* Fichas de Referência (agrupadas por atendimento) */
     .attn-card + .attn-card { border-top: 1px solid #eee; }
     .attn-group-header .btn-toggle { min-width: 36px; }
     .table-fichas td, .table-fichas th { vertical-align: middle; }
+=======
+>>>>>>> 8e0a9307ce7a5ca3c7e6940ea0e842be5e351bbc
   </style>
 </head>
 <body>
@@ -1975,6 +1978,7 @@
             return;
           }
 
+<<<<<<< HEAD
           // Agrupar por atendimento
           const grupos = {};
           fichas.forEach(f => {
@@ -2099,6 +2103,37 @@
           $('#btnRecolherTodasFichas').off('click').on('click', function() {
             $('.attn-collapse').collapse('hide');
           });
+=======
+          let html = '<ul class="list-group list-group-flush">';
+          fichas.forEach(f => {
+            const dataHora = `${f.data} ${f.hora}`;
+            const pacienteNome = f.paciente_nome || 'Paciente';
+            const medicoNome = f.medico_nome || 'Médico';
+            const status = f.status_atendimento || '-';
+            html += `
+              <li class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <div class="font-weight-bold text-primary">${pacienteNome}</div>
+                    <div class="small text-muted">Atendimento: ${f.atendimento_id} • ${dataHora} • ${status}</div>
+                    <div class="small">${f.procedimento || f.texto_referencia || ''}</div>
+                    ${f.unidade_referencia ? `<div class="small text-muted">Unidade de Referência: ${f.unidade_referencia}</div>` : ''}
+                    <div class="small text-muted">Médico: ${medicoNome}</div>
+                  </div>
+                  <div class="btn-group btn-group-sm" role="group">
+                    <a class="btn btn-outline-info" href="/ficha_geral_paciente?paciente_id=${f.paciente_id}" target="_blank" title="Abrir ficha do paciente">
+                      <i class="fas fa-file-alt"></i>
+                    </a>
+                    <button class="btn btn-outline-success" onclick="criarFichaAtendimento(${f.paciente_id})" title="Criar ficha de atendimento">
+                      <i class="fas fa-plus-circle"></i>
+                    </button>
+                  </div>
+                </div>
+              </li>`;
+          });
+          html += '</ul>';
+          container.html(html);
+>>>>>>> 8e0a9307ce7a5ca3c7e6940ea0e842be5e351bbc
         })
         .catch(err => {
           container.html('<div class="p-3 text-danger">Erro ao carregar fichas de referência ativas.</div>');
@@ -2198,6 +2233,7 @@
         });
     }
   </script>
+<<<<<<< HEAD
   <!-- Modal: Visualizar Ficha de Referência -->
   <div class="modal fade" id="modalFichaReferencia" tabindex="-1" role="dialog" aria-labelledby="modalFichaReferenciaLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
@@ -2223,6 +2259,8 @@
       </div>
     </div>
   </div>
+=======
+>>>>>>> 8e0a9307ce7a5ca3c7e6940ea0e842be5e351bbc
   <!-- Modal Buscar Paciente -->
   <div class="modal fade" id="modalBuscarPaciente" tabindex="-1" role="dialog" aria-labelledby="modalBuscarPacienteLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
@@ -2582,6 +2620,7 @@
         helpText.removeClass('text-success').addClass('text-danger');
       }
     });
+<<<<<<< HEAD
     
     // ====== MODAL FICHA DE REFERÊNCIA ======
     function abrirModalFichaReferencia(btn) {
@@ -2643,6 +2682,8 @@
         alert('Não foi possível abrir a ficha de referência.');
       }
     }
+=======
+>>>>>>> 8e0a9307ce7a5ca3c7e6940ea0e842be5e351bbc
   </script>
 
 </body>
