@@ -55,57 +55,119 @@ $(document).ready(function() {
 // ========== EVOLUÇÃO DE ENFERMAGEM ==========
 
 function carregarEvolucoesEnfermagem(silencioso = false) {
-    if (!internacaoId) {
-        console.error('ID da internação não definido');
+    const idInternacao = window.internacaoId || internacaoId;
+    
+    if (!idInternacao) {
+        console.error('❌ ID da internação não definido para evoluções de enfermagem');
         return;
     }
     
-    console.log('Carregando evoluções de enfermagem para internação:', internacaoId);
-    
-    // Mostrar loading apenas se não for um carregamento silencioso
-    if (!silencioso) {
-        mostrarLoadingEvolucoes();
-    }
+    console.log('🔄 Carregando evoluções de enfermagem para internação:', idInternacao);
     
     $.ajax({
-        url: `/api/enfermagem/evolucao/${internacaoId}`,
+        url: `/api/enfermagem/evolucao/${idInternacao}`,
         method: 'GET',
         success: function(response) {
-            console.log('Evoluções recebidas:', response);
+            console.log('✅ Evoluções de enfermagem recebidas:', response);
             
-            // Separar evoluções de hoje e anteriores
-            const hoje = new Date().toLocaleDateString('pt-BR');
-            const evolucoesDoDia = [];
-            const evolucoesAntigas = [];
-            
-            if (Array.isArray(response)) {
-                response.forEach(ev => {
-                    const dataEv = new Date(ev.data_evolucao);
-                    const dataFormatada = dataEv.toLocaleDateString('pt-BR');
-                    
-                    if (dataFormatada === hoje) {
-                        evolucoesDoDia.push(ev);
-                    } else {
-                        evolucoesAntigas.push(ev);
-                    }
-                });
+            if (!Array.isArray(response)) {
+                console.error('❌ Resposta não é um array:', response);
+                return;
             }
             
-            // Atualizar contador
-            $('#contador-evolucoes-antigas').text(evolucoesAntigas.length);
+            // Separar evoluções de hoje e anteriores para contadores
+            const hoje = new Date().toLocaleDateString('pt-BR');
+            let evolucoesDoDia = 0;
+            let evolucoesAntigas = 0;
             
-            // Renderizar evoluções do dia
-            renderizarEvolucoesDia(evolucoesDoDia);
+            response.forEach(ev => {
+                const dataEv = new Date(ev.data_evolucao);
+                const dataFormatada = dataEv.toLocaleDateString('pt-BR');
+                
+                if (dataFormatada === hoje) {
+                    evolucoesDoDia++;
+                } else {
+                    evolucoesAntigas++;
+                }
+            });
             
-            // Renderizar evoluções antigas
-            renderizarEvolucoesAntigas(evolucoesAntigas);
+            console.log(`📊 Total de evoluções: ${response.length}`);
+            console.log(`📅 Evoluções de hoje: ${evolucoesDoDia}`);
+            console.log(`📅 Evoluções antigas: ${evolucoesAntigas}`);
+            
+            // Atualizar contadores
+            $('#contador-evolucoes-total').text(response.length);
+            $('#contador-evolucoes-hoje-resumo').text(evolucoesDoDia);
+            $('#contador-evolucoes-antigas').text(evolucoesAntigas);
+            
+            // Renderizar TODAS as evoluções em uma única tabela
+            renderizarTodasEvolucoes(response);
         },
         error: function(xhr, status, error) {
-            console.error('Erro ao carregar evoluções:', error);
-            $('#listaEvolucoesDoDia').html('<tr><td colspan="3" class="text-center text-danger">Erro ao carregar evoluções.</td></tr>');
-            $('#listaEvolucoesAntigas').html('<tr><td colspan="3" class="text-center text-danger">Erro ao carregar evoluções.</td></tr>');
+            console.error('❌ Erro ao carregar evoluções:', error);
+            $('#tabela-evolucoes-enfermagem').html('<tr><td colspan="3" class="text-center text-danger">Erro ao carregar evoluções.</td></tr>');
         }
     });
+}
+
+// Função para renderizar todas as evoluções em uma única tabela
+function renderizarTodasEvolucoes(evolucoes) {
+    console.log('📝 renderizarTodasEvolucoes chamada com:', evolucoes ? evolucoes.length : 0, 'evoluções');
+    const tbody = $('#tabela-evolucoes-enfermagem');
+    
+    if (!tbody || tbody.length === 0) {
+        console.error('❌ Elemento #tabela-evolucoes-enfermagem não encontrado!');
+        console.log('Tentando encontrar tabelas disponíveis:', $('tbody[id*="evolucoes"]').map(function() { return this.id; }).get());
+        return;
+    }
+    
+    console.log('✅ Tabela encontrada, limpando conteúdo...');
+    tbody.empty();
+    
+    if (!evolucoes || evolucoes.length === 0) {
+        console.log('ℹ️ Nenhuma evolução para renderizar');
+        tbody.html('<tr><td colspan="3" class="text-center text-muted py-4"><i class="fas fa-info-circle me-2"></i>Nenhuma evolução registrada.</td></tr>');
+        return;
+    }
+    
+    // Ordenar por data/hora (mais recente primeiro)
+    evolucoes.sort((a, b) => new Date(b.data_evolucao) - new Date(a.data_evolucao));
+    
+    const hoje = new Date().toLocaleDateString('pt-BR');
+    let html = '';
+    
+    evolucoes.forEach((ev, index) => {
+        const dataObj = new Date(ev.data_evolucao);
+        const dataFormatada = dataObj.toLocaleDateString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
+        const hora = dataObj.toLocaleTimeString('pt-BR', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        // Verificar se é de hoje para adicionar badge
+        const ehHoje = dataFormatada === hoje;
+        const badgeHoje = ehHoje ? ' <span class="badge bg-success">HOJE</span>' : '';
+        const classeRow = ehHoje ? 'table-success' : '';
+        
+        html += `
+            <tr class="${classeRow}">
+                <td>${dataFormatada} ${hora}${badgeHoje}</td>
+                <td>${ev.enfermeiro_nome || 'Não informado'}</td>
+                <td>
+                    <div class="texto-evolucao">
+                        ${ev.texto || '---'}
+                    </div>
+                </td>
+            </tr>
+        `;
+    });
+    
+    tbody.html(html);
+    console.log(`✅ ${evolucoes.length} evoluções renderizadas na tabela única!`);
 }
 
 function renderizarEvolucoesDia(evolucoes) {
@@ -136,15 +198,26 @@ function renderizarEvolucoesDia(evolucoes) {
 }
 
 function renderizarEvolucoesAntigas(evolucoes) {
+    console.log('📅 renderizarEvolucoesAntigas chamada com:', evolucoes);
     const tbody = $('#tabela-evolucoes-antigas');
+    
+    if (!tbody || tbody.length === 0) {
+        console.error('❌ Elemento #tabela-evolucoes-antigas não encontrado!');
+        return;
+    }
+    
     tbody.empty();
     
-    if (evolucoes.length === 0) {
+    if (!evolucoes || evolucoes.length === 0) {
+        console.log('ℹ️ Nenhuma evolução antiga para renderizar');
         tbody.html('<tr><td colspan="3" class="text-center text-muted">Nenhuma evolução anterior encontrada.</td></tr>');
         return;
     }
     
-    evolucoes.forEach(ev => {
+    console.log(`✅ Renderizando ${evolucoes.length} evoluções antigas`);
+    
+    evolucoes.forEach((ev, index) => {
+        console.log(`Renderizando evolução antiga ${index + 1}:`, ev);
         const dataObj = new Date(ev.data_evolucao);
         const dataFormatada = dataObj.toLocaleDateString('pt-BR', {
             day: '2-digit',
@@ -169,24 +242,12 @@ function renderizarEvolucoesAntigas(evolucoes) {
             </tr>
         `);
     });
+    
+    console.log('✅ Evoluções antigas renderizadas com sucesso!');
 }
 
 function configurarEventosEvolucao() {
-    // Toggle evoluções antigas
-    $('#toggle-evolucoes-antigas').on('click', function() {
-        const container = $('#antigas-container');
-        const isVisible = container.is(':visible');
-        
-        if (isVisible) {
-            container.hide();
-            $(this).find('span').text('Mostrar Antigas');
-            $(this).find('i').removeClass('fa-eye-slash').addClass('fa-eye');
-        } else {
-            container.show();
-            $(this).find('span').text('Ocultar Antigas');
-            $(this).find('i').removeClass('fa-eye').addClass('fa-eye-slash');
-        }
-    });
+    // Toggle não é mais necessário - todas as evoluções são mostradas juntas
     
     // Filtro de data
     $('#btn-filtrar-data').on('click', function() {

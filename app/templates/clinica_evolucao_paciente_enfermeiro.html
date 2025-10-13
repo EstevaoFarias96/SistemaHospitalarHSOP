@@ -214,7 +214,7 @@
             top: 0;
             padding-top: 20px;
             transition: all 0.3s ease;
-            overflow: hidden;
+            overflow: visible;
             z-index: 1000;
             box-shadow: var(--shadow-soft);
         }
@@ -222,6 +222,44 @@
         .sidebar:hover {
             width: 200px;
             box-shadow: var(--shadow-strong);
+        }
+        
+        /* Submenu */
+        .nav-item-with-submenu {
+            position: relative;
+        }
+        
+        .submenu {
+            position: absolute;
+            left: 100%;
+            top: 0;
+            min-width: 180px;
+            background: linear-gradient(180deg, var(--primary-main) 0%, var(--primary-light) 100%);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(-10px);
+            transition: all 0.3s ease;
+            z-index: 1001;
+            margin-left: 5px;
+        }
+        
+        .sidebar:hover .nav-item-with-submenu:hover .submenu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+        }
+        
+        .submenu .nav-link {
+            padding: 10px 15px;
+            margin: 5px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+        
+        .submenu .nav-link:hover {
+            background-color: rgba(255,255,255,0.15);
         }
         
         .nav-pills {
@@ -1968,12 +2006,35 @@ function abrirImpressoesEnfermagem() {
             </a>
             <a class="nav-link" href="#" data-target="evolucaoSection">
                 <i class="fas fa-notes-medical"></i>
-                <span>Evolução</span>
+                <span>Evolução Médica</span>
             </a>
-            <a class="nav-link active" href="#" data-target="enfermagemSection">
-                <i class="fas fa-user-nurse"></i>
-                <span>Enfermagem</span>
-            </a>
+            
+            <!-- Menu Enfermagem com Submenu -->
+            <div class="nav-item-with-submenu">
+                <a class="nav-link active" href="#" data-target="evolucaoEnfermagemSection">
+                    <i class="fas fa-user-nurse"></i>
+                    <span>Enfermagem</span>
+                </a>
+                <div class="submenu">
+                    <a class="nav-link" href="#" data-target="admissaoEnfermagemSection">
+                        <i class="fas fa-user-plus me-2"></i>
+                        <span>Admissão</span>
+                    </a>
+                    <a class="nav-link" href="#" data-target="evolucaoEnfermagemSection">
+                        <i class="fas fa-heartbeat me-2"></i>
+                        <span>Evolução</span>
+                    </a>
+                    <a class="nav-link" href="#" data-target="prescricaoEnfermagemSection">
+                        <i class="fas fa-prescription-bottle-alt me-2"></i>
+                        <span>Prescrição</span>
+                    </a>
+                    <a class="nav-link" href="#" data-target="saeSection">
+                        <i class="fas fa-clipboard-check me-2"></i>
+                        <span>SAE</span>
+                    </a>
+                </div>
+            </div>
+            
             <a class="nav-link" href="#" data-target="examesSection">
                 <i class="fas fa-vial"></i>
                 <span>Exames Lab.</span>
@@ -2644,7 +2705,8 @@ function abrirImpressoesEnfermagem() {
             </div>
         </div>
 
-        <div id="enfermagemSection" class="content-section active">
+        <!-- Seção de Admissão de Enfermagem -->
+        <div id="admissaoEnfermagemSection" class="content-section">
             <!-- Admissão de Enfermagem -->
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
@@ -2687,7 +2749,10 @@ function abrirImpressoesEnfermagem() {
                     </div>
                 </div>
             </div>
+        </div>
 
+        <!-- Seção de Evoluções de Enfermagem -->
+        <div id="evolucaoEnfermagemSection" class="content-section active">
             <!-- Evoluções de Enfermagem -->
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
@@ -2698,50 +2763,28 @@ function abrirImpressoesEnfermagem() {
                             <i class="fas fa-plus me-1"></i>Nova Evolução
                         </button>
                         {% endif %}
-                        <button class="btn btn-sm btn-outline-light" id="toggle-evolucoes-antigas">
-                            <i class="fas fa-eye me-1"></i>
-                            <span id="toggle-evolucoes-text">Ver Antigas</span>
-                        </button>
                     </div>
                 </div>
                 <div class="card-body">
-                    <!-- Filtros e Resumo -->
-                    <div class="row mb-4">
-                        <div class="col-lg-6 col-md-12 mb-3">
-                            <div class="card border-0 bg-light h-100">
-                                <div class="card-body py-3">
-                                    <h6 class="card-title mb-3"><i class="fas fa-filter me-2"></i>Filtros</h6>
-                                    <div class="row align-items-end">
-                                        <div class="col-8">
-                                            <label for="filtro-data" class="form-label small">Filtrar por data:</label>
-                                            <input type="date" id="filtro-data" class="form-control form-control-sm">
-                                        </div>
+                    <!-- Resumo -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body py-2">
+                                    <div class="row text-center">
                                         <div class="col-4">
-                                            <div class="d-flex gap-1">
-                                                <button class="btn btn-sm btn-primary" id="btn-filtrar-data" title="Filtrar">
-                                                    <i class="fas fa-search"></i>
-                                                </button>
-                                                <button class="btn btn-sm btn-outline-secondary" id="btn-limpar-filtro" title="Limpar">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
+                                            <div class="p-2 bg-info bg-opacity-10 rounded">
+                                                <div class="h5 mb-1 text-info" id="contador-evolucoes-total">0</div>
+                                                <small class="text-muted">Total</small>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-12 mb-3">
-                            <div class="card border-0 bg-light h-100">
-                                <div class="card-body py-3">
-                                    <h6 class="card-title mb-3"><i class="fas fa-chart-bar me-2"></i>Resumo</h6>
-                                    <div class="row text-center">
-                                        <div class="col-6">
+                                        <div class="col-4">
                                             <div class="p-2 bg-success bg-opacity-10 rounded">
                                                 <div class="h5 mb-1 text-success" id="contador-evolucoes-hoje-resumo">0</div>
                                                 <small class="text-muted">Hoje</small>
                                             </div>
                                         </div>
-                                        <div class="col-6">
+                                        <div class="col-4">
                                             <div class="p-2 bg-secondary bg-opacity-10 rounded">
                                                 <div class="h5 mb-1 text-secondary" id="contador-evolucoes-antigas">0</div>
                                                 <small class="text-muted">Anteriores</small>
@@ -2753,84 +2796,42 @@ function abrirImpressoesEnfermagem() {
                         </div>
                     </div>
                     
-                    <!-- Evoluções de Hoje -->
-                    <div class="mb-4" id="hoje-container">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="fw-bold text-success mb-0">
-                                <i class="fas fa-calendar-day me-2"></i>
-                                <span id="titulo-evolucoes-hoje">Evoluções de Hoje</span>
-                            </h6>
-                        </div>
-                        <div class="card border-success border-opacity-25">
-                            <div class="table-responsive">
-                                <table class="table table-hover mb-0">
-                                    <thead class="table-success">
-                                        <tr>
-                                            <th scope="col" style="width: 15%" class="fw-semibold">
-                                                <i class="fas fa-clock me-1"></i>Horário
-                                            </th>
-                                            <th scope="col" style="width: 25%" class="fw-semibold">
-                                                <i class="fas fa-user-nurse me-1"></i>Enfermeiro(a)
-                                            </th>
-                                            <th scope="col" style="width: 60%" class="fw-semibold">
-                                                <i class="fas fa-notes-medical me-1"></i>Evolução
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tabela-evolucoes-hoje">
-                                        <tr>
-                                            <td colspan="3" class="text-center py-4">
-                                                <div class="spinner-border text-success" role="status">
-                                                    <span class="visually-hidden">Carregando...</span>
-                                                </div>
-                                                <p class="text-muted mt-2 mb-0">Carregando evoluções de hoje...</p>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Evoluções Antigas -->
-                    <div class="mb-4" id="antigas-container" style="display: none;">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="fw-bold text-secondary mb-0">
-                                <i class="fas fa-calendar-alt me-2"></i>Evoluções Anteriores
-                            </h6>
-                        </div>
-                        <div class="card border-secondary border-opacity-25">
-                            <div class="table-responsive">
-                                <table class="table table-hover mb-0">
-                                    <thead class="table-secondary">
-                                        <tr>
-                                            <th scope="col" style="width: 20%" class="fw-semibold">
-                                                <i class="fas fa-clock me-1"></i>Data/Hora
-                                            </th>
-                                            <th scope="col" style="width: 25%" class="fw-semibold">
-                                                <i class="fas fa-user-nurse me-1"></i>Enfermeiro(a)
-                                            </th>
-                                            <th scope="col" style="width: 55%" class="fw-semibold">
-                                                <i class="fas fa-notes-medical me-1"></i>Evolução
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tabela-evolucoes-antigas">
-                                        <tr>
-                                            <td colspan="3" class="text-center py-3">
-                                                <div class="text-muted">
-                                                    <i class="fas fa-info-circle me-2"></i>Clique em "Ver Antigas" para carregar evoluções anteriores
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                    <!-- Todas as Evoluções em uma única tabela -->
+                    <div class="card border-info border-opacity-25">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-info">
+                                    <tr>
+                                        <th scope="col" style="width: 20%" class="fw-semibold">
+                                            <i class="fas fa-clock me-1"></i>Data/Hora
+                                        </th>
+                                        <th scope="col" style="width: 25%" class="fw-semibold">
+                                            <i class="fas fa-user-nurse me-1"></i>Enfermeiro(a)
+                                        </th>
+                                        <th scope="col" style="width: 55%" class="fw-semibold">
+                                            <i class="fas fa-notes-medical me-1"></i>Evolução
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-evolucoes-enfermagem">
+                                    <tr>
+                                        <td colspan="3" class="text-center py-4">
+                                            <div class="spinner-border text-info" role="status">
+                                                <span class="visually-hidden">Carregando...</span>
+                                            </div>
+                                            <p class="text-muted mt-2 mb-0">Carregando evoluções...</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
+        <!-- Seção de Prescrições de Enfermagem -->
+        <div id="prescricaoEnfermagemSection" class="content-section">
             <!-- Prescrições de Enfermagem -->
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-warning text-white d-flex justify-content-between align-items-center">
@@ -2871,7 +2872,10 @@ function abrirImpressoesEnfermagem() {
                     </div>
                 </div>
             </div>
+        </div>
 
+        <!-- Seção de SAE -->
+        <div id="saeSection" class="content-section">
             <!-- SAE - Sistematização da Assistência de Enfermagem -->
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
@@ -4012,8 +4016,8 @@ function abrirImpressoesEnfermagem() {
             });
         });
 
-        // Ativar a aba de enfermagem por padrão
-        document.querySelector('.sidebar .nav-link[data-target="enfermagemSection"]').click();
+        // Ativar a aba de evolução de enfermagem por padrão
+        document.querySelector('.sidebar .nav-link[data-target="evolucaoEnfermagemSection"]').click();
 
         // Carregar prescrições ao iniciar
         carregarPrescricoes();
@@ -4363,19 +4367,8 @@ function abrirImpressoesEnfermagem() {
             });
         }
         
-        // Toggle para mostrar/ocultar evoluções antigas
-        $('#toggle-evolucoes-antigas').click(function() {
-            const container = $('#antigas-container');
-            if (container.is(':visible')) {
-                container.hide();
-                $('#toggle-evolucoes-text').text('Mostrar Antigas');
-                $(this).find('i').removeClass('fa-eye-slash').addClass('fa-eye');
-            } else {
-                container.show();
-                $('#toggle-evolucoes-text').text('Ocultar Antigas');
-                $(this).find('i').removeClass('fa-eye').addClass('fa-eye-slash');
-            }
-        });
+        // Toggle evoluções antigas (handler configurado em enfermagem_completo.js)
+        // Removido daqui para evitar duplicação
         
         // Agora as funções estão no módulo enfermagem_completo.js
         
@@ -5370,19 +5363,8 @@ function abrirImpressoesEnfermagem() {
             $('#admissao-texto-container').show();
         });
 
-        // Toggle evolucoes antigas
-        $('#toggle-evolucoes-antigas').click(function() {
-            const container = $('#antigas-container');
-            if (container.is(':visible')) {
-                container.hide();
-                $('#toggle-evolucoes-text').text('Mostrar Antigas');
-                $(this).find('i').removeClass('fa-eye-slash').addClass('fa-eye');
-            } else {
-                container.show();
-                $('#toggle-evolucoes-text').text('Ocultar Antigas');
-                $(this).find('i').removeClass('fa-eye').addClass('fa-eye-slash');
-            }
-        });
+        // Toggle evolucoes antigas (handler já configurado em enfermagem_completo.js)
+        // Removido para evitar duplicação
 
         // O módulo enfermagem_completo.js já configura o handler de submit e carrega as prescrições
         // Apenas garantir que seja chamado após a inicialização
