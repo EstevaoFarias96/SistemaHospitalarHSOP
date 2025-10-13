@@ -16,57 +16,83 @@ function carregarPrescricoesEnfermagem() {
     $('#listaPrescricoesEnfermagem').html('<tr><td colspan="4" class="text-center"><i class="fas fa-spinner fa-spin"></i> Carregando prescrições...</td></tr>');
     
     $.ajax({
-        url: `/api/enfermagem/prescricoes/${window.internacaoId}`,
+        url: `/api/enfermagem/prescricao/${window.internacaoId}`,
         method: 'GET',
         success: function(response) {
             const tabela = $('#listaPrescricoesEnfermagem');
             tabela.empty();
-            
-            if (response.success && response.prescricoes && response.prescricoes.length > 0) {
-                prescricoesEnfermagem = response.prescricoes;
-                
-                // Ordenar por data, mais recente primeiro
-                prescricoesEnfermagem.sort((a, b) => new Date(b.data_hora) - new Date(a.data_hora));
-                
+
+            // Suportar respostas nos formatos {success, prescricoes} ou lista direta
+            let lista = [];
+            if (Array.isArray(response)) {
+                lista = response;
+            } else if (response && response.success && Array.isArray(response.prescricoes)) {
+                lista = response.prescricoes;
+            }
+
+            // Modo simples (3 colunas: Data/Hora, Enfermeiro, Prescrição)
+            if ($('#listaPrescricoesEnfermagem').length > 0) {
+                if (lista.length === 0) {
+                    tabela.html('<tr><td colspan="3" class="text-center">Nenhuma prescrição de enfermagem registrada.</td></tr>');
+                    return;
+                }
+
+                // Ordenar do mais recente para o mais antigo
+                lista.sort((a, b) => new Date((b.data_prescricao || b.data_hora)) - new Date((a.data_prescricao || a.data_hora)));
+
+                let html = '';
+                lista.forEach(pe => {
+                    const dataObj = new Date(pe.data_prescricao || pe.data_hora);
+                    const dataFormatada = dataObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                    const horaFormatada = dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                    const enfermeiro = pe.enfermeiro_nome || pe.enfermeiro || 'Não informado';
+                    const texto = pe.texto || pe.prescricao || '---';
+
+                    html += `
+                        <tr>
+                            <td>${dataFormatada} ${horaFormatada}</td>
+                            <td>${enfermeiro}</td>
+                            <td><div class="texto-evolucao">${texto}</div></td>
+                        </tr>`;
+                });
+
+                tabela.html(html);
+                return;
+            }
+
+            // Modo completo (com cuidados) - fallback quando usado em telas mais ricas
+            if (lista.length > 0) {
+                prescricoesEnfermagem = lista;
+
+                prescricoesEnfermagem.sort((a, b) => new Date((b.data_hora || b.data_prescricao)) - new Date((a.data_hora || a.data_prescricao)));
+
                 prescricoesEnfermagem.forEach(pe => {
-                    const dataObj = new Date(pe.data_hora);
-                    const dataFormatada = dataObj.toLocaleDateString('pt-BR', { 
-                        day: '2-digit', 
-                        month: '2-digit', 
-                        year: 'numeric' 
-                    });
-                    
-                    const horaFormatada = dataObj.toLocaleTimeString('pt-BR', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                    });
-                    
-                    // Status visual da prescrição
+                    const dataObj = new Date(pe.data_hora || pe.data_prescricao);
+                    const dataFormatada = dataObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                    const horaFormatada = dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
                     let statusClass = 'bg-primary';
                     if (pe.status && pe.status.toLowerCase() === 'concluída') {
                         statusClass = 'bg-success';
                     } else if (pe.status && pe.status.toLowerCase() === 'cancelada') {
                         statusClass = 'bg-danger';
                     }
-                    
+
                     tabela.append(`
                         <tr>
                             <td>${dataFormatada} ${horaFormatada}</td>
-                            <td>${pe.enfermeiro || 'Não informado'}</td>
+                            <td>${pe.enfermeiro || pe.enfermeiro_nome || 'Não informado'}</td>
                             <td>
                                 <span class="badge ${statusClass}">${pe.status || 'Ativa'}</span>
                             </td>
                             <td>
-                                <button class="btn btn-sm btn-outline-primary toggle-cuidados" 
-                                    data-prescricao-id="${pe.id}">
+                                <button class="btn btn-sm btn-outline-primary toggle-cuidados" data-prescricao-id="${pe.id}">
                                     <i class="fas fa-chevron-down"></i> Ver cuidados
                                 </button>
                                 ${pe.status !== 'Concluída' && pe.status !== 'Cancelada' && window.session?.cargo === 'Enfermeiro' ? 
                                     `<button class="btn btn-sm btn-outline-success ms-1" onclick="concluirPrescricaoEnfermagem(${pe.id})">
                                         <i class="fas fa-check"></i> Concluir
-                                    </button>` : 
-                                    ''
-                                }
+                                    </button>` : ''}
                             </td>
                         </tr>
                         <tr class="cuidados-container" id="cuidados-${pe.id}" style="display: none;">
@@ -80,9 +106,7 @@ function carregarPrescricoesEnfermagem() {
                                                     <th>Descrição</th>
                                                     <th>Frequência</th>
                                                     <th>Status</th>
-                                                    ${pe.status !== 'Concluída' && pe.status !== 'Cancelada' && window.session?.cargo === 'Enfermeiro' ? 
-                                                        '<th>Ações</th>' : ''
-                                                    }
+                                                    ${pe.status !== 'Concluída' && pe.status !== 'Cancelada' && window.session?.cargo === 'Enfermeiro' ? '<th>Ações</th>' : ''}
                                                 </tr>
                                             </thead>
                                             <tbody id="lista-cuidados-${pe.id}">
@@ -95,26 +119,20 @@ function carregarPrescricoesEnfermagem() {
                         </tr>
                     `);
                 });
-                
-                // Configurar evento para expandir/colapsar cuidados
+
                 $('.toggle-cuidados').on('click', function() {
                     const prescricaoId = $(this).data('prescricao-id');
                     const row = $(`#cuidados-${prescricaoId}`);
                     const icon = $(this).find('i');
-                    
+
                     if (row.is(':visible')) {
                         row.hide();
                         icon.removeClass('fa-chevron-up').addClass('fa-chevron-down');
                         $(this).html('<i class="fas fa-chevron-down"></i> Ver cuidados');
                     } else {
-                        // Esconder todas as outras linhas de cuidados
                         $('.cuidados-container').hide();
                         $('.toggle-cuidados i').removeClass('fa-chevron-up').addClass('fa-chevron-down');
-                        $('.toggle-cuidados').html(function() {
-                            return '<i class="fas fa-chevron-down"></i> Ver cuidados';
-                        });
-                        
-                        // Mostrar apenas esta linha
+                        $('.toggle-cuidados').html(function() { return '<i class="fas fa-chevron-down"></i> Ver cuidados'; });
                         row.show();
                         icon.removeClass('fa-chevron-down').addClass('fa-chevron-up');
                         $(this).html('<i class="fas fa-chevron-up"></i> Esconder cuidados');

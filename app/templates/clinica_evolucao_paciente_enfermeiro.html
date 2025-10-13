@@ -3662,13 +3662,14 @@ function abrirImpressoesEnfermagem() {
 
 <script src="/static/js/aprazamento.js"></script>
 <script src="/static/js/calculo_horarios.js"></script>
+<script src="/static/js/admissao_enfermagem.js"></script>
+<script src="/static/js/clinica_medico.js"></script>
 
 <!-- Adicionar referência ao módulo de evoluções de enfermeiro -->
 
-<!-- Adicionar o novo módulo completo de enfermagem -->
+<!-- Adicionar o novo módulo completo de enfermagem - DEVE VIR POR ÚLTIMO -->
 <script src="/static/js/enfermagem_completo.js"></script>
-<script src="/static/js/clinica_medico.js"></script>
-<script src="/static/js/modal_ficha_fix.js"></script>
+<!-- modal_ficha_fix removido nesta tela para evitar interferências -->
 
 <!-- Campo hidden para armazenar o cargo do usuário -->
 <input type="hidden" id="cargo_usuario" value="{{ session.get('cargo', '') }}">
@@ -3680,14 +3681,16 @@ function abrirImpressoesEnfermagem() {
     const internacaoIdRaw = JSON.parse(`{{ internacao.id|tojson }}`);
     console.log('Valor raw de internacao.id:', internacaoIdRaw);
     
-    // Atribuir à variável global do módulo de enfermagem
+    // FORÇAR atribuição da variável internacaoId ANTES de qualquer módulo usar
+    window.internacaoId = parseInt(internacaoIdRaw, 10);
+    
+    // Também tentar atribuir à variável do módulo se já estiver declarada
     if (typeof internacaoId !== 'undefined') {
         internacaoId = parseInt(internacaoIdRaw, 10);
-        console.log('internacaoId atribuído ao módulo:', internacaoId);
-    } else {
-        window.internacaoId = parseInt(internacaoIdRaw, 10);
-        console.log('internacaoId definido globalmente:', window.internacaoId);
+        console.log('✅ internacaoId atribuído ao módulo:', internacaoId);
     }
+    
+    console.log('✅ window.internacaoId definido:', window.internacaoId);
     
     // Definir também a variável global internacaoIdRaw para compatibilidade
     window.internacaoIdRaw = internacaoIdRaw;
@@ -4040,16 +4043,7 @@ function abrirImpressoesEnfermagem() {
             console.error('Função carregarEvolucoesEnfermagem não encontrada no módulo externo');
         }
 
-        // Inicializar módulo de Fichas de Referência (somente visualização)
-        if (typeof inicializarModuloFichasReferencia === 'function') {
-            try {
-                inicializarModuloFichasReferencia({ somenteLeitura: true });
-            } catch (e) {
-                console.error('Erro ao inicializar módulo de Fichas de Referência:', e);
-            }
-        } else {
-            console.warn('Módulo de Fichas de Referência não encontrado. Verifique modal_ficha_fix.js');
-        }
+        // Desativado nesta tela: módulo de Fichas de Referência para evitar interferências
         
         // Configurar handler para editar admissão
         $('#btn-editar-admissao').click(function() {
@@ -5390,22 +5384,9 @@ function abrirImpressoesEnfermagem() {
             }
         });
 
-        // Verificar se o formulario ja tem um handler de submit para evitar duplicacoes
-        if ($._data($('#formPrescricaoEnfermagem')[0], 'events') === undefined ||
-            !$._data($('#formPrescricaoEnfermagem')[0], 'events').submit) {
-            
-            console.log('[clinica_evolucao_paciente_enfermeiro.html] Não há handler de submit configurado para #formPrescricaoEnfermagem. O módulo enfermagem_completo.js deve configurar.');
-        } else {
-            console.log('[clinica_evolucao_paciente_enfermeiro.html] Handler de submit já configurado para #formPrescricaoEnfermagem pelo módulo enfermagem_completo.js.');
-        }
-
-        // Carregar prescrições ao iniciar usando a função do módulo externo
-        if (typeof carregarPrescricoesEnfermagem === 'function') {
-            console.log('Carregando prescrições de enfermagem usando função do módulo externo');
-            carregarPrescricoesEnfermagem();
-        } else {
-            console.error('Função carregarPrescricoesEnfermagem não encontrada no módulo enfermagem_completo.js');
-        }
+        // O módulo enfermagem_completo.js já configura o handler de submit e carrega as prescrições
+        // Apenas garantir que seja chamado após a inicialização
+        console.log('Módulo enfermagem_completo.js carregará as prescrições de enfermagem automaticamente');
 
         // Event handlers para evoluções médicas
         $('#btn-filtrar-evolucoes-medicas').click(function() {
@@ -5512,7 +5493,7 @@ function abrirImpressoesEnfermagem() {
 
 </script>
 
-<script src="{{ url_for('static', filename='js/admissao_enfermagem.js') }}"></script>
+<!-- admissao_enfermagem.js já foi movido para o topo dos scripts -->
 
 <!-- Modal para visualizar aprazamentos por medicamento -->
 <div class="modal fade" id="modalAprazamentosMedicamento" tabindex="-1" aria-labelledby="modalAprazamentosMedicamentoLabel" aria-hidden="true">

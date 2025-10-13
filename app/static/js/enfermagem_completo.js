@@ -8,26 +8,38 @@ let internacaoId = null;
 
 // Inicialização quando o documento estiver pronto
 $(document).ready(function() {
-    console.log('Inicializando módulo de enfermagem completo');
+    console.log('🔧 Inicializando módulo de enfermagem completo');
     
-    // O internacaoId será atribuído no template principal
-    // Obter outros IDs alternativos se internacaoId não estiver definido
-    if (!internacaoId) {
+    // Usar window.internacaoId como fonte primária
+    if (window.internacaoId) {
+        internacaoId = window.internacaoId;
+        console.log('✅ Usando window.internacaoId:', internacaoId);
+    } else {
+        // Obter de campos hidden como fallback
         internacaoId = $('#internacao_id').val() || $('#internacao_id_evolucao').val() || $('#internacao_id_prescricao').val();
+        console.log('⚠️ Usando ID de campo hidden:', internacaoId);
     }
     
     const atendimentoId = $('#sae_paciente_id').val(); // Agora contém o atendimento_id
     
-    console.log('ID da internação:', internacaoId);
-    console.log('ID do atendimento para SAE:', atendimentoId);
+    console.log('📋 ID da internação:', internacaoId);
+    console.log('📋 ID do atendimento para SAE:', atendimentoId);
     
     if (internacaoId) {
         // Carregar todas as informações
+        console.log('🔄 Iniciando carregamento de evoluções e prescrições...');
         carregarEvolucoesEnfermagem();
-        carregarPrescricoesEnfermagem();
+        
+        // Aguardar um momento para garantir que o DOM está pronto
+        setTimeout(function() {
+            console.log('⏰ Carregando prescrições após delay...');
+            carregarPrescricoesEnfermagem();
+        }, 500);
         
         // Iniciar atualizações automáticas (opcional - pode ser desabilitado se causar problemas)
         // iniciarAtualizacaoAutomatica();
+    } else {
+        console.error('❌ ID da internação não encontrado! Prescrições não serão carregadas.');
     }
     
     if (atendimentoId) {
@@ -695,23 +707,28 @@ function configurarCamposSAE() {
 // ========== PRESCRIÇÃO DE ENFERMAGEM ==========
 
 function carregarPrescricoesEnfermagem() {
-    if (!internacaoId) {
-        console.error('ID da internação não definido');
+    // Usar window.internacaoId como fonte principal
+    const idInternacao = window.internacaoId || internacaoId;
+    
+    if (!idInternacao) {
+        console.error('❌ ID da internação não definido para carregar prescrições');
+        console.log('window.internacaoId:', window.internacaoId);
+        console.log('internacaoId (local):', internacaoId);
         return;
     }
     
-    console.log('Carregando prescrições de enfermagem para internação:', internacaoId);
+    console.log('✅ Carregando prescrições de enfermagem para internação:', idInternacao);
     
     $.ajax({
-        url: `/api/enfermagem/prescricao/${internacaoId}`,
+        url: `/api/enfermagem/prescricao/${idInternacao}`,
         method: 'GET',
         success: function(response) {
-            console.log('Prescrições recebidas:', response);
+            console.log('✅ Prescrições recebidas:', response);
             
             if (response.success) {
                 renderizarPrescricoes(response.prescricoes || []);
             } else {
-                console.error('Erro na resposta da API:', response.message);
+                console.error('❌ Erro na resposta da API:', response.message);
                 $('#listaPrescricoesEnfermagem').html(`
                     <tr>
                         <td colspan="3" class="text-center text-muted">
@@ -723,7 +740,9 @@ function carregarPrescricoesEnfermagem() {
             }
         },
         error: function(xhr) {
-            console.error('Erro ao carregar prescrições:', xhr);
+            console.error('❌ Erro ao carregar prescrições:', xhr);
+            console.error('Status:', xhr.status);
+            console.error('Response:', xhr.responseText);
             $('#listaPrescricoesEnfermagem').html(`
                 <tr>
                     <td colspan="3" class="text-center text-muted">
@@ -737,15 +756,26 @@ function carregarPrescricoesEnfermagem() {
 }
 
 function renderizarPrescricoes(prescricoes) {
+    console.log('📝 renderizarPrescricoes chamada com:', prescricoes);
     const tbody = $('#listaPrescricoesEnfermagem');
+    
+    if (!tbody || tbody.length === 0) {
+        console.error('❌ Elemento #listaPrescricoesEnfermagem não encontrado!');
+        return;
+    }
+    
     tbody.empty();
     
     if (!prescricoes || prescricoes.length === 0) {
+        console.log('ℹ️ Nenhuma prescrição para renderizar');
         tbody.html('<tr><td colspan="3" class="text-center text-muted">Nenhuma prescrição registrada.</td></tr>');
         return;
     }
     
-    prescricoes.forEach(presc => {
+    console.log(`✅ Renderizando ${prescricoes.length} prescrições`);
+    
+    prescricoes.forEach((presc, index) => {
+        console.log(`Renderizando prescrição ${index + 1}:`, presc);
         const dataObj = new Date(presc.data_prescricao);
         const dataFormatada = dataObj.toLocaleDateString('pt-BR', {
             day: '2-digit',
@@ -770,6 +800,8 @@ function renderizarPrescricoes(prescricoes) {
             </tr>
         `);
     });
+    
+    console.log('✅ Prescrições renderizadas com sucesso!');
 }
 
 function configurarEventosPrescricao() {
