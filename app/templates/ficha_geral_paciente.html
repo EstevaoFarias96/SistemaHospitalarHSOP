@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ficha Geral do Paciente</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    header {
+      background-color: #2d2ddcec;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+    /* Layout do cabeçalho com botões e logo */
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header-top button {
+      margin: 5px;
+    }
+    .header-top img {
+      height: 50px;
+    }
+    h1 {
+      margin: 10px 0;
+      text-align: center;
+    }
+    .section-title {
+      text-align: center;
+      margin-top: 30px;
+      margin-bottom: 15px;
+    }
+    .info-row {
+      margin-bottom: 10px;
+    }
+    .info-label {
+      font-weight: bold;
+    }
+    /* Card para a pré-consulta (triagem) com posicionamento relativo */
+    .triagem-card {
+      position: relative;
+    }
+    /* Caixa de assinatura reduzida, posicionada no canto inferior direito do card */
+    .signature-box {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      border: 1px solid #ddd;
+      padding: 8px;
+      background-color: #fff;
+      font-size: 0.9em;
+      max-width: 40%;
+    }
+  </style>
+</head>
+<body>
+  <!-- Cabeçalho com botões -->
+  <header>
+    <div class="header-top">
+      <button class="btn btn-secondary" id="btnVoltar">Voltar para o Menu</button>
+      <img id="hospitalLogo" src="/static/imagem1.png" alt="Logotipo do Hospital" />
+      <button class="btn btn-primary" onclick="gerarPdf()">Gerar PDF</button>
+    </div>
+    <h1>Ficha Geral do Paciente</h1>
+  </header>
+
+  <!-- Conteúdo Principal -->
+  <main class="container my-4">
+    <!-- Dados do Paciente -->
+    <section id="dadosPaciente">
+      <h2 class="section-title">Dados do Paciente</h2>
+      <div class="card">
+        <div class="card-body">
+          <div class="row info-row">
+            <div class="col-md-6">
+              <span class="info-label">Nome:</span> <span id="nomePaciente"></span>
+            </div>
+            <div class="col-md-6">
+              <span class="info-label">Nome Social:</span> <span id="nomeSocial"></span>
+            </div>
+          </div>
+          <div class="row info-row">
+            <div class="col-md-6">
+              <span class="info-label">Filiação:</span> <span id="filiacao"></span>
+            </div>
+            <div class="col-md-6">
+              <span class="info-label">Data de Nascimento:</span> <span id="dataNascimento"></span>
+            </div>
+          </div>
+          <div class="row info-row">
+            <div class="col-md-6">
+              <span class="info-label">Sexo:</span> <span id="sexo"></span>
+            </div>
+            <div class="col-md-6">
+              <span class="info-label">CPF:</span> <span id="cpfPaciente"></span>
+            </div>
+          </div>
+          <div class="row info-row">
+            <div class="col-md-6">
+              <span class="info-label">Cartão SUS:</span> <span id="cartaoSus"></span>
+            </div>
+            <div class="col-md-6">
+              <span class="info-label">Telefone:</span> <span id="telefone"></span>
+            </div>
+          </div>
+          <div class="row info-row">
+            <div class="col-md-6">
+              <span class="info-label">Endereço:</span> <span id="endereco"></span>
+            </div>
+            <div class="col-md-6">
+              <span class="info-label">Município:</span> <span id="municipio"></span>
+            </div>
+          </div>
+          <div class="row info-row">
+            <div class="col-md-6">
+              <span class="info-label">Bairro:</span> <span id="bairro"></span>
+            </div>
+            <div class="col-md-6">
+              <span class="info-label">Status:</span> <span id="status"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Histórico de Atendimentos -->
+    <section id="historicoSection">
+      <h2 class="section-title">Histórico de Atendimentos</h2>
+      <div class="card">
+        <div class="card-body">
+          <div id="historicoVazio" class="alert alert-light text-center" style="display:none;">
+            Nenhum atendimento encontrado para este paciente.
+          </div>
+          <div class="table-responsive">
+            <table class="table table-sm table-striped" id="tabelaHistorico" style="display:none;">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Data</th>
+                  <th>Hora</th>
+                  <th>Status</th>
+                  <th>Classificação de Risco</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyHistorico"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- jQuery e Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Função auxiliar para obter parâmetros da URL
+    function getQueryParameter(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+    
+    $(document).ready(function() {
+      // Define o destino do botão Voltar conforme o cargo
+      $.getJSON('/api/usuario/cargo')
+        .done(function(resp){
+          if(resp && resp.success){
+            const cargo = (resp.cargo || '').toLowerCase();
+            let destino = '/enfermeiro';
+            if (cargo === 'recepcionista') destino = '/recepcionista';
+            else if (cargo === 'medico') destino = '/medico';
+            else if (cargo === 'multi') destino = '/multi';
+            $('#btnVoltar').off('click').on('click', function(){ window.location.href = destino; });
+          }
+        })
+        .fail(function(){
+          // fallback padrão para enfermeiro
+          $('#btnVoltar').off('click').on('click', function(){ window.location.href = '/enfermeiro'; });
+        });
+
+      const pacienteId = getQueryParameter('paciente_id');
+      if (!pacienteId) {
+        alert('ID do paciente não especificado.');
+        return;
+      }
+      // Carrega dados do paciente (dados cadastrais)
+      $.ajax({
+        url: '/api/enfermeiro/ficha_geral',
+        method: 'GET',
+        data: { paciente_id: pacienteId },
+        dataType: 'json',
+        success: function(response) {
+          if (response.success) {
+            const paciente = response.paciente;
+            $('#nomePaciente').text(paciente.nome || '');
+            $('#nomeSocial').text(paciente.nome_social || '');
+            $('#filiacao').text(paciente.filiacao || '');
+            $('#dataNascimento').text(paciente.data_nascimento || '');
+            $('#sexo').text(paciente.sexo || '');
+            $('#cpfPaciente').text(paciente.cpf || '');
+            $('#cartaoSus').text(paciente.cartao_sus || '');
+            $('#telefone').text(paciente.telefone || '');
+            $('#endereco').text(paciente.endereco || '');
+            $('#municipio').text(paciente.municipio || '');
+            $('#bairro').text(paciente.bairro || '');
+          } else {
+            alert(response.message || 'Erro ao carregar dados do paciente.');
+          }
+        },
+        error: function() {
+          alert('Erro ao conectar com o servidor.');
+        }
+      });
+
+      // Carrega histórico de atendimentos
+      $.ajax({
+        url: '/api/pacientes/' + pacienteId + '/atendimentos',
+        method: 'GET',
+        dataType: 'json',
+        success: function(resp) {
+          if (resp.success && resp.atendimentos && resp.atendimentos.length > 0) {
+            const tbody = document.getElementById('tbodyHistorico');
+            tbody.innerHTML = '';
+            resp.atendimentos.forEach(function(a) {
+              const tr = document.createElement('tr');
+              tr.innerHTML =
+                '<td>' + (a.id || '') + '</td>' +
+                '<td>' + (a.data_atendimento || '') + '</td>' +
+                '<td>' + (a.hora_atendimento || '') + '</td>' +
+                '<td>' + (a.status || '') + '</td>' +
+                '<td>' + (a.classificacao_risco || '') + '</td>';
+              tbody.appendChild(tr);
+            });
+            $('#historicoVazio').hide();
+            $('#tabelaHistorico').show();
+          } else {
+            $('#tabelaHistorico').hide();
+            $('#historicoVazio').show();
+          }
+        },
+        error: function() {
+          $('#tabelaHistorico').hide();
+          $('#historicoVazio').show();
+        }
+      });
+    });
+    
+    // Função para gerar PDF usando o template ODT via backend
+    function gerarPdf() {
+      // Coleta os dados da página
+      const dados = {
+        nome: document.getElementById("nomePaciente").innerText,
+        nome_social: document.getElementById("nomeSocial").innerText,
+        filiacao: document.getElementById("filiacao").innerText,
+        data_nascimento: document.getElementById("dataNascimento").innerText,
+        sexo: document.getElementById("sexo").innerText,
+        cpf: document.getElementById("cpfPaciente").innerText,
+        cartao_sus: document.getElementById("cartaoSus").innerText,
+        telefone: document.getElementById("telefone").innerText,
+        endereco: document.getElementById("endereco").innerText,
+        municipio: document.getElementById("municipio").innerText,
+        bairro: document.getElementById("bairro").innerText,
+        data_atendimento: document.getElementById("dataAtendimento").innerText,
+        hora_atendimento: document.getElementById("horaAtendimento").innerText,
+        pressao: document.getElementById("pressao").innerText,
+        pulso: document.getElementById("pulso").innerText,
+        temperatura: document.getElementById("temperatura").innerText,
+        classificacao_risco: document.getElementById("classificacaoRisco").innerText,
+        triagem: document.getElementById("triagem").innerText,
+        alergias: document.getElementById("alergias").innerText,
+        observacoes: document.getElementById("observacoesTriagem").innerText,
+        sp02: document.getElementById("sp02").innerText,
+        peso: document.getElementById("peso").innerText,
+        altura: document.getElementById("altura").innerText,
+        dx: document.getElementById("dx").innerText,
+        fr: document.getElementById("fr").innerText,
+        anamnese_exame_fisico: document.getElementById("anamnese_exame_fisico").innerText,
+        prescricao_medica: document.getElementById("prescricao_medica").innerText,
+        reavaliacao: document.getElementById("reavaliacao").innerText,
+        conduta_final: document.getElementById("conduta_final").innerText,
+        status: document.getElementById("status").innerText,
+        nome_enfermeiro: document.getElementById("nomeEnfermeiro").innerText,
+        numero_profissional: document.getElementById("numeroProfissional").innerText
+      };
+      
+      fetch('/gerar_pdf_ficha', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(dados)
+      })
+      .then(response => {
+        if (response.ok) {
+          return response.blob();
+        } else {
+          throw new Error('Erro ao gerar PDF');
+        }
+      })
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'ficha_paciente.pdf';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      })
+      .catch(error => {
+        alert(error);
+      });
+    }
+  </script>
+</body>
+</html>

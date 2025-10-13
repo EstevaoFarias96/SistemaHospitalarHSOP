@@ -1,0 +1,306 @@
+<style>
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 0.3cm;
+  }
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    font-size: 12pt;
+  }
+  .prescription-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 8px;
+    justify-content: space-between;
+  }
+  .prescription {
+    width: 49.5%;
+    font-size: 12pt;
+    page-break-inside: avoid;
+    border: 1px dashed #000;
+    padding: 15px;
+    box-sizing: border-box;
+    height: calc(100vh - 1cm);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .header-prefeitura {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    height: 3cm;
+    position: relative;
+  }
+  .header-prefeitura img {
+    width: 3cm;
+    height: 3cm;
+    object-fit: contain;
+  }
+  .prefeitura-title {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: bold;
+    text-align: center;
+    font-size: 10pt;
+    z-index: 1;
+    line-height: 1.2;
+    max-width: 60%;
+  }
+  .prefeitura-title small {
+    font-size: 8pt;
+    font-weight: normal;
+  }
+  .receituario-title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 12pt;
+    margin-bottom: 8px;
+  }
+  .patient-name {
+    font-size: 10pt;
+    font-weight: normal;
+    text-align: left;
+    margin-bottom: 5px;
+    padding-bottom: 2px;
+  }
+  .patient-address {
+    font-size: 10pt;
+    font-weight: normal;
+    text-align: left;
+    margin-bottom: 3px;
+    padding-bottom: 2px;
+  }
+  .prescricao-text {
+    font-size: 10pt;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    line-height: 1.5;
+    font-family: 'Courier New', monospace;
+    margin: 5px 0 20px 0;
+    flex-grow: 1;
+    overflow-y: auto;
+  }
+  .footer-info {
+    margin-top: auto;
+    padding-top: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11pt;
+  }
+  .data {
+    text-align: left;
+  }
+  .assinatura {
+    text-align: right;
+  }
+}
+
+.prescription-container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.prescription {
+  width: 49.5%;
+  border: 1px dashed #000;
+  padding: 15px;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  font-size: 12pt;
+  height: calc(100vh - 1cm);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.header-prefeitura {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  height: 3cm;
+  position: relative;
+}
+
+.header-prefeitura img {
+  width: 4cm;
+  height: 4cm;
+  object-fit: contain;
+}
+
+.prefeitura-title {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: bold;
+  text-align: center;
+  font-size: 10pt;
+  z-index: 1;
+  line-height: 1.2;
+  max-width: 60%;
+}
+
+.prefeitura-title small {
+  font-size: 8pt;
+  font-weight: normal;
+}
+
+.receituario-title {
+  text-align: center;
+  font-weight: bold;
+  font-size: 12pt;
+  margin-bottom: 8px;
+}
+
+.patient-name {
+  font-size: 10pt;
+  font-weight: normal;
+  text-align: left;
+  margin-bottom: 5px;
+  padding-bottom: 2px;
+}
+
+.patient-address {
+  font-size: 10pt;
+  font-weight: normal;
+  text-align: left;
+  margin-bottom: 3px;
+  padding-bottom: 2px;
+}
+
+.prescricao-text {
+  font-size: 10pt;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  line-height: 1.5;
+  font-family: 'Courier New', monospace;
+  margin: 5px 0 20px 0;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.footer-info {
+  margin-top: auto;
+  padding-top: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11pt;
+}
+
+.data {
+  text-align: left;
+}
+
+.assinatura {
+  text-align: right;
+}
+</style>
+
+<div class="prescription-container">
+<!-- PRIMEIRA VIA -->
+<div class="prescription">
+  <div class="header-prefeitura">
+    <img src="/static/Imagens/logomassape.png" alt="Logo Esquerda">
+    <div class="prefeitura-title">
+      Prefeitura Municipal de Massapê<br>
+      Secretaria Municipal de Saúde<br>
+      Hospital Senador Ozires Pontes<br>
+      <small>RUA CRUZEIRO, S/N - COHAB, Massapê - CE, 62140-000</small>
+    </div>
+    <img src="/static/Imagens/sus.png" alt="Logo Direita">
+  </div>
+  
+  <hr style="border: 1px solid #000; margin: 10px 0;">
+  
+  <div class="receituario-title">RECEITUÁRIO</div>
+  
+  <div class="patient-name">Paciente: {{ paciente_nome }}</div>
+  
+  <div class="patient-address">Data de Nascimento: {{ paciente_data_nascimento or "Não informado" }}</div>
+  
+  <div class="patient-address">Endereço: {{ paciente_endereco }}</div>
+  
+  <div class="patient-address">Nome da Mãe: {{ paciente_filiacao or "Não informado" }}</div>
+  
+  <div class="patient-address">Cartão SUS: {{ paciente_cartao_sus or "Não informado" }}</div>
+  
+  <div class="prescricao-text">{{ receituario_receita|safe }}</div>
+  
+  <div class="footer-info">
+    <div class="data">Data: {{data_hoje}}</div>
+    <div class="assinatura">Assinatura e Carimbo</div>
+  </div>
+</div>
+
+<!-- SEGUNDA VIA -->
+<div class="prescription">
+  <div class="header-prefeitura">
+    <img src="/static/Imagens/logomassape.png" alt="Logo Esquerda">
+    <div class="prefeitura-title">
+      Prefeitura Municipal de Massapê<br>
+      Secretaria Municipal de Saúde<br>
+      Hospital Senador Ozires Pontes<br>
+      <small>RUA CRUZEIRO, S/N - COHAB, Massapê - CE, 62140-000</small>
+    </div>
+    <img src="/static/Imagens/sus.png" alt="Logo Direita">
+  </div>
+  
+  <hr style="border: 1px solid #000; margin: 10px 0;">
+  
+  <div class="receituario-title">RECEITUÁRIO</div>
+  
+  <div class="patient-name">Paciente: {{ paciente_nome }}</div>
+  
+  <div class="patient-address">Data de Nascimento: {{ paciente_data_nascimento or "Não informado" }}</div>
+  
+  <div class="patient-address">Endereço: {{ paciente_endereco }}</div>
+  
+  <div class="patient-address">Nome da Mãe: {{ paciente_filiacao or "Não informado" }}</div>
+  
+  <div class="patient-address">Cartão SUS: {{ paciente_cartao_sus or "Não informado" }}</div>
+  
+  <div class="prescricao-text">{{ receituario_receita|safe }}</div>
+  
+  <div class="footer-info">
+    <div class="data">Data: {{data_hoje}}</div>
+    <div class="assinatura">Assinatura e Carimbo</div>
+  </div>
+</div>
+</div>
+<!-- Fechamento da div prescription-container -->
+
+<script>
+// Função para obter data atual formatada
+function obterDataAtual() {
+    const agora = new Date();
+    const dia = String(agora.getDate()).padStart(2, '0');
+    const mes = String(agora.getMonth() + 1).padStart(2, '0');
+    const ano = agora.getFullYear();
+    return `${dia}/${mes}/${ano}`;
+}
+
+// Substituir {{data_hoje}} pela data atual automaticamente
+document.addEventListener('DOMContentLoaded', function() {
+    const dataAtual = obterDataAtual();
+    document.body.innerHTML = document.body.innerHTML.replace(/\{\{data_hoje\}\}/g, dataAtual);
+    
+    // Auto-imprimir quando a página carregar
+    setTimeout(function() {
+        window.print();
+    }, 500);
+});
+</script>

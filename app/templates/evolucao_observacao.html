@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Evolução do Paciente</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+  <style>
+    body { background-color: #f8f9fa; }
+    h2, h4 { font-weight: bold; color: #004085; }
+    .card {
+      border-radius: 10px;
+      border: 1px solid #b8daff;
+      background-color: #ffffff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.03);
+    }
+    .card-title {
+      color: #004085;
+      border-bottom: 1px solid #b8daff;
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+    }
+    .info-line { margin-bottom: 6px; }
+    .is-valid {
+      border: 2px solid #28a745 !important;
+      background-color: #e6ffed;
+    }
+    .is-invalid {
+      border: 2px solid #dc3545 !important;
+      background-color: #ffe6e6;
+    }
+  </style>
+</head>
+<body>
+<div class="container mt-5 mb-5">
+  <h2 class="text-center mb-4">Evolução do Paciente em Observação</h2>
+  <input type="hidden" id="atendimento_id" value="{{ atendimento_id }}">
+
+  <div class="card mb-4">
+    <div class="card-body" id="dadosPaciente">
+      <h4 class="card-title">Dados do Paciente</h4>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-body" id="dadosTriagem">
+      <h4 class="card-title">Dados da Triagem</h4>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <h4 class="card-title">Evolução Médica</h4>
+      <form id="formEvolucao">
+
+        <div class="form-group">
+          <label for="anamnese">Anamnese e Exame Físico</label>
+          <textarea id="anamnese" class="form-control" rows="3" readonly></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="conduta">Conduta Médica</label>
+          <textarea id="conduta" class="form-control" rows="3" readonly></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Medicações Prescritas</label>
+          <div class="table-responsive">
+            <table class="table table-bordered table-sm bg-white">
+              <thead class="thead-light">
+                <tr>
+                  <th>Hora da Prescrição</th>
+                  <th>Medicamento</th>
+                  <th>Como Usar</th>
+                  <th>Aprazamento</th>
+                  <th>Médico</th>
+                  <th>Enfermeiro</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaMedicacoes">
+                <tr><td colspan="6" class="text-center text-muted">Carregando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="medicamento">Novo Medicamento</label>
+          <input id="medicamento" class="form-control" list="listaMedicamentos" placeholder="Digite o nome do medicamento" />
+          <datalist id="listaMedicamentos"></datalist>
+          <small id="avisoAlergia" class="form-text text-warning font-weight-bold" style="display: none;"></small>
+        </div>
+
+        <div class="form-group">
+          <label for="descricaoMedicamento">Como será utilizado</label>
+          <textarea id="descricaoMedicamento" class="form-control" rows="2" placeholder="Descreva como o medicamento será utilizado"></textarea>
+        </div>
+
+        <button type="button" id="btnAdicionarMedicacao" class="btn btn-info mb-3">Adicionar Medicação</button>
+
+        <div class="form-group">
+          <label for="observacao">Evolução / Observação</label>
+          <textarea id="observacao" class="form-control" rows="4"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="status">Conduta Final</label>
+          <select id="status" class="form-control">
+            <option value="">Selecione</option>
+            <option value="Alta">Alta</option>
+            <option value="Alta após Medicação">Alta após Medicação</option>
+            <option value="Observação">Observação</option>
+            <option value="Evasão por conta própria">Evasão por conta própria</option>
+            <option value="Internamento">Internamento</option>
+            <option value="Recusa transferência após conduta médica">Recusa transferência após conduta médica</option>
+            <option value="Assinou termo de responsabilidade">Assinou termo de responsabilidade</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-success">Salvar Evolução</button>
+        <a href="/medico" class="btn btn-secondary ml-2">Voltar</a>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script>
+const atendimentoId = document.getElementById('atendimento_id').value;
+let alergiasPaciente = '';
+let medicacoesPendentes = [];
+
+$(document).ready(function () {
+  $.getJSON(`/api/medico/observacao/${atendimentoId}`, function (res) {
+    if (!res.success) return alert('Erro ao carregar atendimento.');
+    const p = res.paciente;
+    const a = res.atendimento;
+    alergiasPaciente = a.alergias ? a.alergias.toLowerCase() : '';
+
+    $('#dadosPaciente').append(`
+      <div class="info-line"><strong>Nome:</strong> ${p.nome} | <strong>CPF:</strong> ${p.cpf}</div>
+      <div class="info-line"><strong>Cartão SUS:</strong> ${p.cartao_sus || '---'} | <strong>Sexo:</strong> ${p.sexo} | <strong>Nasc.:</strong> ${p.data_nascimento}</div>
+      <div class="info-line"><strong>Endereço:</strong> ${p.endereco}, ${p.bairro}, ${p.municipio}</div>
+      <div class="info-line"><strong>Telefone:</strong> ${p.telefone}</div>
+    `);
+
+    $('#dadosTriagem').append(`
+      <div class="info-line"><strong>Enfermeiro:</strong> ${res.enfermeiro} | <strong>Horário Triagem:</strong> ${a.horario_triagem ? new Date(a.horario_triagem).toLocaleString() : '---'}</div>
+      <div class="info-line"><strong>Classificação de Risco:</strong> ${a.classificacao_risco}</div>
+      <div class="info-line mt-2">
+        <strong>Temperatura:</strong> ${a.temp || '---'} |
+        <strong>Pressão:</strong> ${a.pressao || '---'} |
+        <strong>Pulso:</strong> ${a.pulso || '---'} |
+        <strong>SpO2:</strong> ${a.sp02 || '---'} |
+        <strong>FR:</strong> ${a.fr || '---'} |
+        <strong>Peso:</strong> ${a.peso || '---'}kg |
+        <strong>Altura:</strong> ${a.altura || '---'}m |
+        <strong>DX:</strong> ${a.dx || '---'}
+      </div>
+      <div class="info-line mt-2"><strong>Alergias:</strong> ${a.alergias || '---'}</div>
+      <div class="info-line"><strong>Queixa Principal:</strong> ${a.triagem || '---'}</div>
+    `);
+
+    $('#anamnese').val(a.anamnese_exame_fisico || '');
+    $('#conduta').val(a.conduta_final || '');
+    $('#observacao').val(a.observacao || '');
+    $('#status').val(a.status || '');
+    carregarMedicacoes();
+  });
+
+    $('#btnAdicionarMedicacao').click(function () {
+    const nome = $('#medicamento').val().trim();
+    const descricao = $('#descricaoMedicamento').val().trim();
+    if (!nome || !descricao) return alert('Preencha nome e descrição.');
+
+    $.ajax({
+      url: `/api/medicacoes/registrar`,
+      method: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        atendimento_id: atendimentoId,
+        nome_medicamento: nome,
+        descricao_uso: descricao
+      }),
+      success: function (res) {
+        if (res.success) {
+          $('#medicamento').val('');
+          $('#descricaoMedicamento').val('');
+          $('#avisoAlergia').hide();
+          carregarMedicacoes();  // Atualiza a tabela logo após adicionar
+        } else {
+          alert('Erro ao registrar medicação: ' + res.message);
+        }
+      },
+      error: function () {
+        alert('Erro ao conectar com o servidor.');
+      }
+    });
+  });
+
+
+  $('#formEvolucao').submit(function (e) {
+    e.preventDefault();
+    const payload = {
+      observacao: $('#observacao').val(),
+      status: $('#status').val()
+    };
+
+    $.ajax({
+      url: `/api/medico/observacao/${atendimentoId}`,
+      method: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify(payload),
+      success: function (res) {
+        if (res.success) {
+          if (medicacoesPendentes.length > 0) {
+            let chamadas = medicacoesPendentes.map(m => {
+              return $.ajax({
+                url: `/api/medicacoes/registrar`,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                  atendimento_id: atendimentoId,
+                  nome_medicamento: m.nome,
+                  descricao_uso: m.descricao
+                })
+              });
+            });
+
+            Promise.all(chamadas).then(() => {
+              alert('Evolução e medicações salvas com sucesso!');
+              window.location.href = "/medico";
+            }).catch(() => {
+              alert('Erro ao registrar medicamentos.');
+            });
+          } else {
+            alert('Evolução salva com sucesso!');
+            window.location.href = "/medico";
+          }
+        } else {
+          alert('Erro ao salvar: ' + res.message);
+        }
+      }
+    });
+  });
+});
+
+function carregarMedicacoes() {
+  $.getJSON(`/api/medicacoes/atendimento/${atendimentoId}`, function (res) {
+    const tabela = $('#tabelaMedicacoes');
+    tabela.empty();
+    if (res.success && res.medicacoes.length > 0) {
+      res.medicacoes.forEach(m => {
+        tabela.append(`
+          <tr>
+            <td>${m.horario_prescricao ? new Date(m.horario_prescricao).toLocaleString() : '---'}</td>
+            <td>${m.nome_medicamento}</td>
+            <td>${m.descricao_uso || '---'}</td>
+            <td>${m.aprazamento ? new Date(m.aprazamento).toLocaleString() : '---'}</td>
+            <td>${m.medico || '---'}</td>
+            <td>${m.enfermeiro || '---'}</td>
+          </tr>
+        `);
+      });
+    } else {
+      tabela.append('<tr><td colspan="6" class="text-center text-muted">Nenhuma medicação registrada ainda.</td></tr>');
+    }
+  });
+}
+</script>
+</body>
+</html>

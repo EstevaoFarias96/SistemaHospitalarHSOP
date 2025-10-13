@@ -1,0 +1,2742 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evolução do Paciente</title>
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet" />
+    <meta name="theme-color" content="#2c3e50" />
+
+    <!-- JS – ordem de dependência preservada com defer -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+    <!-- Seu script, que depende das bibliotecas acima -->
+    <script src="/static/js/clinica_medico.js?v=20250627" defer></script>
+    <script src="/static/js/informacoes_alta.js" defer></script>
+    
+    <!-- Script para interceptar e substituir scroll.js -->
+    <script>
+        // Interceptar scripts antes que sejam carregados
+        const originalCreateElement = document.createElement;
+        document.createElement = function(tagName) {
+            const element = originalCreateElement.call(document, tagName);
+            
+            if (tagName.toLowerCase() === 'script') {
+                const originalSetAttribute = element.setAttribute;
+                element.setAttribute = function(name, value) {
+                    if (name === 'src' && value && value.includes('scroll.js')) {
+                        console.log('Interceptado carregamento de scroll.js - Substituindo com implementação moderna');
+                        // Não carregamos o script original
+                        return element;
+                    }
+                    return originalSetAttribute.call(this, name, value);
+                };
+            }
+            
+            return element;
+        };
+        
+        // Nota: As funções de observadores foram movidas para clinica_medico.js
+    </script>
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Variáveis de cores */
+        :root {
+            --primary-dark: #1a237e;
+            --primary-main: #283593;
+            --primary-light: #3949ab;
+            --accent: #1565c0;
+            --hover-light: rgba(255,255,255,0.08);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255,255,255,0.85);
+            --shadow-soft: 0 2px 4px rgba(0,0,0,0.08);
+            --shadow-strong: 0 4px 8px rgba(0,0,0,0.12);
+            --gradient-primary: linear-gradient(135deg, var(--primary-main), var(--primary-light));
+            --gradient-accent: linear-gradient(135deg, var(--accent), var(--primary-light));
+        }
+
+        /* Estilos globais para cards e headers */
+        .card {
+            border: none;
+            box-shadow: var(--shadow-soft);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-strong);
+        }
+
+        .card-header {
+            border-bottom: none;
+            background: var(--gradient-primary) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            border: none;
+            box-shadow: var(--shadow-soft);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--gradient-accent);
+            box-shadow: var(--shadow-strong);
+            transform: translateY(-1px);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f57c00, #ffb74d);
+            border: none;
+            color: var(--text-primary);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #ff9800, #ffa726);
+            color: var(--text-primary);
+            box-shadow: var(--shadow-strong);
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            border: none;
+            color: var(--text-primary);
+            box-shadow: var(--shadow-soft);
+            transition: all 0.3s ease;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #388e3c, #66bb6a);
+            color: var(--text-primary);
+            box-shadow: var(--shadow-strong);
+            transform: translateY(-1px);
+        }
+
+        .badge {
+            background: var(--gradient-primary);
+            border: none;
+            box-shadow: var(--shadow-soft);
+        }
+
+        /* Estilos para prescrições */
+        .prescricao-container {
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            border: 1px solid #e9ecef;
+            background-color: #fff;
+        }
+
+        .prescricao-container:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-strong);
+        }
+
+        /* Novo estilo para prescrições do dia */
+        .prescricao-hoje {
+            border-left: 4px solid var(--primary-main);
+            background-color: rgba(var(--primary-main-rgb), 0.02);
+            position: relative;
+        }
+
+        .prescricao-hoje::before {
+            content: "Hoje";
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--primary-main);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .prescricao-antiga {
+            border-left: 4px solid transparent;
+        }
+
+        .prescricao-header {
+            padding: 12px 15px;
+            background: var(--gradient-primary);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .prescricao-body {
+            padding: 15px;
+        }
+
+        /* Variáveis RGB para transparência */
+        :root {
+            --primary-main-rgb: 40, 53, 147;
+            --primary-light-rgb: 57, 73, 171;
+        }
+
+        /* Estilo do menu lateral */
+        .sidebar {
+            width: 60px;
+            height: 100vh;
+            background: linear-gradient(180deg, var(--primary-dark) 0%, var(--primary-main) 100%);
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding-top: 20px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            z-index: 1000;
+            box-shadow: var(--shadow-soft);
+        }
+        
+        .sidebar:hover {
+            width: 200px;
+            box-shadow: var(--shadow-strong);
+        }
+        
+        .nav-pills {
+            flex-direction: column;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .nav-pills .nav-link {
+            margin: 5px 10px;
+            border-radius: 8px;
+            padding: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-pills .nav-link:hover {
+            background-color: var(--hover-light);
+            transform: translateX(5px);
+            color: var(--text-primary);
+            border-color: rgba(255,255,255,0.1);
+        }
+        
+        .nav-pills .nav-link i {
+            font-size: 1.2rem;
+            min-width: 30px;
+            text-align: center;
+            transition: transform 0.3s ease;
+            color: var(--text-primary);
+        }
+        
+        .nav-pills .nav-link:hover i {
+            transform: scale(1.1);
+        }
+        
+        .nav-pills .nav-link span {
+            margin-left: 10px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .sidebar:hover .nav-pills .nav-link span {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .nav-pills .nav-link.active {
+            background-color: var(--accent);
+            color: var(--text-primary);
+            box-shadow: 0 2px 4px rgba(21,101,192,0.3);
+            border-color: rgba(255,255,255,0.2);
+        }
+        
+        .nav-pills .nav-link.active:hover {
+            transform: translateX(5px) scale(1.02);
+            background-color: var(--accent);
+        }
+        
+        /* Ajuste do conteúdo principal */
+        .main-content {
+            margin-left: 60px;
+            flex: 1;
+            padding: 20px;
+            transition: all 0.3s ease;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+        
+        .sidebar:hover + .main-content {
+            margin-left: 200px;
+        }
+
+        /* Estilos para as ações rápidas */
+        .quick-actions {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            background: linear-gradient(0deg, var(--primary-dark) 0%, transparent 100%);
+        }
+
+        .quick-actions .action-btn {
+            background-color: transparent;
+            border: none;
+            color: var(--text-secondary);
+            opacity: 0.9;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .quick-actions .action-btn:hover {
+            opacity: 1;
+            color: var(--text-primary);
+            background-color: var(--hover-light);
+            transform: translateX(5px);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .menu-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .nav-pills {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        /* Resto dos estilos existentes */
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .paciente-info {
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        .paciente-info .info-item {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        .paciente-info .info-item strong {
+            color: #495057;
+        }
+        .table-medicamentos {
+            background: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .alerta-alergia {
+            border: 2px solid #ffc107;
+            padding: 5px 10px;
+            display: none;
+            font-weight: bold;
+            color: #856404;
+            background-color: #fff3cd;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+        /* Estilos adicionais para a tabela de evoluções */
+        .table-medicamentos td {
+            vertical-align: middle;
+            padding: 10px;
+        }
+        
+        /* Estilos para as tabelas de medicamentos nas prescrições */
+        .prescricao-card {
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+        
+        .prescricao-card .card-header {
+            padding: 5px 10px;
+            font-size: 0.85rem;
+        }
+        
+        .prescricao-card .card-body {
+            padding: 8px;
+        }
+        
+        .tabela-medicamentos-prescricao th,
+        .tabela-medicamentos-prescricao td {
+            padding: 4px 8px;
+            font-size: 0.85rem;
+        }
+        
+        .tabela-medicamentos-prescricao tbody tr:hover {
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+        
+        /* Novos estilos para melhorar a distinção entre prescrições */
+        .prescricao-container {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        
+        .prescricao-container:hover {
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .prescricao-header {
+            background-color: #f1f8ff;
+            padding: 5px 10px;
+            margin: -12px -12px 10px -12px;
+            border-bottom: 1px solid #dee2e6;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .prescricao-header .medico-info {
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        
+        .prescricao-header .timestamp {
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+        
+        .prescricao-section {
+            margin-bottom: 10px;
+            border-left: 3px solid #cfe2ff;
+            padding-left: 10px;
+        }
+        
+        .prescricao-section.dieta {
+            border-color: #d1e7dd;
+        }
+        
+        .prescricao-section.medicamentos {
+            border-color: #cfe2ff;
+        }
+        
+        .prescricao-section.procedimentos {
+            border-color: #f8d7da;
+        }
+        
+        .prescricao-section-title {
+            font-weight: bold;
+            color: #495057;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .prescricao-section-content {
+            background-color: #f8f9fa;
+            padding: 8px;
+        }
+        
+        .prescricao-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        
+        .data-header {
+            background-color: #6c757d;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        /* Formatação especial para a coluna de texto de evolução */
+        .texto-evolucao {
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            max-height: 450px;
+            min-height: 150px;
+            overflow-y: auto;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 6px;
+            border-left: 4px solid #0d6efd;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            transition: max-height 0.3s ease;
+        }
+        
+        .texto-evolucao:hover {
+            max-height: 600px;
+        }
+        
+        .texto-evolucao p {
+            margin-bottom: 0.6rem;
+        }
+        
+        .texto-evolucao * {
+            max-width: 100%;
+        }
+        
+        .texto-evolucao h1, .texto-evolucao h2, .texto-evolucao h3 {
+            margin-top: 0.8rem;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .texto-evolucao ul, .texto-evolucao ol {
+            padding-left: 25px;
+            margin-bottom: 0.8rem;
+        }
+        
+        .texto-evolucao li {
+            margin-bottom: 0.3rem;
+        }
+        
+        .texto-evolucao strong, .texto-evolucao b {
+            font-weight: 700;
+        }
+        
+        .texto-evolucao em, .texto-evolucao i {
+            font-style: italic;
+        }
+        
+        .texto-evolucao blockquote {
+            margin: 0.8rem 0;
+            padding: 0.5rem 1rem;
+            border-left: 3px solid #adb5bd;
+            background-color: #f0f0f0;
+        }
+        
+        .texto-evolucao::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        .texto-evolucao::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .texto-evolucao::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        
+        .texto-evolucao::-webkit-scrollbar-thumb:hover {
+            background: #0d6efd;
+        }
+        
+        #editor-container {
+            height: 450px;
+            margin-bottom: 15px;
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+        }
+        
+        .ql-editor {
+            overflow-y: auto !important;
+            max-height: 100% !important;
+            scroll-behavior: smooth;
+            font-size: 13px;
+            line-height: 1.5;
+            min-height: 400px;
+        }
+        
+        .ql-tooltip {
+            z-index: 1060 !important;
+        }
+        
+        @media (max-width: 768px) {
+            .texto-evolucao {
+                max-height: 250px;
+                font-size: 0.85rem;
+                min-height: 100px;
+            }
+            #editor-container {
+                height: 250px;
+            }
+            .ql-editor {
+                min-height: 200px;
+            }
+        }
+        
+        /* Estilos para adaptar a altura da caixa baseado no tamanho do conteúdo */
+        .texto-evolucao[data-lines="1"],
+        .texto-evolucao[data-lines="2"],
+        .texto-evolucao[data-lines="3"] {
+            max-height: 150px;
+            min-height: 80px;
+        }
+        
+        .texto-evolucao[data-lines="4"],
+        .texto-evolucao[data-lines="5"],
+        .texto-evolucao[data-lines="6"] {
+            max-height: 200px;
+            min-height: 100px;
+        }
+        
+        .texto-evolucao[data-lines="7"],
+        .texto-evolucao[data-lines="8"],
+        .texto-evolucao[data-lines="9"] {
+            max-height: 250px;
+            min-height: 150px;
+        }
+        
+        .texto-evolucao[data-lines="10"],
+        .texto-evolucao[data-lines="11"],
+        .texto-evolucao[data-lines="12"] {
+            max-height: 300px;
+            min-height: 200px;
+        }
+        
+        .texto-evolucao[data-lines="13"],
+        .texto-evolucao[data-lines="14"],
+        .texto-evolucao[data-lines="15"] {
+            max-height: 350px;
+            min-height: 250px;
+        }
+        
+        .texto-evolucao[data-lines="16"],
+        .texto-evolucao[data-lines="17"],
+        .texto-evolucao[data-lines="18"] {
+            max-height: 400px;
+            min-height: 300px;
+        }
+        
+        .texto-evolucao[data-lines="19"],
+        .texto-evolucao[data-lines="20"],
+        .texto-evolucao[data-lines="21"] {
+            max-height: 450px;
+            min-height: 350px;
+        }
+        
+        .texto-evolucao[data-lines="22"] {
+            max-height: 500px;
+            min-height: 400px;
+        }
+        
+        /* Estilos para o calendário de aprazamento */
+        .calendar-day {
+            width: 120px;
+            min-height: 80px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            background-color: #f8f9fa;
+        }
+        
+        .calendar-day:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background-color: #fff;
+        }
+        
+        .day-header {
+            font-weight: bold;
+            border-bottom: 1px dashed #dee2e6;
+            padding-bottom: 5px;
+        }
+        
+        .time-pill {
+            border: 1px solid #e9ecef;
+            transition: all 0.2s;
+        }
+        
+        .time-pill:hover {
+            background-color: #e9ecef;
+        }
+        
+        /* Estilos para popovers dos dias */
+        .popover {
+            max-width: 300px;
+        }
+        
+        .popover-body {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        /* Novos estilos para o modal de aprazamento redesenhado */
+        #modalAprazamento .modal-content {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        #modalAprazamento .modal-header {
+            background: linear-gradient(135deg, #4a6fdc 0%, #2856d4 100%);
+            border-bottom: none;
+            padding: 20px 24px;
+        }
+        
+        #modalAprazamento .modal-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+        
+        #modalAprazamento .modal-body {
+            padding: 24px;
+        }
+        
+        #modalAprazamento .form-label {
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+        
+        #modalAprazamento .input-group-text {
+            background-color: #f8f9fa;
+            border-color: #ced4da;
+            color: #6c757d;
+        }
+        
+        #modalAprazamento .form-control,
+        #modalAprazamento .form-select {
+            border-color: #ced4da;
+            padding: 10px 15px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        
+        #modalAprazamento .form-control:focus,
+        #modalAprazamento .form-select:focus {
+            border-color: #4a6fdc;
+            box-shadow: 0 0 0 0.25rem rgba(74, 111, 220, 0.25);
+        }
+        
+        #modalAprazamento .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        
+        #modalAprazamento .card:hover {
+            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+        }
+        
+        #modalAprazamento .alert {
+            border-radius: 8px;
+            border: none;
+        }
+        
+        #modalAprazamento .alert-info {
+            background-color: #e6f3fd;
+            color: #0c63e4;
+        }
+        
+        #modalAprazamento .btn-primary {
+            background: linear-gradient(to right, #4a6fdc, #2856d4);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        
+        #modalAprazamento .btn-primary:hover {
+            background: linear-gradient(to right, #5d7fe3, #3967e5);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(45, 85, 211, 0.3);
+        }
+        
+        #modalAprazamento .btn-outline-secondary {
+            border-color: #ced4da;
+            color: #495057;
+        }
+        
+        #modalAprazamento .btn-success {
+            background: linear-gradient(to right, #28a745, #218838);
+            border: none;
+            font-weight: 500;
+        }
+        
+        #modalAprazamento .btn-success:hover {
+            background: linear-gradient(to right, #2fd050, #27a844);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+        
+        #horarios_multiplos_dias .form-check-input {
+            width: 18px;
+            height: 18px;
+            margin-top: 3px;
+        }
+        
+        #horarios_multiplos_dias .form-check-input:checked {
+            background-color: #4a6fdc;
+            border-color: #4a6fdc;
+        }
+        
+        #horarios_multiplos_dias .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            font-weight: 600;
+            padding: 12px 15px;
+        }
+        
+        #horarios_multiplos_dias .btn-group .btn {
+            padding: 5px 10px;
+            font-size: 0.85rem;
+        }
+
+        /* Estilos para o modal de visualização de aprazamentos */
+        .modal-visualizar-aprazamento .modal-content {
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .modal-visualizar-aprazamento .modal-header {
+            background-color: #17a2b8;
+            color: white;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .modal-visualizar-aprazamento .table {
+            margin-bottom: 0;
+        }
+
+        .modal-visualizar-aprazamento .table th {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .modal-visualizar-aprazamento .table td {
+            vertical-align: middle;
+            font-size: 0.9rem;
+        }
+
+        .modal-visualizar-aprazamento .resumo-aprazamentos {
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            padding: 1rem;
+        }
+
+        .modal-visualizar-aprazamento .resumo-aprazamentos .col {
+            text-align: center;
+        }
+
+        .modal-visualizar-aprazamento .resumo-aprazamentos small {
+            display: block;
+            margin-bottom: 0.25rem;
+            color: #6c757d;
+        }
+
+        .modal-visualizar-aprazamento .resumo-aprazamentos strong {
+            font-size: 1.25rem;
+            display: block;
+        }
+
+        .modal-visualizar-aprazamento .status-icon {
+            margin-right: 0.5rem;
+        }
+
+        .modal-visualizar-aprazamento .table-responsive {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* Estilos para os botões de RN */
+        .rn-buttons {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .rn-buttons .btn {
+            margin-right: 10px;
+        }
+
+        /* Estilos para o modal de RN */
+        .modal-rn .form-group {
+            margin-bottom: 15px;
+        }
+
+        /* Efeito visual após atualização */
+        @keyframes flashUpdate {
+            0% { background-color: #d4edda; }
+            100% { background-color: transparent; }
+        }
+        .flash-update {
+            animation: flashUpdate 1.5s ease-out;
+        }
+
+        /* Submenu lateral */
+        .submenu .nav-link {
+            padding-left: 40px;
+            font-size: 0.85rem;
+        }
+
+        .submenu .nav-link i {
+            font-size: 0.9rem;
+        }
+
+        .submenu {
+            display: none; /* escondida por padrão */
+            flex-direction: column;
+        }
+
+        /* Mostrar submenu quando o item principal estiver em hover ou o próprio submenu em hover */
+        .nav-pills .nav-link:hover + .submenu,
+        .submenu:hover {
+            display: flex;
+        }
+
+        .nav-pills .nav-link.has-submenu {
+            margin-bottom: 0; /* remove gap abaixo do item principal */
+        }
+
+        .submenu {
+            margin: 0 10px 5px 10px; /* mesmo recuo lateral e espaçamento inferior */
+        }
+
+        /* Mostrar submenu ao passar o mouse */
+        .nav-pills .nav-link.has-submenu:hover + .submenu,
+        .submenu:hover {
+            display: flex;
+        }
+
+        /* Seções de Enfermagem */
+        .enf-section {display: none;}
+        .enf-section.active {display: block;}
+
+        /* Link ativo no submenu */
+        .submenu .nav-link.active {
+            background-color: var(--accent);
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+<!-- Menu Lateral -->
+<div class="sidebar">
+    <nav class="nav nav-pills flex-column">
+        <!-- Menu Principal -->
+        <div class="menu-section">
+            <a class="nav-link active" href="#prescricaoSection" data-bs-toggle="pill">
+                <i class="fas fa-pills"></i>
+                <span>Prescrição</span>
+            </a>
+            <a class="nav-link" href="#evolucaoSection" data-bs-toggle="pill">
+                <i class="fas fa-notes-medical"></i>
+                <span>Evolução</span>
+            </a>
+            <a class="nav-link has-submenu" href="#enfermagemSection" data-bs-toggle="pill">
+                <i class="fas fa-user-nurse"></i>
+                <span>Enfermagem</span>
+            </a>
+            <!-- Submenu para Enfermagem -->
+            <div class="submenu">
+                <a class="nav-link submenu-link active" href="#" data-enf-target="enfAdmissaoSection">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Admissão</span>
+                </a>
+                <a class="nav-link submenu-link" href="#" data-enf-target="enfEvolucoesSection">
+                    <i class="fas fa-notes-medical"></i>
+                    <span>Evoluções</span>
+                </a>
+                <a class="nav-link submenu-link" href="#" data-enf-target="enfSAESection">
+                    <i class="fas fa-stethoscope"></i>
+                    <span>SAE</span>
+                </a>
+            </div>
+            <a class="nav-link" href="#prescricaoEnfermagemSection" data-bs-toggle="pill">
+                <i class="fas fa-clipboard-list"></i>
+                <span>Prescrição Enf.</span>
+            </a>
+            <a class="nav-link" href="#examesSection" data-bs-toggle="pill">
+                <i class="fas fa-vial"></i>
+                <span>Exames</span>
+            </a>
+            <a class="nav-link" href="#receituarioSection" data-bs-toggle="pill">
+                <i class="fas fa-prescription"></i>
+                <span>Receituário</span>
+            </a>
+            <a class="nav-link" href="#atestadoSection" data-bs-toggle="pill">
+                <i class="fas fa-file-medical"></i>
+                <span>Atestados</span>
+            </a>
+            <a class="nav-link" href="#internamentoInfoSection" data-bs-toggle="pill">
+                <i class="fas fa-notes-medical"></i>
+                <span>Informações Internamento</span>
+            </a>
+        </div>
+
+        <!-- Ações Rápidas -->
+    </nav>
+</div>
+
+<!-- Conteúdo Principal -->
+<div class="main-content">
+    <div class="container-fluid py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Evolução do Paciente</h2>
+            <div>
+                {% if internacao.data_alta %}
+                <button type="button" class="btn btn-success me-2" onclick="verInformacoesAlta('{{ internacao.atendimento_id }}')">
+                    <i class="fas fa-user-check me-1"></i> Informações de Alta
+                </button>
+                {% endif %}
+                <a href="/clinica/pacientes-internados" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </a>
+            </div>
+        </div>
+
+    <!-- Informações do Paciente -->
+    <div class="paciente-info row">
+        <div class="col-md-3 info-item"><strong>Nome:</strong> {{ paciente.nome }}</div>
+        <div class="col-md-3 info-item"><strong>CPF:</strong> {{ paciente.cpf }}</div>
+        <div class="col-md-3 info-item"><strong>Cartão SUS:</strong> {{ paciente.cartao_sus }}</div>
+        <div class="col-md-3 info-item"><strong>Sexo:</strong> {{ paciente.sexo }}</div>
+        <div class="col-md-3 info-item"><strong>Data de Nascimento:</strong> {{ paciente.data_nascimento.strftime('%d/%m/%Y') if paciente.data_nascimento else '-' }}</div>
+        <div class="col-md-3 info-item"><strong>Endereço:</strong> {{ paciente.endereco }}</div>
+        <div class="col-md-3 info-item"><strong>Município:</strong> {{ paciente.municipio }}</div>
+        <div class="col-md-3 info-item"><strong>Telefone:</strong> {{ paciente.telefone }}</div>
+        <div class="col-md-3 info-item"><strong>Nome Social:</strong> {{ paciente.nome_social }}</div>
+        <div class="col-md-3 info-item"><strong>Filiação:</strong> {{ paciente.filiacao }}</div>
+    </div>
+
+    <!-- Botões de RN/Mãe -->
+    <div class="rn-buttons">
+        <!-- Botões para quando o paciente é a mãe -->
+        <div id="botoesResponsavel" style="display: none;">
+            <button type="button" class="btn btn-primary" id="btnAssociarRN" onclick="abrirModalRN()">
+                <i class="fas fa-baby"></i> Associar RN
+            </button>
+            <button type="button" class="btn btn-info" id="btnVerRN" style="display: none;" onclick="verFichaRN()">
+                <i class="fas fa-file-medical"></i> Ver ficha do RN
+            </button>
+        </div>
+        
+        <!-- Botão para quando o paciente é RN -->
+        <div id="botoesRN" style="display: none;">
+            <button type="button" class="btn btn-info" id="btnVerMae" onclick="verFichaMae()">
+                <i class="fas fa-female"></i> Ver ficha da mãe
+            </button>
+        </div>
+    </div>
+
+
+
+    <!-- Seção de Prescrições Médicas -->
+    <div id="prescricaoSection" class="content-section">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Prescrições Médicas</h5>
+            </div>
+            <div class="card-body">
+                <div class="prescricoes-lista">
+                    <!-- Todas as prescrições serão listadas aqui -->
+                    <div id="listaPrescricoes">
+                        <!-- Preenchido via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção de Prescrições de Enfermagem -->
+    <div id="prescricaoEnfermagemSection" class="content-section">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Prescrições de Enfermagem</h5>
+            </div>
+            <div class="card-body">
+                <!-- Prescrições de Enfermagem de Hoje -->
+                <div class="mb-3" id="hoje-container-prescricao-enfermagem">
+                    <h6 class="fw-bold text-success mb-2">
+                        <i class="fas fa-calendar-day me-1"></i> 
+                        <span id="titulo-prescricoes-enfermagem-hoje">Prescrições de Enfermagem de Hoje</span>
+                    </h6>
+                    <div id="listaPrescricoesEnfermagemDoDia">
+                        <!-- Preenchido via JavaScript -->
+                    </div>
+                </div>
+                
+                <!-- Prescrições de Enfermagem Anteriores -->
+                <div class="mb-3" id="antigas-container-prescricao-enfermagem">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="fw-bold text-secondary mb-0">
+                            <i class="fas fa-history me-1"></i> Prescrições de Enfermagem Anteriores
+                        </h6>
+                        <span class="badge bg-info" id="contador-prescricoes-enfermagem-antigas">0</span>
+                    </div>
+                    <div id="listaPrescricoesEnfermagemAntigas">
+                        <!-- Preenchido via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="evolucaoSection" class="content-section">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Evolução e Conduta</h5>
+            </div>
+            <div class="card-body">
+                <div class="mt-3 mb-3">
+                    <h6 class="fw-bold">Informações de Admissão</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label fw-bold">HDA (História da Doença Atual)</label>
+                            </div>
+                            <!-- Aplicar estilos de formatação avançada -->
+                            <div id="hdaContainer" class="form-control texto-evolucao" style="min-height: 100px; max-height: 200px; overflow-y: auto; white-space: pre-wrap;">{{ internacao.hda or 'Não registrado.' }}</div>
+                            <textarea class="form-control d-none" id="hdaTexto">{{ internacao.hda or '' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-responsive mb-3">
+                    <table class="table table-striped table-medicamentos">
+                        <thead class="table-primary">
+                            <tr>
+                                <th scope="col" style="width: 12%">Data/Hora</th>
+                                <th scope="col" style="width: 13%">Médico</th>
+                                <th scope="col" style="width: 75%">Evolução</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaEvolucoes">
+                            <tr>
+                                <td colspan="3" class="text-center">Carregando evoluções...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Evolução -->
+    <div class="modal fade" id="modalEvolucao" tabindex="-1" aria-labelledby="modalEvolucaoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalEvolucaoLabel">Registrar Nova Evolução</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <script>
+                    // Limpar observadores quando o modal for fechado
+                    document.getElementById('modalEvolucao').addEventListener('hidden.bs.modal', function () {
+                        const editor = document.querySelector('#editor-container .ql-editor');
+                        if (editor) {
+                            limparObservadores(editor);
+                        }
+                    });
+                </script>
+                <div class="modal-body">
+                    <form id="formEvolucao">
+                        <div class="mb-3">
+                            <label class="form-label">Texto da Evolução</label>
+                            <!-- Editor container -->
+                            <div id="editor-container"></div>
+                            <!-- Hidden textarea to store the content -->
+                            <textarea id="texto_evolucao" name="texto_evolucao" style="display:none"></textarea>
+                            <small class="text-muted">Descreva a evolução do paciente, sinais, sintomas, exames, condutas realizadas, etc.</small>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Registrar Evolução</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="enfermagemSection" class="content-section">
+        <!-- Admissão de Enfermagem -->
+        <div id="enfAdmissaoSection" class="enf-section card shadow-sm mb-4 active">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Admissão de Enfermagem</h5>
+            </div>
+            <div class="card-body">
+                <div id="admissao-texto-container">
+                    <div class="texto-admissao">
+                        {% if internacao.admissao_enfermagem %}
+                            {{ internacao.admissao_enfermagem | safe }}
+                        {% else %}
+                            <div class="text-muted">Nenhuma admissão de enfermagem registrada para este paciente.</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Evoluções de Enfermagem -->
+        <div id="enfEvolucoesSection" class="enf-section card shadow-sm mb-4">
+            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Evoluções de Enfermagem</h5>
+            </div>
+            <div class="card-body">
+                <!-- Seletor de data para filtrar evoluções -->
+                <div class="mb-3">
+                    <div class="row align-items-center">
+                        <div class="col-md-4">
+                            <label for="filtro-data" class="form-label">Filtrar por data:</label>
+                            <div class="input-group">
+                                <input type="date" id="filtro-data" class="form-control form-control-sm">
+                                <button class="btn btn-sm btn-outline-primary" id="btn-filtrar-data">
+                                    <i class="fas fa-filter"></i> Filtrar
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" id="btn-limpar-filtro">
+                                    <i class="fas fa-times"></i> Limpar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3" id="hoje-container">
+                    <h6 class="fw-bold text-success mb-2"><i class="fas fa-calendar-day me-1"></i> <span id="titulo-evolucoes-hoje">Evoluções de Hoje</span></h6>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-medicamentos">
+                            <thead class="table-info">
+                                <tr>
+                                    <th scope="col" style="width: 12%">Hora</th>
+                                    <th scope="col" style="width: 13%">Enfermeiro</th>
+                                    <th scope="col" style="width: 75%">Evolução</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaEvolucoesDoDia">
+                                <tr>
+                                    <td colspan="3" class="text-center">Carregando evoluções de hoje...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="mb-3" id="antigas-container">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="fw-bold text-secondary mb-0"><i class="fas fa-history me-1"></i> Evoluções Anteriores</h6>
+                        <span class="badge bg-info" id="contador-evolucoes-antigas">0</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-medicamentos">
+                            <thead class="table-secondary">
+                                <tr>
+                                    <th scope="col" style="width: 12%">Data/Hora</th>
+                                    <th scope="col" style="width: 13%">Enfermeiro</th>
+                                    <th scope="col" style="width: 75%">Evolução</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaEvolucoesAntigas">
+                                <tr>
+                                    <td colspan="3" class="text-center">Carregando evoluções anteriores...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SAE -->
+        <div id="enfSAESection" class="enf-section card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Sistematização da Assistência de Enfermagem (SAE)</h5>
+                <div>
+                    <button class="btn btn-light btn-sm" id="btn-historico-sae">
+                        <i class="fas fa-history"></i> Ver Histórico
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="listaSAE">
+                    <p class="text-center text-muted">Carregando dados da SAE...</p>
+                </div>
+                <div id="historicoSAE" style="display: none;">
+                    <h6 class="mb-3 text-secondary"><i class="fas fa-history me-2"></i> Histórico de SAE</h6>
+                    <div id="listaHistoricoSAE">
+                        <p class="text-center text-muted">Carregando histórico...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="examesSection" class="content-section">
+        <div class="card shadow-sm">
+            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Exames Laboratoriais</h5>
+
+            </div>
+            <div class="card-body">
+                <div id="examesLaboratoriaisTexto" class="texto-evolucao">
+                    {{ internacao.exames_laboratoriais or 'Não registrado.' }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Exames -->
+    <div class="modal fade" id="modalEditarExames" tabindex="-1" aria-labelledby="modalEditarExamesLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-secondary text-white">
+                    <h5 class="modal-title" id="modalEditarExamesLabel">Editar Exames Laboratoriais</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formExames">
+                        <div class="mb-3">
+                            <label for="textoExames" class="form-label">Exames Laboratoriais</label>
+                            <textarea class="form-control" id="textoExames" name="textoExames" rows="10" 
+                                placeholder="Registre os exames laboratoriais do paciente...">{{ internacao.exames_laboratoriais or '' }}</textarea>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Salvar Exames</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="receituarioSection" class="content-section">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Receituário</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3" id="hoje-container-receituario">
+                    <h6 class="fw-bold text-success mb-2">
+                        <i class="fas fa-calendar-day me-1"></i> 
+                        <span id="titulo-receitas-hoje">Receitas de Hoje</span>
+                    </h6>
+                    <div id="listaReceitasDoDia">
+                        <!-- Preenchido via JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="mb-3" id="antigas-container-receituario">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="fw-bold text-secondary mb-0">
+                            <i class="fas fa-history me-1"></i> Receitas Anteriores
+                        </h6>
+                        <span class="badge bg-info" id="contador-receitas-antigas">0</span>
+                    </div>
+                    <div id="listaReceitasAntigas">
+                        <!-- Preenchido via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Nova Receita -->
+    <div class="modal fade" id="modalNovaReceita" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Nova Receita</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formReceita">
+                        <div class="mb-3">
+                            <label class="form-label">Tipo de Receita</label>
+                            <select class="form-select" id="tipo_receita" required>
+                                <option value="">Selecione o tipo de receita</option>
+                                <option value="normal">Receita Normal</option>
+                                <option value="especial">Receita Especial</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Conteúdo da Receita</label>
+                            <div id="editor-receita-container">
+                                <!-- Editor Quill será inicializado aqui -->
+                            </div>
+                            <textarea id="conteudo_receita" name="conteudo_receita" style="display:none"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btn_salvar_receita">Salvar Receita</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="atestadoSection" class="content-section">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Atestados</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3" id="hoje-container-atestado">
+                    <h6 class="fw-bold text-success mb-2">
+                        <i class="fas fa-calendar-day me-1"></i> 
+                        <span id="titulo-atestados-hoje">Atestados de Hoje</span>
+                    </h6>
+                    <div id="listaAtestadosDoDia">
+                        <!-- Preenchido via JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="mb-3" id="antigas-container-atestado">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="fw-bold text-secondary mb-0">
+                            <i class="fas fa-history me-1"></i> Atestados Anteriores
+                        </h6>
+                        <span class="badge bg-info" id="contador-atestados-antigos">0</span>
+                    </div>
+                    <div id="listaAtestadosAntigos">
+                        <!-- Preenchido via JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Novo Atestado -->
+    <div class="modal fade" id="modalNovoAtestado" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Novo Atestado</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formAtestado">
+                        <div class="mb-3">
+                            <label class="form-label">Dias de Afastamento</label>
+                            <input type="number" class="form-control" id="dias_afastamento" min="1" placeholder="Número de dias">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Conteúdo do Atestado</label>
+                            <div id="editor-atestado-container">
+                                <!-- Editor Quill será inicializado aqui -->
+                            </div>
+                            <textarea id="conteudo_atestado" name="conteudo_atestado" style="display:none"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btn_salvar_atestado">Salvar Atestado</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="imagensSection" class="content-section">
+        <div class="alert alert-info">Visualização de imagens ainda não disponível.</div>
+    </div>
+
+    <!-- Seção de Informações de Internamento -->
+    <div id="internamentoInfoSection" class="content-section">
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Informações Detalhadas do Internamento</h5>
+            </div>
+            <div class="card-body">
+                <div id="internamento-info-loading" class="text-center my-3">
+                    <div class="spinner-border text-warning" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                </div>
+                <div id="internamento-info-content" style="display:none;"></div>
+            </div>
+            <div class="card-footer text-end" id="internamento-info-footer" style="display:none;">
+                <!-- Botões de Salvar/Cancelar para o modo de edição aparecerão aqui -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- jQuery (deve ser carregado primeiro) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+
+<script src="/static/js/aprazamento.js"></script>
+<script src="/static/js/calendario_aprazamento.js"></script>
+<script src="/static/js/calculo_horarios.js"></script>
+
+<!-- Definir variáveis globais importantes -->
+<script>
+    // Definir globalmente o ID do usuário e cargo para os scripts
+    const session = {
+        cargo: "{{ session.get('cargo', '') }}",
+        user_id: "{{ session.get('user_id', '') }}"
+    };
+</script>
+
+<!-- Campo oculto para o ID do atendimento -->
+<input type="hidden" id="atendimento_id" value="{{ internacao.id }}">
+
+<script>
+    // Variáveis globais
+    let quill;
+    let medicamentosAdicionados = [];
+    
+    // Extrair e validar o ID da internação
+    const internacaoId = parseInt("{{ internacao.id }}", 10);
+    console.log('ID da internação:', internacaoId);
+    
+    // Definir variável global para uso em outros scripts
+    window.internacaoId = internacaoId;
+    
+    // Verificar se internacaoId é um número válido
+    if (isNaN(internacaoId)) {
+        console.error('Erro: ID da internação não é válido!');
+        alert('Erro ao carregar o ID da internação. Por favor, recarregue a página ou contate o suporte.');
+    }
+
+    $(document).ready(function() {
+        const urlAnterior = "{{ url_anterior }}";
+        
+        // Iniciar carregamento das visualizações de enfermagem
+        carregarEvolucoesEnfermagem();
+        carregarPrescricoesEnfermagem();
+        
+        // Configurar filtros
+        $('#filtrarEvolucoesPorData').on('change', function() {
+            const dataFiltro = $(this).val();
+            filtrarEvolucoesEnfermagemPorData(dataFiltro);
+        });
+        
+        $('#filtrarPrescricoesPorData').on('change', function() {
+            const dataFiltro = $(this).val();
+            filtrarPrescricoesEnfermagemPorData(dataFiltro);
+        });
+        
+        // Debugar cargo do usuário
+        console.log("Cargo do usuário na sessão:", "{{ session.get('cargo') }}");
+        
+        // Configurar navegação das abas
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('#menuTabs .nav-link').forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+
+                    const target = this.getAttribute('data-target');
+                    document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+                    if (target) document.getElementById(target).classList.add('active');
+                });
+            });
+
+            // Ativar a primeira aba por padrão
+            const primeiraAba = document.querySelector('#menuTabs .nav-link');
+            if (primeiraAba) {
+                primeiraAba.click();
+            }
+        });
+        
+        // Inicializar o Editor Quill
+        try {
+            console.log('A inicialização do editor Quill será feita pelo script clinica_medico.js');
+            
+            // Configurar observadores modernos após a inicialização (se necessário)
+            setTimeout(() => {
+                const editor = document.querySelector('#editor-container .ql-editor');
+                if (editor) {
+                    configurarObservadoresModernos(editor);
+                }
+            }, 100);
+        } catch (error) {
+            console.error('Erro ao configurar o editor Quill:', error);
+            // Criar um fallback para o editor
+            $('#editor-container').html('<textarea id="fallback-editor" class="form-control" rows="10" placeholder="Descreva a evolução do paciente..."></textarea>');
+            
+            // Atualizar o textarea oculto quando o fallback for alterado
+            $('#fallback-editor').on('input', function() {
+                $('#texto_evolucao').val($(this).val());
+            });
+        }
+
+        // Carregar prescrições ao iniciar
+        carregarPrescricoes();
+        
+        // Carregar evoluções ao iniciar
+        carregarEvolucoes();
+        
+        // Adicionar evento para o botão de adicionar medicamento
+
+        
+        // Preparar modal HDA quando for aberto
+        $('#modalEditarHDA').on('show.bs.modal', function() {
+            // Pegar o valor atual do textarea escondido e colocar no campo de edição
+            const hdaAtual = $('#hdaTexto').val();
+            $('#textoHDA').val(hdaAtual);
+        });
+        
+        // Função atualizarTabelaMedicamentos foi movida para clinica_medico.js
+        
+        // Adicionar listeners para eventos de carregamento de prescrições
+        $(document).on('click', 'a.nav-link[href="#prescricaoSection"]', function() {
+            console.log('Clique na aba de prescrições detectado');
+            carregarPrescricoes();
+        });
+
+        $(document).on('click', '.fa-pills', function() {
+            console.log('Clique no ícone de pílulas detectado');
+            carregarPrescricoes();
+        });
+
+        // Carregar dados ao iniciar
+        carregarPrescricoes();
+        carregarEvolucoes();
+        
+        // Carregar evoluções de enfermagem
+        carregarEvolucoesEnfermagem();
+        
+        // Carregar prescrições de enfermagem
+        carregarPrescricoesEnfermagem();
+        
+        // Configurar toggles para mostrar/ocultar evoluções e prescrições antigas
+        $('#toggle-evolucoes-antigas').on('click', function() {
+            const container = $('#antigas-container');
+            const toggleText = $('#toggle-evolucoes-text');
+            const toggleIcon = $(this).find('i');
+            
+            if (container.is(':visible')) {
+                container.hide();
+                toggleText.text('Mostrar Antigas');
+                toggleIcon.removeClass('fa-eye-slash').addClass('fa-eye');
+            } else {
+                container.show();
+                toggleText.text('Ocultar Antigas');
+                toggleIcon.removeClass('fa-eye').addClass('fa-eye-slash');
+            }
+        });
+        
+        $('#toggle-prescricoes-antigas').on('click', function() {
+            const container = $('#antigas-container-prescricao');
+            if (container.is(':visible')) {
+                container.hide();
+                $('#toggle-prescricoes-text').text('Mostrar Antigas');
+                $(this).find('i').removeClass('fa-eye-slash').addClass('fa-eye');
+            } else {
+                container.show();
+                $('#toggle-prescricoes-text').text('Ocultar Antigas');
+                $(this).find('i').removeClass('fa-eye').addClass('fa-eye-slash');
+            }
+        });
+        
+        // Carregar dados da SAE
+        const pacienteId = parseInt("{{ paciente.id }}", 10);
+        $.ajax({
+            url: `/api/enfermagem/sae/${pacienteId}`,
+            method: 'GET',
+            success: function(response) {
+                if (response.success && response.sae) {
+                    const sae = response.sae;
+                    
+                    // Montar a visualização da SAE
+                    let html = `
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div><strong>Data do Registro:</strong> ${new Date(sae.data_registro).toLocaleDateString('pt-BR')}</div>
+                                    <div><span class="badge ${sae.eh_hoje ? 'bg-success' : 'bg-secondary'}">
+                                        ${sae.eh_hoje ? 'Hoje' : 'Registro Anterior'}
+                                    </span></div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <h6 class="text-primary mb-2">Sinais Vitais</h6>
+                                        <div class="row g-2">
+                                            <div class="col-md-2"><strong>PA:</strong> ${sae.pa}</div>
+                                            <div class="col-md-2"><strong>FC:</strong> ${sae.fc}</div>
+                                            <div class="col-md-2"><strong>SAT:</strong> ${sae.sat}</div>
+                                            <div class="col-md-2"><strong>R:</strong> ${sae.r}</div>
+                                            <div class="col-md-2"><strong>T:</strong> ${sae.t}</div>
+                                            <div class="col-md-2"><strong>Pulso:</strong> ${sae.pulso}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <h6 class="text-primary mb-2">Hipótese Diagnóstica</h6>
+                                        <div class="p-2 bg-light rounded">${sae.hipotese_diagnostica}</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="text-primary mb-2">DX</h6>
+                                        <div class="p-2 bg-light rounded">${sae.dx}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <h6 class="text-primary mb-2">Medicação</h6>
+                                        <div class="p-2 bg-light rounded">${sae.medicacao}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <h6 class="text-primary mb-2">Alergias</h6>
+                                        <div class="p-2 bg-light rounded">${sae.alergias}</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="text-primary mb-2">Antecedentes Pessoais</h6>
+                                        <div class="p-2 bg-light rounded">${sae.antecedentes_pessoais}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <h6 class="text-primary mb-2">Diagnóstico de Enfermagem</h6>
+                                        <div class="p-2 bg-light rounded">${sae.diagnostico_de_enfermagem}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="accordion" id="accordionSAE">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetalhes">
+                                                Ver mais detalhes da SAE
+                                            </button>
+                                        </h2>
+                                        <div id="collapseDetalhes" class="accordion-collapse collapse">
+                                            <div class="accordion-body">
+                                                <div class="row mb-3">
+                                                    <div class="col-md-6">
+                                                        <h6 class="text-primary mb-2">Sistema Neurológico</h6>
+                                                        <div class="p-2 bg-light rounded">${sae.sistema_neurologico}</div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <h6 class="text-primary mb-2">Estado Geral</h6>
+                                                        <div class="p-2 bg-light rounded">${sae.estado_geral}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <div class="col-md-6">
+                                                        <h6 class="text-primary mb-2">Ventilação</h6>
+                                                        <div class="p-2 bg-light rounded">${sae.ventilacao}</div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <h6 class="text-primary mb-2">Pele</h6>
+                                                        <div class="p-2 bg-light rounded">${sae.pele}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    $('#listaSAE').html(html);
+                } else {
+                    $('#listaSAE').html('<div class="alert alert-info">Nenhum registro SAE encontrado para este paciente.</div>');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Erro ao carregar SAE:', xhr.responseText);
+                
+                // Se o erro for de permissão (403), tentar buscar pelo histórico SAE
+                if (xhr.status === 403) {
+                    // Mostrar mensagem informativa
+                    $('#listaSAE').html('<div class="alert alert-info">Acessando histórico de SAE...</div>');
+                    
+                    // Chamar diretamente a API de histórico SAE
+                    const pacienteId = parseInt("{{ paciente.id }}", 10);
+                    $.ajax({
+                        url: `/api/enfermagem/sae/historico/${pacienteId}`,
+                        method: 'GET',
+                        success: function(response) {
+                            if (response.success && response.sae && response.sae.length > 0) {
+                                // Mostrar o primeiro registro como principal
+                                const maisRecente = response.sae.sort((a, b) => new Date(b.data_registro) - new Date(a.data_registro))[0];
+                                let htmlPrincipal = `
+                                    <div class="card mb-3">
+                                        <div class="card-header bg-light">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div><strong>Data do Registro:</strong> ${new Date(maisRecente.data_registro).toLocaleDateString('pt-BR')}</div>
+                                                <div><span class="badge bg-secondary">Via Histórico SAE</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row mb-3">
+                                                <div class="col-md-12">
+                                                    <h6 class="text-primary mb-2">Sinais Vitais</h6>
+                                                    <div class="row g-2">
+                                                        <div class="col-md-2"><strong>PA:</strong> ${maisRecente.pa}</div>
+                                                        <div class="col-md-2"><strong>FC:</strong> ${maisRecente.fc}</div>
+                                                        <div class="col-md-2"><strong>SAT:</strong> ${maisRecente.sat}</div>
+                                                        <div class="col-md-2"><strong>R:</strong> ${maisRecente.r}</div>
+                                                        <div class="col-md-2"><strong>T:</strong> ${maisRecente.t}</div>
+                                                        <div class="col-md-2"><strong>Pulso:</strong> ${maisRecente.pulso}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <h6 class="text-primary mb-2">Hipótese Diagnóstica</h6>
+                                                    <div class="p-2 bg-light rounded">${maisRecente.hipotese_diagnostica}</div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <h6 class="text-primary mb-2">DX</h6>
+                                                    <div class="p-2 bg-light rounded">${maisRecente.dx}</div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row mb-3">
+                                                <div class="col-md-12">
+                                                    <h6 class="text-primary mb-2">Medicação</h6>
+                                                    <div class="p-2 bg-light rounded">${maisRecente.medicacao}</div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <h6 class="text-primary mb-2">Alergias</h6>
+                                                    <div class="p-2 bg-light rounded">${maisRecente.alergias}</div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <h6 class="text-primary mb-2">Antecedentes Pessoais</h6>
+                                                    <div class="p-2 bg-light rounded">${maisRecente.antecedentes_pessoais}</div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="row mb-3">
+                                                <div class="col-md-12">
+                                                    <h6 class="text-primary mb-2">Diagnóstico de Enfermagem</h6>
+                                                    <div class="p-2 bg-light rounded">${maisRecente.diagnostico_de_enfermagem}</div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="accordion" id="accordionSAE">
+                                                <div class="accordion-item">
+                                                    <h2 class="accordion-header">
+                                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetalhes">
+                                                            Ver mais detalhes da SAE
+                                                        </button>
+                                                    </h2>
+                                                    <div id="collapseDetalhes" class="accordion-collapse collapse">
+                                                        <div class="accordion-body">
+                                                            <div class="row mb-3">
+                                                                <div class="col-md-6">
+                                                                    <h6 class="text-primary mb-2">Sistema Neurológico</h6>
+                                                                    <div class="p-2 bg-light rounded">${maisRecente.sistema_neurologico}</div>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <h6 class="text-primary mb-2">Estado Geral</h6>
+                                                                    <div class="p-2 bg-light rounded">${maisRecente.estado_geral}</div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row mb-3">
+                                                                <div class="col-md-6">
+                                                                    <h6 class="text-primary mb-2">Ventilação</h6>
+                                                                    <div class="p-2 bg-light rounded">${maisRecente.ventilacao}</div>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <h6 class="text-primary mb-2">Pele</h6>
+                                                                    <div class="p-2 bg-light rounded">${maisRecente.pele}</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                                
+                                // Atualizar view principal
+                                $('#listaSAE').html(htmlPrincipal);
+                                
+                                // Mostrar o histórico automaticamente
+                                $('#historicoSAE').show();
+                                $('#btn-historico-sae').html('<i class="fas fa-times"></i> Ocultar Histórico');
+                                
+                                // Carregar resto do histórico normalmente
+                                carregarHistoricoSAE();
+                            } else {
+                                $('#listaSAE').html('<div class="alert alert-info">Nenhum registro SAE encontrado para este paciente.</div>');
+                            }
+                        },
+                        error: function() {
+                            $('#listaSAE').html('<div class="alert alert-info">Não foi possível acessar os dados de SAE.</div>');
+                        }
+                    });
+                } else {
+                    // Mostrar mensagem genérica para outros erros
+                    $('#listaSAE').html('<div class="alert alert-info">Nenhum registro SAE disponível para este paciente.</div>');
+                }
+            }
+        });
+
+        // Adicionar funções para filtrar evoluções e prescrições por data
+        
+        // Configurar filtros
+        $('#btn-filtrar-data').on('click', function() {
+            const dataFiltro = $('#filtro-data').val();
+            filtrarEvolucoesEnfermagemPorData(dataFiltro);
+        });
+        
+        $('#btn-limpar-filtro').on('click', function() {
+            $('#filtro-data').val('');
+            carregarEvolucoesEnfermagem();
+        });
+        
+        $('#btn-filtrar-data-prescricao').on('click', function() {
+            const dataFiltro = $('#filtro-data-prescricao').val();
+            filtrarPrescricoesEnfermagemPorData(dataFiltro);
+        });
+        
+        $('#btn-limpar-filtro-prescricao').on('click', function() {
+            $('#filtro-data-prescricao').val('');
+            carregarPrescricoesEnfermagem();
+        });
+        
+        // Configurar toggles para mostrar/ocultar evoluções e prescrições antigas
+        $('#toggle-evolucoes-antigas').on('click', function() {
+            const container = $('#antigas-container');
+            const toggleText = $('#toggle-evolucoes-text');
+            const toggleIcon = $(this).find('i');
+            
+            if (container.is(':visible')) {
+                container.hide();
+                toggleText.text('Mostrar Antigas');
+                toggleIcon.removeClass('fa-eye-slash').addClass('fa-eye');
+            } else {
+                container.show();
+                toggleText.text('Ocultar Antigas');
+                toggleIcon.removeClass('fa-eye').addClass('fa-eye-slash');
+            }
+        });
+        
+        $('#toggle-prescricoes-antigas').on('click', function() {
+            const container = $('#antigas-container-prescricao');
+            if (container.is(':visible')) {
+                container.hide();
+                $('#toggle-prescricoes-text').text('Mostrar Antigas');
+                $(this).find('i').removeClass('fa-eye-slash').addClass('fa-eye');
+            } else {
+                container.show();
+                $('#toggle-prescricoes-text').text('Ocultar Antigas');
+                $(this).find('i').removeClass('fa-eye').addClass('fa-eye-slash');
+            }
+        });
+        
+        // Configurar botão para mostrar histórico SAE
+        $('#btn-historico-sae').on('click', function() {
+            const historicoContainer = $('#historicoSAE');
+            if (historicoContainer.is(':visible')) {
+                historicoContainer.hide();
+                $(this).html('<i class="fas fa-history"></i> Ver Histórico');
+            } else {
+                carregarHistoricoSAE();
+                historicoContainer.show();
+                $(this).html('<i class="fas fa-times"></i> Ocultar Histórico');
+            }
+        });
+
+        // Ativar seção Enfermagem ao clicar no submenu
+        $('.submenu .nav-link').on('click', function(){
+            $('a.nav-link[href="#enfermagemSection"]').click();
+        });
+
+        // Inicializar visibilidade das seções de enfermagem
+        $('.enf-section').removeClass('active').hide();
+        $('#enfAdmissaoSection').addClass('active').show();
+
+        // Clique no submenu para alternar seções
+        $('.submenu-link').on('click', function(e){
+            e.preventDefault();
+            const alvo = $(this).data('enf-target');
+
+            // Atualizar links ativos
+            $('.submenu .nav-link').removeClass('active');
+            $(this).addClass('active');
+
+            // Mostrar seção correspondente
+            $('.enf-section').removeClass('active').hide();
+            $('#' + alvo).addClass('active').show();
+
+            // Garantir que aba Enfermagem esteja ativada
+            $('a.nav-link[href="#enfermagemSection"]').addClass('active');
+        });
+    });
+    
+    // Todas as funções foram movidas para o arquivo clinica_medico.js
+    
+    // Adicionar evento para o botão de visualização de aprazamento
+    $(document).on('click', '.btn-visualizar-aprazamento', function(e) {
+        e.preventDefault();
+        
+        try {
+            // Obter dados do botão
+            const aprazamento = $(this).data('aprazamento');
+            const medicamento = $(this).data('medicamento');
+            
+            console.log('Visualizando aprazamento para:', medicamento);
+            
+            if (!aprazamento) {
+                alert('Não há horários de aprazamento definidos para este medicamento.');
+                return;
+            }
+            
+            // Verificar se o formato já é válido
+            let textoFormatado = corrigirFormatoAprazamento(aprazamento);
+            
+            // Log para diagnóstico
+            console.log('Formato corrigido do aprazamento:', textoFormatado);
+            
+            // Verificar se o formato está válido
+            if (!textoFormatado || !textoFormatado.match(/\d{2}\/\d{2}\/\d{4}: \d{2}:\d{2}/)) {
+                alert('Não foi possível identificar datas e horários no formato esperado.\n\nUse o formato: DD/MM/YYYY: HH:MM, HH:MM');
+                console.error('Formato inválido após correção:', textoFormatado);
+                return;
+            }
+            
+            // Formatar o título do modal
+            const titulo = medicamento ? 
+                medicamento : 
+                'Horários';
+                
+            // Inicializar o modal com os dados formatados
+            inicializarModalCalendarioAprazamento(textoFormatado, titulo);
+            
+            // Log para depuração
+            console.log('Texto formatado para visualização:', textoFormatado);
+        } catch (error) {
+            console.error('Erro ao inicializar visualização de aprazamento:', error);
+            alert('Ocorreu um erro ao tentar visualizar o calendário. Por favor, tente novamente.');
+        }
+    });
+    
+    // Função para corrigir o formato do aprazamento
+    // As funções corrigirFormatoAprazamento, inicializarModalCalendarioAprazamento e 
+    // gerarHTMLCalendarioAprazamento foram movidas para clinica_medico.js
+
+    // Adicionar manipulador para o formulário de HDA
+    $(document).on('submit', '#formHDA', function(e) {
+        e.preventDefault(); // Previne o comportamento padrão do formulário
+        e.stopPropagation(); // Impede propagação do evento
+        
+        console.log('Formulário HDA submetido - iniciando processamento');
+        
+        const hdaTexto = $('#textoHDA').val().trim();
+        
+        if (!hdaTexto) {
+            alert('Por favor, preencha a História da Doença Atual.');
+            return false;
+        }
+        
+        // Mostrar indicador de carregamento
+        const btnSubmit = $(this).find('button[type="submit"]');
+        const textoOriginal = btnSubmit.html();
+        btnSubmit.html('<i class="fas fa-spinner fa-spin"></i> Processando...');
+        btnSubmit.prop('disabled', true);
+        
+        // Preparar dados para envio
+        const atendimentoIdVal = $('#atendimento_id').val();
+        const dados = {
+            atendimentos_clinica_id: atendimentoIdVal,
+            hda: hdaTexto
+};
+        
+        console.log('Enviando dados para atualizar HDA:', dados);
+        
+        // Enviar requisição para atualizar HDA
+        $.ajax({
+            url: '/api/internacao/atualizar-hda',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(dados),
+            success: function(response) {
+                console.log('Resposta do servidor:', response);
+                
+                if (response.success) {
+                    console.log('HDA atualizado com sucesso, atualizando elementos de HDA');
+                    // Atualizar o texto nos elementos relevantes
+                    $('#hdaTexto').val(hdaTexto);
+                    $('#hdaContainer').text(hdaTexto);
+                    
+                    // Recalcular estimativa de linhas para aplicar altura correta
+                    (function(){
+                        const texto = $('#hdaContainer').text();
+                        const linhas = texto.split(/\r\n|\r|\n/).length;
+                        const palavras = texto.split(/\s+/).length;
+                        let estimativaLinhas = Math.max(linhas, Math.ceil(palavras / 15));
+                        estimativaLinhas = Math.min(estimativaLinhas, 22);
+                        $('#hdaContainer').attr('data-lines', estimativaLinhas);
+                    })();
+                    
+                    console.log('Fechando modal');
+                    $('#modalEditarHDA').modal('hide');
+                    // Mostrar mensagem de sucesso em um toast ou alert pequeno
+                    const alertHtml = `
+                        <div class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3" role="alert" style="z-index: 1060">
+                            História da Doença Atual atualizada com sucesso!
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    `;
+                    $('body').append(alertHtml);
+                    
+                    // Remover o alerta após 3 segundos
+                    setTimeout(function() {
+                        $('.alert').alert('close');
+                    }, 3000);
+                } else {
+                    alert('Erro ao atualizar HDA: ' + (response.message || 'Erro desconhecido'));
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Erro ao atualizar HDA:', xhr.responseText);
+                alert('Erro ao atualizar HDA: ' + (xhr.responseJSON?.error || error));
+            },
+            complete: function() {
+                console.log('Requisição HDA concluída');
+                // Restaurar botão
+                btnSubmit.html(textoOriginal);
+                btnSubmit.prop('disabled', false);
+            }
+        });
+        
+        return false; // Retorno adicional para garantir que o formulário não seja enviado
+    });
+
+    // A função renderizarPrescricao foi movida para o arquivo clinica_medico.js
+</script>
+
+<!-- Modal Editar HDA -->
+<div class="modal fade" id="modalEditarHDA" tabindex="-1" aria-labelledby="modalEditarHDALabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalEditarHDALabel">Editar História da Doença Atual (HDA)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formHDA">
+                    <div class="mb-3">
+                        <label for="textoHDA" class="form-label">História da Doença Atual</label>
+                        <textarea class="form-control" id="textoHDA" name="textoHDA" rows="5" 
+                            placeholder="Descreva a história da doença atual do paciente...">{{ internacao.hda or '' }}</textarea>
+                        <small class="text-muted">Informações completas sobre o histórico da doença atual, sintomas e evolução do quadro.</small>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar HDA</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Visualizar Aprazamentos -->
+<div class="modal fade modal-visualizar-aprazamento" id="modalVisualizarAprazamento" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Horários de Aprazamento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="resumo-aprazamentos mb-3">
+                    <div class="row">
+                        <div class="col">
+                            <small>Total de Horários</small>
+                            <strong id="totalHorarios">0</strong>
+                        </div>
+                        <div class="col">
+                            <small>Realizados</small>
+                            <strong id="totalRealizados">0</strong>
+                        </div>
+                        <div class="col">
+                            <small>Pendentes</small>
+                            <strong id="totalPendentes">0</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Status</th>
+                                <th>Enfermeiro</th>
+                                <th>Data Realização</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaAprazamentos">
+                            <!-- Preenchido via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Extrair o ID do atendimento da URL e disponibilizá-lo globalmente
+window.ATENDIMENTO_ID = window.location.pathname.split('/').pop();
+console.log('[Debug] ID do atendimento extraído:', window.ATENDIMENTO_ID);
+
+// Verificar se o ID foi extraído corretamente
+if (!window.ATENDIMENTO_ID) {
+    console.error('[Debug] Erro: ID do atendimento não encontrado na URL');
+} else {
+    console.log('[Debug] ID do atendimento disponível globalmente');
+}
+
+// Função para visualizar aprazamentos de um medicamento
+// Função movida para clinica_medico.js
+</script>
+
+<!-- Modal Nova Prescrição -->
+<div class="modal fade" id="modalNovaPrescricao" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Nova Prescrição Médica</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formPrescricao">
+                    <div class="mb-3">
+                        <label class="form-label">Dieta</label>
+                        <textarea class="form-control" id="texto_dieta" rows="2" placeholder="Descreva a dieta do paciente..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Medicamentos</label>
+                        <div class="card mb-2">
+                            <div class="card-body">
+                                <div class="row g-2">
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" id="nome_medicamento" placeholder="Nome do medicamento">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control" id="descricao_uso" placeholder="Descrição/Posologia">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="button" class="btn btn-success w-100" id="btn_adicionar_medicamento">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm" id="tabela_medicamentos">
+                                <thead>
+                                    <tr>
+                                        <th>Medicamento</th>
+                                        <th>Descrição/Posologia</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr id="sem_medicamentos">
+                                        <td colspan="3" class="text-center text-muted">Nenhum medicamento adicionado</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Procedimentos Médicos</label>
+                        <textarea class="form-control" id="texto_procedimento_medico" rows="3" placeholder="Descreva os procedimentos médicos..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Procedimentos Multiprofissionais</label>
+                        <textarea class="form-control" id="texto_procedimento_multi" rows="3" placeholder="Descreva os procedimentos multiprofissionais..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btn_salvar_prescricao">Salvar Prescrição</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Variáveis globais
+window.medicamentosAdicionados = window.medicamentosAdicionados || [];
+
+// Evento para abrir o modal de nova prescrição
+$('#btn-nova-prescricao').on('click', function() {
+    // Limpar o formulário
+    $('#formPrescricao')[0].reset();
+    window.medicamentosAdicionados = [];
+    atualizarTabelaMedicamentos();
+    
+    // Abrir o modal
+    $('#modalNovaPrescricao').modal('show');
+});
+
+
+// Evento para adicionar medicamento
+$('#btn_adicionar_medicamento').on('click', function(e) {
+    e.preventDefault(); // Previne o comportamento padrão do botão
+    e.stopPropagation(); // Impede a propagação do evento
+    
+    const nome_medicamento = $('#nome_medicamento').val().trim();
+    const descricao_uso = $('#descricao_uso').val().trim();
+    
+    if (!nome_medicamento || !descricao_uso) {
+        alert('Por favor, preencha o nome do medicamento e a descrição de uso.');
+        return;
+    }
+    
+    window.medicamentosAdicionados.push({
+        nome_medicamento: nome_medicamento,
+        descricao_uso: descricao_uso
+    });
+    
+    // Limpar campos
+    $('#nome_medicamento').val('');
+    $('#descricao_uso').val('');
+    
+    // Atualizar tabela
+    atualizarTabelaMedicamentos();
+    
+    // Focar no campo de nome do medicamento
+    $('#nome_medicamento').focus();
+});
+
+// Evento para salvar prescrição
+$('#btn_salvar_prescricao').on('click', function(e) {
+    e.preventDefault(); // Previne o comportamento padrão do botão
+    
+    const texto_dieta = $('#texto_dieta').val().trim();
+    const texto_procedimento_medico = $('#texto_procedimento_medico').val().trim();
+    const texto_procedimento_multi = $('#texto_procedimento_multi').val().trim();
+    
+    // Verificar se ao menos algo foi preenchido
+    if (!texto_dieta && !texto_procedimento_medico && !texto_procedimento_multi && window.medicamentosAdicionados.length === 0) {
+        alert('Por favor, preencha pelo menos um dos campos da prescrição ou adicione ao menos um medicamento.');
+        return;
+    }
+    
+    // Preparar dados para envio
+    const dados = {
+        atendimentos_clinica_id: internacaoId,
+        texto_dieta: texto_dieta || null,
+        texto_procedimento_medico: texto_procedimento_medico || null,
+        texto_procedimento_multi: texto_procedimento_multi || null,
+        medicamentos: window.medicamentosAdicionados
+    };
+    
+    // Mostrar indicador de carregamento
+    const btnSalvar = $(this);
+    const textoOriginal = btnSalvar.html();
+    btnSalvar.html('<i class="fas fa-spinner fa-spin"></i> Salvando...').prop('disabled', true);
+    
+    // Enviar requisição
+    $.ajax({
+        url: '/api/prescricoes',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(dados),
+        success: async function(response) {
+            if (response.success) {
+                try {
+                    // Limpar o formulário
+                    $('#formPrescricao')[0].reset();
+                    window.medicamentosAdicionados = [];
+                    atualizarTabelaMedicamentos();
+                    
+                    // Fechar modal
+                    $('#modalNovaPrescricao').modal('hide');
+                    
+                    // Forçar atualização das prescrições
+                    await carregarPrescricoes();
+                    
+                    // Mostrar mensagem de sucesso
+                    const alertHtml = `
+                        <div class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3" role="alert" style="z-index: 1060">
+                            Prescrição registrada com sucesso!
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    `;
+                    $('body').append(alertHtml);
+                    
+                    // Remover o alerta após 3 segundos
+                    setTimeout(function() {
+                        $('.alert').alert('close');
+                    }, 3000);
+                    
+                    // Forçar atualização da visualização
+                    $('#prescricaoSection').show();
+                    $('#listaPrescricoesDoDia').html('<tr><td colspan="3" class="text-center"><i class="fas fa-spinner fa-spin"></i> Atualizando prescrições...</td></tr>');
+                    
+                    // Recarregar prescrições novamente após um pequeno delay
+                    setTimeout(async function() {
+                        await carregarPrescricoes();
+                    }, 500);
+                    
+                } catch (error) {
+                    console.error('Erro ao atualizar prescrições:', error);
+                }
+            } else {
+                alert('Erro ao registrar prescrição: ' + (response.message || 'Erro desconhecido'));
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Erro ao registrar prescrição:', xhr.responseText);
+            alert('Erro ao registrar prescrição: ' + (xhr.responseJSON?.error || error));
+        },
+        complete: function() {
+            // Restaurar botão
+            btnSalvar.html(textoOriginal).prop('disabled', false);
+        }
+    });
+});
+
+// Adicionar evento de tecla para os campos de medicamento
+
+// Adicionar evento de tecla para os campos de medicamento
+$('#nome_medicamento, #descricao_uso').on('keypress', function(e) {
+    // Se pressionar Enter
+    if (e.which === 13) {
+        e.preventDefault(); // Previne o comportamento padrão
+        // Se estiver no campo nome, vai para descrição
+        if ($(this).attr('id') === 'nome_medicamento') {
+            $('#descricao_uso').focus();
+        } else {
+            // Se estiver na descrição, aciona o botão adicionar
+            $('#btn_adicionar_medicamento').click();
+        }
+    }
+});
+
+// Prevenir submissão do formulário ao pressionar Enter
+$('#formPrescricao').on('submit', function(e) {
+    e.preventDefault();
+    return false;
+});
+</script>
+
+<!-- Modal Editar Exames -->
+<div class="modal fade" id="modalEditarExames" tabindex="-1" aria-labelledby="modalEditarExamesLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary text-white">
+                <h5 class="modal-title" id="modalEditarExamesLabel">Editar Exames Laboratoriais</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formExames">
+                    <div class="mb-3">
+                        <label for="textoExames" class="form-label">Exames Laboratoriais</label>
+                        <textarea class="form-control" id="textoExames" name="textoExames" rows="10" 
+                            placeholder="Registre os exames laboratoriais do paciente...">{{ internacao.exames_laboratoriais or '' }}</textarea>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar Exames</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Manipulador para o formulário de exames
+$('#formExames').on('submit', function(e) {
+    e.preventDefault();
+    
+    const textoExames = $('#textoExames').val().trim();
+    
+    // Mostrar indicador de carregamento
+    const btnSubmit = $(this).find('button[type="submit"]');
+    const textoOriginal = btnSubmit.html();
+    btnSubmit.html('<i class="fas fa-spinner fa-spin"></i> Processando...').prop('disabled', true);
+    
+    // Enviar requisição para atualizar exames
+    $.ajax({
+        url: `/api/internacao/{{ internacao.id }}/atualizar`,
+        method: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            exames_laboratoriais: textoExames
+        }),
+        success: function(response) {
+            if (response.success) {
+                // Atualizar o texto na tela
+                $('#examesLaboratoriaisTexto').html(textoExames || 'Não registrado.');
+                
+                // Fechar o modal
+                $('#modalEditarExames').modal('hide');
+                
+                // Mostrar mensagem de sucesso
+                const alertHtml = `
+                    <div class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3" role="alert" style="z-index: 1060">
+                        Exames laboratoriais atualizados com sucesso!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `;
+                $('body').append(alertHtml);
+                
+                // Remover o alerta após 3 segundos
+                setTimeout(function() {
+                    $('.alert').alert('close');
+                }, 3000);
+            } else {
+                alert('Erro ao atualizar exames: ' + (response.message || 'Erro desconhecido'));
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Erro ao atualizar exames:', xhr.responseText);
+            alert('Erro ao atualizar exames: ' + (xhr.responseJSON?.error || error));
+        },
+        complete: function() {
+            // Restaurar botão
+            btnSubmit.html(textoOriginal).prop('disabled', false);
+        }
+    });
+});
+</script>
+
+
+<!-- Adicionar antes do fechamento da div container -->
+<div id="receituarioSection" class="content-section">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Receituário</h5>
+            <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalNovaReceita">
+                <i class="fas fa-plus-circle"></i> Nova Receita
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="mb-3" id="hoje-container-receituario">
+                <h6 class="fw-bold text-success mb-2">
+                    <i class="fas fa-calendar-day me-1"></i> 
+                    <span id="titulo-receitas-hoje">Receitas de Hoje</span>
+                </h6>
+                <div id="listaReceitasDoDia">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+            </div>
+            
+            <div class="mb-3" id="antigas-container-receituario">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="fw-bold text-secondary mb-0">
+                        <i class="fas fa-history me-1"></i> Receitas Anteriores
+                    </h6>
+                    <span class="badge bg-info" id="contador-receitas-antigas">0</span>
+                </div>
+                <div id="listaReceitasAntigas">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nova Receita -->
+<div class="modal fade" id="modalNovaReceita" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Nova Receita</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formReceita">
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de Receita</label>
+                        <select class="form-select" id="tipo_receita" required>
+                            <option value="">Selecione o tipo de receita</option>
+                            <option value="normal">Receita Normal</option>
+                            <option value="especial">Receita Especial</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Conteúdo da Receita</label>
+                        <div id="editor-receita-container">
+                            <!-- Editor Quill será inicializado aqui -->
+                        </div>
+                        <textarea id="conteudo_receita" name="conteudo_receita" style="display:none"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btn_salvar_receita">Salvar Receita</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Inicializar editor Quill para receitas
+$(document).ready(function() {
+    // A inicialização do Quill para receitas agora é feita no clinica_medico.js
+    console.log('O editor de receitas será inicializado pelo script clinica_medico.js');
+
+    // Carregar receitas ao iniciar
+    if (typeof carregarReceitas === 'function') {
+        carregarReceitas();
+    } else {
+        console.warn('Função carregarReceitas não está disponível');
+    }
+});
+
+</script>
+
+<!-- Modal de Informações de Internamento -->
+<div class="modal fade" id="modalInformacoesInternamento" tabindex="-1" aria-labelledby="modalInformacoesInternamentoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title" id="modalInformacoesInternamentoLabel">Informações de Internamento</h5>
+        <button type="button" class="btn btn-outline-primary btn-sm ms-2" id="btnEditarInternamentoInfo">
+          <i class="fas fa-edit"></i> Editar
+        </button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body">
+        <div id="internamento-info-loading" class="text-center my-3">
+          <div class="spinner-border text-warning" role="status"><span class="visually-hidden">Carregando...</span></div>
+        </div>
+        <div id="internamento-info-content" style="display:none"></div>
+      </div>
+      <div class="modal-footer" id="internamento-info-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Campos ocultos para IDs necessários -->
+<input type="hidden" id="user_id" value="{{ session.get('user_id', 0) }}">
+<input type="hidden" id="paciente_id" value="{{ paciente.id }}">
+
+<!-- Modal de Informações de Alta -->
+<div class="modal fade" id="modalInformacoesAlta" tabindex="-1" aria-labelledby="modalInformacoesAltaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalInformacoesAltaLabel">
+                    <i class="fas fa-user-check me-2"></i>Informações de Alta do Paciente
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-4">
+                    <div class="col-md-8">
+                        <h6 class="text-primary mb-2">
+                            <i class="fas fa-user me-2"></i>Dados do Paciente
+                        </h6>
+                        <div class="d-flex gap-4">
+                            <strong>Nome:</strong> <span id="altaNomePaciente"></span>
+                            <strong>CPF:</strong> <span id="altaCpfPaciente"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <h6 class="text-success mb-2">
+                            <i class="fas fa-calendar-check me-2"></i>Data de Alta
+                        </h6>
+                        <strong id="altaDataAlta" class="text-success fs-5"></strong>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-lg-12">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-light border-0">
+                                <h6 class="mb-0 text-primary">
+                                    <i class="fas fa-stethoscope me-2"></i>Diagnóstico Final
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <p id="altaDiagnosticoAlta" class="mb-0 text-justify" style="min-height: 60px; white-space: pre-wrap;"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-12">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-light border-0">
+                                <h6 class="mb-0 text-primary">
+                                    <i class="fas fa-history me-2"></i>Histórico da Internação
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <p id="altaHistoricoInternacao" class="mb-0 text-justify" style="min-height: 100px; white-space: pre-wrap;"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-light border-0">
+                                <h6 class="mb-0 text-primary">
+                                    <i class="fas fa-heart me-2"></i>Cuidados Gerais
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <p id="altaCuidadosGerais" class="mb-0 text-justify" style="min-height: 60px; white-space: pre-wrap;"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Fechar
+                </button>
+                <button type="button" class="btn btn-primary" onclick="imprimirInformacoesAlta()">
+                    <i class="fas fa-print me-2"></i>Imprimir
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+
+

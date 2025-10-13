@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evolução de Enfermagem - {{ paciente.nome }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        @page { size: A4; margin: 1cm; }
+        body { font-family: Arial, sans-serif; font-size: 10pt; color: #333; background: #fff; }
+        .header { text-align: center; border-bottom: 2px solid #2c5aa0; padding-bottom: 8px; margin-bottom: 12px; }
+        .hospital-name { font-size: 14pt; font-weight: bold; color: #2c5aa0; }
+        .title { font-size: 12pt; font-weight: bold; color: #333; margin-top: 4px; }
+        .patient-info { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 8px; margin-bottom: 12px; }
+        .patient-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 9pt; }
+        .field { display: flex; gap: 6px; }
+        .label { font-weight: bold; color: #495057; min-width: 110px; }
+        .evolucao-section { border: 1px solid #dee2e6; border-radius: 5px; overflow: hidden; }
+        .section-header { background: linear-gradient(135deg, #2c5aa0, #4a6fa5); color: #fff; padding: 8px 12px; font-weight: bold; }
+        .section-content { padding: 12px; white-space: pre-wrap; word-wrap: break-word; line-height: 1.45; font-size: 10pt; }
+        .profissional { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 8px; margin-top: 14px; }
+        .assinatura { margin-top: 28px; text-align: center; font-size: 9pt; }
+        .assinatura .nome { font-weight: bold; color: #495057; }
+        .assinatura .registro { color: #666; }
+        .footer { margin-top: 14px; text-align: center; font-size: 8pt; color: #666; border-top: 1px solid #dee2e6; padding-top: 6px; }
+        .print-button { position: fixed; top: 16px; right: 16px; background: #28a745; color: #fff; border: none; padding: 10px 16px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000; }
+        .print-button:hover { background: #218838; }
+        @media print { .no-print { display: none; } body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+    </style>
+    </head>
+<body>
+    <button class="print-button no-print" onclick="window.print()"><i class="fas fa-print"></i> Imprimir</button>
+    <div class="header">
+        <div class="hospital-name">HOSPITAL SENADOR OZIRES PONTES</div>
+        <div class="title">EVOLUÇÃO DE ENFERMAGEM</div>
+    </div>
+    <div class="patient-info">
+        <div class="patient-grid">
+            <div class="field"><span class="label">Nome:</span><span>{{ paciente.nome or 'Não informado' }}</span></div>
+            <div class="field"><span class="label">Cartão SUS:</span><span>{{ paciente.cartao_sus or 'Não informado' }}</span></div>
+            <div class="field"><span class="label">Data Nascimento:</span><span>{{ paciente.data_nascimento.strftime('%d/%m/%Y') if paciente.data_nascimento else 'Não informado' }}</span></div>
+            <div class="field"><span class="label">Sexo:</span><span>{{ paciente.sexo or 'Não informado' }}</span></div>
+            <div class="field"><span class="label">Leito:</span><span>{{ internacao.leito or 'Não informado' }}</span></div>
+            <div class="field"><span class="label">Data Evolução:</span><span>{{ evolucao.data_evolucao.strftime('%d/%m/%Y %H:%M') if evolucao.data_evolucao else 'Não informada' }}</span></div>
+            <div class="field"><span class="label">ID Atendimento:</span><span>{{ atendimento.id }}</span></div>
+        </div>
+    </div>
+    <div class="evolucao-section">
+        <div class="section-header"><i class="fas fa-notes-medical"></i> Texto da Evolução</div>
+        <div class="section-content">{{ evolucao.texto or 'Evolução não registrada' }}</div>
+    </div>
+    <div class="profissional">
+        <div><strong>Profissional:</strong> {{ enfermeiro.nome if enfermeiro else 'Não identificado' }}</div>
+        {% if enfermeiro and enfermeiro.numero_profissional %}
+        <div><strong>COREN:</strong> {{ enfermeiro.numero_profissional }}</div>
+        {% endif %}
+    </div>
+    <div class="assinatura">
+        <div class="nome">{{ enfermeiro.nome if enfermeiro else 'Enfermagem' }}</div>
+        {% if enfermeiro and enfermeiro.numero_profissional %}
+        <div class="registro">{{ enfermeiro.numero_profissional }}</div>
+        {% endif %}
+    </div>
+    <div class="footer">
+        Evolução registrada em {{ evolucao.data_evolucao.strftime('%d/%m/%Y às %H:%M') if evolucao.data_evolucao else 'Data não informada' }}
+        <br>RUA CRUZEIRO, S/N - COHAB, Massapê - CE, 62140-000
+    </div>
+    <script>window.onload = function() { document.body.focus(); };</script>
+</body>
+</html>
+
+
+

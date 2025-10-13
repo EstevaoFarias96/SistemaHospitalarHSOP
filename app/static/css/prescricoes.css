@@ -1,0 +1,112 @@
+﻿/* Estilos para prescrições médicas */
+
+
+/* Cartão de prescrição */
+.card {
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+
+.card-header.bg-primary {
+    border-bottom: none;
+}
+
+
+/* Ícones nas prescrições */
+.fa-calendar-check {
+    color: #28a745;
+}
+
+.fa-calendar-times {
+    color: #6c757d;
+}
+
+
+/* Conteúdo em caixas */
+.bg-light.rounded {
+    background-color: #f8f9fa;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Estilos para o cabeçalho da prescrição */
+.prescricao-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: linear-gradient(135deg, #f1f8ff, #e3f2fd);
+    border-bottom: 1px solid #dee2e6;
+    border-radius: 8px 8px 0 0;
+}
+
+.prescricao-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Botão de impressão */
+.btn-print-discreto,
+.btn-imprimir-prescricao {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-primary);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.btn-print-discreto:hover,
+.btn-imprimir-prescricao:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--text-primary);
+    transform: translateY(-1px);
+}
+
+.btn-print-discreto:active,
+.btn-imprimir-prescricao:active {
+    transform: scale(0.95);
+}
+
+.btn-print-discreto i,
+.btn-imprimir-prescricao i {
+    font-size: 0.9rem;
+    margin-right: 5px;
+}
+
+/* Responsividade para botões de prescrição */
+@media (max-width: 768px) {
+    .prescricao-header {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    .prescricao-actions {
+        width: 100%;
+        justify-content: center;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    .btn-print-discreto,
+    .btn-imprimir-prescricao {
+        font-size: 0.8rem;
+        padding: 5px 10px;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+}

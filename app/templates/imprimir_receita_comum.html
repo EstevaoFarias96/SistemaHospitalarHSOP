@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Impressão de Receita Comum</title>
+    <style>
+        @media print {
+            body { margin: 0; }
+            .receita-copia { page-break-inside: avoid; }
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        .receita-copia {
+            width: 48%;
+            display: inline-block;
+            vertical-align: top;
+            margin: 1%;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 18px 22px;
+            box-sizing: border-box;
+            min-height: 380px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .titulo {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .info-block {
+            margin-bottom: 10px;
+        }
+        .info-block strong {
+            display: inline-block;
+            width: 140px;
+        }
+        .conteudo-receita {
+            border: 1px dashed #888;
+            border-radius: 5px;
+            padding: 10px;
+            min-height: 80px;
+            margin-bottom: 10px;
+            background: #fafafa;
+        }
+        .assinatura {
+            margin-top: 30px;
+            text-align: right;
+        }
+        .assinatura .linha {
+            border-top: 1px solid #333;
+            width: 220px;
+            margin-left: auto;
+            margin-bottom: 2px;
+        }
+        .assinatura small {
+            color: #555;
+        }
+    </style>
+</head>
+<body onload="window.print()">
+    {% for i in range(2) %}
+    <div class="receita-copia">
+        <div class="header">
+            <div class="titulo">Receita Médica - Cópia {{ i+1 }}</div>
+        </div>
+        <div class="info-block">
+            <strong>Paciente:</strong> {{ paciente.nome }}<br>
+            <strong>CPF:</strong> {{ paciente.cpf or '-' }}<br>
+            <strong>Data de Nascimento:</strong> {{ paciente.data_nascimento.strftime('%d/%m/%Y') if paciente.data_nascimento else '-' }}<br>
+            <strong>Endereço:</strong> {{ paciente.endereco or '-' }}<br>
+        </div>
+        <div class="info-block">
+            <strong>Médico:</strong> {{ medico.nome }}<br>
+            <strong>CRM:</strong> {{ medico.numero_profissional or '-' }}<br>
+        </div>
+        <div class="info-block">
+            <strong>Data da Receita:</strong> {{ receituario.data_receita.strftime('%d/%m/%Y %H:%M') }}
+        </div>
+        <div class="conteudo-receita">
+            {{ receituario.conteudo_receita|safe }}
+        </div>
+        <div class="assinatura">
+            <div class="linha"></div>
+            <small>Assinatura e carimbo do profissional</small>
+        </div>
+    </div>
+    {% endfor %}
+</body>
+</html> 

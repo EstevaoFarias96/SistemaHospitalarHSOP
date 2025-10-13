@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listas - Recepção</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .container {
+      margin-top: 20px;
+    }
+    .filter-section {
+      margin-bottom: 20px;
+    }
+    .table-responsive {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Botão para voltar à página do Recepcionista -->
+    <button type="button" class="btn btn-secondary mb-3" onclick="window.location.href='/recepcionista'">
+      Voltar ao Recepcionista
+    </button>
+
+    <h1>Lista de Atendimentos por Status</h1>
+    <div class="filter-section">
+      <label for="statusFilter">Filtrar por status:</label>
+      <select id="statusFilter" class="form-control">
+        <option value="">Selecione o status</option>
+        <option value="ficha_criada">Ficha Criada</option>
+        <option value="triagem_concluida">Triagem Concluída</option>
+        <option value="consulta_concluida">Consulta Concluída</option>
+        <option value="observacao">Observação</option>
+        <option value="internamento">Internamento</option>
+        <option value="maternidade">Maternidade</option>
+        <option value="alta">Alta</option>
+        <option value="Evasao_hospitalar">Evasão Hospitalar</option>
+      </select>
+      <button id="filterBtn" class="btn btn-primary mt-2">Filtrar</button>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-striped" id="atendimentosTable">
+        <thead>
+          <tr>
+            <th>ID Atendimento</th>
+            <th>Paciente</th>
+            <th>CPF</th>
+            <th>Data Atendimento</th>
+            <th>Hora Atendimento</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Os dados serão inseridos aqui via JavaScript -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script>
+    $('#filterBtn').click(function(){
+      const status = $('#statusFilter').val();
+      if(!status){
+        alert('Selecione um status para filtrar.');
+        return;
+      }
+      $.ajax({
+         url: '/api/recepcionista/atendimentos-por-status?status=' + encodeURIComponent(status),
+         method: 'GET',
+         dataType: 'json',
+         success: function(data){
+            if(data.success){
+              let tbody = $('#atendimentosTable tbody');
+              tbody.empty();
+              data.atendimentos.forEach(function(item){
+                 let row = `<tr>
+                    <td>${item.atendimento_id}</td>
+                    <td>${item.paciente.nome}</td>
+                    <td>${item.paciente.cpf}</td>
+                    <td>${item.data_atendimento}</td>
+                    <td>${item.hora_atendimento}</td>
+                    <td>${item.status}</td>
+                 </tr>`;
+                 tbody.append(row);
+              });
+            } else {
+               alert('Erro: ' + data.message);
+            }
+         },
+         error: function(){
+           alert('Erro ao buscar atendimentos.');
+         }
+      });
+    });
+  </script>
+</body>
+</html>

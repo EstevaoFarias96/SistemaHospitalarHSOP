@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autorização de Internação Hospitalar - AIH</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 1cm;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 9px;
+            line-height: 1.2;
+            color: #333;
+            background: white;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        
+        .header {
+            text-align: center;
+            font-weight: bold;
+            font-size: 11px;
+            margin-bottom: 15px;
+            padding: 8px;
+            background: #f8f9fa;
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .header-logo {
+            position: absolute;
+            height: 40px;
+            width: auto;
+        }
+        
+        .header-logo.left {
+            left: 10px;
+        }
+        
+        .header-logo.right {
+            right: 10px;
+        }
+        
+        .header-text {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .section {
+            margin-bottom: 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .section-title {
+            background: #007bff;
+            color: white;
+            padding: 6px 10px;
+            font-weight: bold;
+            font-size: 9px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        
+        .section-content {
+            padding: 8px;
+        }
+        
+        .grid {
+            display: grid;
+            gap: 6px;
+        }
+        
+        .grid-2 { grid-template-columns: 1fr 1fr; }
+        .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+        .grid-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+        .grid-6 { grid-template-columns: repeat(6, 1fr); }
+        
+        .field {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #e0e0e0;
+            border-radius: 3px;
+            padding: 4px 6px;
+            background: #fafafa;
+        }
+        
+        .field-label {
+            font-weight: bold;
+            font-size: 7px;
+            color: #666;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+        }
+        
+        .field-value {
+            font-size: 8px;
+            color: #333;
+            min-height: 12px;
+        }
+        
+        .field-large {
+            grid-column: span 2;
+        }
+        
+        .field-xlarge {
+            grid-column: span 3;
+        }
+        
+        .field-full {
+            grid-column: span 6;
+        }
+        
+        .text-area {
+            min-height: 25px;
+            padding: 4px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            background: white;
+            resize: none;
+        }
+        
+        .text-area-large {
+            min-height: 45px;
+            padding: 4px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            background: white;
+            resize: none;
+        }
+        
+        .text-area-extra-large {
+            min-height: 60px;
+            padding: 4px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            background: white;
+            resize: none;
+        }
+        
+        .field-small {
+            grid-column: span 1;
+            max-width: 80px;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            font-size: 8px;
+            margin: 5px 0;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        
+        .signature-area {
+            border: 1px solid #ccc;
+            height: 40px;
+            background: #f9f9f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 7px;
+            color: #666;
+        }
+        
+        @media print {
+            body { font-size: 8px; }
+            .container { padding: 5px; }
+            .section { margin-bottom: 8px; }
+            .section-content { padding: 5px; }
+            .header { margin-bottom: 10px; padding: 5px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Cabeçalho -->
+        <div class="header">
+            <div class="header-text">
+                AUTORIZAÇÃO DE INTERNAÇÃO HOSPITALAR - AIH<br>
+                HOSPITAL SENADOR OZIRES PONTES
+            </div>
+        </div>
+
+        <!-- Identificação do Estabelecimento -->
+        <div class="section">
+            <div class="section-title">Identificação do Estabelecimento de Saúde</div>
+            <div class="section-content">
+                <div class="grid grid-4">
+                    <div class="field">
+                        <div class="field-label">Nome do Estabelecimento Solicitante</div>
+                        <div class="field-value">Hospital Senador Ozires Pontes</div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">CNES Solicitante</div>
+                        <div class="field-value">2478277</div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Nome do Estabelecimento Executante</div>
+                        <div class="field-value">Hospital Senador Ozires Pontes</div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">CNES Executante</div>
+                        <div class="field-value">2478277</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Identificação do Paciente -->
+        <div class="section">
+            <div class="section-title">Identificação do Paciente</div>
+            <div class="section-content">
+                <div class="grid grid-6">
+                    <div class="field field-xlarge">
+                        <div class="field-label">Nome do Paciente</div>
+                        <div class="field-value">{{ paciente_nome }}</div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Nº Prontuário</div>
+                        <div class="field-value">{{ id_atendimento }}</div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Cartão SUS</div>
+                        <div class="field-value">{{ paciente_cartao_sus }}</div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Data Nascimento</div>
+                        <div class="field-value">{{ paciente_data_nascimento }}</div>
+                    </div>
+                    
+                    <div class="field field-large">
+                        <div class="field-label">Nome da Mãe ou Responsável</div>
+                        <div class="field-value">{{ paciente_nome_filiacao }}</div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Telefone</div>
+                        <div class="field-value">{{ paciente_telefone }}</div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Sexo</div>
+                        <div class="field-value">{{ paciente_sexo }}</div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Raça/Cor</div>
+                        <div class="field-value">{{ paciente_cor }}</div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Etnia</div>
+                        <div class="field-value">-</div>
+                    </div>
+                    
+                    <div class="field field-large">
+                        <div class="field-label">Endereço</div>
+                        <div class="field-value">{{ paciente_endereco }}</div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Município</div>
+                        <div class="field-value">{{ municipio_residencia }}</div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">UF</div>
+                        <div class="field-value">CE</div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">CEP</div>
+                        <div class="field-value"> 62140-000</div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Cód. IBGE</div>
+                        <div class="field-value">2308005</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Justificativa da Internação -->
+        <div class="section">
+            <div class="section-title">Justificativa da Internação</div>
+            <div class="section-content">
+                <div class="field" style="margin-bottom: 6px;">
+                    <div class="field-label">Principais Sinais e Sintomas Clínicos</div>
+                    <div class="field-value text-area-extra-large">{{ sinais_e_sintomas }}</div>
+                </div>
+                
+                <div class="field" style="margin-bottom: 6px;">
+                    <div class="field-label">Condições que Justificam a Internação</div>
+                    <div class="field-value text-area">{{ justificativa_de_internacao }}</div>
+                </div>
+                
+                <div class="field" style="margin-bottom: 6px;">
+                    <div class="field-label">Principais Resultados de Provas Diagnósticas</div>
+                    <div class="field-value text-area">{{ exames }}</div>
+                </div>
+                
+                <div class="grid grid-6">
+                    <div class="field field-large">
+                        <div class="field-label">Diagnóstico Inicial</div>
+                        <div class="field-value">{{ diagnostico_inicial }}</div>
+                    </div>
+                    <div class="field field-small">
+                        <div class="field-label">CID-10 Principal</div>
+                        <div class="field-value">{{ cid_principal }}</div>
+                    </div>
+                    <div class="field field-small">
+                        <div class="field-label">CID-10 Secundário</div>
+                        <div class="field-value">{{ cid_secundario }}</div>
+                    </div>
+                    <div class="field field-small">
+                        <div class="field-label">CID-10 Causas Associadas</div>
+                        <div class="field-value">{{ cid_causas_associadas }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Procedimentos Solicitados -->
+        <div class="section">
+            <div class="section-title">Procedimentos Solicitados</div>
+            <div class="section-content">
+                <div class="grid grid-4">
+                    <div class="field">
+                        <div class="field-label">Descrição do Procedimento</div>
+                        <div class="field-value">{{ descricao_procedimento }}</div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Código do Procedimento</div>
+                        <div class="field-value">{{ codigo_procedimento }}</div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Clínica/Leito</div>
+                        <div class="field-value">{{ leito }}</div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Caráter</div>
+                        <div class="field-value">{{ carater_de_internacao }}</div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-4" style="margin-top: 6px;">
+                    <div class="field">
+                        <div class="field-label">Nome do Profissional</div>
+                        <div class="field-value">{{ funcionario_nome }}</div>
+                    </div>
+                    <div class="field field-small">
+                        <div class="field-label">CNS/CPF Solicitante</div>
+                        <div class="field-value">{{ medico_cpf }}</div>
+                    </div>
+                    <div class="field field-small">
+                        <div class="field-label">Data da Solicitação</div>
+                        <div class="field-value">{{ data_atual }}</div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Assinatura e Carimbo (Nº do Registro do Conselho)</div>
+                        <div class="signature-area">Área para Assinatura e Carimbo</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Causas Externas -->
+        <div class="section">
+            <div class="section-title">Causas Externas (Acidentes ou Violências)</div>
+            <div class="section-content">
+                <div class="checkbox-group" style="margin-bottom: 6px;">
+                    <div class="checkbox-item">☐ Acidente de Trânsito</div>
+                    <div class="checkbox-item">☐ Acidente de Trabalho Típico</div>
+                    <div class="checkbox-item">☐ Acidente de Trabalho Trajeto</div>
+                </div>
+                
+                <div class="grid grid-3" style="margin-bottom: 6px;">
+                    <div class="field">
+                        <div class="field-label">CNPJ da Seguradora</div>
+                        <div class="field-value">-</div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Nº do Bilhete</div>
+                        <div class="field-value">-</div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Série</div>
+                        <div class="field-value">-</div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-3" style="margin-bottom: 6px;">
+                    <div class="field">
+                        <div class="field-label">CNPJ Empresa</div>
+                        <div class="field-value">-</div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">CNAE da Empresa</div>
+                        <div class="field-value">-</div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">CBOR</div>
+                        <div class="field-value">-</div>
+                    </div>
+                </div>
+                
+                <div class="checkbox-group">
+                    <strong>Vínculo Previdência:</strong>
+                    <div class="checkbox-item">☐ Empregado</div>
+                    <div class="checkbox-item">☐ Autônomo</div>
+                    <div class="checkbox-item">☐ Desempregado</div>
+                    <div class="checkbox-item">☐ Aposentado</div>
+                    <div class="checkbox-item">☐ Não Segurado</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Autorização -->
+        <div class="section">
+            <div class="section-title">Autorização</div>
+            <div class="section-content">
+                <div class="grid grid-4">
+                    <div class="field">
+                        <div class="field-label">Nome do Profissional Autorizador</div>
+                        <div class="field-value"></div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Documento</div>
+                        <div class="field-value"></div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Data da Autorização</div>
+                        <div class="field-value">-</div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Nº da Autorização</div>
+                        <div class="field-value">-</div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-2" style="margin-top: 8px;">
+                    <div class="field">
+                        <div class="field-label">CNS/CPF do Profissional</div>
+                        <div class="field-value"></div>
+                    </div>
+                    <div class="field">
+                        <div class="field-label">Assinatura e Carimbo</div>
+                        <div class="signature-area">Área para Assinatura e Carimbo</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

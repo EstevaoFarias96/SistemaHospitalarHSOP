@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAE - {{ paciente.nome }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0.5cm;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 9px;
+            line-height: 1.2;
+            color: #000;
+            background: white;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #000;
+            padding: 8px 0;
+            margin-bottom: 10px;
+        }
+        
+        .header h1 {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+        
+        .header h2 {
+            font-size: 11px;
+            margin-bottom: 2px;
+        }
+        
+        .header-subtitle {
+            font-size: 8px;
+        }
+        
+        .patient-info {
+            border: 1px solid #000;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .patient-info h3 {
+            font-size: 10px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+            font-size: 8px;
+        }
+        
+        .info-item {
+            padding: 2px 4px;
+        }
+        
+        .info-item strong {
+            font-weight: bold;
+        }
+        
+        .section {
+            margin-bottom: 8px;
+            border: 1px solid #000;
+            break-inside: avoid;
+        }
+        
+        .section-title {
+            background: #f0f0f0;
+            padding: 4px 8px;
+            font-size: 9px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .section-content {
+            padding: 6px;
+        }
+        
+        .vitals-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            text-align: center;
+        }
+        
+        .vital-item {
+            border: 1px solid #ccc;
+            padding: 4px 2px;
+        }
+        
+        .vital-label {
+            font-weight: bold;
+            font-size: 7px;
+            display: block;
+            margin-bottom: 2px;
+        }
+        
+        .vital-value {
+            font-size: 9px;
+            font-weight: bold;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .three-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+        }
+        
+        .single-column {
+            width: 100%;
+        }
+        
+        .subsection {
+            border: 1px solid #ccc;
+        }
+        
+        .subsection-title {
+            background: #f5f5f5;
+            padding: 3px 6px;
+            font-weight: bold;
+            font-size: 8px;
+            text-align: center;
+        }
+        
+        .subsection-content {
+            padding: 4px;
+        }
+        
+        .text-field {
+            border: 1px solid #ccc;
+            padding: 4px;
+            background: white;
+            min-height: 25px;
+            font-size: 8px;
+            word-wrap: break-word;
+        }
+        
+        .text-field:empty::before {
+            content: "Não informado";
+            color: #666;
+            font-style: italic;
+        }
+        
+        .signature-area {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .signature-box {
+            text-align: center;
+            border: 1px solid #000;
+            padding: 8px;
+            font-size: 8px;
+            width: 250px;
+        }
+        
+        .signature-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .footer {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 7px;
+            color: #666;
+        }
+        
+        .compact-info {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 4px;
+            font-size: 7px;
+            margin-bottom: 8px;
+        }
+        
+        @media print {
+            body { 
+                print-color-adjust: exact; 
+                -webkit-print-color-adjust: exact;
+            }
+            .section { 
+                page-break-inside: avoid; 
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Cabeçalho -->
+    <div class="header">
+        <h1>SISTEMATIZAÇÃO DA ASSISTÊNCIA DE ENFERMAGEM</h1>
+        <h2>Hospital Senador Ozires Pontes</h2>
+        <div class="header-subtitle">Rua Cruzeiro, S/N - COHAB, Massapê - CE, 62140-000</div>
+    </div>
+
+    <!-- Informações do Paciente -->
+    <div class="patient-info">
+        <h3>DADOS DO PACIENTE</h3>
+        <div class="info-grid">
+            <div class="info-item"><strong>Nome:</strong> {{ paciente.nome or '-' }}</div>
+            <div class="info-item"><strong>CPF:</strong> {{ paciente.cpf or '-' }}</div>
+            <div class="info-item"><strong>Sexo:</strong> {{ paciente.sexo or '-' }}</div>
+            <div class="info-item"><strong>Nascimento:</strong> {{ paciente.data_nascimento.strftime('%d/%m/%Y') if paciente.data_nascimento else '-' }}</div>
+            <div class="info-item"><strong>Leito:</strong> {{ internacao.leito or '-' }}</div>
+            <div class="info-item"><strong>Internação:</strong> {{ internacao.data_internacao.strftime('%d/%m/%Y') if internacao.data_internacao else '-' }}</div>
+            <div class="info-item"><strong>Data SAE:</strong> {{ sae.data_registro.strftime('%d/%m/%Y %H:%M') if sae.data_registro else '-' }}</div>
+            <div class="info-item"><strong>Enfermeiro:</strong> {{ sae.enfermeiro.nome if sae.enfermeiro else '-' }}</div>
+        </div>
+    </div>
+
+    <!-- Sinais Vitais -->
+    <div class="section">
+        <div class="section-title">SINAIS VITAIS</div>
+        <div class="section-content">
+            <div class="vitals-grid">
+                <div class="vital-item">
+                    <span class="vital-label">PA</span>
+                    <span class="vital-value">{{ sae.pa or '-' }}</span>
+                </div>
+                <div class="vital-item">
+                    <span class="vital-label">FC</span>
+                    <span class="vital-value">{{ sae.fc or '-' }}</span>
+                </div>
+                <div class="vital-item">
+                    <span class="vital-label">SAT</span>
+                    <span class="vital-value">{{ sae.sat or '-' }}</span>
+                </div>
+                <div class="vital-item">
+                    <span class="vital-label">FR</span>
+                    <span class="vital-value">{{ sae.r or '-' }}</span>
+                </div>
+                <div class="vital-item">
+                    <span class="vital-label">TEMP</span>
+                    <span class="vital-value">{{ sae.t or '-' }}</span>
+                </div>
+                <div class="vital-item">
+                    <span class="vital-label">PULSO</span>
+                    <span class="vital-value">{{ sae.pulso or '-' }}</span>
+                </div>
+                <div class="vital-item">
+                    <span class="vital-label">DX</span>
+                    <span class="vital-value">{{ sae.dx or '-' }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Avaliações Principais -->
+    <div class="section">
+        <div class="section-title">AVALIAÇÃO NEUROLÓGICA E ESTADO GERAL</div>
+        <div class="section-content">
+            <div class="two-column">
+                <div class="subsection">
+                    <div class="subsection-title">Sistema Neurológico</div>
+                    <div class="subsection-content">
+                        <div class="text-field">{{ sae.sistema_neurologico or '' }}</div>
+                    </div>
+                </div>
+                <div class="subsection">
+                    <div class="subsection-title">Estado Geral</div>
+                    <div class="subsection-content">
+                        <div class="text-field">{{ sae.estado_geral or '' }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sistema Respiratório e Pele -->
+    <div class="section">
+        <div class="section-title">RESPIRATÓRIO E PELE</div>
+        <div class="section-content">
+            <div class="two-column">
+                <div class="subsection">
+                    <div class="subsection-title">Ventilação</div>
+                    <div class="subsection-content">
+                        <div class="text-field">{{ sae.ventilacao or '' }}</div>
+                    </div>
+                </div>
+                <div class="subsection">
+                    <div class="subsection-title">Pele</div>
+                    <div class="subsection-content">
+                        <div class="text-field">{{ sae.pele or '' }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sistemas Digestivo e Circulatório -->
+    <div class="section">
+        <div class="section-title">SISTEMAS DIGESTIVO E CIRCULATÓRIO</div>
+        <div class="section-content">
+            <div class="three-column">
+                <div class="subsection">
+                    <div class="subsection-title">Gastrointestinal</div>
+                    <div class="subsection-content">
+                        <div class="text-field">{{ sae.sistema_gastrointerstinal or '' }}</div>
+                    </div>
+                </div>
+                <div class="subsection">
+                    <div class="subsection-title">Regulação Vascular</div>
+                    <div class="subsection-content">
+                        <div class="text-field">{{ sae.regulacao_vascular or '' }}</div>
+                    </div>
+                </div>
+                <div class="subsection">
+                    <div class="subsection-title">RHA</div>
+                    <div class="subsection-content">
+                        <div class="text-field">{{ sae.rha or '' }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Abdome e Sistema Urinário -->
+    <div class="section">
+        <div class="section-title">ABDOME E SISTEMA URINÁRIO</div>
+        <div class="section-content">
+            <div class="two-column">
+                <div class="subsection">
+                    <div class="subsection-title">Regulação Abdominal</div>
+                    <div class="subsection-content">
+                        <div class="text-field">{{ sae.regulacao_abdominal or '' }}</div>
+                    </div>
+                </div>
+                <div class="subsection">
+                    <div class="subsection-title">Sistema Urinário</div>
+                    <div class="subsection-content">
+                        <div class="text-field">{{ sae.sistema_urinario or '' }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Diagnósticos -->
+    <div class="section">
+        <div class="section-title">DIAGNÓSTICOS</div>
+        <div class="section-content">
+            <div class="two-column">
+                <div class="subsection">
+                    <div class="subsection-title">Diagnóstico de Enfermagem</div>
+                    <div class="subsection-content">
+                        <div class="text-field">{{ sae.diagnostico_de_enfermagem or '' }}</div>
+                    </div>
+                </div>
+                <div class="subsection">
+                    <div class="subsection-title">Hipótese Diagnóstica</div>
+                    <div class="subsection-content">
+                        <div class="text-field">{{ sae.hipotese_diagnostica or '' }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Informações Complementares -->
+    <div class="section">
+        <div class="section-title">INFORMAÇÕES COMPLEMENTARES</div>
+        <div class="section-content">
+            <div class="three-column">
+                <div class="subsection">
+                    <div class="subsection-title">Medicação</div>
+                    <div class="subsection-content">
+                        <div class="text-field">{{ sae.medicacao or '' }}</div>
+                    </div>
+                </div>
+                <div class="subsection">
+                    <div class="subsection-title">Alergias</div>
+                    <div class="subsection-content">
+                        <div class="text-field">{{ sae.alergias or '' }}</div>
+                    </div>
+                </div>
+                <div class="subsection">
+                    <div class="subsection-title">Acesso Venoso</div>
+                    <div class="subsection-content">
+                        <div class="text-field">{{ sae.acesso_venoso or '' }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 6px;">
+                <div class="subsection">
+                    <div class="subsection-title">Antecedentes Pessoais</div>
+                    <div class="subsection-content">
+                        <div class="text-field">{{ sae.antecedentes_pessoais or '' }}</div>
+                    </div>
+                </div>
+            </div>
+
+            {% if sae.observacao %}
+            <div style="margin-top: 6px;">
+                <div class="subsection">
+                    <div class="subsection-title">Observações Gerais</div>
+                    <div class="subsection-content">
+                        <div class="text-field">{{ sae.observacao }}</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Área de Assinatura -->
+    <div class="signature-area">
+        <div class="signature-box">
+            <div class="signature-title">ENFERMEIRO(A) RESPONSÁVEL</div>
+            <div class="signature-info">
+                {% if sae.enfermeiro %}
+                    <strong>{{ sae.enfermeiro.nome }}</strong><br>
+                    {% if sae.enfermeiro.numero_profissional %}
+                        COREN: {{ sae.enfermeiro.numero_profissional }}
+                    {% endif %}
+                    <br>____________________________<br>
+                    Assinatura e Carimbo
+                {% else %}
+                    ____________________________<br>
+                    Assinatura e Carimbo
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Rodapé -->
+    <div class="footer">
+        SAE registrada em {{ sae.data_registro.strftime('%d/%m/%Y às %H:%M') if sae.data_registro else 'Data não informada' }} - Hospital Senador Ozires Pontes
+        <!-- Cache buster: gerado em {{ moment().format() if moment else 'timestamp não disponível' }} -->
+    </div>
+
+    <script>
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                window.print();
+            }, 500);
+        });
+    </script>
+</body>
+</html> 

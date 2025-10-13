@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aguardando Médico</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f8f9fa; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin: 20px 0; }
+    .card-item { border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+    .risk-badge { font-weight: 600; }
+    .triagem-text { white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <div class="container py-3">
+    <div class="header">
+      <div class="w-100">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h3 class="mb-0"><i class="fas fa-user-md text-primary mr-2"></i>Atendimentos</h3>
+            <small class="text-muted">Visualize por categoria</small>
+          </div>
+          <div>
+            <a href="/medico" class="btn btn-outline-secondary"><i class="fas fa-arrow-left mr-1"></i>Voltar</a>
+            <button id="btnAtualizar" class="btn btn-primary ml-2"><i class="fas fa-sync-alt mr-1"></i>Atualizar</button>
+          </div>
+        </div>
+
+        <ul class="nav nav-tabs mt-3" id="tabsMedico" role="tablist">
+          <li class="nav-item" role="presentation">
+            <a class="nav-link active" id="tab-aguardando" data-toggle="tab" href="#pane-aguardando" role="tab" aria-controls="pane-aguardando" aria-selected="true">Aguardando Médico</a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" id="tab-triagem" data-toggle="tab" href="#pane-triagem" role="tab" aria-controls="pane-triagem" aria-selected="false">Aguardando Triagem</a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" id="tab-alta" data-toggle="tab" href="#pane-alta" role="tab" aria-controls="pane-alta" aria-selected="false">Alta após medicação</a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" id="tab-reavaliacao" data-toggle="tab" href="#pane-reavaliacao" role="tab" aria-controls="pane-reavaliacao" aria-selected="false">Reavaliação</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tab-content mb-3" id="tabsConteudo">
+      <div class="tab-pane fade show active" id="pane-aguardando" role="tabpanel" aria-labelledby="tab-aguardando">
+        <div id="lista-aguardando">
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"><span class="sr-only">Carregando...</span></div>
+            <p class="text-muted mt-3">Carregando atendimentos...</p>
+      </div>
+        </div>
+      </div>
+        <div class="tab-pane fade" id="pane-triagem" role="tabpanel" aria-labelledby="tab-triagem">
+          <div id="lista-triagem">
+            <div class="text-center py-5">
+              <div class="spinner-border text-primary" role="status"><span class="sr-only">Carregando...</span></div>
+              <p class="text-muted mt-3">Carregando pacientes aguardando triagem...</p>
+            </div>
+          </div>
+        </div>
+      <div class="tab-pane fade" id="pane-alta" role="tabpanel" aria-labelledby="tab-alta">
+        <div id="lista-alta">
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"><span class="sr-only">Carregando...</span></div>
+            <p class="text-muted mt-3">Carregando altas após medicação...</p>
+          </div>
+        </div>
+      </div>
+      <div class="tab-pane fade" id="pane-reavaliacao" role="tabpanel" aria-labelledby="tab-reavaliacao">
+        <div id="lista-reavaliacao">
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"><span class="sr-only">Carregando...</span></div>
+            <p class="text-muted mt-3">Carregando reavaliações...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    function calcularIdade(data) {
+      if (!data) return 'N/A';
+      const d = new Date(data);
+      const h = new Date();
+      let idade = h.getFullYear() - d.getFullYear();
+      const m = h.getMonth() - d.getMonth();
+      if (m < 0 || (m === 0 && h.getDate() < d.getDate())) idade--;
+      return idade;
+    }
+
+    function badgeRisco(risco) {
+      if (!risco) return '<span class="badge badge-secondary risk-badge">Sem classificação</span>';
+      const r = (''+risco).toLowerCase();
+      if (r.includes('vermelho')) return '<span class="badge badge-danger risk-badge">Vermelho</span>';
+      if (r.includes('laranja')) return '<span class="badge badge-warning risk-badge" style="color:#000">Laranja</span>';
+      if (r.includes('amarelo')) return '<span class="badge badge-warning risk-badge" style="color:#000">Amarelo</span>';
+      if (r.includes('verde')) return '<span class="badge badge-success risk-badge">Verde</span>';
+      if (r.includes('azul')) return '<span class="badge badge-primary risk-badge">Azul</span>';
+      return '<span class="badge badge-info risk-badge">' + risco + '</span>';
+    }
+
+    function renderLista(containerSel, itens, vazioHtml) {
+      if (!itens || itens.length === 0) { $(containerSel).html(vazioHtml); return; }
+      let html = '';
+      itens.forEach(item => {
+        html += `
+          <div class="card card-item mb-3">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <h5 class="mb-1">${item.nome || 'Paciente'}</h5>
+                  <div class="text-muted mb-2">${item.idade != null ? item.idade + ' anos' : 'Idade N/A'}${item.horario_triagem ? ' • Triagem: ' + new Date(item.horario_triagem).toLocaleString('pt-BR') : ''}</div>
+                </div>
+                <div>${badgeRisco(item.classificacao_risco)}</div>
+              </div>
+              <div class="mt-2 triagem-text">${(item.triagem || 'Sem texto de triagem').replace(/\n/g,'<br>')}</div>
+              <div class="mt-3 text-right">
+                <a class="btn btn-outline-primary btn-sm" href="/medico/atendimento/${item.atendimento_id}"><i class="fas fa-notes-medical mr-1"></i>Abrir atendimento</a>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      $(containerSel).html(html);
+    }
+
+    function carregarAba(tipo) {
+      if (tipo === 'aguardando') {
+        fetch('/api/medico/atendimentos/aguardando')
+          .then(r => r.json())
+          .then(data => {
+            if (!data.success) { $('#lista-aguardando').html('<p class="text-danger">Erro ao carregar</p>'); return; }
+            renderLista('#lista-aguardando', data.atendimentos, '<div class="text-center py-5"><i class="fas fa-check-circle fa-3x text-success mb-3"></i><h5>Nenhum atendimento aguardando</h5></div>');
+          })
+          .catch(() => { $('#lista-aguardando').html('<p class="text-danger">Erro ao carregar dados</p>'); });
+      } else if (tipo === 'triagem') {
+        fetch('/api/medico/atendimentos/aguardando-triagem')
+          .then(r => r.json())
+          .then(data => {
+            if (!data.success) { $('#lista-triagem').html('<p class="text-danger">Erro ao carregar</p>'); return; }
+            renderLista('#lista-triagem', data.atendimentos, '<div class="text-center py-5"><i class="fas fa-info-circle fa-3x text-secondary mb-3"></i><h5>Sem pacientes aguardando triagem</h5></div>');
+          })
+          .catch(() => { $('#lista-triagem').html('<p class="text-danger">Erro ao carregar dados</p>'); });
+      } else if (tipo === 'alta') {
+        fetch('/api/medico/atendimentos/alta-medicacao')
+          .then(r => r.json())
+          .then(data => {
+            if (!data.success) { $('#lista-alta').html('<p class="text-danger">Erro ao carregar</p>'); return; }
+            renderLista('#lista-alta', data.atendimentos, '<div class="text-center py-5"><i class="fas fa-info-circle fa-3x text-secondary mb-3"></i><h5>Sem pacientes em alta após medicação</h5></div>');
+          })
+          .catch(() => { $('#lista-alta').html('<p class="text-danger">Erro ao carregar dados</p>'); });
+      } else if (tipo === 'reavaliacao') {
+        fetch('/api/medico/atendimentos/reavaliacao-medicacao')
+          .then(r => r.json())
+          .then(data => {
+            if (!data.success) { $('#lista-reavaliacao').html('<p class="text-danger">Erro ao carregar</p>'); return; }
+            renderLista('#lista-reavaliacao', data.atendimentos, '<div class="text-center py-5"><i class="fas fa-info-circle fa-3x text-secondary mb-3"></i><h5>Sem pacientes para reavaliação</h5></div>');
+          })
+          .catch(() => { $('#lista-reavaliacao').html('<p class="text-danger">Erro ao carregar dados</p>'); });
+      }
+    }
+
+    $(function(){
+      carregarAba('aguardando');
+      $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        const id = $(e.target).attr('id');
+        if (id === 'tab-aguardando') carregarAba('aguardando');
+        if (id === 'tab-triagem') carregarAba('triagem');
+        if (id === 'tab-alta') carregarAba('alta');
+        if (id === 'tab-reavaliacao') carregarAba('reavaliacao');
+      });
+      $('#btnAtualizar').click(function(){
+        const btn = $(this); const icon = btn.find('i');
+        btn.prop('disabled', true); icon.addClass('fa-spin');
+        const activeId = $('.nav-link.active').attr('id');
+        if (activeId === 'tab-aguardando') carregarAba('aguardando');
+        if (activeId === 'tab-triagem') carregarAba('triagem');
+        if (activeId === 'tab-alta') carregarAba('alta');
+        if (activeId === 'tab-reavaliacao') carregarAba('reavaliacao');
+        setTimeout(()=>{ btn.prop('disabled', false); icon.removeClass('fa-spin'); }, 800);
+      });
+    });
+  </script>
+</body>
+</html>
+
+
+
+

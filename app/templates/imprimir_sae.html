@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAE - {{ paciente.nome }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 1cm;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.3;
+            color: #333;
+            background: white;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .header h1 {
+            font-size: 18px;
+            color: #0066cc;
+            margin-bottom: 5px;
+        }
+        
+        .header h2 {
+            font-size: 14px;
+            color: #666;
+            font-weight: normal;
+        }
+        
+        .patient-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .patient-info h3 {
+            font-size: 14px;
+            color: #0066cc;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        
+        .info-item {
+            font-size: 11px;
+        }
+        
+        .info-item strong {
+            color: #333;
+        }
+        
+        .section {
+            margin-bottom: 20px;
+            break-inside: avoid;
+        }
+        
+        .section-title {
+            background: #0066cc;
+            color: white;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            border-radius: 3px;
+        }
+        
+        .section-content {
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .vitals-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0;
+        }
+        
+        .vital-item {
+            border-right: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+            background: #f8f9fa;
+        }
+        
+        .vital-item:last-child {
+            border-right: none;
+        }
+        
+        .vital-label {
+            font-weight: bold;
+            font-size: 10px;
+            color: #666;
+            display: block;
+            margin-bottom: 3px;
+        }
+        
+        .vital-value {
+            font-size: 12px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .subsection {
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .subsection-title {
+            background: #e9ecef;
+            padding: 6px 10px;
+            font-weight: bold;
+            font-size: 12px;
+            color: #495057;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .subsection-content {
+            padding: 10px;
+        }
+        
+        .checkbox-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 5px;
+        }
+        
+        .checkbox-item {
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .checkbox-mark {
+            width: 12px;
+            height: 12px;
+            border: 1px solid #666;
+            display: inline-block;
+            position: relative;
+        }
+        
+        .checkbox-mark.checked::after {
+            content: "✓";
+            position: absolute;
+            top: -2px;
+            left: 1px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        
+        .radio-item {
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 3px;
+        }
+        
+        .radio-mark {
+            width: 12px;
+            height: 12px;
+            border: 1px solid #666;
+            border-radius: 50%;
+            display: inline-block;
+            position: relative;
+        }
+        
+        .radio-mark.checked::after {
+            content: "";
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #333;
+        }
+        
+        .text-field {
+            border: 1px solid #ddd;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 3px;
+            margin-top: 5px;
+            min-height: 30px;
+        }
+        
+        .diagnosis-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+        }
+        
+        .signature-area {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+        }
+        
+        .signature-box {
+            text-align: center;
+            border-top: 1px solid #333;
+            padding-top: 5px;
+            font-size: 11px;
+        }
+        
+        @media print {
+            body { print-color-adjust: exact; }
+            .section { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Cabeçalho -->
+    <div class="header">
+        <h1>SISTEMATIZAÇÃO DA ASSISTÊNCIA DE ENFERMAGEM - SAE</h1>
+        <h2>{{ hospital_nome or 'Hospital' }}</h2>
+    </div>
+
+    <!-- Informações do Paciente -->
+    <div class="patient-info">
+        <h3>DADOS DO PACIENTE</h3>
+        <div class="info-grid">
+            <div class="info-item"><strong>Nome:</strong> {{ paciente.nome }}</div>
+            <div class="info-item"><strong>CPF:</strong> {{ paciente.cpf }}</div>
+            <div class="info-item"><strong>Cartão SUS:</strong> {{ paciente.cartao_sus }}</div>
+            <div class="info-item"><strong>Sexo:</strong> {{ paciente.sexo }}</div>
+            <div class="info-item"><strong>Data de Nascimento:</strong> {{ paciente.data_nascimento.strftime('%d/%m/%Y') if paciente.data_nascimento else '-' }}</div>
+            <div class="info-item"><strong>Endereço:</strong> {{ paciente.endereco }}</div>
+            <div class="info-item"><strong>Município:</strong> {{ paciente.municipio }}</div>
+            <div class="info-item"><strong>Telefone:</strong> {{ paciente.telefone }}</div>
+            <div class="info-item"><strong>Data da SAE:</strong> {{ sae.data_registro.strftime('%d/%m/%Y às %H:%M') if sae.data_registro else '-' }}</div>
+            <div class="info-item"><strong>Enfermeiro:</strong> {{ sae.enfermeiro_nome or '-' }}</div>
+        </div>
+    </div>
+
+    <!-- Sinais Vitais -->
+    <div class="section">
+        <div class="section-title">1. SINAIS VITAIS</div>
+        <div class="section-content">
+            <div class="vitals-grid">
+                <div class="vital-item">
+                    <span class="vital-label">PA</span>
+                    <span class="vital-value">{{ sae.pa or '-' }}</span>
+                </div>
+                <div class="vital-item">
+                    <span class="vital-label">FC</span>
+                    <span class="vital-value">{{ sae.fc or '-' }}</span>
+                </div>
+                <div class="vital-item">
+                    <span class="vital-label">SAT</span>
+                    <span class="vital-value">{{ sae.sat or '-' }}</span>
+                </div>
+                <div class="vital-item">
+                    <span class="vital-label">R</span>
+                    <span class="vital-value">{{ sae.r or '-' }}</span>
+                </div>
+                <div class="vital-item">
+                    <span class="vital-label">T</span>
+                    <span class="vital-value">{{ sae.t or '-' }}</span>
+                </div>
+                <div class="vital-item">
+                    <span class="vital-label">PULSO</span>
+                    <span class="vital-value">{{ sae.pulso or '-' }}</span>
+                </div>
+                <div class="vital-item">
+                    <span class="vital-label">DX (mg/dL)</span>
+                    <span class="vital-value">{{ sae.dx or '-' }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sistema Neurológico e Estado Geral -->
+    <div class="section">
+        <div class="section-title">2. AVALIAÇÃO NEUROLÓGICA E ESTADO GERAL</div>
+        <div class="section-content">
+            <div class="two-column">
+                <div class="subsection">
+                    <div class="subsection-title">Sistema Neurológico</div>
+                    <div class="subsection-content">
+                        <div class="checkbox-list">
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.neuro_consciente else '' }}"></span>
+                                <span>Consciente</span>
+                            </div>
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.neuro_orientado else '' }}"></span>
+                                <span>Orientado</span>
+                            </div>
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.neuro_desorientado else '' }}"></span>
+                                <span>Desorientado</span>
+                            </div>
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.neuro_torporoso else '' }}"></span>
+                                <span>Torporoso</span>
+                            </div>
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.neuro_inquieto else '' }}"></span>
+                                <span>Inquieto</span>
+                            </div>
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.neuro_reage else '' }}"></span>
+                                <span>Reage a estímulos</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <div class="subsection-title">Estado Geral</div>
+                    <div class="subsection-content">
+                        <div class="radio-item">
+                            <span class="radio-mark {{ 'checked' if sae.estado_geral == 'bom' else '' }}"></span>
+                            <span>Bom</span>
+                        </div>
+                        <div class="radio-item">
+                            <span class="radio-mark {{ 'checked' if sae.estado_geral == 'regular' else '' }}"></span>
+                            <span>Regular</span>
+                        </div>
+                        <div class="radio-item">
+                            <span class="radio-mark {{ 'checked' if sae.estado_geral == 'prejudicado' else '' }}"></span>
+                            <span>Prejudicado</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ventilação e Pele -->
+    <div class="section">
+        <div class="section-title">3. VENTILAÇÃO E CARACTERÍSTICAS DA PELE</div>
+        <div class="section-content">
+            <div class="two-column">
+                <div class="subsection">
+                    <div class="subsection-title">Ventilação</div>
+                    <div class="subsection-content">
+                        <div class="checkbox-list">
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.ventilacao_eupneico else '' }}"></span>
+                                <span>Eupneico</span>
+                            </div>
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.ventilacao_bradipneico else '' }}"></span>
+                                <span>Bradipneico</span>
+                            </div>
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.ventilacao_dispneico else '' }}"></span>
+                                <span>Dispneico</span>
+                            </div>
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.ventilacao_aa else '' }}"></span>
+                                <span>AA</span>
+                            </div>
+                        </div>
+                        {% if sae.ventilacao_o2 %}
+                        <div style="margin-top: 10px;">
+                            <strong>O₂ POR:</strong>
+                            <div class="text-field">{{ sae.ventilacao_o2 }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <div class="subsection-title">Pele</div>
+                    <div class="subsection-content">
+                        <div class="checkbox-list">
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.pele_normocorado else '' }}"></span>
+                                <span>Normocorado</span>
+                            </div>
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.pele_hipocorado else '' }}"></span>
+                                <span>Hipocorado</span>
+                            </div>
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.pele_acianotica else '' }}"></span>
+                                <span>Acianótica</span>
+                            </div>
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.pele_icterica else '' }}"></span>
+                                <span>Ictérica</span>
+                            </div>
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.pele_anicterica else '' }}"></span>
+                                <span>Anictérica</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sistema Gastrointestinal e Regulação Vascular -->
+    <div class="section">
+        <div class="section-title">4. SISTEMA GASTROINTESTINAL E REGULAÇÃO VASCULAR</div>
+        <div class="section-content">
+            <div class="two-column">
+                <div class="subsection">
+                    <div class="subsection-title">Sistema Gastrointestinal</div>
+                    <div class="subsection-content">
+                        <div class="checkbox-list">
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.gi_gavagem else '' }}"></span>
+                                <span>Gavagem</span>
+                            </div>
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.gi_aberta else '' }}"></span>
+                                <span>Aberta</span>
+                            </div>
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.gi_emese else '' }}"></span>
+                                <span>Emese</span>
+                            </div>
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <strong>Evacuações:</strong>
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.gi_evac_presente else '' }}"></span>
+                                <span>Presente</span>
+                            </div>
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.gi_evac_ausente else '' }}"></span>
+                                <span>Ausente há {{ sae.gi_evac_dias or '-' }} dias</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <div class="subsection-title">Regulação Vascular</div>
+                    <div class="subsection-content">
+                        <div class="checkbox-list">
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.vascular_normocardico else '' }}"></span>
+                                <span>Normocárdico</span>
+                            </div>
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.vascular_taquicardico else '' }}"></span>
+                                <span>Taquicárdico</span>
+                            </div>
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.vascular_bradicardico else '' }}"></span>
+                                <span>Bradicárdico</span>
+                            </div>
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.vascular_hipertenso else '' }}"></span>
+                                <span>Hipertenso</span>
+                            </div>
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.vascular_hipotenso else '' }}"></span>
+                                <span>Hipotenso</span>
+                            </div>
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.vascular_normotenso else '' }}"></span>
+                                <span>Normotenso</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Características do Pulso -->
+    <div class="section">
+        <div class="section-title">5. CARACTERÍSTICAS DO PULSO</div>
+        <div class="section-content">
+            <div class="subsection-content">
+                <div class="checkbox-list">
+                    <div class="checkbox-item">
+                        <span class="checkbox-mark {{ 'checked' if sae.pulso_cheio else '' }}"></span>
+                        <span>Cheio</span>
+                    </div>
+                    <div class="checkbox-item">
+                        <span class="checkbox-mark {{ 'checked' if sae.pulso_filiforme else '' }}"></span>
+                        <span>Filiforme</span>
+                    </div>
+                    <div class="checkbox-item">
+                        <span class="checkbox-mark {{ 'checked' if sae.pulso_ritmico else '' }}"></span>
+                        <span>Rítmico</span>
+                    </div>
+                    <div class="checkbox-item">
+                        <span class="checkbox-mark {{ 'checked' if sae.pulso_arritmico else '' }}"></span>
+                        <span>Arrítmico</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Regulação Abdominal e RHA -->
+    <div class="section">
+        <div class="section-title">6. REGULAÇÃO ABDOMINAL E RHA</div>
+        <div class="section-content">
+            <div class="two-column">
+                <div class="subsection">
+                    <div class="subsection-title">Regulação Abdominal</div>
+                    <div class="subsection-content">
+                        <div class="checkbox-list">
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.abdominal_normotenso else '' }}"></span>
+                                <span>Normotenso</span>
+                            </div>
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.abdominal_tenso else '' }}"></span>
+                                <span>Tenso</span>
+                            </div>
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.abdominal_globoso else '' }}"></span>
+                                <span>Globoso</span>
+                            </div>
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.abdominal_distendido else '' }}"></span>
+                                <span>Distendido</span>
+                            </div>
+                            <div class="checkbox-item">
+                                <span class="checkbox-mark {{ 'checked' if sae.abdominal_concavo else '' }}"></span>
+                                <span>Côncavo</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <div class="subsection-title">RHA (Ruídos Hidroaéreos)</div>
+                    <div class="subsection-content">
+                        <div class="radio-item">
+                            <span class="radio-mark {{ 'checked' if sae.rha == 'presente' else '' }}"></span>
+                            <span>Presente</span>
+                        </div>
+                        <div class="radio-item">
+                            <span class="radio-mark {{ 'checked' if sae.rha == 'ausente' else '' }}"></span>
+                            <span>Ausente</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sistema Urinário -->
+    <div class="section">
+        <div class="section-title">7. SISTEMA URINÁRIO</div>
+        <div class="section-content">
+            <div class="subsection-content">
+                <div class="checkbox-list">
+                    <div class="checkbox-item">
+                        <span class="checkbox-mark {{ 'checked' if sae.urinario_espontanea else '' }}"></span>
+                        <span>Espontânea</span>
+                    </div>
+                    <div class="checkbox-item">
+                        <span class="checkbox-mark {{ 'checked' if sae.urinario_anuria else '' }}"></span>
+                        <span>Anúria</span>
+                    </div>
+                    <div class="checkbox-item">
+                        <span class="checkbox-mark {{ 'checked' if sae.urinario_poliuria else '' }}"></span>
+                        <span>Poliúria</span>
+                    </div>
+                    <div class="checkbox-item">
+                        <span class="checkbox-mark {{ 'checked' if sae.urinario_disuria else '' }}"></span>
+                        <span>Disúria</span>
+                    </div>
+                    <div class="checkbox-item">
+                        <span class="checkbox-mark {{ 'checked' if sae.urinario_hematuria else '' }}"></span>
+                        <span>Hematúria</span>
+                    </div>
+                    <div class="checkbox-item">
+                        <span class="checkbox-mark {{ 'checked' if sae.urinario_oliguria else '' }}"></span>
+                        <span>Oligúria</span>
+                    </div>
+                    <div class="checkbox-item">
+                        <span class="checkbox-mark {{ 'checked' if sae.urinario_cistostomia else '' }}"></span>
+                        <span>Cistostomia</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Diagnósticos de Enfermagem -->
+    <div class="section">
+        <div class="section-title">8. DIAGNÓSTICOS DE ENFERMAGEM</div>
+        <div class="section-content">
+            <div class="diagnosis-grid">
+                <div class="checkbox-item">
+                    <span class="checkbox-mark {{ 'checked' if sae.dx_risco_infeccao else '' }}"></span>
+                    <span>Risco de infecção</span>
+                </div>
+                <div class="checkbox-item">
+                    <span class="checkbox-mark {{ 'checked' if sae.dx_risco_pele else '' }}"></span>
+                    <span>Risco de integridade da pele prejudicada</span>
+                </div>
+                <div class="checkbox-item">
+                    <span class="checkbox-mark {{ 'checked' if sae.dx_mobilidade else '' }}"></span>
+                    <span>Mobilidade física prejudicada</span>
+                </div>
+                <div class="checkbox-item">
+                    <span class="checkbox-mark {{ 'checked' if sae.dx_perfusao else '' }}"></span>
+                    <span>Perfusão tissular prejudicada</span>
+                </div>
+                <div class="checkbox-item">
+                    <span class="checkbox-mark {{ 'checked' if sae.dx_autocuidado else '' }}"></span>
+                    <span>Déficit autocuidado para banho/higienização</span>
+                </div>
+                <div class="checkbox-item">
+                    <span class="checkbox-mark {{ 'checked' if sae.dx_eliminacao_vesical else '' }}"></span>
+                    <span>Eliminação vesical alterada</span>
+                </div>
+                <div class="checkbox-item">
+                    <span class="checkbox-mark {{ 'checked' if sae.dx_eliminacao_intestinal else '' }}"></span>
+                    <span>Eliminação intestinal alterada</span>
+                </div>
+                <div class="checkbox-item">
+                    <span class="checkbox-mark {{ 'checked' if sae.dx_risco_lp else '' }}"></span>
+                    <span>Risco de LP</span>
+                </div>
+                <div class="checkbox-item">
+                    <span class="checkbox-mark {{ 'checked' if sae.dx_troca_gases else '' }}"></span>
+                    <span>Troca de gases ineficaz</span>
+                </div>
+                <div class="checkbox-item">
+                    <span class="checkbox-mark {{ 'checked' if sae.dx_nutricao else '' }}"></span>
+                    <span>Nutrição desequilibrada</span>
+                </div>
+                <div class="checkbox-item">
+                    <span class="checkbox-mark {{ 'checked' if sae.dx_dor_aguda else '' }}"></span>
+                    <span>Dor aguda</span>
+                </div>
+                <div class="checkbox-item">
+                    <span class="checkbox-mark {{ 'checked' if sae.dx_dor_cronica else '' }}"></span>
+                    <span>Dor crônica</span>
+                </div>
+                <div class="checkbox-item">
+                    <span class="checkbox-mark {{ 'checked' if sae.dx_protecao else '' }}"></span>
+                    <span>Proteção ineficaz</span>
+                </div>
+            </div>
+            
+            {% if sae.dx_outros %}
+            <div style="margin-top: 15px;">
+                <strong>Outros diagnósticos:</strong>
+                <div class="text-field">{{ sae.dx_outros }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Informações Adicionais -->
+    <div class="section">
+        <div class="section-title">9. INFORMAÇÕES ADICIONAIS</div>
+        <div class="section-content">
+            {% if sae.medicacao %}
+            <div class="subsection">
+                <div class="subsection-title">Medicação</div>
+                <div class="text-field">{{ sae.medicacao }}</div>
+            </div>
+            {% endif %}
+
+            <div class="two-column" style="margin-top: 15px;">
+                {% if sae.alergias %}
+                <div>
+                    <strong>Alergias:</strong>
+                    <div class="text-field">{{ sae.alergias }}</div>
+                </div>
+                {% endif %}
+
+                {% if sae.antecedentes_pessoais %}
+                <div>
+                    <strong>Antecedentes Pessoais:</strong>
+                    <div class="text-field">{{ sae.antecedentes_pessoais }}</div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="two-column" style="margin-top: 15px;">
+                {% if sae.acesso_venoso %}
+                <div>
+                    <strong>Acesso Venoso:</strong>
+                    <div class="text-field">{{ sae.acesso_venoso }}</div>
+                </div>
+                {% endif %}
+
+                {% if sae.observacao %}
+                <div>
+                    <strong>Observação:</strong>
+                    <div class="text-field">{{ sae.observacao }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Área de Assinatura -->
+    <div class="signature-area">
+        <div class="signature-box">
+            <strong>{{ sae.enfermeiro_nome or 'Enfermeiro(a) Responsável' }}</strong><br>
+            COREN: ________________
+        </div>
+        <div class="signature-box">
+            <strong>Data: {{ sae.data_registro.strftime('%d/%m/%Y') if sae.data_registro else '___/___/______' }}</strong><br>
+            Horário: {{ sae.data_registro.strftime('%H:%M') if sae.data_registro else '___:___' }}
+        </div>
+    </div>
+
+    <!-- Rodapé -->
+    <div class="footer">
+        <p>Documento gerado automaticamente pelo sistema em {{ data_impressao.strftime('%d/%m/%Y às %H:%M') }}</p>
+    </div>
+
+    <script>
+        // Auto imprimir quando a página carregar
+        window.onload = function() {
+            window.print();
+        }
+    </script>
+</body>
+</html> 

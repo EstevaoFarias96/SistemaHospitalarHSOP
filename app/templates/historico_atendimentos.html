@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Histórico do Paciente</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    h2, h4 {
+      color: #004085;
+      font-weight: bold;
+    }
+    .card {
+      background-color: #ffffff;
+      border: 1px solid #b8daff;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    .table th {
+      background-color: #cfe2ff;
+    }
+    .btn-voltar {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-4 mb-5">
+    <h2 class="mb-4 text-center">Histórico do Paciente</h2>
+
+    <!-- Card com dados do paciente -->
+    <div class="card">
+      <h4>Dados Pessoais</h4>
+      <p><strong>Nome:</strong> {{ paciente.nome }} {% if paciente.nome_social %} ({{ paciente.nome_social }}) {% endif %}</p>
+      <p><strong>Cartão SUS:</strong> {{ paciente.cartao_sus or '---' }}</p>
+      <p><strong>Filiação:</strong> {{ paciente.filiacao or '---' }}</p>
+      <p><strong>Data de Nascimento:</strong> {{ paciente.data_nascimento.strftime('%d/%m/%Y') if paciente.data_nascimento else '---' }}</p>
+      <p><strong>Sexo:</strong> {{ paciente.sexo or '---' }}</p>
+      <p><strong>CPF:</strong> {{ paciente.cpf or '---' }}</p>
+      <p><strong>Endereço:</strong> {{ paciente.endereco or '' }}, {{ paciente.bairro or '' }} - {{ paciente.municipio or '' }}</p>
+      <p><strong>Telefone:</strong> {{ paciente.telefone or '---' }}</p>
+      {% if not paciente.identificado %}
+        <p class="text-danger"><strong>Paciente Não Identificado:</strong> {{ paciente.descricao_nao_identificado }}</p>
+      {% endif %}
+    </div>
+
+    <!-- Tabela de atendimentos -->
+    <div class="card">
+      <h4>Atendimentos Realizados</h4>
+      {% if atendimentos %}
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover table-sm">
+            <thead>
+              <tr>
+                <th>Data/Hora</th>
+                <th>Status</th>
+                <th>Conduta Final</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for a in atendimentos %}
+                <tr>
+                    <td>{{ a.horario_triagem.strftime('%d/%m/%Y %H:%M') if a.horario_triagem else '---' }}</td>
+                  <td>{{ a.status or '---' }}</td>
+                  <td>{{ a.conduta_final or '---' }}</td>
+                  <td>
+                    <a href="/atendimento/{{ a.id }}/ficha" class="btn btn-sm btn-info">Abrir Ficha</a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="text-muted">Nenhum atendimento encontrado para este paciente.</p>
+      {% endif %}
+    </div>
+
+    <a href="/medico/pesquisar" class="btn btn-secondary btn-voltar">Voltar</a>
+  </div>
+</body>
+</html>

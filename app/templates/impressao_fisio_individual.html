@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evolução de Fisioterapia - {{ paciente.nome }}</title>
+    
+    <!-- Font Awesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* Reset e configurações básicas */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Configuração para impressão A4 */
+        @page {
+            size: A4;
+            margin: 1cm;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #333;
+            background: white;
+        }
+
+        /* Cabeçalho */
+        .header {
+            text-align: center;
+            border-bottom: 1px solid #17a2b8;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+
+        .hospital-name {
+            font-size: 16pt;
+            font-weight: bold;
+            color: #17a2b8;
+            margin-bottom: 3px;
+        }
+
+        .evolucao-title {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .data-impressao {
+            font-size: 8pt;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Informações do paciente */
+        .patient-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 15px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        .patient-info .info-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .patient-info .info-label {
+            font-weight: bold;
+            color: #17a2b8;
+            font-size: 9pt;
+            margin-bottom: 2px;
+        }
+
+        .patient-info .info-value {
+            color: #333;
+            font-size: 10pt;
+        }
+
+        /* Seção da evolução */
+        .evolucao-section {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .section-header {
+            background: #17a2b8;
+            color: white;
+            padding: 8px 12px;
+            font-weight: bold;
+            font-size: 11pt;
+        }
+
+        .section-content {
+            padding: 15px;
+            background: white;
+        }
+
+        .evolucao-meta {
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 3px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 3px solid #17a2b8;
+        }
+
+        .meta-item {
+            font-size: 10pt;
+            color: #666;
+        }
+
+        .meta-value {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .evolucao-texto {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            padding: 15px;
+            color: #333;
+            font-size: 11pt;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            min-height: 400px;
+        }
+
+        /* Rodapé */
+        .footer {
+            position: fixed;
+            bottom: 1cm;
+            left: 1cm;
+            right: 1cm;
+            text-align: center;
+            font-size: 8pt;
+            color: #666;
+            border-top: 1px solid #dee2e6;
+            padding-top: 5px;
+        }
+
+        /* Estilos para impressão */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            
+            body {
+                font-size: 10pt;
+            }
+            
+            .evolucao-section {
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Botão de impressão */
+        .print-button {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10pt;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .print-button:hover {
+            background: #138496;
+        }
+
+        /* Responsividade para tela */
+        @media screen and (max-width: 768px) {
+            .patient-info {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Assinatura */
+        .assinatura-area {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .linha-assinatura {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 9pt;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <!-- Botão de impressão (apenas na tela) -->
+    <button class="print-button no-print" onclick="window.print()">
+        <i class="fas fa-print"></i> Imprimir
+    </button>
+
+    <!-- Cabeçalho -->
+    <div class="header">
+        <div class="hospital-name">
+            Hospital Senador Ozires Pontes
+        </div>
+        <div class="evolucao-title">
+            Evolução de Fisioterapia
+        </div>
+        <div class="data-impressao">
+            {% set now = moment() %}
+            Impresso em: {{ now.strftime('%d/%m/%Y às %H:%M') }}
+        </div>
+    </div>
+
+    <!-- Informações do paciente -->
+    <div class="patient-info">
+        <div class="info-group">
+            <span class="info-label">Nome do Paciente</span>
+            <span class="info-value">{{ paciente.nome }}</span>
+        </div>
+        
+        <div class="info-group">
+            <span class="info-label">CPF</span>
+            <span class="info-value">{{ paciente.cpf or 'Não informado' }}</span>
+        </div>
+        
+        <div class="info-group">
+            <span class="info-label">Data de Nascimento</span>
+            <span class="info-value">
+                {% if paciente.data_nascimento %}
+                    {{ paciente.data_nascimento.strftime('%d/%m/%Y') }}
+                {% else %}
+                    Não informada
+                {% endif %}
+            </span>
+        </div>
+        
+        <div class="info-group">
+            <span class="info-label">Leito</span>
+            <span class="info-value">{{ internacao.leito if internacao else 'Não informado' }}</span>
+        </div>
+        
+        <div class="info-group">
+            <span class="info-label">Data de Internação</span>
+            <span class="info-value">
+                {% if internacao and internacao.data_internacao %}
+                    {{ internacao.data_internacao.strftime('%d/%m/%Y') }}
+                {% else %}
+                    Não informada
+                {% endif %}
+            </span>
+        </div>
+        
+        <div class="info-group">
+            <span class="info-label">Diagnóstico</span>
+            <span class="info-value">{{ internacao.diagnostico_inicial if internacao else 'Não informado' }}</span>
+        </div>
+    </div>
+
+    <!-- Conteúdo da evolução -->
+    <div class="evolucao-section">
+        <div class="section-header">
+            Evolução de Fisioterapia
+        </div>
+        <div class="section-content">
+            <!-- Metadados da evolução -->
+            <div class="evolucao-meta">
+                <div class="meta-item">
+                    <span class="meta-value">{{ evolucao.data_evolucao.strftime('%d/%m/%Y às %H:%M') }}</span>
+                </div>
+                
+                <div class="meta-item">
+                    <span class="meta-value">
+                        {{ evolucao.fisioterapeuta_nome }}
+                        {% if evolucao.fisioterapeuta_registro %}
+                            - CREFITO: {{ evolucao.fisioterapeuta_registro }}
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Texto da evolução -->
+            <div class="evolucao-texto">
+                {{ evolucao.evolucao_fisio }}
+            </div>
+            
+            <!-- Área de assinatura -->
+            <div class="assinatura-area">
+                <div class="linha-assinatura">
+                    {{ evolucao.fisioterapeuta_nome }}
+                    {% if evolucao.fisioterapeuta_registro %}
+                        <br>CREFITO: {{ evolucao.fisioterapeuta_registro }}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rodapé -->
+    <div class="footer">
+        <p>
+            <strong>Hospital Senador Ozires Pontes</strong> | 
+            Evolução de Fisioterapia | 
+            {% set now = moment() %}
+            {{ now.strftime('%d/%m/%Y %H:%M') }}
+        </p>
+        <p style="font-size: 7pt; margin-top: 2px;">
+            Este documento foi gerado automaticamente pelo sistema HSOP
+        </p>
+    </div>
+
+    <script>
+        // Auto-imprimir quando a página carregar (opcional)
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                window.print();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

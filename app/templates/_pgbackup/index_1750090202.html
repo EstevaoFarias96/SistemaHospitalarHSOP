@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hospital Senador Ozires Pontes - Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+      .form-signin {
+        max-width: 330px;
+        padding: 15px;
+        margin: auto;
+      }
+      .hidden {
+        display: none;
+      }
+      /* Impede que o nome do hospital seja quebrado em duas linhas */
+      .form-signin h1 {
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body class="text-center">
+    <main class="form-signin">
+      <form id="loginForm">
+        <img class="mb-4" src="/static/Imagens/Imagem1.png" alt="Logo do Hospital" width="72" height="72">
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" id="cpf" name="cpf" placeholder="CPF" required>
+          <label for="cpf">CPF</label>
+        </div>
+        <div class="form-floating mb-3">
+          <input type="password" class="form-control" id="senha" name="senha" placeholder="Senha" required>
+          <label for="senha">Senha</label>
+        </div>
+        <button class="w-100 btn btn-lg btn-primary" type="submit">Entrar</button>
+        <div id="error-message" class="alert alert-danger hidden mt-3" role="alert">
+          CPF ou senha inválidos.
+        </div>
+      </form>
+    </main>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <script>
+      $(document).ready(function() {
+        $('#cpf').mask('000.000.000-00', {
+          reverse: true,
+          clearIfNotMatch: true
+        });
+
+        $('#loginForm').on('submit', function(e) {
+        e.preventDefault();
+        $.ajax({
+          url: '/login',
+          type: 'POST',
+          data: $(this).serialize(),
+          success: function(response) {
+            if (!response.success) {
+              $('#error-message').removeClass('hidden');
+            } else {
+              switch (response.cargo.toLowerCase()) {
+                case 'medico':
+                  window.location.href = '/medico';
+                  break;
+                case 'enfermeiro':
+                  window.location.href = '/enfermeiro';
+                  break;
+                case 'nutricionista':
+                  window.location.href = '/nutricionista';
+                  break;
+                case 'assistente_social':
+                  window.location.href = '/assistente_social';
+                  break;
+                case 'recepcionista':
+                  window.location.href = '/recepcionista';
+                  break;
+                case 'administrador':
+                  window.location.href = '/administrador';
+                  break;
+                case 'fisioterapeuta':
+                  window.location.href = '/fisioterapeuta';
+                  break;
+                default:
+                  alert('Cargo não reconhecido.');
+              }
+            }
+          },
+          error: function() {
+            alert('Erro ao processar o login.');
+          }
+        });
+      });
+    });
+    </script>
+  </body>
+</html>

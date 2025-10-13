@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Modal RN</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/modal_fix.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Teste do Modal de Adicionar RN</h1>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalAdicionarRN">
+            <i class="fas fa-baby me-2"></i>Adicionar RN
+        </button>
+    </div>
+
+    <!-- Modal para Adicionar RN -->
+    <div class="modal fade" id="modalAdicionarRN" tabindex="-1" aria-labelledby="modalAdicionarRNLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="modalAdicionarRNLabel">
+                        <i class="fas fa-baby me-2"></i>Adicionar Recém-Nascido - TESTE
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Abas para as etapas do processo -->
+                    <ul class="nav nav-tabs" id="adicionarRNTabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="dados-rn-tab" data-bs-toggle="tab" href="#dados-rn" role="tab" aria-controls="dados-rn" aria-selected="true">
+                                1. Dados do RN
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link disabled" id="internacao-rn-tab" data-bs-toggle="tab" href="#internacao-rn" role="tab" aria-controls="internacao-rn" aria-selected="false">
+                                2. Dados da Internação
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content mt-4" id="adicionarRNTabsContent">
+                        <!-- Etapa 1: Dados do RN -->
+                        <div class="tab-pane fade show active" id="dados-rn" role="tabpanel" aria-labelledby="dados-rn-tab">
+                            <form id="dadosRNForm">
+                                <div class="row">
+                                    <div class="form-group col-md-8">
+                                        <label for="nomeRN" class="form-label">Nome Completo do RN*</label>
+                                        <input type="text" class="form-control" id="nomeRN" name="nomeRN" placeholder="RN DE TESTE" required>
+                                    </div>
+                                    <div class="form-group col-md-4">
+                                        <label for="sexoRN" class="form-label">Sexo*</label>
+                                        <select class="form-control" id="sexoRN" name="sexoRN" required>
+                                            <option value="">Selecione...</option>
+                                            <option value="M">Masculino</option>
+                                            <option value="F">Feminino</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="form-group col-md-6">
+                                        <label for="dataNascimentoRN" class="form-label">Data de Nascimento*</label>
+                                        <input type="date" class="form-control" id="dataNascimentoRN" name="dataNascimentoRN" required>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label for="corRN" class="form-label">Raça/Cor*</label>
+                                        <select class="form-control" id="corRN" name="corRN" required>
+                                            <option value="">Selecione...</option>
+                                            <option value="Branca">Branca</option>
+                                            <option value="Preta">Preta</option>
+                                            <option value="Parda">Parda</option>
+                                            <option value="Amarela">Amarela</option>
+                                            <option value="Indígena">Indígena</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-end mt-4">
+                                    <button type="submit" class="btn btn-success">
+                                        Próximo <i class="fas fa-arrow-right ms-1"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Etapa 2: Dados da Internação -->
+                        <div class="tab-pane fade" id="internacao-rn" role="tabpanel" aria-labelledby="internacao-rn-tab">
+                            <div class="alert alert-success">
+                                <i class="fas fa-check me-2"></i>
+                                <strong>Sucesso!</strong> Se você conseguiu chegar até aqui, o problema foi resolvido!
+                            </div>
+                            
+                            <form id="internacaoRNForm">
+                                <div class="form-group">
+                                    <label for="primeiraEvolucaoRN" class="form-label">Primeira Evolução*</label>
+                                    <textarea class="form-control" id="primeiraEvolucaoRN" name="primeiraEvolucaoRN" rows="4" placeholder="Digite a primeira evolução do RN..."></textarea>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between mt-4">
+                                    <button type="button" class="btn btn-outline-secondary" id="btnVoltarDadosRN">
+                                        <i class="fas fa-arrow-left me-1"></i>Voltar
+                                    </button>
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-save me-1"></i>Salvar RN (Teste)
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/static/js/modal-rn-fix-ultimate.js"></script>
+    
+    <script>
+        // Definir data padrão como hoje
+        document.addEventListener('DOMContentLoaded', function() {
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('dataNascimentoRN').value = hoje;
+            document.getElementById('nomeRN').value = 'RN DE TESTE';
+        });
+        
+        // Botão voltar
+        document.getElementById('btnVoltarDadosRN').addEventListener('click', function() {
+            document.getElementById('dados-rn-tab').click();
+        });
+        
+        // Teste de submissão da segunda aba
+        document.getElementById('internacaoRNForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('✅ Teste concluído com sucesso! O modal está funcionando corretamente.');
+            $('#modalAdicionarRN').modal('hide');
+        });
+    </script>
+</body>
+</html>

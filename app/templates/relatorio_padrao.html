@@ -1,0 +1,125 @@
+{% extends 'base_funcionarios.html' %}
+
+{% block title %}Relatório - HSOP{% endblock %}
+
+{% block content %}
+<div class="py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h2 class="mb-1">Relatório: {{ tipo|capitalize }}</h2>
+      <div class="text-muted">Período: {{ inicio.strftime('%d/%m/%Y') }} a {{ fim_exibicao.strftime('%d/%m/%Y') }}</div>
+    </div>
+    <div>
+      <a href="{{ url_for('main.relatorios_admin') }}" class="btn btn-outline-primary">Voltar</a>
+    </div>
+  </div>
+
+  {% if tipo == 'internacoes' %}
+  <div class="row g-3 mb-3">
+    <div class="col-md-3">
+      <div class="card kpi-card">
+        <div class="card-body">
+          <div class="text-muted">Taxa de Ocupação</div>
+          <div class="h3 mb-0">{{ kpis.taxa_ocupacao }}%</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card kpi-card" style="border-left:6px solid #20c997">
+        <div class="card-body">
+          <div class="text-muted">Tempo Médio Permanência</div>
+          <div class="h3 mb-0">{{ kpis.tempo_medio_permanencia }} d</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card kpi-card" style="border-left:6px solid #0d6efd">
+        <div class="card-body">
+          <div class="text-muted">Internações no período</div>
+          <div class="h3 mb-0">{{ kpis.total_internacoes_periodo }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card kpi-card" style="border-left:6px solid #fd7e14">
+        <div class="card-body">
+          <div class="text-muted">Altas no período</div>
+          <div class="h3 mb-0">{{ kpis.total_altas }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-3">
+    <div class="card-header-min">Série temporal (Internações x Altas)</div>
+    <div class="card-body">
+      <canvas id="serieInternacoesAltas" height="160" aria-label="Série temporal" role="img"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-sm mb-0">
+          <thead class="thead-light">
+            <tr>
+              <th>Atendimento</th>
+              <th>Paciente</th>
+              <th>Leito</th>
+              <th>Data Internação</th>
+              <th>Data Alta</th>
+              <th>Dias</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in internados %}
+            <tr>
+              <td>{{ item.atendimento_id }}</td>
+              <td>{{ item.paciente }}</td>
+              <td>{{ item.leito }}</td>
+              <td>{{ item.data_internacao }}</td>
+              <td>{{ item.data_alta }}</td>
+              <td>{{ item.dias }}</td>
+              <td>{{ item.status_atendimento }}</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="7" class="text-center text-muted py-4">Nenhum paciente internado no momento.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function(){
+  var el = document.getElementById('serieInternacoesAltas');
+  if (el) {
+    var labels = {{ serie_labels|default([])|tojson }};
+    var valsInt = {{ serie_internacoes|default([])|tojson }};
+    var valsAlt = {{ serie_altas|default([])|tojson }};
+    new Chart(el, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          { label: 'Internações', data: valsInt, borderColor: '#0d6efd', backgroundColor: 'rgba(13,110,253,.15)', tension: .3, fill: true },
+          { label: 'Altas', data: valsAlt, borderColor: '#20c997', backgroundColor: 'rgba(32,201,151,.15)', tension: .3, fill: true },
+        ]
+      },
+      options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+  }
+})();
+</script>
+{% endblock %}
+
+

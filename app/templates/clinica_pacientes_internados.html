@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Pacientes Internados</h2>
+        <a href="/clinica" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+    </div>
+    
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">
+                            <i class="fas fa-search text-primary"></i>
+                        </span>
+                        <input type="text" id="searchInput" class="form-control" placeholder="Buscar paciente...">
+                    </div>
+                </div>
+            </div>
+            
+            <div id="statusMessage" class="alert alert-info mb-3" style="display: none;">
+                Carregando pacientes...
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nome</th>
+                            <th>Data de Internação</th>
+                            <th>Data de Nascimento</th>
+                            <th>Leito</th>
+                            <th>Diagnóstico</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pacientesTableBody">
+                        <!-- Os dados serão inseridos aqui via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#pacientesTableBody tr');
+        
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+
+    carregarPacientes();
+});
+
+function carregarPacientes() {
+    const statusMessage = document.getElementById('statusMessage');
+    statusMessage.style.display = 'block';
+    statusMessage.textContent = 'Carregando pacientes...';
+    
+    fetch('/api/pacientes/internados')
+        .then(response => {
+            console.log('Status da resposta:', response.status);
+            if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            console.log('Dados recebidos da API:', data);
+            if (data.success) {
+                const tbody = document.getElementById('pacientesTableBody');
+                tbody.innerHTML = '';
+                
+                if (data.pacientes && data.pacientes.length > 0) {
+                    statusMessage.style.display = 'none';
+                    
+                    data.pacientes.forEach(paciente => {
+                        console.log('Processando paciente:', paciente);
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${paciente.nome || '-'}</td>
+                            <td>${formatarData(paciente.data_internacao)}</td>
+                            <td>${formatarData(paciente.data_nascimento)}</td>
+                            <td>${paciente.leito || '-'}</td>
+                            <td>${paciente.diagnostico || '-'}</td>
+                            <td>
+                                <a href="/clinica/evolucao-paciente-medico/${paciente.atendimento_id}" class="btn btn-sm btn-outline-primary me-2" title="Evoluir Paciente">
+                                    <i class="fas fa-notes-medical"></i>
+                                </a>
+                                <button class="btn btn-sm btn-outline-info" onclick="imprimirAlta('${paciente.atendimento_id}')" title="Imprimir Relatório de Alta">
+                                    <i class="fas fa-print"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-success" onclick="registrarAlta('${paciente.atendimento_id}')" title="Registrar Alta">
+                                    <i class="fas fa-check-circle"></i>
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                } else {
+                    statusMessage.className = 'alert alert-info mb-3';
+                    statusMessage.textContent = 'Não há pacientes internados no momento.';
+                }
+            } else {
+                console.error('Erro ao carregar pacientes:', data.error);
+                statusMessage.className = 'alert alert-danger mb-3';
+                statusMessage.textContent = 'Erro ao carregar lista de pacientes: ' + (data.error || 'Erro desconhecido');
+            }
+        })
+        .catch(error => {
+            console.error('Erro na requisição:', error);
+            const statusMessage = document.getElementById('statusMessage');
+            statusMessage.className = 'alert alert-danger mb-3';
+            statusMessage.textContent = 'Erro ao carregar lista de pacientes: ' + error.message;
+        });
+}
+
+function formatarData(dataString) {
+    if (!dataString) return '-';
+    try {
+        // Tentar converter para formato de data
+        const data = new Date(dataString);
+        
+        // Verificar se é uma data válida
+        if (isNaN(data.getTime())) {
+            console.warn('Data inválida recebida:', dataString);
+            return '-';
+        }
+        
+        // Formatar para pt-BR (dia/mês/ano)
+        return data.toLocaleDateString('pt-BR');
+    } catch (error) {
+        console.error('Erro ao formatar data:', dataString, error);
+        return '-';
+    }
+}
+
+function registrarAlta(atendimentoId) {
+    // Redireciona para a página de registro de alta
+    window.location.href = `/clinica/internacao/${atendimentoId}/alta`;
+}
+
+function imprimirAlta(atendimentoId) {
+    // Abre a página de impressão em uma nova aba
+    window.open(`/imprimir/alta/${atendimentoId}`, '_blank');
+}
+</script>
+{% endblock %}

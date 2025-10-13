@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Identificação do Paciente - {{ paciente.nome }}</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 0.5cm;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.2;
+            color: #000;
+            background: white;
+        }
+        
+        .identification-card {
+            border: 2px solid #000;
+            padding: 10px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .patient-name {
+            font-size: 56px;
+            font-weight: bold;
+            color: #000;
+            text-transform: uppercase;
+            text-align: center;
+            border-bottom: 3px solid #000;
+            padding-bottom: 18px;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #000;
+            border-bottom: 2px solid #000;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+
+        .allergies-section {
+            border: 2px solid #000;
+            padding: 12px;
+            min-height: 50px;
+        }
+
+        .allergies-content {
+            font-size: 20px;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .dieta-section {
+            border: 2px solid #000;
+            padding: 12px;
+            min-height: 50px;
+        }
+
+        .dieta-content {
+            font-size: 20px;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .diagnostico-section {
+            border: 2px solid #000;
+            padding: 12px;
+            min-height: 55px;
+        }
+
+        .diagnostico-content {
+            font-size: 20px;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .risks-section {
+            border: 2px solid #000;
+            padding: 12px;
+        }
+
+        .risks-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .risk-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            border: 2px solid #000;
+            padding: 8px;
+        }
+
+        .checkbox {
+            width: 22px;
+            height: 22px;
+            border: 2px solid #000;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+        
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+            }
+            
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="identification-card">
+        <div class="main-content">
+            <!-- NOME DO PACIENTE -->
+            <div class="patient-name">{{ paciente.nome }}</div>
+
+            <!-- ALERGIAS -->
+            <div class="allergies-section">
+                <div class="section-title">ALERGIAS</div>
+                <div class="allergies-content">
+                    {% if atendimento.alergias %}
+                        {{ atendimento.alergias }}
+                    {% else %}
+                        Não há alergias registradas
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- DIETA -->
+            <div class="dieta-section">
+                <div class="section-title">DIETA</div>
+                <div class="dieta-content">
+                    {% set dieta_encontrada = false %}
+                    {% if prescricoes %}
+                        {% for prescricao in prescricoes %}
+                            {% if prescricao.texto_dieta and not dieta_encontrada %}
+                                {{ prescricao.texto_dieta }}
+                                {% set dieta_encontrada = true %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    {% if not dieta_encontrada %}Não informado{% endif %}
+                </div>
+            </div>
+
+            <!-- DIAGNÓSTICO PRINCIPAL -->
+            <div class="diagnostico-section">
+                <div class="section-title">DIAGNÓSTICO PRINCIPAL</div>
+                <div class="diagnostico-content">
+                    {{ internacao.diagnostico or internacao.diagnostico_inicial or 'Não informado' }}
+                    {% if internacao.cid_principal %}
+                        <br><strong>CID:</strong> {{ internacao.cid_principal }}
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- RISCOS -->
+            <div class="risks-section">
+                <div class="section-title">RISCOS</div>
+                <div class="risks-grid">
+                    <div class="risk-item">
+                        <span class="checkbox"></span>
+                        QUEDA
+                    </div>
+                    <div class="risk-item">
+                        <span class="checkbox"></span>
+                        BRONCOASPIRAÇÃO
+                    </div>
+                    <div class="risk-item">
+                        <span class="checkbox"></span>
+                        LPP
+                    </div>
+                    <div class="risk-item">
+                        <span class="checkbox"></span>
+                        FLEBITE
+                    </div>
+                    <div class="risk-item">
+                        <span class="checkbox"></span>
+                        ÚLCERA
+                    </div>
+                    <div class="risk-item">
+                        <span class="checkbox"></span>
+                        OUTROS
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    
+    <script>
+        // Auto-print quando a página carregar
+        window.onload = function() {
+            // Pequeno delay para garantir que o CSS seja carregado
+            setTimeout(function() {
+                window.print();
+            }, 500);
+        };
+    </script>
+</body>
+</html> 

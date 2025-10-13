@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Registro de Alta</h2>
+        <a href="/clinica/pacientes-internados" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form id="formAlta">
+                <input type="hidden" id="atendimento_id" value="{{ atendimento_id }}">
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="diagnostico" class="form-label">Diagnóstico Final</label>
+                        <textarea id="diagnostico" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="relatorio_alta" class="form-label">Relatório de Alta</label>
+                        <textarea id="relatorio_alta" class="form-control" rows="3" required></textarea>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="cid_principal" class="form-label">CID-10 Principal</label>
+                        <input type="text" id="cid_principal" class="form-control" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="cid_10_secundario" class="form-label">CID-10 Secundário</label>
+                        <input type="text" id="cid_10_secundario" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="cid_10_causas_associadas" class="form-label">CID-10 Causas Associadas</label>
+                        <input type="text" id="cid_10_causas_associadas" class="form-control">
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="descr_procedimento_solicitado" class="form-label">Procedimento Solicitado</label>
+                        <input type="text" id="descr_procedimento_solicitado" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="codigo_procedimento" class="form-label">Código do Procedimento</label>
+                        <input type="text" id="codigo_procedimento" class="form-control">
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="carater_internacao" class="form-label">Caráter da Internação</label>
+                        <select id="carater_internacao" class="form-control" required>
+                            <option value="">Selecione</option>
+                            <option value="Eletiva">Eletiva</option>
+                            <option value="Urgência">Urgência</option>
+                            <option value="Emergência">Emergência</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check mt-4">
+                            <input type="checkbox" id="acidente_de_trabalho" class="form-check-input">
+                            <label class="form-check-label" for="acidente_de_trabalho">Acidente de Trabalho</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label for="evolucao" class="form-label">Evolução do Paciente</label>
+                        <textarea id="evolucao" class="form-control" rows="3" required></textarea>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label for="parametros" class="form-label">Parâmetros Vitais na Alta</label>
+                        <textarea id="parametros" class="form-control" rows="2" required></textarea>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label for="exames_laboratoriais" class="form-label">Exames Laboratoriais</label>
+                        <textarea id="exames_laboratoriais" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <label for="conduta" class="form-label">Conduta na Alta</label>
+                        <textarea id="conduta" class="form-control" rows="3" required></textarea>
+                    </div>
+                </div>
+
+                <div class="text-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Registrar Alta
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('formAlta');
+    const atendimentoId = document.getElementById('atendimento_id').value;
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const data = {
+            diagnostico: document.getElementById('diagnostico').value,
+            relatorio_alta: document.getElementById('relatorio_alta').value,
+            cid_principal: document.getElementById('cid_principal').value,
+            cid_10_secundario: document.getElementById('cid_10_secundario').value,
+            cid_10_causas_associadas: document.getElementById('cid_10_causas_associadas').value,
+            descr_procedimento_solicitado: document.getElementById('descr_procedimento_solicitado').value,
+            codigo_procedimento: document.getElementById('codigo_procedimento').value,
+            carater_internacao: document.getElementById('carater_internacao').value,
+            acidente_de_trabalho: document.getElementById('acidente_de_trabalho').checked,
+            evolucao: document.getElementById('evolucao').value,
+            parametros: document.getElementById('parametros').value,
+            exames_laboratoriais: document.getElementById('exames_laboratoriais').value,
+            conduta: document.getElementById('conduta').value
+        };
+
+        fetch(`/api/medico/atendimento/${atendimentoId}/alta`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert('Alta registrada com sucesso!');
+                window.location.href = '/clinica/pacientes-internados';
+            } else {
+                alert('Erro ao registrar alta: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Erro ao registrar alta');
+        });
+    });
+});
+</script>
+{% endblock %} 

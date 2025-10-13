@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Estatísticas Farmácia</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Teste de Estatísticas da Farmácia</h1>
+
+        <!-- Cards de Estatísticas -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card stats-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="card-title mb-0">Pendentes</h5>
+                                <h3 class="mb-0" id="stats-pendentes">--</h3>
+                                <small>Prescrições</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Container de prescrições -->
+        <div id="prescriptions-cards" class="row">
+            <div class="col-12">
+                <div class="alert alert-info">
+                    Carregando prescrições...
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button class="btn btn-primary" onclick="simularCarregamento()">Simular Carregamento</button>
+            <button class="btn btn-secondary" onclick="resetTest()">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        // Variáveis para armazenar totais parciais
+        let totalAtendimentosAguardando = 0;
+        let totalPrescricoesFluxo = 0;
+
+        // Função para atualizar estatísticas
+        function atualizarEstatisticas(response) {
+            totalAtendimentosAguardando = response.total || 0;
+            $('#total-prescricoes').text(totalAtendimentosAguardando);
+            $('#stats-pendentes').text(totalAtendimentosAguardando);
+            console.log('Estatísticas atualizadas (atendimentos):', totalAtendimentosAguardando);
+        }
+
+        // Função para atualizar estatísticas incluindo prescrições do fluxo
+        function atualizarEstatisticasComFluxo(totalFluxo) {
+            totalPrescricoesFluxo = totalFluxo;
+            const totalGeral = totalAtendimentosAguardando + totalPrescricoesFluxo;
+
+            $('#stats-pendentes').text(totalGeral);
+
+            console.log(`Estatísticas atualizadas: Atendimentos=${totalAtendimentosAguardando}, Fluxo=${totalPrescricoesFluxo}, Total=${totalGeral}`);
+        }
+
+        // Função para carregar atendimentos aguardando (simulado)
+        function carregarAtendimentosAguardando() {
+            $('#prescriptions-cards').html(`
+                <div class="col-12">
+                    <h4>Atendimentos Aguardando Medicação</h4>
+                    <div class="alert alert-success">
+                        <strong>Simulação:</strong> 0 atendimentos aguardando
+                    </div>
+                </div>
+            `);
+
+            // Simular resposta da API
+            setTimeout(function() {
+                const response = { success: true, total: 0, data: [] };
+                atualizarEstatisticas(response);
+
+                // Se o fluxo já foi carregado, atualizar estatísticas combinadas
+                if (totalPrescricoesFluxo > 0) {
+                    atualizarEstatisticasComFluxo(totalPrescricoesFluxo);
+                }
+            }, 500);
+        }
+
+        // Função para carregar prescrições pendentes do fluxo
+        function carregarPrescricoesFluxo() {
+            setTimeout(function() {
+                $('#prescriptions-cards').append(`
+                    <div class="col-12 mt-4">
+                        <hr class="my-4">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-clipboard-list mr-2"></i>Prescrições Pendentes (Fluxo)
+                        </h5>
+                        <div id="fluxo-prescriptions-container">
+                            <div class="alert alert-info">
+                                Carregando prescrições do fluxo...
+                            </div>
+                        </div>
+                    </div>
+                `);
+
+                // Simular resposta da API
+                setTimeout(function() {
+                    const response = { success: true, total: 1, data: [{id: 1, paciente: {nome: 'João Silva'}}] };
+                    exibirPrescricoesFluxo(response.data);
+                    atualizarEstatisticasComFluxo(response.total);
+                }, 1000);
+            }, 100);
+        }
+
+        function exibirPrescricoesFluxo(prescricoes) {
+            const container = $('#fluxo-prescriptions-container');
+
+            if (prescricoes.length === 0) {
+                container.html('<div class="alert alert-warning">Nenhuma prescrição pendente</div>');
+                return;
+            }
+
+            container.html(`
+                <div class="alert alert-success">
+                    <strong>Simulação:</strong> ${prescricoes.length} prescrição(ões) do fluxo encontrada(s)
+                </div>
+            `);
+        }
+
+        function simularCarregamento() {
+            console.log('Iniciando simulação...');
+
+            // Reset
+            totalAtendimentosAguardando = 0;
+            totalPrescricoesFluxo = 0;
+            $('#stats-pendentes').text('--');
+
+            // Carregar em sequência
+            carregarAtendimentosAguardando();
+            carregarPrescricoesFluxo();
+        }
+
+        function resetTest() {
+            $('#prescriptions-cards').html(`
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        Container resetado. Clique em "Simular Carregamento" para testar.
+                    </div>
+                </div>
+            `);
+            $('#stats-pendentes').text('--');
+            totalAtendimentosAguardando = 0;
+            totalPrescricoesFluxo = 0;
+            console.log('Teste resetado');
+        }
+
+        // Inicializar
+        $(document).ready(function() {
+            console.log('Página carregada. Use os botões para testar.');
+        });
+    </script>
+</body>
+</html>
+
+
+
+

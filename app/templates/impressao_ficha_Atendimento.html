@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha de Atendimento</title>
+    <style>
+        @media print {
+            body { 
+                margin: 0; 
+                padding: 10mm;
+                font-family: Arial, sans-serif;
+                font-size: 10pt;
+                line-height: 1.2;
+            }
+            
+            .page-break { 
+                page-break-before: always; 
+            }
+            
+            .no-page-break {
+                page-break-inside: avoid;
+            }
+            
+            @page {
+                size: A4;
+                margin: 10mm;
+            }
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.2;
+            margin: 0;
+            padding: 10mm;
+        }
+        
+        .header {
+            text-align: center;
+            font-weight: bold;
+            font-size: 12pt;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 4px;
+        }
+        
+        .section-title {
+            background-color: #f0f0f0;
+            font-weight: bold;
+            text-align: center;
+            padding: 3px;
+            margin: 5px 0 3px 0;
+            border: 1px solid #000;
+            font-size: 8pt;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 8px;
+            page-break-inside: auto;
+        }
+
+        td, th {
+            border: 1px solid #000;
+            padding: 3px;
+            vertical-align: top;
+            page-break-inside: auto;
+            font-size: 8pt;
+        }
+
+        .field-label {
+            font-weight: bold;
+            background-color: #f8f8f8;
+            width: 20%;
+            font-size: 7pt;
+        }
+        
+        .field-value {
+            border-bottom: 1px dotted #666;
+            min-height: 18px;
+        }
+        
+        .large-field {
+            min-height: 60px;
+        }
+        
+        .medium-field {
+            min-height: 40px;
+        }
+        
+        .small-field {
+            min-height: 20px;
+        }
+        
+        .vital-signs {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2px;
+        }
+        
+        .vital-box {
+            border: 1px solid #000;
+            padding: 4px;
+            text-align: center;
+        }
+        
+        .classification-box {
+            text-align: center;
+            padding: 5px;
+            margin: 3px 0;
+            border: 2px solid #000;
+            font-weight: bold;
+            background-color: #f0f0f0;
+            font-size: 8pt;
+        }
+        
+        .prescription-area {
+            min-height: 60px;
+            border: 1px solid #000;
+            padding: 4px;
+            margin: 2px 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow: visible;
+            page-break-inside: auto;
+            break-inside: auto;
+            font-size: 8pt;
+            line-height: 1.1;
+        }
+        
+        .manual-area {
+            min-height: 45px;
+            border: 1px solid #000;
+            padding: 4px;
+            margin: 2px 0;
+            background: linear-gradient(transparent 19px, #ddd 19px, #ddd 20px, transparent 20px);
+            background-size: 100% 20px;
+            page-break-inside: auto;
+            break-inside: auto;
+            overflow: visible;
+            font-size: 8pt;
+            line-height: 1.1;
+        }
+        
+        .signature-area {
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .signature-box {
+            width: 45%;
+            text-align: center;
+            border-top: 1px solid #000;
+            padding-top: 4px;
+            margin-top: 20px;
+        }
+        
+        .time-field {
+            width: 80px;
+            display: inline-block;
+            border-bottom: 1px solid #000;
+            text-align: center;
+        }
+
+        /* Seções fluídas para permitir quebra entre páginas em textos longos */
+        .flow-section {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            gap: 6px;
+            align-items: start;
+            margin-bottom: 8px;
+        }
+        .flow-section .time-col {
+            text-align: center;
+            font-weight: bold;
+            border: 1px solid #000;
+            padding: 4px;
+            background-color: #f8f8f8;
+        }
+        .flow-section .content-col {
+            border: 1px solid #000;
+            padding: 6px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow: visible;
+            page-break-inside: auto;
+            break-inside: auto;
+            min-height: 40px;
+        }
+
+        /* Permitir quebra dentro de blocos grandes ao imprimir */
+        @media print {
+            body {
+                margin: 0;
+                padding: 10mm;
+                font-family: Arial, sans-serif;
+                font-size: 10pt;
+                line-height: 1.2;
+            }
+
+            .page-break {
+                page-break-before: always;
+            }
+
+            .no-page-break {
+                page-break-inside: avoid;
+            }
+
+            @page {
+                size: A4;
+                margin: 10mm;
+            }
+
+            /* Permitir quebra de conteúdo longo */
+            .flow-section, .flow-section .content-col,
+            .prescription-area, .manual-area {
+                page-break-inside: auto;
+                break-inside: auto;
+            }
+
+            table {
+                page-break-inside: auto;
+            }
+
+            td, th {
+                page-break-inside: auto;
+            }
+
+            /* Manter seções importantes juntas */
+            .signature-area, .page-header {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- FRENTE DA FICHA -->
+    <div class="page-front">
+        <div class="header">
+            FICHA DE ATENDIMENTO
+        </div>
+        
+        <!-- Dados de Identificação -->
+        <table style="margin-bottom: 10px; page-break-inside: avoid;">
+            <tr>
+                <td class="field-label">CNS:</td>
+                <td class="field-value">{{ paciente_cns or '-' }}</td>
+                <td class="field-label">Data:</td>
+                <td class="field-value">{{ atendimento_data or '-' }}</td>
+                <td class="field-label">Horário:</td>
+                <td class="field-value">{{ atendimento_hora or '-' }}</td>
+                <td class="field-label">Ficha Nº:</td>
+                <td class="field-value">{{ atendimento_id or '-' }}</td>
+            </tr>
+            <tr>
+                <td class="field-label">Nome:</td>
+                <td colspan="7" class="field-value">{{ paciente_nome or '-' }}</td>
+            </tr>
+            <tr>
+                <td class="field-label">Nome Social:</td>
+                <td colspan="7" class="field-value">{{ paciente_nome_social or '-' }}</td>
+            </tr>
+            <tr>
+                <td class="field-label">Filiação:</td>
+                <td colspan="7" class="field-value">{{ paciente_filiacao or '-' }}</td>
+            </tr>
+            <tr>
+                <td class="field-label">DN:</td>
+                <td class="field-value">{{ paciente_data_nascimento or '-' }}</td>
+                <td class="field-label">Idade:</td>
+                <td class="field-value">{{ paciente_idade or '-' }}</td>
+                <td class="field-label">Sexo:</td>
+                <td class="field-value">{{ paciente_sexo or '-' }}</td>
+                <td class="field-label">CPF:</td>
+                <td class="field-value">{{ paciente_cpf or '-' }}</td>
+            </tr>
+            <tr>
+                <td class="field-label">Endereço:</td>
+                <td colspan="4" class="field-value">{{ paciente_endereco or '-' }}</td>
+                <td class="field-label">Bairro:</td>
+                <td colspan="2" class="field-value">{{ paciente_bairro or '-' }}</td>
+            </tr>
+            <tr>
+                <td class="field-label">Município:</td>
+                <td colspan="4" class="field-value">{{ paciente_municipio or '-' }}</td>
+                <td class="field-label">Contato:</td>
+                <td colspan="2" class="field-value">{{ paciente_telefone or '-' }}</td>
+            </tr>
+        </table>
+
+        <!-- Classificação de Risco -->
+        <div class="classification-box">
+            CLASSIFICAÇÃO DE RISCO: {{ atendimento_classificacao_risco }}
+        </div>
+
+        <!-- Sinais Vitais -->
+        <div class="section-title">SINAIS VITAIS</div>
+        <table style="margin-bottom: 10px; page-break-inside: avoid;">
+            <tr>
+                <td style="text-align: center; font-weight: bold;">PA: {{ atendimento_pressao or '-' }} mmHg</td>
+                <td style="text-align: center; font-weight: bold;">Pulso: {{ atendimento_pulso or '-' }} bpm</td>
+                <td style="text-align: center; font-weight: bold;">SpO₂: {{ atendimento_sp02 or '-' }}%</td>
+                <td style="text-align: center; font-weight: bold;">Temp: {{ atendimento_temp or '-' }}°C</td>
+            </tr>
+            <tr>
+                <td style="text-align: center; font-weight: bold;">Peso: {{ atendimento_peso or '-' }} Kg</td>
+                <td style="text-align: center; font-weight: bold;">Altura: {{ atendimento_altura or '-' }} cm</td>
+                <td style="text-align: center; font-weight: bold;">Glicemia: {{ atendimento_dx or '-' }} mg/dL</td>
+                <td style="text-align: center; font-weight: bold;">FR: {{ atendimento_fr or '-' }} rpm</td>
+            </tr>
+        </table>
+
+        <!-- Triagem -->
+        <div class="section-title">TRIAGEM</div>
+        <div style="margin-bottom: 10px;">
+            <div style="display: grid; grid-template-columns: 80px 1fr; gap: 6px; align-items: start;">
+                <div style="text-align: center; font-weight: bold; border: 1px solid #000; padding: 4px; background-color: #f8f8f8;">
+                    {{ atendimento_horario_triagem or '-' }}
+                </div>
+                <div style="border: 1px solid #000; padding: 6px; white-space: pre-wrap; word-wrap: break-word; overflow: visible; page-break-inside: auto; break-inside: auto; min-height: 40px;">
+                    {{ atendimento_triagem or '-' }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Anamnese e Exame Físico -->
+        <div class="section-title">ANAMNESE E EXAME FÍSICO</div>
+        <div style="margin-bottom: 10px;">
+            <div style="display: grid; grid-template-columns: 80px 1fr; gap: 6px; align-items: start;">
+                <div style="text-align: center; font-weight: bold; border: 1px solid #000; padding: 4px; background-color: #f8f8f8;">
+                    {{ atendimento_horario_consulta_medica or '-' }}
+                </div>
+                <div style="border: 1px solid #000; padding: 6px; white-space: pre-wrap; word-wrap: break-word; overflow: visible; page-break-inside: auto; break-inside: auto; min-height: 60px;">
+                    {{ atendimento_anamnese_exame_fisico or '-' }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Observações/Intercorrências -->
+        <div class="section-title">OBSERVAÇÕES/INTERCORRÊNCIAS (Preenchimento Manual)</div>
+        <div style="border: 1px solid #000; padding: 8px; margin: 2px 0 6px 0; background: linear-gradient(transparent 19px, #ddd 19px, #ddd 20px, transparent 20px); background-size: 100% 20px; page-break-inside: auto; break-inside: auto; overflow: visible; min-height: 80px; font-size: 8pt; line-height: 1.1;">
+            <!-- Área com linhas para preenchimento manual -->
+        </div>
+
+    </div>
+
+    <!-- VERSO DA FICHA -->
+    <div class="page-break">
+        <!-- Prescrição Médica -->
+        <div class="section-title">PRESCRIÇÃO MÉDICA</div>
+        {% if prescricoes %}
+            <table style="width: 100%; border-collapse: collapse; font-size: 7pt; margin: 2px 0;">
+                <thead>
+                    <tr style="background: #f0f0f0;">
+                        <th style="border: 1px solid #000; padding: 2px; font-weight: bold; width: 12%;">Data/Hora</th>
+                        <th style="border: 1px solid #000; padding: 2px; font-weight: bold; width: 15%;">Tipo</th>
+                        <th style="border: 1px solid #000; padding: 2px; font-weight: bold;">Prescrição</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prescricao in prescricoes %}
+                        {% if prescricao.medicamentos_json %}
+                            {% for medicamento in prescricao.medicamentos_json %}
+                                <tr>
+                                    <td style="border: 1px solid #000; padding: 2px; vertical-align: top; text-align: center;">{{ prescricao.horario_prescricao_pretty or '-' }}</td>
+                                    <td style="border: 1px solid #000; padding: 2px; vertical-align: top; font-weight: bold;">Medicamento</td>
+                                    <td style="border: 1px solid #000; padding: 2px; vertical-align: top;">
+                                        {{ medicamento.nome_medicamento }}{% if medicamento.descricao_uso %} - {{ medicamento.descricao_uso }}{% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                        
+                        {% if prescricao.texto_dieta %}
+                            <tr>
+                                <td style="border: 1px solid #000; padding: 2px; vertical-align: top; text-align: center;">{{ prescricao.horario_prescricao_pretty or '-' }}</td>
+                                <td style="border: 1px solid #000; padding: 2px; vertical-align: top; font-weight: bold;">Dieta</td>
+                                <td style="border: 1px solid #000; padding: 2px; vertical-align: top;">{{ prescricao.texto_dieta }}</td>
+                            </tr>
+                        {% endif %}
+                        
+                        {% if prescricao.texto_procedimento_medico %}
+                            <tr>
+                                <td style="border: 1px solid #000; padding: 2px; vertical-align: top; text-align: center;">{{ prescricao.horario_prescricao_pretty or '-' }}</td>
+                                <td style="border: 1px solid #000; padding: 2px; vertical-align: top; font-weight: bold;">Procedimentos</td>
+                                <td style="border: 1px solid #000; padding: 2px; vertical-align: top;">{{ prescricao.texto_procedimento_medico }}</td>
+                            </tr>
+                        {% endif %}
+                        
+                        {% if prescricao.texto_procedimento_multi %}
+                            <tr>
+                                <td style="border: 1px solid #000; padding: 2px; vertical-align: top; text-align: center;">{{ prescricao.horario_prescricao_pretty or '-' }}</td>
+                                <td style="border: 1px solid #000; padding: 2px; vertical-align: top; font-weight: bold;">Cuidados</td>
+                                <td style="border: 1px solid #000; padding: 2px; vertical-align: top;">{{ prescricao.texto_procedimento_multi }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div style="text-align: center; font-style: italic; color: #666; padding: 15px; font-size: 8pt; border: 1px solid #000;">
+                Nenhuma prescrição encontrada.
+            </div>
+        {% endif %}
+
+        <!-- Reavaliação Médica -->
+        <div class="section-title">REAVALIAÇÃO MÉDICA</div>
+        <div style="border: 1px solid #000; padding: 5px; margin: 2px 0 6px 0; white-space: pre-wrap; word-wrap: break-word; overflow: visible; page-break-inside: auto; break-inside: auto; min-height: 35px; font-size: 8pt; line-height: 1.1;">
+            {{ atendimento_reavaliacao or '-' }}
+        </div>
+
+        <!-- Conduta Final -->
+        <div class="section-title">CONDUTA FINAL</div>
+        <div style="border: 1px solid #000; padding: 5px; margin: 2px 0; white-space: pre-wrap; word-wrap: break-word; overflow: visible; page-break-inside: auto; break-inside: auto; min-height: 35px; font-size: 8pt; line-height: 1.1;">
+            {{ atendimento_conduta_final or '-' }}
+        </div>
+
+
+        <!-- Rodapé -->
+        <div style="text-align: center; margin-top: 20px; font-size: 7pt; border-top: 1px solid #ccc; padding-top: 6px; page-break-inside: avoid;">
+            Hospital Senador Ozires Pontes - Ficha de Atendimento<br>
+            Documento gerado em: {{ current_date.strftime('%d/%m/%Y às %H:%M') if current_date else '-' }}
+        </div>
+    </div>
+</body>
+</html>

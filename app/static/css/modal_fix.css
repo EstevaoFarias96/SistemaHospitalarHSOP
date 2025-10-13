@@ -1,0 +1,234 @@
+/* Fix para problemas de z-index e interatividade em modais */
+
+/* Garantir que modais tenham z-index correto */
+.modal {
+    z-index: 1055 !important;
+}
+
+.modal-backdrop {
+    z-index: 1050 !important;
+}
+
+/* Garantir que botões no modal-footer sejam clicáveis */
+.modal-footer {
+    position: relative !important;
+    z-index: 1060 !important;
+    pointer-events: auto !important;
+}
+
+.modal-footer .btn {
+    position: relative !important;
+    z-index: 1065 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Fix específico para o modal de ficha de referência */
+#modalNovaFichaReferencia {
+    z-index: 1055 !important;
+}
+
+#modalNovaFichaReferencia .modal-footer {
+    z-index: 1060 !important;
+    pointer-events: auto !important;
+}
+
+#modalNovaFichaReferencia .modal-footer .btn {
+    z-index: 1065 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Garantir que o botão salvar ficha seja clicável */
+#btn_salvar_ficha_referencia {
+    position: relative !important;
+    z-index: 1070 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    display: inline-block !important;
+}
+
+/* Remover qualquer sobreposição que possa estar bloqueando */
+.modal-content {
+    position: relative !important;
+    z-index: 1056 !important;
+}
+
+.modal-body {
+    position: relative !important;
+    z-index: 1057 !important;
+}
+
+/* Fix para possíveis elementos sobrepostos */
+.modal .form-control,
+.modal .form-floating,
+.modal .form-check {
+    position: relative;
+    z-index: auto;
+}
+
+/* Garantir que botões modais tenham aparência correta */
+.modal .btn:disabled {
+    pointer-events: none !important;
+    opacity: 0.65;
+}
+
+.modal .btn:not(:disabled) {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Fix para backdrop que pode estar bloqueando cliques */
+.modal-backdrop.show {
+    pointer-events: none !important;
+}
+
+/* Garantir que o modal em si permita cliques */
+.modal.show {
+    pointer-events: auto !important;
+}
+
+/* Fix específico para textarea grandes que podem sobrepor */
+#modalNovaFichaReferencia textarea {
+    z-index: auto !important;
+}
+
+/* Garantir que checkboxes e labels não interfiram */
+#modalNovaFichaReferencia .form-check {
+    z-index: auto !important;
+}
+
+#modalNovaFichaReferencia .form-check-input,
+#modalNovaFichaReferencia .form-check-label {
+    z-index: auto !important;
+}
+
+/* Fix específico para modais de evolução */
+#modalNovaEvolucaoNutricao,
+#modalNovaEvolucaoAssistenteSocial {
+    z-index: 1055 !important;
+}
+
+#modalNovaEvolucaoNutricao .modal-backdrop,
+#modalNovaEvolucaoAssistenteSocial .modal-backdrop {
+    z-index: 1050 !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+#modalNovaEvolucaoNutricao .modal-dialog,
+#modalNovaEvolucaoAssistenteSocial .modal-dialog {
+    z-index: 1056 !important;
+    position: relative !important;
+}
+
+#modalNovaEvolucaoNutricao .modal-content,
+#modalNovaEvolucaoAssistenteSocial .modal-content {
+    z-index: 1057 !important;
+    position: relative !important;
+    background-color: white !important;
+}
+
+/* Garantir que botões dos modais de evolução sejam clicáveis */
+#modalNovaEvolucaoNutricao .modal-footer .btn,
+#modalNovaEvolucaoAssistenteSocial .modal-footer .btn {
+    z-index: 1065 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    position: relative !important;
+}
+
+/* Prevent black screen issues */
+body.modal-open {
+    overflow: hidden !important;
+}
+
+.modal.fade.show {
+    display: block !important;
+}
+
+.modal-backdrop.fade.show {
+    opacity: 0.5 !important;
+}
+
+/* Fix específico para problemas de abertura do modal de assistência social */
+#modalNovaEvolucaoAssistenteSocial.show {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+#modalNovaEvolucaoAssistenteSocial .modal-dialog {
+    transform: none !important;
+    margin: 1.75rem auto !important;
+}
+
+/* Garantir que o modal apareça acima de tudo */
+#modalNovaEvolucaoAssistenteSocial {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    outline: 0 !important;
+}
+
+/* Forçar backdrop específico para assistência social */
+.modal-backdrop.assistente-social-backdrop {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 1050 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Fix específico para o modal de adicionar RN */
+#modalAdicionarRN {
+    z-index: 1055 !important;
+}
+
+#modalAdicionarRN .modal-content {
+    z-index: 1056 !important;
+    position: relative !important;
+}
+
+#modalAdicionarRN .modal-backdrop {
+    z-index: 1050 !important;
+}
+
+#modalAdicionarRN .modal-footer {
+    position: relative !important;
+    z-index: 1060 !important;
+    pointer-events: auto !important;
+}
+
+#modalAdicionarRN .modal-footer .btn {
+    position: relative !important;
+    z-index: 1065 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* Garantir que o modal RN não feche durante transições */
+#modalAdicionarRN.show {
+    display: block !important;
+}
+
+/* Garantir que as abas do modal RN funcionem corretamente */
+#modalAdicionarRN .nav-tabs .nav-link {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+#modalAdicionarRN .nav-tabs .nav-link.disabled {
+    pointer-events: none !important;
+    cursor: not-allowed !important;
+    opacity: 0.5 !important;
+}
+
+/* Debug styles - remover depois */
+.debug-modal-open {
+    border: 3px solid red !important;
+    background-color: rgba(255, 0, 0, 0.1) !important;
+}

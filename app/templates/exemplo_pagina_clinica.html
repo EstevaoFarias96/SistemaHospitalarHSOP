@@ -1,0 +1,95 @@
+{% extends "base_clinica.html" %}
+
+{% block title %}Exemplo de Página Clínica{% endblock %}
+
+{% block page_title %}Exemplo de Página Clínica{% endblock %}
+
+{% block extra_styles %}
+<style>
+    /* Estilos específicos desta página */
+    .exemplo-card {
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        background-color: #f0f8ff;
+        box-shadow: var(--shadow-soft);
+    }
+    
+    .exemplo-card:hover {
+        box-shadow: var(--shadow-strong);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Informações do Paciente -->
+<div class="paciente-info row">
+    <div class="col-md-3 info-item"><strong>Nome:</strong> João da Silva</div>
+    <div class="col-md-3 info-item"><strong>CPF:</strong> 123.456.789-00</div>
+    <div class="col-md-3 info-item"><strong>Cartão SUS:</strong> 123456789012345</div>
+    <div class="col-md-3 info-item"><strong>Sexo:</strong> Masculino</div>
+    <div class="col-md-3 info-item"><strong>Data de Nascimento:</strong> 01/01/1980</div>
+    <div class="col-md-3 info-item"><strong>Endereço:</strong> Rua Exemplo, 123</div>
+    <div class="col-md-3 info-item"><strong>Município:</strong> São Paulo</div>
+    <div class="col-md-3 info-item"><strong>Telefone:</strong> (11) 98765-4321</div>
+</div>
+
+<!-- Exemplo de conteúdo específico -->
+<div class="exemplo-card">
+    <h4>Exemplo de componente</h4>
+    <p>Este é um exemplo de página que usa o template base de clínica. Observe como ele herda todos os estilos e funcionalidades comuns.</p>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Evoluções Recentes</h5>
+            </div>
+            <div class="card-body">
+                <div class="texto-evolucao">
+                    <p><strong>10/11/2023 08:30</strong> - Paciente refere melhora dos sintomas após medicação.</p>
+                    <p><strong>09/11/2023 14:15</strong> - Iniciado antibioticoterapia conforme prescrição.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Prescrições Ativas</h5>
+            </div>
+            <div class="card-body">
+                <div class="prescricao-container prescricao-hoje">
+                    <div class="prescricao-header">
+                        <div>Dr. Carlos Oliveira</div>
+                        <div>10/11/2023</div>
+                    </div>
+                    <div class="prescricao-body">
+                        <p><strong>Medicamentos:</strong></p>
+                        <ul>
+                            <li>Dipirona 1g 6/6h se dor ou febre</li>
+                            <li>Amoxicilina 500mg 8/8h por 7 dias</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    $(document).ready(function() {
+        // Exemplo de código JavaScript específico desta página
+        $('.exemplo-card').on('click', function() {
+            mostrarMensagemSucesso('Você clicou no card de exemplo!');
+        });
+        
+        // Observe que podemos usar as funções helpers definidas no template base
+        console.log('Data formatada:', formatarDataBR('2023-11-10'));
+    });
+</script>
+{% endblock %} 

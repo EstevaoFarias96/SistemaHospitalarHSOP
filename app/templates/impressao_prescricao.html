@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prescrição Médica - {{ paciente.nome }}</title>
+    
+    <!-- Font Awesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* Reset e configurações básicas */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Configuração para impressão A4 horizontal */
+        @page {
+            size: A4 landscape;
+            margin: 0.8cm 1.2cm;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 9pt;
+            line-height: 1.1;
+            color: #333;
+            background: white;
+        }
+
+        /* Cabeçalho */
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #2c5aa0;
+            padding-bottom: 6px;
+            margin-bottom: 10px;
+        }
+
+        .hospital-name {
+            font-size: 15pt;
+            font-weight: bold;
+            color: #2c5aa0;
+            margin-bottom: 2px;
+        }
+
+        .prescricao-title {
+            font-size: 13pt;
+            font-weight: bold;
+            color: #333;
+            margin-top: 3px;
+        }
+
+        /* Dados do paciente */
+        .patient-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            padding: 6px;
+            margin-bottom: 10px;
+        }
+
+        .patient-info h3 {
+            color: #2c5aa0;
+            font-size: 10pt;
+            margin-bottom: 4px;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 2px;
+        }
+
+        .patient-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 6px;
+            font-size: 8pt;
+        }
+
+        .patient-field {
+            display: flex;
+            align-items: center;
+        }
+
+        .patient-label {
+            font-weight: bold;
+            color: #495057;
+            min-width: 60px;
+            margin-right: 4px;
+            font-size: 7pt;
+        }
+
+        .patient-value {
+            color: #333;
+            flex: 1;
+            font-size: 8pt;
+        }
+
+        /* Seção de prescrição */
+        .prescricao-section {
+            margin-bottom: 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #2c5aa0, #4a6fa5);
+            color: white;
+            padding: 4px 8px;
+            font-weight: bold;
+            font-size: 9pt;
+        }
+
+        .section-content {
+            padding: 6px;
+            background: white;
+        }
+
+        /* Tabela de medicamentos */
+        .medicamentos-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 6px;
+        }
+
+        .medicamentos-table th,
+        .medicamentos-table td {
+            border: 1px solid #dee2e6;
+            padding: 3px 5px;
+            text-align: left;
+            vertical-align: top;
+            font-size: 8pt;
+        }
+
+        .medicamentos-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #495057;
+            font-size: 8pt;
+        }
+
+        .medicamentos-table tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .medicamento-nome {
+            font-weight: bold;
+            color: #2c5aa0;
+            font-size: 10pt;
+        }
+
+        /* Aprazamentos */
+        .aprazamentos-list {
+            margin-top: 3px;
+            padding-left: 6px;
+        }
+
+        .aprazamento-item {
+            display: inline-block;
+            margin-right: 12px;
+            margin-bottom: 2px;
+            color: #666;
+            font-size: 7pt;
+        }
+
+        .aprazamento-horario {
+            font-weight: bold;
+            color: #dc3545;
+        }
+
+        /* Dieta e procedimentos */
+        .texto-content {
+            background: #f8f9fa;
+            padding: 6px;
+            border-radius: 2px;
+            border-left: 2px solid #2c5aa0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 8pt;
+        }
+
+        /* Assinaturas */
+        .assinaturas {
+            margin-top: 15px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+
+        .assinatura-title {
+            font-weight: bold;
+            color: #555657;
+            margin-bottom: 8px;
+            font-size: 9pt;
+        }
+
+        .assinatura-info {
+            font-size: 7pt;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 12px;
+            text-align: center;
+            font-size: 7pt;
+            color: #666;
+            border-top: 1px solid #dee2e6;
+            padding-top: 4px;
+        }
+
+        /* Impressão */
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            .no-print {
+                display: none;
+            }
+        }
+
+        /* Botão de impressão */
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12pt;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        .print-button:hover {
+            background: #218838;
+        }
+
+        .assinatura-box {
+            text-align: center;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            background: #f8f9fa;
+            height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* Dieta mais discreta */
+        .dieta-discreta {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+
+        .dieta-discreta .dieta-label {
+            font-weight: bold;
+            color: #2c5aa0;
+            font-size: 9pt;
+            margin-bottom: 4px;
+        }
+
+        .dieta-discreta .dieta-content {
+            font-size: 8pt;
+            color: #333;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <!-- Botão de impressão -->
+    <button class="print-button no-print" onclick="window.print()">
+        <i class="fas fa-print"></i> Imprimir
+    </button>
+
+    <!-- Cabeçalho -->
+    <div class="header">
+        <div class="hospital-name">HOSPITAL SENADOR OZIRES PONTES</div>
+        <div class="prescricao-title">PRESCRIÇÃO MÉDICA</div>
+    </div>
+
+    <!-- Dados do Paciente -->
+    <div class="patient-info">
+        <h3>Informações do Paciente</h3>
+        <div class="patient-grid">
+            <div class="patient-field">
+                <span class="patient-label">Nome:</span>
+                <span class="patient-value">{{ paciente.nome or 'Não informado' }}</span>
+            </div>
+            <div class="patient-field">
+                <span class="patient-label">Cartão SUS:</span>
+                <span class="patient-value">{{ paciente.cartao_sus or 'Não informado' }}</span>
+            </div>
+            <div class="patient-field">
+                <span class="patient-label">Data Nasc.:</span>
+                <span class="patient-value">{{ paciente.data_nascimento.strftime('%d/%m/%Y') if paciente.data_nascimento else 'Não informado' }}</span>
+            </div>
+            <div class="patient-field">
+                <span class="patient-label">Sexo:</span>
+                <span class="patient-value">{{ paciente.sexo or 'Não informado' }}</span>
+            </div>
+            <div class="patient-field">
+                <span class="patient-label">Leito:</span>
+                <span class="patient-value">{{ internacao.leito or 'Não informado' }}</span>
+            </div>
+            <div class="patient-field">
+                <span class="patient-label">Data Admissão:</span>
+                <span class="patient-value">{{ internacao.data_internacao.strftime('%d/%m/%Y %H:%M') if internacao.data_internacao else 'Não informado' }}</span>
+            </div>
+            <div class="patient-field">
+                <span class="patient-label">Alergias:</span>
+                <span class="patient-value">{{ atendimento.alergias or 'Nenhuma alergia informada' }}</span>
+            </div>
+            <div class="patient-field">
+                <span class="patient-label">ID Atendimento:</span>
+                <span class="patient-value">{{ atendimento.id }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dieta -->
+    {% if prescricao.texto_dieta %}
+    <div class="dieta-discreta">
+        <div class="dieta-label">Dieta:</div>
+        <div class="dieta-content">{{ prescricao.texto_dieta }}</div>
+    </div>
+    {% endif %}
+
+    <!-- Prescrição Médica -->
+    {% if medicamentos_com_aprazamentos %}
+    <div class="prescricao-section">
+        <div class="section-header">
+            <i class="fas fa-pills"></i> MEDICAMENTOS E APRAZAMENTOS
+        </div>
+        <div class="section-content">
+            <table class="medicamentos-table">
+                <thead>
+                    <tr>
+                        <th style="width: 30%;">Medicamento</th>
+                        <th style="width: 40%;">Descrição de Uso</th>
+                        <th style="width: 30%;">Horários de Aprazamento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in medicamentos_com_aprazamentos %}
+                    <tr>
+                        <td class="medicamento-nome">{{ item.medicamento.nome_medicamento }}</td>
+                        <td>{{ item.medicamento.descricao_uso }}</td>
+                        <td>
+                            {% if item.aprazamentos %}
+                                <div class="aprazamentos-list">
+                                    {% for aprazamento in item.aprazamentos %}
+                                    <div class="aprazamento-item">
+                                        <span class="aprazamento-horario">{{ aprazamento.data_hora_aprazamento.strftime('%d/%m %H:%M') }}</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <span style="color: #666; font-style: italic;"></span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Procedimentos Médicos -->
+    {% if prescricao.texto_procedimento_medico %}
+    <div class="prescricao-section">
+        <div class="section-header">
+            <i class="fas fa-user-md"></i> PROCEDIMENTOS MÉDICOS
+        </div>
+        <div class="section-content">
+            <div class="texto-content">{{ prescricao.texto_procedimento_medico }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Procedimentos Multiprofissionais -->
+    {% if prescricao.texto_procedimento_multi %}
+    <div class="prescricao-section">
+        <div class="section-header">
+            <i class="fas fa-users"></i> PROCEDIMENTOS MULTIPROFISSIONAIS
+        </div>
+        <div class="section-content">
+            <div class="texto-content">{{ prescricao.texto_procedimento_multi }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Assinaturas -->
+    <div class="assinaturas">
+        <div class="assinatura-box">
+            <div class="assinatura-title">MÉDICO RESPONSÁVEL</div>
+        </div>
+        <div class="assinatura-box">
+            <div class="assinatura-title">ENFERMEIRO RESPONSÁVEL</div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>Prescrição gerada em {{ prescricao.horario_prescricao.strftime('%d/%m/%Y às %H:%M') if prescricao.horario_prescricao else 'Data não informada' }}</p>
+        <p>Sistema de Gestão Hospitalar - Hospital Senador Ozires Pontes</p>
+    </div>
+
+    <script>
+        // Foco automático para impressão
+        window.onload = function() {
+            // Auto-focus para facilitar impressão via Ctrl+P
+            document.body.focus();
+        };
+    </script>
+</body>
+</html> 

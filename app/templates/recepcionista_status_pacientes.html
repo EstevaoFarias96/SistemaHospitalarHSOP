@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Status de Pacientes - Recepcionista</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+
+    .main-content {
+      padding: 20px;
+    }
+
+    .sidebar {
+      width: 80px;
+      min-height: 100vh;
+      background-color: #2d2ddcec;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 20px;
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      width: 100%;
+    }
+
+    .sidebar li {
+      position: relative;
+      width: 100%;
+    }
+
+    .sidebar a {
+      color: #fff;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+      width: 100%;
+      font-size: 18px;
+      white-space: nowrap;
+      position: relative;
+      text-decoration: none;
+    }
+
+    .sidebar a:hover::after {
+      content: attr(data-title);
+      position: absolute;
+      left: 100%;
+      background-color: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 5px;
+      white-space: nowrap;
+      margin-left: 10px;
+      font-size: 14px;
+    }
+
+    .status-card {
+      transition: all 0.3s ease;
+      border: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .status-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .status-badge {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .patient-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #007bff;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .filter-tabs .nav-link {
+      border: none;
+      border-radius: 0;
+      color: #6c757d;
+      font-weight: 500;
+    }
+
+    .filter-tabs .nav-link.active {
+      background-color: #007bff;
+      color: white;
+      border-radius: 0.375rem;
+    }
+
+    .loading-spinner {
+      display: none;
+    }
+
+    .paciente-item {
+      transition: background-color 0.2s ease;
+    }
+
+    .paciente-item:hover {
+      background-color: #f8f9fa;
+    }
+
+    .user-menu {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      width: 100%;
+    }
+
+    .user-menu-button {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+    }
+
+    .user-menu-button:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .user-dropdown {
+      display: none;
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      padding: 10px;
+      min-width: 150px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 1001;
+    }
+
+    .user-dropdown a {
+      display: block;
+      color: #333;
+      text-decoration: none;
+      padding: 5px 0;
+      font-size: 14px;
+    }
+
+    .user-dropdown a:hover {
+      color: #007bff;
+    }
+
+    .menu-label { display: none; margin-left: 10px; font-size: 16px; }
+    .sidebar:hover { width: 220px; align-items: flex-start; padding-left: 10px; }
+    .sidebar:hover a { justify-content: flex-start; }
+    .sidebar:hover .menu-label { display: inline-block; }
+  </style>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <ul class="nav flex-column">
+          <li class="nav-item" data-title="Menu Inicial">
+            <a class="nav-link" href="/recepcionista">
+              <i class="fas fa-home"></i><span class="menu-label">Menu Inicial</span>
+            </a>
+          </li>
+          <li class="nav-item" data-title="Cadastrar Paciente">
+            <a class="nav-link" href="#" onclick="abrirModalCadastroPaciente()">
+              <i class="fas fa-user-plus"></i><span class="menu-label">Cadastrar Paciente</span>
+            </a>
+          </li>
+          <li class="nav-item" data-title="Buscar Paciente">
+            <a class="nav-link" href="#" onclick="showBuscaPaciente()">
+              <i class="fas fa-search"></i><span class="menu-label">Buscar Paciente</span>
+            </a>
+          </li>
+          <li class="nav-item" data-title="Status de Pacientes">
+            <a class="nav-link active" href="/recepcionista/status-pacientes">
+              <i class="fas fa-chart-line"></i><span class="menu-label">Status de Pacientes</span>
+            </a>
+          </li>
+          <li class="nav-item" data-title="Listas">
+            <a class="nav-link" href="/listas_recepcao">
+              <i class="fas fa-list"></i><span class="menu-label">Listas</span>
+            </a>
+          </li>
+        </ul>
+
+        <!-- Menu do Usuário -->
+        <div class="user-menu">
+          <button class="user-menu-button" id="userMenuButton"><i class="fas fa-user"></i></button>
+          <div class="user-dropdown" id="userDropdown">
+            <span id="userNameDisplay">Nome do Funcionário</span>
+            <a href="#" id="changePasswordOption">Mudar a senha</a>
+            <a href="/logout" id="logoutOption">Sair</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col main-content" style="margin-left: 80px;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h2 class="mb-0">
+              <i class="fas fa-chart-line mr-2 text-primary"></i>Status de Pacientes
+            </h2>
+            <p class="text-muted mb-0">Acompanhe pacientes internados e em observação</p>
+          </div>
+          <button class="btn btn-outline-primary" onclick="atualizarStatus()" id="btnAtualizar">
+            <i class="fas fa-sync-alt mr-1"></i>Atualizar
+          </button>
+        </div>
+
+        <!-- Filtros -->
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body">
+            <ul class="nav nav-tabs filter-tabs" id="statusTabs" role="tablist">
+              <li class="nav-item">
+                <a class="nav-link active" id="aguardando-tab" data-toggle="tab" href="#aguardando" role="tab">
+                  <i class="fas fa-clock mr-1"></i>Aguardando Triagem
+                  <span class="badge badge-info ml-2" id="count-aguardando">0</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="internados-tab" data-toggle="tab" href="#internados" role="tab">
+                  <i class="fas fa-procedures mr-1"></i>Pacientes Internados
+                  <span class="badge badge-primary ml-2" id="count-internados">0</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="observacao-tab" data-toggle="tab" href="#observacao" role="tab">
+                  <i class="fas fa-eye mr-1"></i>Em Observação
+                  <span class="badge badge-warning ml-2" id="count-observacao">0</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="todos-tab" data-toggle="tab" href="#todos" role="tab">
+                  <i class="fas fa-list mr-1"></i>Todos
+                  <span class="badge badge-secondary ml-2" id="count-todos">0</span>
+                </a>
+              </li>
+            </ul>
+
+            <div class="tab-content mt-3" id="statusTabsContent">
+              <!-- Aguardando Triagem -->
+              <div class="tab-pane fade show active" id="aguardando" role="tabpanel">
+                <div id="lista-aguardando">
+                  <div class="text-center py-5">
+                    <div class="spinner-border text-info" role="status">
+                      <span class="sr-only">Carregando...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Carregando pacientes aguardando triagem...</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pacientes Internados -->
+              <div class="tab-pane fade" id="internados" role="tabpanel">
+                <div id="lista-internados">
+                  <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="sr-only">Carregando...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Carregando pacientes internados...</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Em Observação -->
+              <div class="tab-pane fade" id="observacao" role="tabpanel">
+                <div id="lista-observacao">
+                  <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="sr-only">Carregando...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Carregando pacientes em observação...</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Todos -->
+              <div class="tab-pane fade" id="todos" role="tabpanel">
+                <div id="lista-todos">
+                  <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="sr-only">Carregando...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Carregando todos os pacientes...</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script>
+    $(document).ready(function() {
+      // Carregar nome do usuário
+      $.getJSON('/api/recepcionista/nome', function(data) {
+        if(data.nome) {
+          $('#userNameDisplay').text(data.nome);
+        }
+      });
+
+      // Carregar dados iniciais
+      carregarStatusPacientes();
+
+      // Menu do usuário
+      $('#userMenuButton').click(function() {
+        $('#userDropdown').toggle();
+      });
+
+      $(document).click(function(event) {
+        if(!$(event.target).closest('#userMenuButton, #userDropdown').length) {
+          $('#userDropdown').hide();
+        }
+      });
+
+      $('#changePasswordOption').click(function(e) {
+        e.preventDefault();
+        $('#userDropdown').hide();
+        $('#changePasswordModal').modal('show');
+      });
+    });
+
+    function carregarStatusPacientes() {
+      // Carregar pacientes aguardando triagem
+      fetch('/api/pacientes/status/aguardando-triagem')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            exibirPacientes('aguardando', data.pacientes);
+            $('#count-aguardando').text(data.pacientes.length);
+          }
+        })
+        .catch(error => {
+          console.error('Erro ao carregar pacientes aguardando triagem:', error);
+          $('#lista-aguardando').html('<p class="text-danger text-center">Erro ao carregar dados</p>');
+        });
+
+      // Carregar pacientes internados
+      fetch('/api/pacientes/status/internados')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            exibirPacientes('internados', data.pacientes);
+            $('#count-internados').text(data.pacientes.length);
+          }
+        })
+        .catch(error => {
+          console.error('Erro ao carregar pacientes internados:', error);
+          $('#lista-internados').html('<p class="text-danger text-center">Erro ao carregar dados</p>');
+        });
+
+      // Carregar pacientes em observação
+      fetch('/api/pacientes/status/observacao')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            exibirPacientes('observacao', data.pacientes);
+            $('#count-observacao').text(data.pacientes.length);
+          }
+        })
+        .catch(error => {
+          console.error('Erro ao carregar pacientes em observação:', error);
+          $('#lista-observacao').html('<p class="text-danger text-center">Erro ao carregar dados</p>');
+        });
+    }
+
+    function exibirPacientes(tipo, pacientes) {
+      if (!pacientes || pacientes.length === 0) {
+        $(`#lista-${tipo}`).html(`
+          <div class="text-center py-5">
+            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">Nenhum paciente encontrado</h5>
+            <p class="text-muted">Não há pacientes com este status no momento.</p>
+          </div>
+        `);
+        return;
+      }
+
+      let html = '<div class="row">';
+
+      pacientes.forEach(paciente => {
+        const idade = calcularIdade(paciente.data_nascimento);
+        let statusBadge = '';
+
+        if (tipo === 'aguardando') {
+          statusBadge = '<span class="badge badge-info status-badge">Aguardando Triagem</span>';
+        } else if (tipo === 'internados') {
+          statusBadge = '<span class="badge badge-primary status-badge">Internado</span>';
+        } else if (tipo === 'observacao') {
+          statusBadge = '<span class="badge badge-warning status-badge">Observação</span>';
+        }
+
+        // Campos específicos para cada tipo
+        let campoExtra1Label = '';
+        let campoExtra1Valor = '';
+        let campoExtra2Label = '';
+        let campoExtra2Valor = '';
+
+        if (tipo === 'aguardando') {
+          campoExtra1Label = 'Hora Entrada';
+          campoExtra1Valor = paciente.hora_entrada || 'N/A';
+          campoExtra2Label = 'Recepcionista';
+          campoExtra2Valor = paciente.recepcionista_nome || 'N/A';
+        } else {
+          campoExtra1Label = 'Leito';
+          campoExtra1Valor = paciente.leito || 'N/A';
+          campoExtra2Label = 'Médico';
+          campoExtra2Valor = paciente.medico_nome || 'N/A';
+        }
+
+        html += `
+          <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card status-card h-100">
+              <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                  <div class="patient-avatar mr-3">
+                    ${paciente.nome ? paciente.nome.charAt(0).toUpperCase() : '?'}
+                  </div>
+                  <div class="flex-grow-1">
+                    <h6 class="mb-0 font-weight-bold text-primary">${paciente.nome || 'Nome não informado'}</h6>
+                    <small class="text-muted">${idade} anos</small>
+                  </div>
+                  ${statusBadge}
+                </div>
+
+                <div class="row text-center mb-2">
+                  <div class="col-6">
+                    <small class="text-muted d-block">CPF</small>
+                    <span class="font-weight-bold">${formatarCPF(paciente.cpf) || 'N/A'}</span>
+                  </div>
+                  <div class="col-6">
+                    <small class="text-muted d-block">${campoExtra1Label}</small>
+                    <span class="font-weight-bold">${campoExtra1Valor}</span>
+                  </div>
+                </div>
+
+                <div class="row text-center">
+                  <div class="col-6">
+                    <small class="text-muted d-block">Entrada</small>
+                    <span class="font-weight-bold">${formatarData(paciente.data_entrada)}</span>
+                  </div>
+                  <div class="col-6">
+                    <small class="text-muted d-block">${campoExtra2Label}</small>
+                    <span class="font-weight-bold">${campoExtra2Valor}</span>
+                  </div>
+                </div>
+
+                <div class="mt-3 text-right">
+                  <a class="btn btn-sm btn-outline-info" href="/ficha_geral_paciente?paciente_id=${paciente.id}" target="_blank">
+                    <i class="fas fa-file-alt mr-1"></i>Ficha
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      html += '</div>';
+
+      $(`#lista-${tipo}`).html(html);
+
+      // Atualizar contador total
+      if (tipo !== 'todos') {
+        const totalAguardando = $('#count-aguardando').text() || 0;
+        const totalInternados = $('#count-internados').text() || 0;
+        const totalObservacao = $('#count-observacao').text() || 0;
+        $('#count-todos').text(parseInt(totalAguardando) + parseInt(totalInternados) + parseInt(totalObservacao));
+      }
+
+      // Preencher aba "Todos" quando todas as categorias forem carregadas
+      if (tipo === 'internados') {
+        Promise.all([
+          fetch('/api/pacientes/status/aguardando-triagem').then(r => r.json()),
+          fetch('/api/pacientes/status/observacao').then(r => r.json())
+        ]).then(([aguardandoData, observacaoData]) => {
+          if (aguardandoData.success && observacaoData.success) {
+            const todosPacientes = aguardandoData.pacientes.concat(pacientes, observacaoData.pacientes);
+            exibirPacientes('todos', todosPacientes);
+          }
+        }).catch(error => {
+          console.error('Erro ao carregar dados para aba "Todos":', error);
+        });
+      }
+    }
+
+    function atualizarStatus() {
+      const btn = $('#btnAtualizar');
+      const icon = btn.find('i');
+
+      btn.prop('disabled', true);
+      icon.addClass('fa-spin');
+
+      carregarStatusPacientes();
+
+      setTimeout(() => {
+        btn.prop('disabled', false);
+        icon.removeClass('fa-spin');
+      }, 1000);
+    }
+
+    function calcularIdade(dataNascimento) {
+      if (!dataNascimento) return 'N/A';
+
+      const nascimento = new Date(dataNascimento);
+      const hoje = new Date();
+      let idade = hoje.getFullYear() - nascimento.getFullYear();
+      const mes = hoje.getMonth() - nascimento.getMonth();
+
+      if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) {
+        idade--;
+      }
+
+      return idade;
+    }
+
+    function formatarCPF(cpf) {
+      if (!cpf) return 'N/A';
+      return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    }
+
+    function formatarData(data) {
+      if (!data) return 'N/A';
+      const d = new Date(data);
+      return d.toLocaleDateString('pt-BR');
+    }
+
+    // Funções de navegação
+    function abrirModalCadastroPaciente() {
+      // Implementar se necessário
+      alert('Funcionalidade será implementada');
+    }
+
+    function showBuscaPaciente() {
+      window.location.href = '/recepcionista';
+    }
+  </script>
+</body>
+</html>

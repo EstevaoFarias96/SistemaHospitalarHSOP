@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Lobby de Impressões</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .documento {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .documento i {
+            margin-right: 10px;
+            color: #007bff;
+        }
+        .btn-gerar {
+            min-width: 120px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <h3 class="mb-4">Lobby de Impressões</h3>
+
+    <div class="documento">
+        <div><i class="fas fa-file-medical"></i> AIH</div>
+        <a href="{{ url_for('main.imprimir_aih', atendimento_id=atendimento.id) }}" class="btn btn-primary btn-gerar" target="_blank">
+            Gerar PDF
+        </a>
+
+    </div>
+
+
+    <div class="documento">
+        <div><i class="fas fa-procedures"></i> SAE</div>
+        <a href="/imprimir/sae/{{ atendimento.id }}" class="btn btn-primary btn-gerar" target="_blank">
+            Gerar PDF
+        </a>
+    </div>
+
+    <div class="documento">
+        <div><i class="fas fa-user-plus"></i> Ficha de Admissão</div>
+        <a href="/imprimir/ficha_admissao/{{ atendimento.id }}" class="btn btn-primary btn-gerar" target="_blank">
+            Gerar PDF
+        </a>
+    </div>
+
+    <div class="documento">
+        <div><i class="fas fa-id-card"></i> Identificação do Paciente</div>
+        <a href="/imprimir/identificacao_paciente/{{ atendimento.id }}" class="btn btn-primary btn-gerar" target="_blank">
+            Gerar PDF
+        </a>
+    </div>
+
+    <div class="documento">
+        <div><i class="fas fa-file-medical-alt"></i> Ficha de Atendimento</div>
+        <a href="/imprimir/ficha_atendimento/{{ atendimento.id }}" class="btn btn-primary btn-gerar" target="_blank">
+            Gerar PDF
+        </a>
+    </div>
+
+</div>
+
+<!-- Font Awesome para ícones -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+</body>
+</html>
+

@@ -1,0 +1,261 @@
+{% extends 'base_funcionarios.html' %}
+
+{% block title %}Administração - HSOP{% endblock %}
+
+{% block styles %}
+<style>
+    .kpi-card {
+        border: none;
+        border-left: 6px solid #0d6efd;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    .kpi-icon {
+        width: 48px;
+        height: 48px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        background: rgba(13,110,253,.1);
+        color: #0d6efd;
+    }
+    .card-header-min {
+        padding: .75rem 1rem;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        font-weight: 600;
+    }
+    .table-sm td, .table-sm th { padding: .5rem; }
+    .muted { color: #6c757d; font-size: .875rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="py-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="mb-1">Painel do Gestor</h2>
+            <div class="muted">Visão geral operacional e técnica do hospital</div>
+        </div>
+        <div class="text-end">
+            <div class="muted">
+                Atualizado em: <span id="dsb-now">-</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card kpi-card h-100">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="muted">Internações hoje</div>
+                        <div class="h3 mb-0">{{ total_internacoes_hoje|default(0) }}</div>
+                    </div>
+                    <div class="kpi-icon" aria-hidden="true"><i class="fas fa-hospital-user"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card kpi-card h-100" style="border-left-color:#20c997">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="muted">Ocupação de leitos</div>
+                        <div class="h3 mb-0">{{ taxa_ocupacao|default(0) }}%</div>
+                    </div>
+                    <div class="kpi-icon" style="background:rgba(32,201,151,.1);color:#20c997" aria-hidden="true"><i class="fas fa-procedures"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card kpi-card h-100" style="border-left-color:#fd7e14">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="muted">Tempo médio de permanência</div>
+                        <div class="h3 mb-0">{{ tempo_medio_permanencia|default(0) }} d</div>
+                    </div>
+                    <div class="kpi-icon" style="background:rgba(253,126,20,.1);color:#fd7e14" aria-hidden="true"><i class="fas fa-clock"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card kpi-card h-100" style="border-left-color:#dc3545">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="muted">Em observação</div>
+                        <div class="h3 mb-0">{{ pacientes_observacao|default(0) }}</div>
+                    </div>
+                    <div class="kpi-icon" style="background:rgba(220,53,69,.1);color:#dc3545" aria-hidden="true"><i class="fas fa-heartbeat"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header-min">Atendimentos hoje por classificação de risco</div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="muted">Total hoje</div>
+                        <div class="h5 mb-0">{{ total_atendimentos_hoje|default(0) }}</div>
+                    </div>
+                    <canvas id="chartClassificacaoRisco" height="160" aria-label="Gráfico de atendimentos por classificação de risco" role="img"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header-min">Entradas x Altas (últimos 7 dias)</div>
+                <div class="card-body">
+                    <canvas id="chartFluxo" height="160" aria-label="Gráfico de entradas e altas na última semana" role="img"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header-min">Alertas técnicos em fichas</div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Paciente</th>
+                                    <th>Atendimento</th>
+                                    <th>Problema</th>
+                                    <th class="text-end">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for alerta in alertas_tecnicos|default([]) %}
+                                <tr>
+                                    <td>{{ alerta.paciente }}</td>
+                                    <td>#{{ alerta.atendimento_id }}</td>
+                                    <td>{{ alerta.problema }}</td>
+                                    <td class="text-end">
+                                        <a href="{{ alerta.url|default('#') }}" class="btn btn-sm btn-outline-primary">Revisar</a>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">Sem alertas no momento</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header-min">Últimas alterações técnicas</div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for alt in ultimas_alteracoes|default([]) %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <div><strong>{{ alt.titulo }}</strong></div>
+                                <div class="muted">{{ alt.usuario }} • {{ alt.data }}</div>
+                            </div>
+                            <a href="{{ alt.url|default('#') }}" class="btn btn-sm btn-outline-secondary">Ver</a>
+                        </li>
+                        {% else %}
+                        <li class="list-group-item text-center text-muted">Nenhuma alteração recente</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header-min">Ações rápidas do gestor</div>
+        <div class="card-body">
+            <div class="row g-2">
+                <div class="col-md-3">
+                    <a href="{{ url_for('index') if false else '#' }}" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-database mr-1"></i> Normalizar CID/Procedimentos
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="#" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-link mr-1"></i> Vincular atendimentos duplicados
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="#" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-file-medical-alt mr-1"></i> Corrigir prescrições
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="#" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-user-shield mr-1"></i> Revisar permissões
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+    (function() {
+        var nowEl = document.getElementById('dsb-now');
+        if (nowEl) {
+            var now = new Date();
+            nowEl.textContent = now.toLocaleString('pt-BR');
+        }
+        var ctxRisco = document.getElementById('chartClassificacaoRisco');
+        if (ctxRisco) {
+            var labelsRisco = {{ porta_risco_labels|default(["Vermelho","Laranja","Amarelo","Verde","Azul","Não classificado"])|tojson }};
+            var dataRisco = {{ porta_risco_valores|default([0,0,0,0,0,0])|tojson }};
+            new Chart(ctxRisco, {
+                type: 'bar',
+                data: {
+                    labels: labelsRisco,
+                    datasets: [{
+                        label: 'Atendimentos',
+                        data: dataRisco,
+                        backgroundColor: 'rgba(13,110,253,0.2)',
+                        borderColor: 'rgba(13,110,253,1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: { y: { beginAtZero: true } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+        var ctxFluxo = document.getElementById('chartFluxo');
+        if (ctxFluxo) {
+            var labelsFluxo = {{ fluxo_labels|default(["D-6","D-5","D-4","D-3","D-2","D-1","Hoje"])|tojson }};
+            var entradas = {{ fluxo_entradas|default([10,14,9,12,15,11,13])|tojson }};
+            var altas = {{ fluxo_altas|default([8,12,7,10,12,9,12])|tojson }};
+            new Chart(ctxFluxo, {
+                type: 'line',
+                data: {
+                    labels: labelsFluxo,
+                    datasets: [
+                        { label: 'Entradas', data: entradas, borderColor: '#20c997', backgroundColor: 'rgba(32,201,151,.15)', tension: .3, fill: true },
+                        { label: 'Altas', data: altas, borderColor: '#fd7e14', backgroundColor: 'rgba(253,126,20,.15)', tension: .3, fill: true }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+    })();
+    </script>
+{% endblock %}
+
+
