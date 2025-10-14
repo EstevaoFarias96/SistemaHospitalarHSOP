@@ -237,18 +237,33 @@
             background: linear-gradient(180deg, var(--primary-main) 0%, var(--primary-light) 100%);
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            opacity: 0;
-            visibility: hidden;
+            opacity: 0 !important;
+            visibility: hidden !important;
             transform: translateX(-10px);
             transition: all 0.3s ease;
             z-index: 1001;
             margin-left: 5px;
+            pointer-events: none;
         }
         
         .sidebar:hover .nav-item-with-submenu:hover .submenu {
-            opacity: 1;
-            visibility: visible;
+            opacity: 1 !important;
+            visibility: visible !important;
             transform: translateX(0);
+            pointer-events: auto;
+        }
+        
+        /* Garantir que o submenu não apareça com classe active */
+        .nav-item-with-submenu .nav-link.active ~ .submenu {
+            opacity: 0 !important;
+            visibility: hidden !important;
+        }
+        
+        /* Apenas mostrar submenu quando sidebar E item estiverem em hover */
+        .sidebar:not(:hover) .submenu {
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none;
         }
         
         .submenu .nav-link {

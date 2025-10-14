@@ -6571,12 +6571,15 @@ def buscar_paciente():
 
         query = Paciente.query
 
+        pacientes_encontrados: list[Paciente] = []
         if cpf:
             cpf_limpo = re.sub(r'\D', '', cpf)  # Remove pontos e traços
             # Comparar ignorando máscara no banco também
-            paciente = query.filter(
+            p = query.filter(
                 func.replace(func.replace(Paciente.cpf, '.', ''), '-', '') == cpf_limpo
             ).first()
+            if p:
+                pacientes_encontrados = [p]
         else:
             # Usar a mesma lógica avançada de busca por nome
             import unicodedata
@@ -6602,12 +6605,10 @@ def buscar_paciente():
             # Normalizar o valor de busca
             nome_normalizado = normalizar_texto(nome)
             
-            # Buscar todos os pacientes
+            # Buscar todos os pacientes e pontuar similaridade
             todos_pacientes = Paciente.query.all()
-            
-            # Lista para armazenar pacientes com sua pontuação de similaridade
-            pacientes_com_score = []
-            
+            pacientes_com_score: list[tuple[Paciente, float]] = []
+
             for p in todos_pacientes:
                 nome_paciente_normalizado = normalizar_texto(p.nome)
                 
@@ -6635,34 +6636,33 @@ def buscar_paciente():
                     # Apenas incluir se a similaridade for >= 0.6 (60%)
                     if max_similaridade >= 0.6:
                         pacientes_com_score.append((p, max_similaridade))
-            
-            # Ordenar por score (maior primeiro) e pegar o primeiro (mais similar)
+            # Ordenar por score (maior primeiro) e pegar os top 20
             if pacientes_com_score:
                 pacientes_com_score.sort(key=lambda x: -x[1])
-                paciente = pacientes_com_score[0][0]
-            else:
-                paciente = None
+                pacientes_encontrados = [p for p, _ in pacientes_com_score[:20]]
 
-        if not paciente:
+        if not pacientes_encontrados:
             return jsonify({'success': True, 'pacientes': [], 'total': 0, 'message': 'Nenhum paciente encontrado.'}), 200
 
-        # Retornar como lista para manter consistência com outros endpoints
-        paciente_data = {
-            'id': paciente.id,
-            'nome': paciente.nome,
-            'cpf': paciente.cpf,
-            'data_nascimento': paciente.data_nascimento.strftime('%Y-%m-%d') if paciente.data_nascimento else None,
-            'sexo': paciente.sexo,
-            'filiacao': paciente.filiacao,
-            'telefone': paciente.telefone,
-            'endereco': paciente.endereco,
-            'bairro': paciente.bairro,
-            'municipio': paciente.municipio,
-            'cartao_sus': getattr(paciente, 'cartao_sus', None),
-            'cor': getattr(paciente, 'cor', None)
-        }
+        # Mapear lista completa de pacientes encontrados
+        pacientes_data = []
+        for paciente in pacientes_encontrados:
+            pacientes_data.append({
+                'id': paciente.id,
+                'nome': paciente.nome,
+                'cpf': paciente.cpf,
+                'data_nascimento': paciente.data_nascimento.strftime('%Y-%m-%d') if paciente.data_nascimento else None,
+                'sexo': paciente.sexo,
+                'filiacao': paciente.filiacao,
+                'telefone': paciente.telefone,
+                'endereco': paciente.endereco,
+                'bairro': paciente.bairro,
+                'municipio': paciente.municipio,
+                'cartao_sus': getattr(paciente, 'cartao_sus', None),
+                'cor': getattr(paciente, 'cor', None)
+            })
 
-        return jsonify({'success': True, 'pacientes': [paciente_data], 'total': 1}), 200
+        return jsonify({'success': True, 'pacientes': pacientes_data, 'total': len(pacientes_data)}), 200
 
     except Exception as e:
         logging.error(f"Erro ao buscar paciente: {str(e)}")

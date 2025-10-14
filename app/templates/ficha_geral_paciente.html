@@ -11,10 +11,11 @@
       background-color: #f8f9fa;
     }
     header {
-      background-color: #2d2ddcec;
-      color: #fff;
-      padding: 20px;
-      text-align: center;
+      background-color: #ffffff;
+      color: #212529;
+      padding: 16px 20px;
+      border-bottom: 1px solid #e9ecef;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
     }
     /* Layout do cabeçalho com botões e logo */
     .header-top {
@@ -29,19 +30,28 @@
       height: 50px;
     }
     h1 {
-      margin: 10px 0;
+      margin: 16px 0 8px 0;
       text-align: center;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #2c3e50;
     }
     .section-title {
-      text-align: center;
-      margin-top: 30px;
-      margin-bottom: 15px;
+      text-align: left;
+      margin-top: 28px;
+      margin-bottom: 12px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #34495e;
+      border-left: 4px solid #2d2ddc;
+      padding-left: 10px;
     }
     .info-row {
       margin-bottom: 10px;
     }
     .info-label {
-      font-weight: bold;
+      font-weight: 600;
+      color: #6c757d;
     }
     /* Card para a pré-consulta (triagem) com posicionamento relativo */
     .triagem-card {
@@ -58,15 +68,46 @@
       font-size: 0.9em;
       max-width: 40%;
     }
+
+    /* Melhorias de apresentação dos cards e tabelas */
+    .card {
+      border: 1px solid #e9ecef;
+      border-radius: 0.5rem;
+    }
+    .card > .card-body {
+      padding: 1.25rem;
+    }
+    .table th {
+      font-weight: 600;
+      color: #495057;
+      border-top: none;
+    }
+    .table td {
+      vertical-align: middle;
+    }
+
+    /* Impressão */
+    @media print {
+      body { background: #ffffff !important; }
+      header { box-shadow: none; border-bottom: 1px solid #ddd; }
+      .header-actions, #btnVoltar { display: none !important; }
+      .container { width: 100% !important; max-width: 100% !important; }
+      .card { box-shadow: none !important; border: 1px solid #ddd; }
+      h1 { margin-top: 8px; font-size: 1.5rem; }
+    }
   </style>
 </head>
 <body>
   <!-- Cabeçalho com botões -->
   <header>
     <div class="header-top">
-      <button class="btn btn-secondary" id="btnVoltar">Voltar para o Menu</button>
-      <img id="hospitalLogo" src="/static/imagem1.png" alt="Logotipo do Hospital" />
-      <button class="btn btn-primary" onclick="gerarPdf()">Gerar PDF</button>
+      <div class="d-flex align-items-center">
+        <img id="hospitalLogo" src="/static/Imagens/logosemfundo.png" alt="Logotipo do Hospital" />
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-outline-secondary" id="btnVoltar">Voltar para o Menu</button>
+        <button class="btn btn-primary" onclick="gerarPdf()">Gerar PDF</button>
+      </div>
     </div>
     <h1>Ficha Geral do Paciente</h1>
   </header>
