@@ -7471,7 +7471,7 @@ def imprimir_ficha_atendimento(atendimento_id):
                 idade -= 1
 
         # Renderizar template HTML para impressão
-        return render_template('impressao_ficha_Atendimento.html',
+        return render_template('ficha_atendimento_medico.html',
                              atendimento=atendimento,
                              paciente=paciente,
                              medico=medico,
@@ -7481,7 +7481,7 @@ def imprimir_ficha_atendimento(atendimento_id):
                              idade=idade,
                              current_date=data_impressao,
                              # Dados do paciente
-                             paciente_cns=paciente.cartao_sus or '',
+                             paciente_cartao_sus=paciente.cartao_sus or '',
                              paciente_nome=paciente.nome or '',
                              paciente_nome_social=paciente.nome_social or '',
                              paciente_filiacao=paciente.filiacao or '',
@@ -7493,10 +7493,12 @@ def imprimir_ficha_atendimento(atendimento_id):
                              paciente_bairro=paciente.bairro or '',
                              paciente_municipio=paciente.municipio or '',
                              paciente_telefone=paciente.telefone or '',
+                             paciente_cor=paciente.cor or '',
                              # Dados do atendimento
                              atendimento_id=atendimento.id,
                              atendimento_data=atendimento.data_atendimento.strftime('%d/%m/%Y') if atendimento.data_atendimento else '',
                              atendimento_hora=atendimento.hora_atendimento.strftime('%H:%M') if atendimento.hora_atendimento else '',
+                             atendimento_status=atendimento.status or '',
                              atendimento_classificacao_risco=atendimento.classificacao_risco or '',
                              atendimento_pressao=atendimento.pressao or '',
                              atendimento_pulso=atendimento.pulso or '',
@@ -7506,11 +7508,13 @@ def imprimir_ficha_atendimento(atendimento_id):
                              atendimento_altura=atendimento.altura or '',
                              atendimento_dx=atendimento.dx or '',
                              atendimento_fr=atendimento.fr or '',
+                             atendimento_alergias=atendimento.alergias or '',
                              atendimento_horario_triagem=atendimento.horario_triagem.strftime('%H:%M') if atendimento.horario_triagem else '',
                              atendimento_triagem=atendimento.triagem or '',
                              atendimento_horario_consulta_medica=atendimento.horario_consulta_medica.strftime('%H:%M') if atendimento.horario_consulta_medica else '',
                              atendimento_anamnese_exame_fisico=atendimento.anamnese_exame_fisico or '',
                              atendimento_reavaliacao=atendimento.reavaliacao or '',
+                             atendimento_exames=atendimento.exames or '',
                              atendimento_conduta_final=atendimento.conduta_final or '',
                              # Dados do médico
                              medico_nome=medico.nome if medico else '',
