@@ -94,15 +94,8 @@ def observacao_paciente():
                     }), 403
         
                 dados = request.get_json()
-                
-                campos_paciente_obrigatorios = ['nome', 'cpf', 'data_nascimento', 'sexo']
-                for campo in campos_paciente_obrigatorios:
-                    if campo not in dados or not dados[campo]:
-                        return jsonify({
-                            'success': False,
-                            'message': f'Campo obrigatório não informado: {campo}'
-                        }), 400
-        
+
+                # Campos obrigatórios de observação (sempre exigidos)
                 campos_observacao_obrigatorios = ['hda', 'diagnostico_inicial']
                 for campo in campos_observacao_obrigatorios:
                     if campo not in dados or not dados[campo]:
@@ -110,85 +103,114 @@ def observacao_paciente():
                             'success': False,
                             'message': f'Campo obrigatório não informado: {campo}'
                         }), 400
-        
-                # Normalizar CPF (remover pontos, traços e quaisquer não dígitos)
-                cpf_raw = (dados.get('cpf') or '').strip()
-                cpf_limpo = re.sub(r'\D', '', cpf_raw)
-                dados['cpf'] = cpf_limpo
 
-                # Verificar se o paciente já existe com o CPF normalizado
-                paciente_existente = Paciente.query.filter_by(cpf=cpf_limpo).first()
-        
-                if paciente_existente:
-                    paciente = paciente_existente
+                # Tentar usar atendimento existente, se fornecido
+                atendimento_id = (dados.get('atendimento_id') or '').strip()
+                atendimento = Atendimento.query.get(atendimento_id) if atendimento_id else None
+
+                if atendimento is not None:
+                    paciente = Paciente.query.get(atendimento.paciente_id)
+                    agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
+                    atendimento.status = 'Em Observação'
+                    atendimento.horario_observacao = agora
+                    db.session.add(atendimento)
                 else:
-                    try:
-                        data_nascimento = datetime.strptime(dados['data_nascimento'], '%Y-%m-%d').date()
-                    except ValueError:
-                        return jsonify({
-                            'success': False,
-                            'message': 'Formato de data de nascimento inválido. Use YYYY-MM-DD.'
-                        }), 400
-        
-                    # Tratar cartão SUS - pode ser vazio se o checkbox estiver marcado
-                    cartao_sus = dados.get('cartao_sus')
-                    if dados.get('sem_cartao_sus', False) or not cartao_sus:
-                        cartao_sus = None
-        
-                    paciente = Paciente(
-                        nome=dados['nome'],
-                        filiacao=dados.get('filiacao', 'Não informado'),
-                        cpf=dados['cpf'],
-                        data_nascimento=data_nascimento,
-                        sexo=dados['sexo'],
-                        telefone=dados.get('telefone', 'Não informado'),
-                        endereco=dados.get('endereco', 'Não informado'),
-                        municipio=dados.get('municipio', 'Não informado'),
-                        bairro=dados.get('bairro', 'Não informado'),
-                        cartao_sus=cartao_sus,
-                        nome_social=dados.get('nome_social', ''),
-                        cor=dados.get('cor', 'Não informada'),
-                        identificado=True
+                    # Não há atendimento existente: criar paciente e atendimento novos
+                    campos_paciente_obrigatorios = ['nome', 'cpf', 'data_nascimento', 'sexo']
+                    for campo in campos_paciente_obrigatorios:
+                        if campo not in dados or not dados[campo]:
+                            return jsonify({
+                                'success': False,
+                                'message': f'Campo obrigatório não informado: {campo}'
+                            }), 400
+
+                    # Normalizar CPF (remover pontos, traços e quaisquer não dígitos)
+                    cpf_raw = (dados.get('cpf') or '').strip()
+                    cpf_limpo = re.sub(r'\D', '', cpf_raw)
+                    dados['cpf'] = cpf_limpo
+
+                    # Verificar se o paciente já existe com o CPF normalizado
+                    paciente_existente = Paciente.query.filter_by(cpf=cpf_limpo).first()
+
+                    if paciente_existente:
+                        paciente = paciente_existente
+                    else:
+                        try:
+                            data_nascimento = datetime.strptime(dados['data_nascimento'], '%Y-%m-%d').date()
+                        except ValueError:
+                            return jsonify({
+                                'success': False,
+                                'message': 'Formato de data de nascimento inválido. Use YYYY-MM-DD.'
+                            }), 400
+
+                        cartao_sus = dados.get('cartao_sus')
+                        if dados.get('sem_cartao_sus', False) or not cartao_sus:
+                            cartao_sus = None
+
+                        paciente = Paciente(
+                            nome=dados['nome'],
+                            filiacao=dados.get('filiacao', 'Não informado'),
+                            cpf=dados['cpf'],
+                            data_nascimento=data_nascimento,
+                            sexo=dados['sexo'],
+                            telefone=dados.get('telefone', 'Não informado'),
+                            endereco=dados.get('endereco', 'Não informado'),
+                            municipio=dados.get('municipio', 'Não informado'),
+                            bairro=dados.get('bairro', 'Não informado'),
+                            cartao_sus=cartao_sus,
+                            nome_social=dados.get('nome_social', ''),
+                            cor=dados.get('cor', 'Não informada'),
+                            identificado=True
+                        )
+                        db.session.add(paciente)
+                        db.session.flush()
+
+                    agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
+                    atendimento_id = (dados.get('atendimento_id') or '').strip()
+                    if atendimento_id:
+                        if len(atendimento_id) > 8:
+                            return jsonify({
+                                'success': False,
+                                'message': 'ID de atendimento excede o limite máximo de 8 dígitos.'
+                            }), 400
+                        if Atendimento.query.get(atendimento_id):
+                            return jsonify({
+                                'success': False,
+                                'message': 'ID de atendimento já existe. Tente novamente.'
+                            }), 400
+                    else:
+                        prefixo_data = agora.strftime('%y%m%d')
+                        numero_unico = str(paciente.id)[-2:].zfill(2)
+                        atendimento_id = f"{prefixo_data}{numero_unico}"
+
+                    atendimento = Atendimento(
+                        id=atendimento_id,
+                        paciente_id=paciente.id,
+                        funcionario_id=current_user.id,
+                        medico_id=current_user.id,
+                        data_atendimento=date.today(),
+                        hora_atendimento=time(agora.hour, agora.minute, agora.second),
+                        status='Em Observação',
+                        horario_observacao=agora,
+                        alergias=dados.get('alergias', '')
                     )
-                    db.session.add(paciente)
+                    db.session.add(atendimento)
                     db.session.flush()
         
-                agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
-                atendimento_id = dados.get('atendimento_id')
-        
-                if atendimento_id and len(atendimento_id) > 8:
+                # Evitar duplicidade de "internacao" para observação
+                existente = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
+                if existente:
+                    # Persistir atualização de status/horário no atendimento
+                    db.session.commit()
                     return jsonify({
-                        'success': False,
-                        'message': 'ID de atendimento excede o limite máximo de 8 dígitos.'
-                    }), 400
-        
-                if not atendimento_id:
-                    prefixo_data = agora.strftime('%y%m%d')
-                    numero_unico = str(paciente.id)[-2:].zfill(2)
-                    atendimento_id = f"{prefixo_data}{numero_unico}"
-        
-                if Atendimento.query.get(atendimento_id):
-                    return jsonify({
-                        'success': False,
-                        'message': 'ID de atendimento já existe. Tente novamente.'
-                    }), 400
-        
-                # Criar atendimento
-                atendimento = Atendimento(
-                    id=atendimento_id,
-                    paciente_id=paciente.id,
-                    funcionario_id=current_user.id,
-                    medico_id=current_user.id,
-                    data_atendimento=date.today(),
-                    hora_atendimento=time(agora.hour, agora.minute, agora.second),
-                    status='Em Observação',
-                    horario_observacao=agora,
-                    alergias=dados.get('alergias', '')
-                )
-                db.session.add(atendimento)
-                db.session.flush()
-        
-                # Criar entrada na tabela Internacao (atendimento_clinica)
+                        'success': True,
+                        'message': 'Observação já existente para este atendimento',
+                        'paciente_id': existente.paciente_id,
+                        'observacao_id': existente.id,
+                        'atendimento_id': atendimento_id
+                    }), 200
+
+                # Criar entrada na tabela Internacao (registro de observação)
                 internacao = Internacao(
                     atendimento_id=atendimento_id,
                     paciente_id=paciente.id,
@@ -196,13 +218,13 @@ def observacao_paciente():
                     enfermeiro_id=None,
                     hda=dados.get('hda', ''),
                     diagnostico_inicial=dados.get('diagnostico_inicial', ''),
-                    folha_anamnese=dados.get('exame_fisico', ''),  # Usando folha_anamnese para armazenar exame físico
+                    folha_anamnese=dados.get('exame_fisico', ''),
                     cid_principal=dados.get('cid_principal', ''),
                     cid_10_secundario=dados.get('cid_secundario', ''),
                     data_internacao=agora,
                     leito='Observação',
                     carater_internacao='Observação',
-                    dieta='1'  # ADICIONAR: Definir dieta = '2' para observação
+                    dieta='1'
                 )
                 db.session.add(internacao)
                 db.session.flush()
@@ -482,6 +504,58 @@ def api_medico_atendimentos_aguardando():
 
     except Exception as e:
         logging.error(f"Erro ao listar atendimentos aguardando médico: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
+
+
+# Médico assume um atendimento (registro explícito de início de consulta)
+@bp.route('/api/atendimento/<string:atendimento_id>/assumir', methods=['POST'])
+@login_required
+def api_medico_assumir_atendimento(atendimento_id):
+    try:
+        current_user = get_current_user()
+        if current_user.cargo.strip().lower() != 'medico':
+            return jsonify({'success': False, 'message': 'Acesso não autorizado'}), 403
+
+        atendimento = Atendimento.query.get(atendimento_id)
+        if not atendimento:
+            return jsonify({'success': False, 'message': 'Atendimento não encontrado'}), 404
+
+        agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
+
+        # Se ainda não havia horário de consulta, registra agora
+        if not atendimento.horario_consulta_medica:
+            atendimento.horario_consulta_medica = agora
+
+        # Se estava aguardando médico, mantém ou atualiza status para refletir início de consulta
+        if atendimento.status and 'aguardando' in atendimento.status.lower():
+            atendimento.status = 'Em Atendimento'
+
+        # Garante médico responsável
+        atendimento.medico_id = atendimento.medico_id or current_user.id
+
+        # Registrar no FluxoPaciente
+        try:
+            fluxo = FluxoPaciente(
+                id_atendimento=atendimento.id,
+                id_medico=current_user.id,
+                id_enfermeiro=None,
+                nome_paciente=atendimento.paciente.nome if atendimento.paciente else '',
+                mudanca_status='INICIO CONSULTA',
+                mudanca_hora=agora
+            )
+            db.session.add(fluxo)
+        except Exception as e:
+            logging.error(f"Falha ao registrar INICIO CONSULTA no FluxoPaciente: {str(e)}")
+
+        db.session.add(atendimento)
+        db.session.commit()
+
+        return jsonify({'success': True, 'message': 'Atendimento assumido pelo médico.'})
+
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Erro ao assumir atendimento: {str(e)}")
         logging.error(traceback.format_exc())
         return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
 
@@ -1693,13 +1767,15 @@ def api_medico_dashboard():
             Atendimento.status == 'Em Observação'
         ).count()
 
-        # Consultas do médico no plantão atual
-        consultas_count = Atendimento.query.filter(
-            Atendimento.medico_id == current_user.id,
-            Atendimento.horario_consulta_medica.isnot(None),
-            Atendimento.horario_consulta_medica >= start_shift,
-            Atendimento.horario_consulta_medica < end_shift
-        ).count()
+        # Consultas realizadas no plantão atual
+        # Contabiliza eventos explícitos de início de consulta registrados no FluxoPaciente
+        consultas_count = db.session.query(FluxoPaciente)\
+            .filter(
+                FluxoPaciente.id_medico == current_user.id,
+                FluxoPaciente.mudanca_status.ilike('%INICIO CONSULTA%'),
+                FluxoPaciente.mudanca_hora >= start_shift,
+                FluxoPaciente.mudanca_hora < end_shift
+            ).count()
 
         # Observação aguardando conduta (lista_observacao sem médico_conduta e sem data_saida)
         try:
@@ -3705,8 +3781,9 @@ def buscar_internacao(internacao_id):
             logging.warning(f'Internação não encontrada para atendimento_id: {internacao_id}')
             return jsonify({
                 'success': False,
-                'message': 'Internação não encontrada'
-            }), 404
+                'message': 'Internação não encontrada',
+                'internacao': None
+            }), 200
         
         logging.info(f'Internação encontrada: ID={internacao.id}, paciente_id={internacao.paciente_id}')
         
@@ -3834,6 +3911,31 @@ def registrar_alta_paciente(internacao_id):
         internacao.diagnostico = dados.get('diagnostico') or internacao.diagnostico
         internacao.cuidados_gerais = dados.get('cuidados_gerais') or internacao.cuidados_gerais
         internacao.data_alta = datetime.now(timezone(timedelta(hours=-3)))  # Horário de Brasília
+
+        # Se informado, aplicar status final do atendimento no momento da conduta
+        try:
+            atendimento = Atendimento.query.get(internacao_id)
+        except Exception:
+            atendimento = None
+
+        if atendimento is not None:
+            status_raw = (dados.get('status_final') or dados.get('status') or '').strip().lower()
+            status_map = {
+                'alta': 'Alta',
+                'obito': 'Óbito',
+                'óbito': 'Óbito',
+                'transferencia': 'Transferido',
+                'transferência': 'Transferido',
+                'transferido': 'Transferido',
+                'evasao': 'Evasão',
+                'evasão': 'Evasão',
+                'alta a pedido': 'Alta a pedido',
+                'a pedido': 'Alta a pedido',
+            }
+            finais_permitidos = {'Alta', 'Óbito', 'Transferido', 'Evasão', 'Alta a pedido'}
+            desejado = status_map.get(status_raw) if status_raw else None
+            if desejado in finais_permitidos:
+                atendimento.status = desejado
 
         # Atualizar ocupação do leito
         if internacao.leito:
@@ -5836,7 +5938,7 @@ def get_internacao_por_id(atendimento_id):
     # Buscar a internação pelo atendimento_id
     internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
     if not internacao:
-        return jsonify({'success': False, 'message': 'Internação não encontrada'}), 404
+        return jsonify({'success': False, 'message': 'Internação não encontrada', 'internacao': None}), 200
 
     atendimento = Atendimento.query.get(internacao.atendimento_id)
     paciente = atendimento.paciente if atendimento else None
@@ -8265,7 +8367,7 @@ def buscar_prescricao_base(prescricao_id):
 def fechar_prontuario(internacao_id):
     """
     Fecha o prontuário de um paciente que já teve alta, definindo dieta = '1'
-    e atualizando o status do atendimento para 'Alta'.
+    e atualizando o status final do atendimento (por padrão 'Alta').
     Isso remove o paciente da listagem de pacientes internados.
     """
     try:
@@ -8294,7 +8396,7 @@ def fechar_prontuario(internacao_id):
                 'message': 'Atendimento não encontrado.'
             }), 404
         
-        # Verificar se o paciente já teve alta
+        # Verificar se o paciente já teve alta (necessário para exibição do botão no front)
         if not internacao.data_alta:
             return jsonify({
                 'success': False,
@@ -8304,14 +8406,44 @@ def fechar_prontuario(internacao_id):
         # Fechar o prontuário definindo dieta = '1'
         internacao.dieta = '1'
         
-        # Atualizar o status do atendimento para 'Alta'
-        atendimento.status = 'Alta'
+        # Determinar e aplicar o status final do atendimento
+        # Permitidos: Alta, Óbito, Transferido, Evasão, Alta a pedido
+        dados = request.get_json(silent=True) or {}
+        status_raw = (dados.get('status_final') or dados.get('status') or '').strip().lower()
+        
+        # Normalização simples de acentos/sinônimos
+        status_map = {
+            'alta': 'Alta',
+            'obito': 'Óbito',
+            'óbito': 'Óbito',
+            'transferencia': 'Transferido',
+            'transferência': 'Transferido',
+            'transferido': 'Transferido',
+            'evasao': 'Evasão',
+            'evasão': 'Evasão',
+            'alta a pedido': 'Alta a pedido',
+            'a pedido': 'Alta a pedido',
+        }
+        finais_permitidos = {'Alta', 'Óbito', 'Transferido', 'Evasão', 'Alta a pedido'}
+        desejado = status_map.get(status_raw) if status_raw else None
+        
+        # Se não veio no payload, manter se já estiver em um status final permitido; senão, usar 'Alta'
+        if not desejado:
+            if atendimento.status in finais_permitidos:
+                desejado = atendimento.status
+            else:
+                desejado = 'Alta'
+        
+        atendimento.status = desejado
         
         # Commit das alterações
         db.session.commit()
         
         # Log da ação
-        logging.info(f"Prontuário fechado pelo {current_user.cargo} {current_user.nome} (ID: {current_user.id}) para internação {internacao_id} - Status atualizado para 'Alta'")
+        logging.info(
+            f"Prontuário fechado pelo {current_user.cargo} {current_user.nome} (ID: {current_user.id}) "
+            f"para internação {internacao_id} - Status final: '{atendimento.status}'"
+        )
         
         return jsonify({
             'success': True,
@@ -11768,15 +11900,8 @@ def internar_paciente():
             }), 403
 
         dados = request.get_json()
-        
-        campos_paciente_obrigatorios = ['nome', 'cpf', 'data_nascimento', 'sexo']
-        for campo in campos_paciente_obrigatorios:
-            if campo not in dados or not dados[campo]:
-                return jsonify({
-                    'success': False,
-                    'message': f'Campo obrigatório não informado: {campo}'
-                }), 400
 
+        # Campos obrigatórios da internação (sempre exigidos)
         campos_internacao_obrigatorios = ['diagnostico_inicial', 'leito']
         for campo in campos_internacao_obrigatorios:
             if campo not in dados or not dados[campo]:
@@ -11785,75 +11910,110 @@ def internar_paciente():
                     'message': f'Campo obrigatório não informado: {campo}'
                 }), 400
 
-        paciente_existente = Paciente.query.filter_by(cpf=dados['cpf']).first()
+        # Tentar usar um atendimento existente se fornecido
+        atendimento_id = (dados.get('atendimento_id') or '').strip()
+        atendimento = Atendimento.query.get(atendimento_id) if atendimento_id else None
 
-        if paciente_existente:
-            paciente = paciente_existente
+        if atendimento is not None:
+            # Usar o paciente já existente do atendimento; não exigir dados de paciente
+            paciente = Paciente.query.get(atendimento.paciente_id)
+            # Atualizar status/horário de internação se aplicável
+            agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
+            atendimento.status = 'Internado'
+            atendimento.horario_internacao = agora
+            db.session.add(atendimento)
         else:
-            try:
-                data_nascimento = datetime.strptime(dados['data_nascimento'], '%Y-%m-%d').date()
-            except ValueError:
-                return jsonify({
-                    'success': False,
-                    'message': 'Formato de data de nascimento inválido. Use YYYY-MM-DD.'
-                }), 400
+            # Não há atendimento existente: criar paciente e atendimento novos
+            campos_paciente_obrigatorios = ['nome', 'cpf', 'data_nascimento', 'sexo']
+            for campo in campos_paciente_obrigatorios:
+                if campo not in dados or not dados[campo]:
+                    return jsonify({
+                        'success': False,
+                        'message': f'Campo obrigatório não informado: {campo}'
+                    }), 400
 
-            # Tratar cartão SUS - pode ser vazio se o checkbox estiver marcado
-            cartao_sus = dados.get('cartao_sus')
-            if dados.get('sem_cartao_sus', False) or not cartao_sus:
-                cartao_sus = None
+            paciente_existente = Paciente.query.filter_by(cpf=dados['cpf']).first()
 
-            paciente = Paciente(
-                nome=dados['nome'],
-                filiacao=dados.get('filiacao', 'Não informado'),
-                cpf=dados['cpf'],
-                data_nascimento=data_nascimento,
-                sexo=dados['sexo'],
-                telefone=dados.get('telefone', 'Não informado'),
-                endereco=dados.get('endereco', 'Não informado'),
-                municipio=dados.get('municipio', 'Não informado'),
-                bairro=dados.get('bairro', 'Não informado'),
-                cartao_sus=cartao_sus,
-                nome_social=dados.get('nome_social', ''),
-                cor=dados.get('cor', 'Não informada'),
-                identificado=True
+            if paciente_existente:
+                paciente = paciente_existente
+            else:
+                try:
+                    data_nascimento = datetime.strptime(dados['data_nascimento'], '%Y-%m-%d').date()
+                except ValueError:
+                    return jsonify({
+                        'success': False,
+                        'message': 'Formato de data de nascimento inválido. Use YYYY-MM-DD.'
+                    }), 400
+
+                # Tratar cartão SUS - pode ser vazio se o checkbox estiver marcado
+                cartao_sus = dados.get('cartao_sus')
+                if dados.get('sem_cartao_sus', False) or not cartao_sus:
+                    cartao_sus = None
+
+                paciente = Paciente(
+                    nome=dados['nome'],
+                    filiacao=dados.get('filiacao', 'Não informado'),
+                    cpf=dados['cpf'],
+                    data_nascimento=data_nascimento,
+                    sexo=dados['sexo'],
+                    telefone=dados.get('telefone', 'Não informado'),
+                    endereco=dados.get('endereco', 'Não informado'),
+                    municipio=dados.get('municipio', 'Não informado'),
+                    bairro=dados.get('bairro', 'Não informado'),
+                    cartao_sus=cartao_sus,
+                    nome_social=dados.get('nome_social', ''),
+                    cor=dados.get('cor', 'Não informada'),
+                    identificado=True
+                )
+                db.session.add(paciente)
+                db.session.flush()
+
+            agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
+
+            # Se cliente forneceu um atendimento_id para criação, validar; senão gerar
+            atendimento_id = (dados.get('atendimento_id') or '').strip()
+            if atendimento_id:
+                if len(atendimento_id) > 8:
+                    return jsonify({
+                        'success': False,
+                        'message': 'ID de atendimento excede o limite máximo de 8 dígitos.'
+                    }), 400
+                if Atendimento.query.get(atendimento_id):
+                    return jsonify({
+                        'success': False,
+                        'message': 'ID de atendimento já existe. Tente novamente.'
+                    }), 400
+            else:
+                prefixo_data = agora.strftime('%y%m%d')
+                numero_unico = str(paciente.id)[-2:].zfill(2)
+                atendimento_id = f"{prefixo_data}{numero_unico}"
+
+            atendimento = Atendimento(
+                id=atendimento_id,
+                paciente_id=paciente.id,
+                funcionario_id=current_user.id,
+                medico_id=current_user.id,
+                data_atendimento=date.today(),
+                hora_atendimento=time(agora.hour, agora.minute, agora.second),
+                status='Internado',
+                horario_internacao=agora,
+                alergias=dados.get('alergias', '')
             )
-            db.session.add(paciente)
+            db.session.add(atendimento)
             db.session.flush()
 
-        agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
-        atendimento_id = dados.get('atendimento_id')
-
-        if atendimento_id and len(atendimento_id) > 8:
+        # Evitar duplicidade de internação para o mesmo atendimento
+        existente = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
+        if existente:
+            # Persistir atualização de status/horário no atendimento
+            db.session.commit()
             return jsonify({
-                'success': False,
-                'message': 'ID de atendimento excede o limite máximo de 8 dígitos.'
-            }), 400
-
-        if not atendimento_id:
-            prefixo_data = agora.strftime('%y%m%d')
-            numero_unico = str(paciente.id)[-2:].zfill(2)
-            atendimento_id = f"{prefixo_data}{numero_unico}"
-
-        if Atendimento.query.get(atendimento_id):
-            return jsonify({
-                'success': False,
-                'message': 'ID de atendimento já existe. Tente novamente.'
-            }), 400
-
-        atendimento = Atendimento(
-            id=atendimento_id,
-            paciente_id=paciente.id,
-            funcionario_id=current_user.id,
-            medico_id=current_user.id,
-            data_atendimento=date.today(),
-            hora_atendimento=time(agora.hour, agora.minute, agora.second),
-            status='Internado',
-            horario_internacao=agora,
-            alergias=dados.get('alergias', '')
-        )
-        db.session.add(atendimento)
-        db.session.flush()
+                'success': True,
+                'message': 'Internação já existente para este atendimento',
+                'paciente_id': existente.paciente_id,
+                'internacao_id': existente.id,
+                'atendimento_id': atendimento_id
+            }), 200
 
         internacao = Internacao(
             atendimento_id=atendimento_id,
@@ -11861,7 +12021,7 @@ def internar_paciente():
             medico_id=current_user.id,
             data_internacao=datetime.now(timezone(timedelta(hours=-3))),
             hda=dados.get('hda', ''),
-            justificativa_internacao_sinais_e_sintomas=f"{dados.get('hda', '').strip()}\n\n{dados.get('folha_anamnese', '').strip()}",
+            justificativa_internacao_sinais_e_sintomas=f"{(dados.get('hda') or '').strip()}\n\n{(dados.get('folha_anamnese') or '').strip()}",
             justificativa_internacao_condicoes="RISCO DE COMPLICAÇÃO",
             justificativa_internacao_principais_resultados_diagnostico="ANMNESE + EXAME FISICO",
             diagnostico_inicial=dados.get('diagnostico_inicial', ''),

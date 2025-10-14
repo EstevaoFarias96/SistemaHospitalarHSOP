@@ -129,6 +129,12 @@
             <div class="info-item">
                 <strong>Médico da Alta:</strong> {{ medico.nome if medico else 'N/A' }}
             </div>
+            <div class="info-item">
+                <strong>Status Final:</strong> {{ status_final or status_atendimento or 'N/A' }}
+            </div>
+            <div class="info-item">
+                <strong>CID (Principal):</strong> {{ internacao.cid_principal or 'N/A' }}
+            </div>
         </div>
         
         <h2 class="section-title">Resumo Clínico</h2>

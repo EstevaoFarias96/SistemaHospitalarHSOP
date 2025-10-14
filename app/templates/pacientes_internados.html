@@ -136,6 +136,23 @@
             <div class="modal-body">
                 <form id="formRelatorioAlta" class="needs-validation" novalidate>
                     <input type="hidden" id="internacaoId" name="internacaoId">
+                    
+                    <!-- Conduta Final (unificado) -->
+                    <div class="row g-3 mb-2">
+                        <div class="col-md-6">
+                            <label for="selectCondutaFinal" class="form-label fw-bold">
+                                <i class="fas fa-clipboard-list me-1"></i>
+                                Conduta Final
+                            </label>
+                            <select class="form-select" id="selectCondutaFinal">
+                                <option value="Alta">Alta</option>
+                                <option value="Alta a pedido">Alta a pedido</option>
+                                <option value="Óbito">Óbito</option>
+                                <option value="Transferido">Transferência</option>
+                                <option value="Evasão">Evasão</option>
+                            </select>
+                        </div>
+                    </div>
 
                     <div class="row g-3">
                         <!-- Campo do Histórico da Internação -->
@@ -175,12 +192,14 @@
                 </button>
                 <button type="button" class="btn btn-success" id="btnConfirmarAlta">
                     <span id="spinnerConfirmarAlta" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                    <span id="textConfirmarAlta">Confirmar Alta</span>
+                    <span id="textConfirmarAlta">Confirmar Conduta</span>
                 </button>
             </div>
         </div>
     </div>
 </div>
+
+<!-- (Removido) Modal de Conduta Final separado: conduta agora está no modal de alta -->
 
 <!-- Modal de Informações de Alta -->
 <div class="modal fade" id="modalInformacoesAlta" tabindex="-1" aria-labelledby="modalInformacoesAltaLabel" aria-hidden="true">
@@ -341,6 +360,8 @@ class PacientesInternadosManager {
         this.cargoUsuario = document.getElementById("page-data").dataset.cargo?.toLowerCase().trim() || "medico"; console.log("Cargo detectado:", this.cargoUsuario);
         this.pacientes = [];
         this.ordenacao = { coluna: null, direcao: 'asc' };
+        // Expor instância global para handlers externos
+        window.__pacIntMgr = this;
         this.inicializarEventListeners();
         this.fetchPacientesInternados();
     }
@@ -438,11 +459,11 @@ class PacientesInternadosManager {
                     <i class="fas fa-notes-medical"></i> Evoluir
                 </a>`;
 
-        // Só mostrar botão de alta para médicos e pacientes SEM alta
+        // Só mostrar botão de definir conduta para médicos e pacientes SEM alta
         if (this.cargoUsuario === 'medico' && !paciente.tem_alta) {
             acoesHTML += `
-                <button class="btn btn-sm btn-success btn-alta" data-internacao-id="${paciente.atendimento_id}">
-                    <i class="fas fa-clipboard-check"></i> Alta
+                <button class="btn btn-sm btn-success btn-conduta" data-internacao-id="${paciente.atendimento_id}">
+                    <i class="fas fa-clipboard-list"></i> Definir Conduta
                 </button>`;
         }
 
@@ -476,8 +497,8 @@ class PacientesInternadosManager {
     }
 
     initializeAltaButtons() {
-        // Event listeners para botões de alta
-        document.querySelectorAll('.btn-alta').forEach(btn => {
+        // Event listeners para botão de definir conduta
+        document.querySelectorAll('.btn-conduta').forEach(btn => {
             btn.addEventListener('click', () => {
                 const internacaoId = btn.getAttribute('data-internacao-id');
                 this.abrirModalAlta(internacaoId);
@@ -601,6 +622,47 @@ class PacientesInternadosManager {
         modalAlta.show();
     }
 
+    _fecharModalGenerico(modalElement) {
+        if (!modalElement) return;
+        try {
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal && bootstrap.Modal.getInstance) {
+                const instance = bootstrap.Modal.getInstance(modalElement);
+                if (instance) {
+                    instance.hide();
+                    return;
+                }
+                throw new Error('getInstance retornou null');
+            }
+            throw new Error('bootstrap.Modal.getInstance não disponível');
+        } catch (e1) {
+            try {
+                if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    const instance2 = new bootstrap.Modal(modalElement);
+                    instance2.hide();
+                    return;
+                }
+                throw new Error('bootstrap.Modal não disponível');
+            } catch (e2) {
+                if (typeof $ !== 'undefined') {
+                    $(modalElement).modal('hide');
+                } else {
+                    const closeButton = modalElement.querySelector('[data-bs-dismiss="modal"], [data-dismiss="modal"]');
+                    if (closeButton) {
+                        closeButton.click();
+                    } else {
+                        modalElement.classList.remove('show');
+                        modalElement.style.display = 'none';
+                        const backdrop = document.querySelector('.modal-backdrop');
+                        if (backdrop) backdrop.remove();
+                        document.body.classList.remove('modal-open');
+                        document.body.style.overflow = '';
+                        document.body.style.paddingRight = '';
+                    }
+                }
+            }
+        }
+    }
+
     preencherFormularioAlta(dados, internacaoId) {
         // Preencher ID da internação
         document.getElementById('internacaoId').value = internacaoId;
@@ -651,11 +713,20 @@ class PacientesInternadosManager {
             
             const internacaoId = document.getElementById('internacaoId').value;
             const formData = this.coletarDadosFormulario();
+            // Capturar conduta selecionada e armazenar para uso no fechamento do prontuário
+            const selectConduta = document.getElementById('selectCondutaFinal');
+            const condutaSelecionada = selectConduta ? selectConduta.value : 'Alta';
+            if (!this.condutaPorInternacao) this.condutaPorInternacao = new Map();
+            this.condutaPorInternacao.set(internacaoId, condutaSelecionada);
+            try { localStorage.setItem(`conduta_final_${internacaoId}`, condutaSelecionada); } catch(e) {}
 
             const response = await fetch(CONFIG.API_ENDPOINTS.ALTA(internacaoId), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+                body: JSON.stringify({
+                    ...formData,
+                    status_final: condutaSelecionada
+                })
             });
 
             const data = await response.json();
@@ -761,7 +832,12 @@ class PacientesInternadosManager {
                 
                 // Atualizar coluna de data de alta
                 const cellDataAlta = row.cells[5]; // Coluna de data de alta (índice 5)
-                cellDataAlta.innerHTML = `<span class="badge bg-success">Alta hoje</span>`;
+                // Mostrar badge com o desfecho escolhido, se houver
+                const statusFinal = this.condutaPorInternacao ? this.condutaPorInternacao.get(internacaoId) : null;
+                const localStored = (() => { try { return localStorage.getItem(`conduta_final_${internacaoId}`); } catch(e) { return null; } })();
+                const finalMostrar = statusFinal || localStored;
+                const textoBadge = finalMostrar ? `${finalMostrar} hoje` : 'Alta hoje';
+                cellDataAlta.innerHTML = `<span class="badge bg-success">${textoBadge}</span>`;
                 
                 // Remover botão de alta e adicionar botão "Fechar Prontuário"
                 const acoesCell = row.cells[7]; // Coluna de ações (índice 7)
@@ -804,9 +880,15 @@ class PacientesInternadosManager {
 
     async fecharProntuario(internacaoId) {
         try {
+            // Enviar status_final escolhido (se houver) para o backend
+            let statusFinal = this.condutaPorInternacao ? this.condutaPorInternacao.get(internacaoId) : undefined;
+            if (!statusFinal) {
+                try { statusFinal = localStorage.getItem(`conduta_final_${internacaoId}`) || undefined; } catch(e) {}
+            }
             const response = await fetch(CONFIG.API_ENDPOINTS.FECHAR_PRONTUARIO(internacaoId), {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(statusFinal ? { status_final: statusFinal } : {})
             });
 
             const data = await response.json();
@@ -846,7 +928,7 @@ class PacientesInternadosManager {
     atualizarEstadoBotao(btn, spinner, text, loading) {
         btn.disabled = loading;
         spinner.classList.toggle('d-none', !loading);
-        text.textContent = loading ? 'Salvando...' : 'Confirmar Alta';
+        text.textContent = loading ? 'Salvando...' : 'Confirmar Conduta';
     }
 
     mostrarNotificacao(mensagem, tipo) {
@@ -900,6 +982,16 @@ class PacientesInternadosManager {
 // Inicialização
 document.addEventListener('DOMContentLoaded', () => {
     new PacientesInternadosManager();
+    // Wire botão confirmar conduta
+    const btn = document.getElementById('btnConfirmarConduta');
+    if (btn) {
+        btn.addEventListener('click', () => {
+            const mgr = window.__pacIntMgr;
+            if (mgr && typeof mgr.onConfirmarConduta === 'function') {
+                mgr.onConfirmarConduta();
+            }
+        });
+    }
 });
 </script>
 {% endblock %}

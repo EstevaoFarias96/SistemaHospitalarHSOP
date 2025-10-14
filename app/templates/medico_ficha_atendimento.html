@@ -1453,10 +1453,36 @@
     </div>
   </div>
 
+  <!-- Modal Pós-Encerramento (Imprimir Ficha) -->
+  <div class="modal fade" id="modalPosEncerramento" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title"><i class="fas fa-check-circle me-2"></i> Atendimento encerrado</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body text-center">
+          <p class="mb-3">Atendimento encerrado com sucesso.</p>
+          <p class="text-muted">Deseja imprimir a Ficha de Atendimento agora?</p>
+        </div>
+        <div class="modal-footer d-flex justify-content-between">
+          <a id="btnImprimirFicha" class="btn btn-primary" target="_blank" href="#">Imprimir Ficha</a>
+          <a class="btn btn-outline-secondary" href="/medico/aguardando-medico">Voltar à lista</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     $(function(){
       const ATENDIMENTO_ID = document.getElementById('ATENDIMENTO_ID').value;
       const modalEnc = new bootstrap.Modal(document.getElementById('modalEncerrarAtendimento'));
+      const modalPos = new bootstrap.Modal(document.getElementById('modalPosEncerramento'));
+
+      // Registrar explicitamente início da consulta para contagem no dashboard
+      try {
+        fetch(`/api/atendimento/${ATENDIMENTO_ID}/assumir`, { method: 'POST' });
+      } catch(e) {}
 
       $('#btnEncerrarAtendimento').on('click', function(){
         $('#encerrarCondutaFinal').val('');
@@ -1550,7 +1576,8 @@
               if ((conduta||'').toUpperCase().indexOf('REAVALIA') >= 0){
                 alert('Conduta registrada: reavaliação. O atendimento permanece em aberto.');
               } else {
-                window.location.href = '/medico/aguardando-medico';
+                $('#btnImprimirFicha').attr('href', `/imprimir/ficha_atendimento/${ATENDIMENTO_ID}`);
+                modalPos.show();
               }
             } else { alert('Erro: ' + (d.message||'Falha ao encerrar')); }
           })
