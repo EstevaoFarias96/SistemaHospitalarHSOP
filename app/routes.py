@@ -659,6 +659,67 @@ def api_medico_atendimentos_reavaliacao_medicacao():
         logging.error(traceback.format_exc())
         return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
 
+
+@bp.route('/api/medico/atendimentos/gestantes', methods=['GET'])
+@login_required
+def api_medico_atendimentos_gestantes():
+    """
+    Lista atendimentos de pacientes gestantes (possuem registro em AtendimentosGestante),
+    priorizando os que estão aguardando (médico ou triagem).
+    Retorna campos compatíveis com o frontend da página do médico.
+    """
+    try:
+        current_user = get_current_user()
+        if not current_user:
+            return jsonify({'success': False, 'message': 'Usuário não autenticado.'}), 401
+
+        if current_user.cargo.lower() not in ['medico', 'multi', 'admin']:
+            return jsonify({'success': False, 'message': 'Acesso não autorizado'}), 403
+
+        # Seleciona atendimentos com registro em AtendimentosGestante
+        # e prioriza os "aguardando" (médico/triagem) na ordenação
+        query = db.session.query(Atendimento).join(
+            AtendimentosGestante, AtendimentosGestante.id_atendimentos == Atendimento.id
+        )
+
+        # Mantém apenas atendimentos em estados de espera, para foco operacional
+        atendimentos = query.filter(
+            Atendimento.status.ilike('%aguardando%')
+        ).order_by(
+            Atendimento.horario_triagem.desc().nullslast(),
+            Atendimento.data_atendimento.desc()
+        ).all()
+
+        def calcular_idade(data_nascimento):
+            if not data_nascimento:
+                return None
+            hoje = date.today()
+            anos = hoje.year - data_nascimento.year - ((hoje.month, hoje.day) < (data_nascimento.month, data_nascimento.day))
+            return anos
+
+        resultado = []
+        for a in atendimentos:
+            paciente = Paciente.query.get(a.paciente_id)
+            if not paciente:
+                continue
+            resultado.append({
+                'atendimento_id': a.id,
+                'paciente_id': paciente.id,
+                'nome': paciente.nome,
+                'data_nascimento': paciente.data_nascimento.strftime('%Y-%m-%d') if paciente.data_nascimento else None,
+                'idade': calcular_idade(paciente.data_nascimento) if paciente.data_nascimento else None,
+                'classificacao_risco': a.classificacao_risco,
+                'triagem': a.triagem,
+                'horario_triagem': a.horario_triagem.strftime('%Y-%m-%d %H:%M:%S') if a.horario_triagem else None,
+            })
+
+        return jsonify({'success': True, 'atendimentos': resultado, 'total': len(resultado)})
+
+    except Exception as e:
+        logging.error(f"Erro ao listar atendimentos gestantes (médico): {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
+
 @bp.route('/medico/aguardando-medico', methods=['GET'])
 @login_required
 def pagina_medico_aguardando_medico():
@@ -12314,20 +12375,25 @@ def salvar_triagem_normal(atendimento_id):
         if not dados:
             return jsonify({'success': False, 'message': 'Dados não fornecidos'}), 400
 
-        # Atualizar os dados da triagem no atendimento
-        atendimento.pressao = dados.get('pressao')
-        atendimento.pulso = dados.get('pulso')
-        atendimento.sp02 = dados.get('sp02')
-        atendimento.temp = dados.get('temp')
-        atendimento.peso = dados.get('peso')
-        atendimento.altura = dados.get('altura')
-        atendimento.fr = dados.get('fr')
-        atendimento.dx = dados.get('dx')
-        atendimento.triagem = dados.get('triagem')
-        atendimento.alergias = dados.get('alergias')
-        atendimento.classificacao_risco = dados.get('classificacao_risco')
-        atendimento.anamnese_exame_fisico = dados.get('anamnese_exame_fisico')
-        atendimento.observacao = dados.get('observacao')
+        # Atualizar os dados da triagem no atendimento, convertendo strings vazias em None
+        def _to_none_if_empty(value):
+            if isinstance(value, str) and value.strip() == '':
+                return None
+            return value
+
+        atendimento.pressao = _to_none_if_empty(dados.get('pressao'))
+        atendimento.pulso = _to_none_if_empty(dados.get('pulso'))
+        atendimento.sp02 = _to_none_if_empty(dados.get('sp02'))
+        atendimento.temp = _to_none_if_empty(dados.get('temp'))
+        atendimento.peso = _to_none_if_empty(dados.get('peso'))
+        atendimento.altura = _to_none_if_empty(dados.get('altura'))
+        atendimento.fr = _to_none_if_empty(dados.get('fr'))
+        atendimento.dx = _to_none_if_empty(dados.get('dx'))
+        atendimento.triagem = _to_none_if_empty(dados.get('triagem'))
+        atendimento.alergias = _to_none_if_empty(dados.get('alergias'))
+        atendimento.classificacao_risco = _to_none_if_empty(dados.get('classificacao_risco'))
+        atendimento.anamnese_exame_fisico = _to_none_if_empty(dados.get('anamnese_exame_fisico'))
+        atendimento.observacao = _to_none_if_empty(dados.get('observacao'))
 
         # Definir enfermeiro responsável e horário da triagem
         atendimento.enfermeiro_id = current_user.id
@@ -12383,20 +12449,25 @@ def salvar_triagem_gestante(atendimento_id):
         if not dados:
             return jsonify({'success': False, 'message': 'Dados não fornecidos'}), 400
 
-        # Atualizar os dados da triagem no atendimento
-        atendimento.pressao = dados.get('pressao')
-        atendimento.pulso = dados.get('pulso')
-        atendimento.sp02 = dados.get('sp02')
-        atendimento.temp = dados.get('temp')
-        atendimento.peso = dados.get('peso')
-        atendimento.altura = dados.get('altura')
-        atendimento.fr = dados.get('fr')
-        atendimento.dx = dados.get('dx')
-        atendimento.triagem = dados.get('triagem')
-        atendimento.alergias = dados.get('alergias')
-        atendimento.classificacao_risco = dados.get('classificacao_risco')
-        atendimento.anamnese_exame_fisico = dados.get('anamnese_exame_fisico')
-        atendimento.observacao = dados.get('observacao')
+        # Atualizar os dados da triagem no atendimento, convertendo strings vazias em None
+        def _to_none_if_empty(value):
+            if isinstance(value, str) and value.strip() == '':
+                return None
+            return value
+
+        atendimento.pressao = _to_none_if_empty(dados.get('pressao'))
+        atendimento.pulso = _to_none_if_empty(dados.get('pulso'))
+        atendimento.sp02 = _to_none_if_empty(dados.get('sp02'))
+        atendimento.temp = _to_none_if_empty(dados.get('temp'))
+        atendimento.peso = _to_none_if_empty(dados.get('peso'))
+        atendimento.altura = _to_none_if_empty(dados.get('altura'))
+        atendimento.fr = _to_none_if_empty(dados.get('fr'))
+        atendimento.dx = _to_none_if_empty(dados.get('dx'))
+        atendimento.triagem = _to_none_if_empty(dados.get('triagem'))
+        atendimento.alergias = _to_none_if_empty(dados.get('alergias'))
+        atendimento.classificacao_risco = _to_none_if_empty(dados.get('classificacao_risco'))
+        atendimento.anamnese_exame_fisico = _to_none_if_empty(dados.get('anamnese_exame_fisico'))
+        atendimento.observacao = _to_none_if_empty(dados.get('observacao'))
 
         # Definir enfermeiro responsável e horário da triagem
         atendimento.enfermeiro_id = current_user.id
@@ -12407,14 +12478,14 @@ def salvar_triagem_gestante(atendimento_id):
         gestante = AtendimentosGestante(
             id_atendimentos=atendimento_id,
             id_paciente=atendimento.paciente_id,
-            semanas=dados.get('idade_gestacional_semanas'),
-            dias=dados.get('idade_gestacional_dias'),
-            altura_uterina=dados.get('altura_uterina'),
-            quantidade_gestacoes=dados.get('quantidade_de_gestacoes'),
-            ultima_menstruacao=dados.get('ultima_menstruacao'),
-            bcf=dados.get('bcf'),
-            data_primeiro_ultrassom=dados.get('data_primeira_ultrassom'),
-            abo_rh=dados.get('abo_rh')
+            semanas=_to_none_if_empty(dados.get('idade_gestacional_semanas')),
+            dias=_to_none_if_empty(dados.get('idade_gestacional_dias')),
+            altura_uterina=_to_none_if_empty(dados.get('altura_uterina')),
+            quantidade_gestacoes=_to_none_if_empty(dados.get('quantidade_de_gestacoes')),
+            ultima_menstruacao=_to_none_if_empty(dados.get('ultima_menstruacao')),
+            bcf=_to_none_if_empty(dados.get('bcf')),
+            data_primeiro_ultrassom=_to_none_if_empty(dados.get('data_primeira_ultrassom')),
+            abo_rh=_to_none_if_empty(dados.get('abo_rh'))
         )
 
         # Adicionar condições clínicas ao atendimento como texto estruturado

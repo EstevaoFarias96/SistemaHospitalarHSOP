@@ -567,6 +567,12 @@
                     <strong>⚠️ ALERGIAS:</strong> {{ atendimento_alergias }}
                 </div>
                 {% endif %}
+
+                <!-- Observações Adicionais -->
+                <div class="text-field">
+                    <div class="text-field-label">Observações Adicionais</div>
+                    <div class="text-field-content" style="min-height: 25px;">{{ atendimento_observacao or atendimento.observacao or 'Não registrado' }}</div>
+                </div>
             </div>
         </div>
 

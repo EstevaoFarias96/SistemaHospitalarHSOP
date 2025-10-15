@@ -37,6 +37,9 @@
             <a class="nav-link" id="tab-triagem" data-toggle="tab" href="#pane-triagem" role="tab" aria-controls="pane-triagem" aria-selected="false">Aguardando Triagem</a>
           </li>
           <li class="nav-item" role="presentation">
+            <a class="nav-link" id="tab-gestantes" data-toggle="tab" href="#pane-gestantes" role="tab" aria-controls="pane-gestantes" aria-selected="false">Gestantes</a>
+          </li>
+          <li class="nav-item" role="presentation">
             <a class="nav-link" id="tab-alta" data-toggle="tab" href="#pane-alta" role="tab" aria-controls="pane-alta" aria-selected="false">Alta após medicação</a>
           </li>
           <li class="nav-item" role="presentation">
@@ -68,6 +71,14 @@
           <div class="text-center py-5">
             <div class="spinner-border text-primary" role="status"><span class="sr-only">Carregando...</span></div>
             <p class="text-muted mt-3">Carregando altas após medicação...</p>
+          </div>
+        </div>
+      </div>
+      <div class="tab-pane fade" id="pane-gestantes" role="tabpanel" aria-labelledby="tab-gestantes">
+        <div id="lista-gestantes">
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"><span class="sr-only">Carregando...</span></div>
+            <p class="text-muted mt-3">Carregando pacientes gestantes...</p>
           </div>
         </div>
       </div>
@@ -156,6 +167,14 @@
             renderLista('#lista-alta', data.atendimentos, '<div class="text-center py-5"><i class="fas fa-info-circle fa-3x text-secondary mb-3"></i><h5>Sem pacientes em alta após medicação</h5></div>');
           })
           .catch(() => { $('#lista-alta').html('<p class="text-danger">Erro ao carregar dados</p>'); });
+      } else if (tipo === 'gestantes') {
+        fetch('/api/medico/atendimentos/gestantes')
+          .then(r => r.json())
+          .then(data => {
+            if (!data.success) { $('#lista-gestantes').html('<p class="text-danger">Erro ao carregar</p>'); return; }
+            renderLista('#lista-gestantes', data.atendimentos, '<div class="text-center py-5"><i class="fas fa-baby fa-3x text-secondary mb-3"></i><h5>Sem pacientes gestantes</h5></div>');
+          })
+          .catch(() => { $('#lista-gestantes').html('<p class="text-danger">Erro ao carregar dados</p>'); });
       } else if (tipo === 'reavaliacao') {
         fetch('/api/medico/atendimentos/reavaliacao-medicacao')
           .then(r => r.json())
@@ -173,6 +192,7 @@
         const id = $(e.target).attr('id');
         if (id === 'tab-aguardando') carregarAba('aguardando');
         if (id === 'tab-triagem') carregarAba('triagem');
+        if (id === 'tab-gestantes') carregarAba('gestantes');
         if (id === 'tab-alta') carregarAba('alta');
         if (id === 'tab-reavaliacao') carregarAba('reavaliacao');
       });
@@ -182,6 +202,7 @@
         const activeId = $('.nav-link.active').attr('id');
         if (activeId === 'tab-aguardando') carregarAba('aguardando');
         if (activeId === 'tab-triagem') carregarAba('triagem');
+        if (activeId === 'tab-gestantes') carregarAba('gestantes');
         if (activeId === 'tab-alta') carregarAba('alta');
         if (activeId === 'tab-reavaliacao') carregarAba('reavaliacao');
         setTimeout(()=>{ btn.prop('disabled', false); icon.removeClass('fa-spin'); }, 800);
