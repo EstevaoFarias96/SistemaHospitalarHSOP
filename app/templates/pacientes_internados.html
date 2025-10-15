@@ -489,7 +489,7 @@ class PacientesInternadosManager {
             <td>${paciente.leito}</td>
             <td>${this.formatarData(paciente.data_internacao)}</td>
             <td>${paciente.tem_alta ? this.formatarData(paciente.data_alta) : '<span class="badge bg-warning text-dark">Ativo</span>'}</td>
-            <td>${paciente.diagnostico || '-'}</td>
+            <td>${(paciente.diagnostico && paciente.diagnostico !== 'Não informado') ? paciente.diagnostico : (paciente.diagnostico_inicial || '-')}</td>
             <td>${acoesHTML}</td>
         `;
 
