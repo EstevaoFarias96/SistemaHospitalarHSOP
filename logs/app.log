@@ -31209,3 +31209,12 @@ werkzeug.exceptions.InternalServerError: 500 Internal Server Error: Erro interno
 2025-10-15 10:35:05,349 [INFO] __init__:72 - LoginManager inicializado com sucesso
 2025-10-15 10:35:05,500 [INFO] __init__:90 - Blueprints registrados com sucesso
 2025-10-15 10:35:05,514 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-15 10:42:31,325 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-15 10:42:31,325 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-15 10:42:31,325 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-15 10:42:31,325 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-15 10:42:31,325 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-15 10:42:31,334 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-15 10:42:31,334 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-15 10:42:31,475 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-10-15 10:42:31,485 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
