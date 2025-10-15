@@ -19,13 +19,13 @@
         /* Configuração para impressão A4 */
         @page {
             size: A4;
-            margin: 0.8cm;
+            margin: 0.6cm;
         }
 
         body {
             font-family: Arial, sans-serif;
-            font-size: 9pt;
-            line-height: 1.2;
+            font-size: 8pt;
+            line-height: 1.15;
             color: #333;
             background: white;
         }
@@ -33,20 +33,20 @@
         /* Cabeçalho */
         .header {
             text-align: center;
-            border-bottom: 2px solid #2c5aa0;
-            padding-bottom: 6px;
-            margin-bottom: 12px;
+            border-bottom: 1px solid #bcd;
+            padding-bottom: 4px;
+            margin-bottom: 8px;
         }
 
         .hospital-name {
-            font-size: 14pt;
+            font-size: 12pt;
             font-weight: bold;
             color: #2c5aa0;
             margin-bottom: 2px;
         }
 
         .prescricoes-title {
-            font-size: 12pt;
+            font-size: 10pt;
             font-weight: bold;
             color: #333;
             margin-top: 2px;
@@ -56,9 +56,9 @@
         .patient-info {
             background: #f8f9fa;
             border: 1px solid #dee2e6;
-            border-radius: 5px;
-            padding: 8px;
-            margin-bottom: 12px;
+            border-radius: 4px;
+            padding: 6px;
+            margin-bottom: 8px;
         }
 
         .patient-info h3 {
@@ -72,28 +72,28 @@
         .patient-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            font-size: 8pt;
+            gap: 6px;
+            font-size: 7.5pt;
         }
 
         .patient-field {
             display: flex;
             align-items: center;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .patient-label {
             font-weight: bold;
             color: #495057;
-            min-width: 80px;
-            margin-right: 6px;
-            font-size: 8pt;
+            min-width: 72px;
+            margin-right: 4px;
+            font-size: 7.5pt;
         }
 
         .patient-value {
             color: #333;
             flex: 1;
-            font-size: 8pt;
+            font-size: 7.5pt;
         }
 
         /* Seção de prescrições */
@@ -106,51 +106,69 @@
         }
 
         .section-header {
-            background: linear-gradient(135deg, #2c5aa0, #4a6fa5);
-            color: white;
-            padding: 6px 10px;
+            background: #eef3fb;
+            color: #2c5aa0;
+            padding: 4px 8px;
             font-weight: bold;
-            font-size: 10pt;
+            font-size: 9pt;
         }
 
         .section-content {
-            padding: 12px;
+            padding: 8px;
             background: white;
         }
 
-        .prescricao-item {
-            background: #f8f9fa;
-            padding: 12px;
-            border-radius: 5px;
-            border-left: 3px solid #007bff;
-            margin-bottom: 12px;
-            page-break-inside: avoid;
-        }
-
-        .prescricao-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .prescricao-content {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            font-size: 9pt;
-            line-height: 1.4;
-            min-height: 50px;
-            margin-bottom: 8px;
-        }
-
-        .prescricao-info {
-            margin-bottom: 8px;
+        /* Tabela de prescrições com colunas M/T/N */
+        .tabela-prescricoes {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
             font-size: 8pt;
-            color: #666;
-            border-bottom: 1px solid #dee2e6;
-            padding-bottom: 4px;
         }
 
-        .prescricao-info strong {
-            color: #333;
+        .tabela-prescricoes thead th {
+            background: #f5f7fb;
+            color: #2c5aa0;
+            border: 1px solid #dde5ee;
+            padding: 4px 6px;
+            text-align: left;
         }
+
+        .tabela-prescricoes tbody td {
+            border: 1px solid #e0e6ec;
+            padding: 4px 6px;
+            vertical-align: top;
+            background: #fff;
+        }
+
+        .tabela-prescricoes .col-texto {
+            width: 70%;
+            word-wrap: break-word;
+        }
+
+        .tabela-prescricoes .col-m,
+        .tabela-prescricoes .col-t,
+        .tabela-prescricoes .col-n {
+            width: 10%;
+            text-align: center;
+        }
+
+        .assinatura-espaco {
+            height: 22px; /* espaço para carimbo/assinatura */
+        }
+
+        .grupo-info {
+            background: #fafcfe;
+            color: #495057;
+            font-size: 7.5pt;
+        }
+
+        .grupo-info td { padding: 4px 6px; }
+
+        .grupo-info strong { color: #333; }
+
+        /* Evitar quebra de página no meio das linhas */
+        .tabela-prescricoes tr { page-break-inside: avoid; }
 
         /* Período selecionado */
         .periodo-info {
@@ -323,19 +341,39 @@
         </div>
         <div class="section-content">
             {% if prescricoes %}
-                {% for prescricao in prescricoes %}
-                <div class="prescricao-item">
-                    <div class="prescricao-info">
-                        <strong>Data/Hora:</strong> 
-                        {{ prescricao.data_prescricao.strftime('%d/%m/%Y às %H:%M') if prescricao.data_prescricao else 'Data não registrada' }}
-                        {% if prescricao.enfermeiro_nome %}
-                            | <strong>Enfermeiro(a):</strong> {{ prescricao.enfermeiro_nome }}
-                        {% endif %}
-                    </div>
-                    
-                    <div class="prescricao-content">{{ prescricao.texto or 'Prescrição não registrada' }}</div>
-                </div>
-                {% endfor %}
+            <table class="tabela-prescricoes">
+                <thead>
+                    <tr>
+                        <th class="col-texto">Prescrição</th>
+                        <th class="col-m">M</th>
+                        <th class="col-t">T</th>
+                        <th class="col-n">N</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prescricao in prescricoes %}
+                        <tr class="grupo-info">
+                            <td colspan="4">
+                                <strong>Data/Hora:</strong>
+                                {{ prescricao.data_prescricao.strftime('%d/%m/%Y às %H:%M') if prescricao.data_prescricao else 'Data não registrada' }}
+                                {% if prescricao.enfermeiro_nome %}
+                                    | <strong>Enfermeiro(a):</strong> {{ prescricao.enfermeiro_nome }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% for linha in (prescricao.texto or '').split('\n') %}
+                            {% if linha|trim %}
+                            <tr>
+                                <td class="col-texto">{{ linha }}</td>
+                                <td class="col-m"><div class="assinatura-espaco"></div></td>
+                                <td class="col-t"><div class="assinatura-espaco"></div></td>
+                                <td class="col-n"><div class="assinatura-espaco"></div></td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
             {% else %}
                 <div class="no-prescricoes">
                     <i class="fas fa-info-circle" style="font-size: 24pt; color: #ccc; margin-bottom: 10px;"></i>

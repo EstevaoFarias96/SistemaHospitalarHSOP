@@ -8,7 +8,7 @@
         /* ===== CONFIGURAÇÕES DE IMPRESSÃO PROFISSIONAL ===== */
         @page {
             size: A4;
-            margin: 12mm 15mm 12mm 15mm; /* Margens: superior, direita, inferior, esquerda */
+            margin: 5mm; /* Margens reduzidas e uniformes */
         }
 
         @media print {
@@ -42,29 +42,31 @@
             line-height: 1.3;
             color: #000;
             background: #fff;
+            text-transform: uppercase;
         }
 
         /* ===== CABEÇALHO COM LOGOS ===== */
         .header {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
             padding-bottom: 8px;
             margin-bottom: 10px;
             border-bottom: 2px solid #003d82;
             position: relative;
+            gap: 20px;
         }
 
         .header-logo-container {
-            width: 100px;
+            width: 120px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .header-logo {
-            max-width: 100px;
-            max-height: 100px;
+            max-width: 120px;
+            max-height: 120px;
             width: auto;
             height: auto;
             object-fit: contain;
@@ -73,7 +75,7 @@
         .header-center {
             flex: 1;
             text-align: center;
-            padding: 0 15px;
+            padding: 0 12px;
         }
 
         .header-title {
@@ -83,6 +85,7 @@
             margin-bottom: 2px;
             text-transform: uppercase;
             letter-spacing: 0.3px;
+            white-space: nowrap;
         }
 
         .header-subtitle {
@@ -653,21 +656,21 @@
                         <table class="prescricoes-table" style="margin-top: 2px;">
                             <thead>
                                 <tr>
-                                    <th style="width: 5%;">#</th>
-                                    <th style="width: 40%;">Medicamento</th>
-                                    <th style="width: 15%;">Dose</th>
-                                    <th style="width: 12%;">Via</th>
-                                    <th style="width: 28%;">Horários / Observações</th>
+                                    <th style="width: 6%;">#</th>
+                                    <th style="width: 52%;">Medicamento</th>
+                                    <th style="width: 28%;">Descrição de uso</th>
+                                    <th style="width: 14%;">Aprazamento (manual)</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for med in prescricao.medicamentos_json %}
                                 <tr>
                                     <td style="text-align: center;">{{ loop.index }}</td>
-                                    <td>{{ med.descricao or med.nome or 'N/A' }}</td>
-                                    <td>{{ med.dose or '-' }}</td>
-                                    <td>{{ med.via or '-' }}</td>
-                                    <td>{{ med.horarios or med.observacoes or '-' }}</td>
+                                    <td>{{ (med.get('nome_medicamento') or med.get('nome') or med.get('descricao') or '-') }}</td>
+                                    <td>{{ (med.get('descricao_uso') or med.get('dose') or med.get('observacoes') or med.get('observacao') or med.get('obs') or '-') }}</td>
+                                    <td>
+                                        <div style="height: 22px;"></div>
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>

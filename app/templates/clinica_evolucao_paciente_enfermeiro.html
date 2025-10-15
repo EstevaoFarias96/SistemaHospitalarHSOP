@@ -206,7 +206,7 @@
 
         /* Estilo do menu lateral */
         .sidebar {
-            width: 60px;
+            width: 200px;
             height: 100vh;
             background: linear-gradient(180deg, var(--primary-dark) 0%, var(--primary-main) 100%);
             position: fixed;
@@ -214,7 +214,7 @@
             top: 0;
             padding-top: 20px;
             transition: all 0.3s ease;
-            overflow: visible;
+            overflow: hidden;
             z-index: 1000;
             box-shadow: var(--shadow-soft);
         }
@@ -230,20 +230,7 @@
         }
         
         .submenu {
-            position: absolute;
-            left: 100%;
-            top: 0;
-            min-width: 180px;
-            background: linear-gradient(180deg, var(--primary-main) 0%, var(--primary-light) 100%);
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            opacity: 0 !important;
-            visibility: hidden !important;
-            transform: translateX(-10px);
-            transition: all 0.3s ease;
-            z-index: 1001;
-            margin-left: 5px;
-            pointer-events: none;
+            display: none;
         }
         
         .sidebar:hover .nav-item-with-submenu:hover .submenu {
@@ -338,7 +325,7 @@
         
         /* Ajuste do conteúdo principal */
         .main-content {
-            margin-left: 60px;
+            margin-left: 200px;
             flex: 1;
             padding: 20px;
             transition: all 0.3s ease;
@@ -348,6 +335,39 @@
         
         .sidebar:hover + .main-content {
             margin-left: 200px;
+        }
+
+        /* Retrátil: estados expandido/colapsado controlados por classe no body */
+        .sidebar-collapsed .sidebar {
+            width: 60px;
+        }
+
+        .sidebar-collapsed .main-content {
+            margin-left: 60px;
+        }
+
+        /* Mostrar/ocultar textos dos itens ao retrair */
+        .sidebar .nav-link span {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .sidebar-collapsed .nav-pills .nav-link span {
+            opacity: 0;
+        }
+
+        /* Botão de retrair/expandir */
+        .toggle-sidebar-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.4);
+            color: var(--text-primary);
+            border-radius: 6px;
+            padding: 4px 8px;
+            cursor: pointer;
+            line-height: 1;
         }
 
         /* Estilos para as ações rápidas */
@@ -795,7 +815,6 @@
             border: 1px solid #ced4da;
             border-radius: 0.25rem;
         }
-        
         .ql-editor {
             font-size: 13px;
             line-height: 1.5;
@@ -1590,7 +1609,6 @@
             font-size: 0.9rem;
             font-weight: 600;
         }
-
         .prescricao-padrao-card .btn-usar-template {
             font-size: 0.8rem;
             padding: 0.25rem 0.75rem;
@@ -2004,6 +2022,9 @@ function abrirImpressoesEnfermagem() {
 
 <!-- Menu Lateral -->
 <div class="sidebar">
+    <button id="btnToggleSidebar" class="toggle-sidebar-btn" title="Expandir/retrair">
+        <i class="fas fa-bars"></i>
+    </button>
     <nav class="nav nav-pills flex-column">
         <!-- Menu Principal -->
         <div class="menu-section">
@@ -2025,30 +2046,10 @@ function abrirImpressoesEnfermagem() {
             </a>
             
             <!-- Menu Enfermagem com Submenu -->
-            <div class="nav-item-with-submenu">
-                <a class="nav-link active" href="#" data-target="evolucaoEnfermagemSection">
-                    <i class="fas fa-user-nurse"></i>
-                    <span>Enfermagem</span>
-                </a>
-                <div class="submenu">
-                    <a class="nav-link" href="#" data-target="admissaoEnfermagemSection">
-                        <i class="fas fa-user-plus me-2"></i>
-                        <span>Admissão</span>
-                    </a>
-                    <a class="nav-link" href="#" data-target="evolucaoEnfermagemSection">
-                        <i class="fas fa-heartbeat me-2"></i>
-                        <span>Evolução</span>
-                    </a>
-                    <a class="nav-link" href="#" data-target="prescricaoEnfermagemSection">
-                        <i class="fas fa-prescription-bottle-alt me-2"></i>
-                        <span>Prescrição</span>
-                    </a>
-                    <a class="nav-link" href="#" data-target="saeSection">
-                        <i class="fas fa-clipboard-check me-2"></i>
-                        <span>SAE</span>
-                    </a>
-                </div>
-            </div>
+            <a class="nav-link active" href="#" data-target="evolucaoEnfermagemSection">
+                <i class="fas fa-user-nurse"></i>
+                <span>Enfermagem</span>
+            </a>
             
             <a class="nav-link" href="#" data-target="examesSection">
                 <i class="fas fa-vial"></i>
@@ -2073,7 +2074,6 @@ function abrirImpressoesEnfermagem() {
         </div>
     </nav>
 </div>
-
 <!-- Conteúdo Principal -->
 <div class="main-content">
     <div class="container-fluid py-4">
@@ -2719,206 +2719,264 @@ function abrirImpressoesEnfermagem() {
                 </div>
             </div>
         </div>
-
-        <!-- Seção de Admissão de Enfermagem -->
-        <div id="admissaoEnfermagemSection" class="content-section">
-            <!-- Admissão de Enfermagem -->
+        <!-- Seção de Enfermagem com Abas -->
+        <div id="evolucaoEnfermagemSection" class="content-section active">
             <div class="card shadow-sm mb-4">
-                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-user-plus me-2"></i>Admissão de Enfermagem</h5>
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-user-nurse me-2"></i>Enfermagem</h5>
                     {% if session.get('cargo')|lower|trim == 'enfermeiro' %}
-                    <button class="btn btn-light btn-sm" id="btn-editar-admissao">
-                        <i class="fas fa-edit me-1"></i>Editar Admissão
+                    <button id="btnAcaoEnfermagem" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalEnfermagemEvolucao">
+                        <i class="fas fa-plus me-1"></i><span>Nova Evolução</span>
                     </button>
                     {% endif %}
                 </div>
-                <div class="card-body">
-                    <div id="admissao-texto-container">
-                        <div class="texto-admissao p-3 bg-light rounded border" style="min-height: 120px;">
-                            {% if internacao.admissao_enfermagem %}
-                                {{ internacao.admissao_enfermagem | safe }}
-                            {% else %}
-                                <div class="text-muted text-center py-4">
-                                    <i class="fas fa-clipboard-list fa-2x mb-2"></i>
-                                    <p class="mb-0">Nenhuma admissão de enfermagem registrada para este paciente.</p>
+                <div class="card-body p-0">
+                    <!-- Abas de Enfermagem -->
+                    <ul class="nav nav-tabs" id="enfermagemTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="tab-evolucoes" data-bs-toggle="tab" data-bs-target="#pane-evolucoes" type="button" role="tab">
+                                <i class="fas fa-notes-medical me-2"></i>Evoluções
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="tab-admissao" data-bs-toggle="tab" data-bs-target="#pane-admissao" type="button" role="tab">
+                                <i class="fas fa-user-plus me-2"></i>Admissão
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="tab-prescricoes" data-bs-toggle="tab" data-bs-target="#pane-prescricoes" type="button" role="tab">
+                                <i class="fas fa-prescription-bottle-alt me-2"></i>Prescrições
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="tab-sae" data-bs-toggle="tab" data-bs-target="#pane-sae" type="button" role="tab">
+                                <i class="fas fa-clipboard-check me-2"></i>SAE
+                            </button>
+                        </li>
+                    </ul>
+                    <div class="tab-content p-4" id="enfermagemTabContent">
+                        <!-- Evoluções -->
+                        <div class="tab-pane fade show active" id="pane-evolucoes" role="tabpanel">
+                            <!-- Resumo -->
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <div class="card border-0 bg-light">
+                                        <div class="card-body py-2">
+                                            <div class="row text-center">
+                                                <div class="col-4">
+                                                    <div class="p-2 bg-info bg-opacity-10 rounded">
+                                                        <div class="h5 mb-1 text-info" id="contador-evolucoes-total">0</div>
+                                                        <small class="text-muted">Total</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="p-2 bg-success bg-opacity-10 rounded">
+                                                        <div class="h5 mb-1 text-success" id="contador-evolucoes-hoje-resumo">0</div>
+                                                        <small class="text-muted">Hoje</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="p-2 bg-secondary bg-opacity-10 rounded">
+                                                        <div class="h5 mb-1 text-secondary" id="contador-evolucoes-antigas">0</div>
+                                                        <small class="text-muted">Anteriores</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            {% endif %}
+                            </div>
+                            <!-- Tabela de Evoluções -->
+                            <div class="card border-info border-opacity-25">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead class="table-info">
+                                            <tr>
+                                                <th scope="col" style="width: 20%" class="fw-semibold">
+                                                    <i class="fas fa-clock me-1"></i>Data/Hora
+                                                </th>
+                                                <th scope="col" style="width: 25%" class="fw-semibold">
+                                                    <i class="fas fa-user-nurse me-1"></i>Enfermeiro(a)
+                                                </th>
+                                                <th scope="col" style="width: 55%" class="fw-semibold">
+                                                    <i class="fas fa-notes-medical me-1"></i>Evolução
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tabela-evolucoes-enfermagem">
+                                            <tr>
+                                                <td colspan="3" class="text-center py-4">
+                                                    <div class="spinner-border text-info" role="status">
+                                                        <span class="visually-hidden">Carregando...</span>
+                                                    </div>
+                                                    <p class="text-muted mt-2 mb-0">Carregando evoluções...</p>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div id="admissao-form-container" style="display: none;">
-                        <div class="mb-3">
-                            <input type="hidden" id="internacao_id" value="{{ internacao.id }}">
-                            <label for="admissao_enfermagem" class="form-label fw-bold">Texto da Admissão</label>
-                            <textarea class="form-control" id="admissao_enfermagem" rows="8" 
-                                      placeholder="Digite aqui a admissão de enfermagem...">{{ internacao.admissao_enfermagem or '' }}</textarea>
-                        </div>
-                        <div class="d-flex justify-content-end gap-2">
-                            <button id="btn-cancelar-admissao" class="btn btn-outline-secondary">
-                                <i class="fas fa-times me-1"></i>Cancelar
-                            </button>
-                            <button id="btn-salvar-admissao" class="btn btn-success">
-                                <i class="fas fa-save me-1"></i>Salvar Admissão
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Seção de Evoluções de Enfermagem -->
-        <div id="evolucaoEnfermagemSection" class="content-section active">
-            <!-- Evoluções de Enfermagem -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-notes-medical me-2"></i>Evoluções de Enfermagem</h5>
-                    <div class="d-flex gap-2">
-                        {% if session.get('cargo')|lower|trim == 'enfermeiro' %}
-                        <button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#modalEnfermagemEvolucao">
-                            <i class="fas fa-plus me-1"></i>Nova Evolução
-                        </button>
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="card-body">
-                    <!-- Resumo -->
-                    <div class="row mb-3">
-                        <div class="col-12">
-                            <div class="card border-0 bg-light">
-                                <div class="card-body py-2">
-                                    <div class="row text-center">
-                                        <div class="col-4">
-                                            <div class="p-2 bg-info bg-opacity-10 rounded">
-                                                <div class="h5 mb-1 text-info" id="contador-evolucoes-total">0</div>
-                                                <small class="text-muted">Total</small>
-                                            </div>
+                        <!-- Admissão -->
+                        <div class="tab-pane fade" id="pane-admissao" role="tabpanel">
+                            <div id="admissao-texto-container">
+                                <div class="texto-admissao p-3 bg-light rounded border" style="min-height: 120px;">
+                                    {% if internacao.admissao_enfermagem %}
+                                        {{ internacao.admissao_enfermagem | safe }}
+                                    {% else %}
+                                        <div class="text-muted text-center py-4">
+                                            <i class="fas fa-clipboard-list fa-2x mb-2"></i>
+                                            <p class="mb-0">Nenhuma admissão de enfermagem registrada para este paciente.</p>
                                         </div>
-                                        <div class="col-4">
-                                            <div class="p-2 bg-success bg-opacity-10 rounded">
-                                                <div class="h5 mb-1 text-success" id="contador-evolucoes-hoje-resumo">0</div>
-                                                <small class="text-muted">Hoje</small>
-                                            </div>
-                                        </div>
-                                        <div class="col-4">
-                                            <div class="p-2 bg-secondary bg-opacity-10 rounded">
-                                                <div class="h5 mb-1 text-secondary" id="contador-evolucoes-antigas">0</div>
-                                                <small class="text-muted">Anteriores</small>
-                                            </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div id="admissao-form-container" style="display: none;">
+                                <div class="mb-3">
+                                    <input type="hidden" id="internacao_id" value="{{ internacao.id }}">
+                                    <label for="admissao_enfermagem" class="form-label fw-bold">Texto da Admissão</label>
+                                    <textarea class="form-control" id="admissao_enfermagem" rows="8" placeholder="Digite aqui a admissão de enfermagem...">{{ internacao.admissao_enfermagem or '' }}</textarea>
+                                </div>
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button id="btn-cancelar-admissao" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times me-1"></i>Cancelar
+                                    </button>
+                                    <button id="btn-salvar-admissao" class="btn btn-success">
+                                        <i class="fas fa-save me-1"></i>Salvar Admissão
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Prescrições -->
+                        <div class="tab-pane fade" id="pane-prescricoes" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead class="table-warning">
+                                        <tr>
+                                            <th scope="col" style="width: 15%">
+                                                <i class="fas fa-clock me-1"></i>Data/Hora
+                                            </th>
+                                            <th scope="col" style="width: 10%">
+                                                <i class="fas fa-user-nurse me-1"></i>Enfermeiro
+                                            </th>
+                                            <th scope="col" style="width: 65%">
+                                                <i class="fas fa-prescription me-1"></i>Prescrição
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="listaPrescricoesEnfermagem">
+                                        <tr>
+                                            <td colspan="3" class="text-center py-4">
+                                                <div class="spinner-border text-warning" role="status">
+                                                    <span class="visually-hidden">Carregando...</span>
+                                                </div>
+                                                <p class="text-muted mt-2 mb-0">Carregando prescrições...</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- SAE -->
+                        <div class="tab-pane fade" id="pane-sae" role="tabpanel">
+                            <div class="card shadow-sm mb-4">
+                                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Sistematização da Assistência de Enfermagem (SAE)</h5>
+                                    {% if session.get('cargo')|lower|trim == 'enfermeiro' %}
+                                    <div>
+                                        <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalSAE">
+                                            <i class="fas fa-plus-circle"></i> Nova SAE
+                                        </button>
+                                        <button class="btn btn-light btn-sm" id="btn-historico-sae">
+                                            <i class="fas fa-history"></i> Ver Histórico
+                                        </button>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="card-body">
+                                    <div id="listaSAE">
+                                        <p class="text-center text-muted">Carregando dados da SAE...</p>
+                                    </div>
+                                    <div id="historicoSAE" style="display: none;">
+                                        <h6 class="mb-3 text-secondary"><i class="fas fa-history me-2"></i> Histórico de SAE</h6>
+                                        <div id="listaHistoricoSAE">
+                                            <p class="text-center text-muted">Carregando histórico...</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Todas as Evoluções em uma única tabela -->
-                    <div class="card border-info border-opacity-25">
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-info">
-                                    <tr>
-                                        <th scope="col" style="width: 20%" class="fw-semibold">
-                                            <i class="fas fa-clock me-1"></i>Data/Hora
-                                        </th>
-                                        <th scope="col" style="width: 25%" class="fw-semibold">
-                                            <i class="fas fa-user-nurse me-1"></i>Enfermeiro(a)
-                                        </th>
-                                        <th scope="col" style="width: 55%" class="fw-semibold">
-                                            <i class="fas fa-notes-medical me-1"></i>Evolução
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabela-evolucoes-enfermagem">
-                                    <tr>
-                                        <td colspan="3" class="text-center py-4">
-                                            <div class="spinner-border text-info" role="status">
-                                                <span class="visually-hidden">Carregando...</span>
-                                            </div>
-                                            <p class="text-muted mt-2 mb-0">Carregando evoluções...</p>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Seção de Prescrições de Enfermagem -->
-        <div id="prescricaoEnfermagemSection" class="content-section">
-            <!-- Prescrições de Enfermagem -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-warning text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-prescription-bottle-alt me-2"></i>Prescrições de Enfermagem</h5>
-                    {% if session.get('cargo')|lower|trim == 'enfermeiro' %}
-                    <button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#modalPrescricaoEnfermagem">
-                        <i class="fas fa-plus-circle me-1"></i>Nova Prescrição
-                    </button>
-                    {% endif %}
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead class="table-warning">
-                                <tr>
-                                    <th scope="col" style="width: 15%">
-                                        <i class="fas fa-clock me-1"></i>Data/Hora
-                                    </th>
-                                    <th scope="col" style="width: 10%">
-                                        <i class="fas fa-user-nurse me-1"></i>Enfermeiro
-                                    </th>
-                                    <th scope="col" style="width: 65%">
-                                        <i class="fas fa-prescription me-1"></i>Prescrição
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody id="listaPrescricoesEnfermagem">
-                                <tr>
-                                    <td colspan="3" class="text-center py-4">
-                                        <div class="spinner-border text-warning" role="status">
-                                            <span class="visually-hidden">Carregando...</span>
-                                        </div>
-                                        <p class="text-muted mt-2 mb-0">Carregando prescrições...</p>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- Script para alternar ação do botão único conforme a aba -->
+        <script>
+        (function() {
+            const btn = document.getElementById('btnAcaoEnfermagem');
+            if (!btn) return;
 
-        <!-- Seção de SAE -->
-        <div id="saeSection" class="content-section">
-            <!-- SAE - Sistematização da Assistência de Enfermagem -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Sistematização da Assistência de Enfermagem (SAE)</h5>
-                    {% if session.get('cargo')|lower|trim == 'enfermeiro' %}
-                    <div>
-                        <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalSAE">
-                            <i class="fas fa-plus-circle"></i> Nova SAE
-                        </button>
-                        <button class="btn btn-light btn-sm" id="btn-historico-sae">
-                            <i class="fas fa-history"></i> Ver Histórico
-                        </button>
-                    </div>
-                    {% endif %}
-                </div>
-                <div class="card-body">
-                    <div id="listaSAE">
-                        <p class="text-center text-muted">Carregando dados da SAE...</p>
-                    </div>
-                    <div id="historicoSAE" style="display: none;">
-                        <h6 class="mb-3 text-secondary"><i class="fas fa-history me-2"></i> Histórico de SAE</h6>
-                        <div id="listaHistoricoSAE">
-                            <p class="text-center text-muted">Carregando histórico...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+            function setAcaoEvolucoes() {
+                btn.innerHTML = '<i class="fas fa-plus me-1"></i><span>Nova Evolução</span>';
+                btn.removeAttribute('onclick');
+                btn.setAttribute('data-bs-toggle', 'modal');
+                btn.setAttribute('data-bs-target', '#modalEnfermagemEvolucao');
+            }
+
+            function setAcaoAdmissao() {
+                btn.innerHTML = '<i class="fas fa-edit me-1"></i><span>Editar Admissão</span>';
+                btn.removeAttribute('data-bs-toggle');
+                btn.removeAttribute('data-bs-target');
+                btn.onclick = function() {
+                    const texto = document.getElementById('admissao-texto-container');
+                    const form = document.getElementById('admissao-form-container');
+                    if (texto && form) {
+                        texto.style.display = 'none';
+                        form.style.display = '';
+                        const ta = document.getElementById('admissao_enfermagem');
+                        if (ta) ta.focus();
+                    }
+                };
+            }
+
+            function setAcaoPrescricoes() {
+                btn.innerHTML = '<i class="fas fa-plus-circle me-1"></i><span>Nova Prescrição</span>';
+                btn.removeAttribute('onclick');
+                btn.setAttribute('data-bs-toggle', 'modal');
+                btn.setAttribute('data-bs-target', '#modalPrescricaoEnfermagem');
+            }
+
+            function setAcaoSAE() {
+                btn.innerHTML = '<i class="fas fa-plus-circle me-1"></i><span>Nova SAE</span>';
+                btn.removeAttribute('onclick');
+                btn.setAttribute('data-bs-toggle', 'modal');
+                btn.setAttribute('data-bs-target', '#modalSAE');
+            }
+
+            // Inicializar para a aba padrão
+            setAcaoEvolucoes();
+
+            // Ouvir mudança de abas (Bootstrap 5)
+            const tabs = document.getElementById('enfermagemTabs');
+            if (tabs) {
+                tabs.addEventListener('shown.bs.tab', function (event) {
+                    const targetId = event.target && event.target.id;
+                    if (targetId === 'tab-evolucoes') setAcaoEvolucoes();
+                    else if (targetId === 'tab-admissao') setAcaoAdmissao();
+                    else if (targetId === 'tab-prescricoes') setAcaoPrescricoes();
+                    else if (targetId === 'tab-sae') setAcaoSAE();
+                });
+            }
+        })();
+        </script>
+
+        <!-- (Seções antigas de Admissão e Prescrições removidas em favor das abas) -->
+
+        <!-- (Seção SAE removida; conteúdo movido para a aba SAE) -->
 
         <!-- Remover seção imagensSection -->
     </div>
@@ -3077,8 +3135,6 @@ function abrirImpressoesEnfermagem() {
         </div>
     </div>
 </div>
-
-
 <!-- Modal SAE -->
 <div class="modal fade" id="modalSAE" tabindex="-1" aria-labelledby="modalSAELabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -3675,7 +3731,6 @@ function abrirImpressoesEnfermagem() {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
 <!-- Quill Rich Text Editor -->
 <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 
@@ -4028,8 +4083,25 @@ function abrirImpressoesEnfermagem() {
                         carregarAtestadosSomenteLeitura();
                     }
                 }
+
+                // Se houver data-tab-target, trocar a aba dentro de Enfermagem
+                const tabTarget = this.getAttribute('data-tab-target');
+                if (tabTarget) {
+                    const tabButton = document.querySelector(tabTarget);
+                    if (tabButton) {
+                        tabButton.click();
+                    }
+                }
             });
         });
+
+        // Toggle retrátil da sidebar
+        const btnToggleSidebar = document.getElementById('btnToggleSidebar');
+        if (btnToggleSidebar) {
+            btnToggleSidebar.addEventListener('click', function () {
+                document.body.classList.toggle('sidebar-collapsed');
+            });
+        }
 
         // Ativar a aba de evolução de enfermagem por padrão
         document.querySelector('.sidebar .nav-link[data-target="evolucaoEnfermagemSection"]').click();
@@ -4193,9 +4265,6 @@ function abrirImpressoesEnfermagem() {
                 });
             }
 });
-
-
-
         // Função para carregar evoluções de enfermagem
         function carregarEvolucoesEnfermagem() {
             console.log('🔄 Iniciando carregamento de evoluções de enfermagem...');
@@ -4924,7 +4993,6 @@ function abrirImpressoesEnfermagem() {
             atualizarTabelaMedicamentos();
             $('#modalPrescricaoLabel').text('Nova Prescrição');
         }
-        
         // Função para editar prescrição
         function editarPrescricao(prescricaoId) {
             // Limpar o formulário primeiro
@@ -5703,7 +5771,6 @@ function visualizarAprazamentosMedicamento(atendimentoId, nomeMedicamento) {
         }
     });
 }
-
 // Modificar a função que renderiza as prescrições para incluir o novo botão
 function renderizarMedicamentosPrescricao(medicamentos, prescricao) {
     let html = `
@@ -6499,7 +6566,6 @@ $(document).on('click', '.btn-ver-aprazamentos', function() {
     }, 1000);
 
     // === FIM DAS FUNÇÕES DE EVOLUÇÃO MÉDICA ===
-
     // === FUNÇÃO PARA IMPRIMIR EVOLUÇÃO ===
     
     // Função para imprimir evolução médica
