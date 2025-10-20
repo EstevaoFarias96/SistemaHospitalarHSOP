@@ -880,29 +880,66 @@ class PacientesInternadosManager {
 
     async fecharProntuario(internacaoId) {
         try {
+            // Mostrar indicador de carregamento
+            const btnFechar = document.querySelector(`[data-internacao-id="${internacaoId}"].btn-fechar-prontuario`);
+            if (btnFechar) {
+                btnFechar.disabled = true;
+                btnFechar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Fechando...';
+            }
+
+            console.log('Iniciando fechamento do prontuário:', internacaoId);
+
             // Enviar status_final escolhido (se houver) para o backend
             let statusFinal = this.condutaPorInternacao ? this.condutaPorInternacao.get(internacaoId) : undefined;
             if (!statusFinal) {
                 try { statusFinal = localStorage.getItem(`conduta_final_${internacaoId}`) || undefined; } catch(e) {}
             }
-            const response = await fetch(CONFIG.API_ENDPOINTS.FECHAR_PRONTUARIO(internacaoId), {
+
+            console.log('Status final a ser enviado:', statusFinal);
+
+            const url = CONFIG.API_ENDPOINTS.FECHAR_PRONTUARIO(internacaoId);
+            console.log('URL da requisição:', url);
+
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(statusFinal ? { status_final: statusFinal } : {})
             });
 
+            console.log('Status da resposta:', response.status);
+
+            if (!response.ok) {
+                throw new Error(`Erro HTTP ${response.status}: ${response.statusText}`);
+            }
+
             const data = await response.json();
+            console.log('Resposta do servidor:', data);
 
             if (data.success) {
+                // Limpar localStorage
+                try { localStorage.removeItem(`conduta_final_${internacaoId}`); } catch(e) {}
+                if (this.condutaPorInternacao) {
+                    this.condutaPorInternacao.delete(internacaoId);
+                }
+
                 // Remover o paciente da tabela com animação
                 this.removerPacienteDaTabela(internacaoId);
                 this.mostrarNotificacao('Prontuário fechado com sucesso!', 'success');
+                
+                console.log('Prontuário fechado com sucesso!');
             } else {
                 throw new Error(data.message || 'Erro ao fechar prontuário');
             }
         } catch (error) {
             console.error('Erro ao fechar prontuário:', error);
             this.mostrarNotificacao('Erro ao fechar prontuário: ' + error.message, 'error');
+            
+            // Restaurar botão em caso de erro
+            const btnFechar = document.querySelector(`[data-internacao-id="${internacaoId}"].btn-fechar-prontuario`);
+            if (btnFechar) {
+                btnFechar.disabled = false;
+                btnFechar.innerHTML = '<i class="fas fa-folder-minus"></i> Fechar Prontuário';
+            }
         }
     }
 

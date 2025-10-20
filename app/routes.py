@@ -224,7 +224,7 @@ def observacao_paciente():
                     data_internacao=agora,
                     leito='Observação',
                     carater_internacao='Observação',
-                    dieta='1'
+                    dieta=None  # Dieta NULL durante a internação/observação
                 )
                 db.session.add(internacao)
                 db.session.flush()
@@ -1671,19 +1671,27 @@ def listar_pacientes_internados():
         
         # Buscar pacientes com status "Internado" na tabela atendimentos
         # Inclui tanto pacientes ainda internados quanto aqueles com alta mas com prontuário para fechar
+        # Exclui APENAS pacientes com dieta = '1' (prontuário fechado)
+        # Inclui pacientes com dieta NULL ou dieta começando com 'PENDENTE:' (alta definida mas prontuário não fechado)
         internacoes = db.session.query(Internacao).join(
             Atendimento, Internacao.atendimento_id == Atendimento.id
         ).filter(
-            Atendimento.status == 'Internado'
+            Atendimento.status == 'Internado',
+            db.or_(Internacao.dieta.is_(None), Internacao.dieta != '1')
         ).all()
         
+        logging.info(f"Total de internações encontradas: {len(internacoes)}")
+        
         for internacao in internacoes:
+            logging.info(f"Processando internação {internacao.atendimento_id}: dieta={internacao.dieta}, data_alta={internacao.data_alta}")
             paciente = Paciente.query.get(internacao.paciente_id)
             atendimento = Atendimento.query.get(internacao.atendimento_id)
             
             if paciente and atendimento:
                 # Determinar se é um paciente com prontuário para fechar
                 prontuario_para_fechar = internacao.data_alta is not None and atendimento.status == 'Internado'
+                
+                logging.info(f"Adicionando à lista: {paciente.nome} - Status: {atendimento.status}, Dieta: {internacao.dieta}")
                 
                 pacientes_list.append({
                     'atendimento_id': internacao.atendimento_id,
@@ -3973,7 +3981,9 @@ def registrar_alta_paciente(internacao_id):
         internacao.cuidados_gerais = dados.get('cuidados_gerais') or internacao.cuidados_gerais
         internacao.data_alta = datetime.now(timezone(timedelta(hours=-3)))  # Horário de Brasília
 
-        # Se informado, aplicar status final do atendimento no momento da conduta
+        # IMPORTANTE: NÃO mudar o status do atendimento aqui!
+        # O status continua 'Internado' até que o prontuário seja fechado
+        # Armazenar temporariamente o status_final desejado no campo dieta (prefixado com PENDENTE:)
         try:
             atendimento = Atendimento.query.get(internacao_id)
         except Exception:
@@ -3994,9 +4004,11 @@ def registrar_alta_paciente(internacao_id):
                 'a pedido': 'Alta a pedido',
             }
             finais_permitidos = {'Alta', 'Óbito', 'Transferido', 'Evasão', 'Alta a pedido'}
-            desejado = status_map.get(status_raw) if status_raw else None
+            desejado = status_map.get(status_raw) if status_raw else 'Alta'
             if desejado in finais_permitidos:
-                atendimento.status = desejado
+                # Armazenar o status desejado no campo dieta temporariamente (será usado ao fechar prontuário)
+                internacao.dieta = f'PENDENTE:{desejado}'
+                logging.info(f"Status pendente armazenado: {desejado} (será aplicado ao fechar prontuário)")
 
         # Atualizar ocupação do leito
         if internacao.leito:
@@ -8468,38 +8480,37 @@ def fechar_prontuario(internacao_id):
                 'message': 'Só é possível fechar prontuário de pacientes que já tiveram alta.'
             }), 400
         
+        # Extrair o status final pendente armazenado no campo dieta
+        status_final = 'Alta'  # Padrão
+        if internacao.dieta and internacao.dieta.startswith('PENDENTE:'):
+            # Extrair o status após 'PENDENTE:'
+            status_final = internacao.dieta.split(':', 1)[1].strip()
+            logging.info(f"Status final extraído do campo dieta: {status_final}")
+        else:
+            # Se não houver status pendente, verificar se foi enviado no payload
+            dados = request.get_json(silent=True) or {}
+            status_raw = (dados.get('status_final') or dados.get('status') or '').strip().lower()
+            if status_raw:
+                status_map = {
+                    'alta': 'Alta',
+                    'obito': 'Óbito',
+                    'óbito': 'Óbito',
+                    'transferencia': 'Transferido',
+                    'transferência': 'Transferido',
+                    'transferido': 'Transferido',
+                    'evasao': 'Evasão',
+                    'evasão': 'Evasão',
+                    'alta a pedido': 'Alta a pedido',
+                    'a pedido': 'Alta a pedido',
+                }
+                status_final = status_map.get(status_raw, 'Alta')
+        
+        # AGORA SIM: Aplicar o status final ao atendimento
+        atendimento.status = status_final
+        logging.info(f"Status do atendimento alterado para: {status_final}")
+        
         # Fechar o prontuário definindo dieta = '1'
         internacao.dieta = '1'
-        
-        # Determinar e aplicar o status final do atendimento
-        # Permitidos: Alta, Óbito, Transferido, Evasão, Alta a pedido
-        dados = request.get_json(silent=True) or {}
-        status_raw = (dados.get('status_final') or dados.get('status') or '').strip().lower()
-        
-        # Normalização simples de acentos/sinônimos
-        status_map = {
-            'alta': 'Alta',
-            'obito': 'Óbito',
-            'óbito': 'Óbito',
-            'transferencia': 'Transferido',
-            'transferência': 'Transferido',
-            'transferido': 'Transferido',
-            'evasao': 'Evasão',
-            'evasão': 'Evasão',
-            'alta a pedido': 'Alta a pedido',
-            'a pedido': 'Alta a pedido',
-        }
-        finais_permitidos = {'Alta', 'Óbito', 'Transferido', 'Evasão', 'Alta a pedido'}
-        desejado = status_map.get(status_raw) if status_raw else None
-        
-        # Se não veio no payload, manter se já estiver em um status final permitido; senão, usar 'Alta'
-        if not desejado:
-            if atendimento.status in finais_permitidos:
-                desejado = atendimento.status
-            else:
-                desejado = 'Alta'
-        
-        atendimento.status = desejado
         
         # Commit das alterações
         db.session.commit()
@@ -8507,7 +8518,7 @@ def fechar_prontuario(internacao_id):
         # Log da ação
         logging.info(
             f"Prontuário fechado pelo {current_user.cargo} {current_user.nome} (ID: {current_user.id}) "
-            f"para internação {internacao_id} - Status final: '{atendimento.status}'"
+            f"para internação {internacao_id} (dieta='1')"
         )
         
         return jsonify({
@@ -11863,8 +11874,8 @@ def definir_conduta():
             # Atualizar leito da internação
             internacao.leito = leito_selecionado
             
-            # ADICIONAR: Definir dieta = '1' para internação
-            internacao.dieta = '1'
+            # NÃO definir dieta aqui - ela deve ser NULL durante a internação
+            # A dieta só será definida como '1' quando o prontuário for fechado
             
             # Atualizar ocupação do leito
             leito.ocupacao_atual += 1
@@ -11894,8 +11905,11 @@ def definir_conduta():
             
         else:
             # Conduta: Alta, Transferido, A pedido ou Óbito
-            atendimento.status = conduta
+            # IMPORTANTE: NÃO mudar status aqui - manter 'Internado' até fechar prontuário
+            # Armazenar conduta pendente no campo dieta
+            internacao.dieta = f'PENDENTE:{conduta}'
             atendimento.conduta_final = f"{conduta.upper()} - {evolucao_medica_final}" if evolucao_medica_final else conduta.upper()
+            logging.info(f"Conduta pendente armazenada: {conduta} (será aplicada ao fechar prontuário)")
             
             # Atualizar observação com conduta final
             observacao.medico_conduta = current_user.nome
@@ -12273,8 +12287,8 @@ def adicionar_rn_internacao():
             cid_10_secundario=dados.get('cid_secundario', ''),
             data_internacao=agora,
             leito=dados.get('leito', 'Berçário'),
-            carater_internacao='Internação RN',
-            dieta=dados.get('dieta', 'Aleitamento materno')
+            carater_internacao='Internação RN'
+            # dieta NÃO é mais definida aqui - fica NULL até fechar prontuário
         )
         db.session.add(internacao)
         db.session.flush()
