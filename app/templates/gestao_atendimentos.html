@@ -1,0 +1,456 @@
+{% extends 'base_funcionarios.html' %}
+
+{% block title %}Gestão de Atendimentos - HSOP{% endblock %}
+
+{% block styles %}
+<style>
+    .stat-card {
+        border-left: 4px solid #0d6efd;
+        transition: all .2s;
+    }
+    .stat-card:hover {
+        box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+    }
+    .search-result-item {
+        padding: 10px;
+        border-bottom: 1px solid #e9ecef;
+        cursor: pointer;
+        transition: background-color .2s;
+    }
+    .search-result-item:hover {
+        background-color: #f8f9fa;
+    }
+    .badge-status {
+        font-size: .75rem;
+        padding: .3rem .6rem;
+    }
+    .timeline-item {
+        font-size: .85rem;
+        padding: .25rem 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="mb-1"><i class="fas fa-clipboard-list text-primary"></i> Gestão de Atendimentos</h3>
+            <p class="text-muted mb-0">Alterar status de atendimentos</p>
+        </div>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Total de Atendimentos</h6>
+                            <h3 class="mb-0">{{ total_atendimentos }}</h3>
+                        </div>
+                        <i class="fas fa-clipboard-check fa-2x text-primary opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card" style="border-left-color:#28a745">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Atendimentos Abertos</h6>
+                            <h3 class="mb-0">{{ atendimentos_abertos }}</h3>
+                        </div>
+                        <i class="fas fa-folder-open fa-2x text-success opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card" style="border-left-color:#dc3545">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Aguardando Triagem</h6>
+                            <h3 class="mb-0">{{ status_count.get('Aguardando Triagem', 0) }}</h3>
+                        </div>
+                        <i class="fas fa-hourglass-half fa-2x text-danger opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card" style="border-left-color:#ffc107">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Aguardando Médico</h6>
+                            <h3 class="mb-0">{{ status_count.get('Aguardando Médico', 0) }}</h3>
+                        </div>
+                        <i class="fas fa-user-md fa-2x text-warning opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Busca de Atendimento -->
+    <div class="card mb-3">
+        <div class="card-header bg-light">
+            <h6 class="mb-0"><i class="fas fa-search"></i> Buscar Atendimento</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="form-group">
+                        <label>Digite o ID do atendimento ou nome do paciente</label>
+                        <input type="text" id="searchAtendimento" class="form-control" placeholder="Ex: A1234567, João Silva" autocomplete="off">
+                        <small class="form-text text-muted">Mínimo 2 caracteres</small>
+                    </div>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button class="btn btn-primary btn-block" onclick="buscarAtendimento()">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                </div>
+            </div>
+            <!-- Resultados da busca -->
+            <div id="searchResults" class="mt-3" style="display: none;">
+                <h6 class="text-muted">Resultados da busca:</h6>
+                <div class="border rounded" id="resultsList" style="max-height: 400px; overflow-y: auto;">
+                    <!-- Preenchido dinamicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Últimos Atendimentos -->
+    <div class="card">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h6 class="mb-0"><i class="fas fa-clock"></i> Últimos Atendimentos</h6>
+            <small class="text-muted">Últimos 100 registros</small>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Paciente</th>
+                            <th>Data/Hora</th>
+                            <th>Status Atual</th>
+                            <th>Classificação</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for atend in atendimentos %}
+                        <tr>
+                            <td><strong>{{ atend.id }}</strong></td>
+                            <td>{{ atend.paciente.nome }}</td>
+                            <td>
+                                {{ atend.data_atendimento.strftime('%d/%m/%Y') if atend.data_atendimento else '-' }}
+                                {{ atend.hora_atendimento.strftime('%H:%M') if atend.hora_atendimento else '' }}
+                            </td>
+                            <td>
+                                {% if atend.status %}
+                                    {% if atend.status == 'Alta' %}
+                                        <span class="badge badge-status badge-success">{{ atend.status }}</span>
+                                    {% elif atend.status == 'Aguardando Triagem' %}
+                                        <span class="badge badge-status badge-danger">{{ atend.status }}</span>
+                                    {% elif atend.status == 'Aguardando Médico' %}
+                                        <span class="badge badge-status badge-warning">{{ atend.status }}</span>
+                                    {% elif atend.status in ['Em Observação', 'Internado'] %}
+                                        <span class="badge badge-status badge-info">{{ atend.status }}</span>
+                                    {% elif atend.status in ['Evasão', 'Óbito'] %}
+                                        <span class="badge badge-status badge-dark">{{ atend.status }}</span>
+                                    {% else %}
+                                        <span class="badge badge-status badge-secondary">{{ atend.status }}</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">Sem status</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if atend.classificacao_risco %}
+                                    {% if atend.classificacao_risco == 'Vermelho' %}
+                                        <span class="badge badge-danger">{{ atend.classificacao_risco }}</span>
+                                    {% elif atend.classificacao_risco == 'Laranja' %}
+                                        <span class="badge" style="background-color: #fd7e14; color: white;">{{ atend.classificacao_risco }}</span>
+                                    {% elif atend.classificacao_risco == 'Amarelo' %}
+                                        <span class="badge badge-warning">{{ atend.classificacao_risco }}</span>
+                                    {% elif atend.classificacao_risco == 'Verde' %}
+                                        <span class="badge badge-success">{{ atend.classificacao_risco }}</span>
+                                    {% elif atend.classificacao_risco == 'Azul' %}
+                                        <span class="badge badge-primary">{{ atend.classificacao_risco }}</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">{{ atend.classificacao_risco }}</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-primary" onclick="alterarStatus('{{ atend.id }}')" title="Alterar status">
+                                    <i class="fas fa-edit"></i> Alterar Status
+                                </button>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">Nenhum atendimento encontrado</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Alteração de Status -->
+<div class="modal fade" id="modalAlterarStatus" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title"><i class="fas fa-exclamation-triangle"></i> Alterar Status do Atendimento</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i> <strong>ATENÇÃO:</strong> Esta alteração será registrada no log do sistema com seu nome e motivo.
+                </div>
+
+                <div id="dadosAtendimento" class="mb-4">
+                    <h6 class="border-bottom pb-2 mb-3">Dados do Atendimento</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>ID:</strong> <span id="atendId">-</span></p>
+                            <p><strong>Paciente:</strong> <span id="atendPaciente">-</span></p>
+                            <p><strong>Data/Hora:</strong> <span id="atendDataHora">-</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Status Atual:</strong> <span id="atendStatusAtual" class="badge badge-secondary">-</span></p>
+                            <p><strong>Classificação:</strong> <span id="atendClassificacao">-</span></p>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <h6>Timeline do Atendimento:</h6>
+                        <div class="timeline-item"><i class="fas fa-check text-muted"></i> <strong>Triagem:</strong> <span id="atendTriagem">-</span></div>
+                        <div class="timeline-item"><i class="fas fa-check text-muted"></i> <strong>Consulta Médica:</strong> <span id="atendConsulta">-</span></div>
+                        <div class="timeline-item"><i class="fas fa-check text-muted"></i> <strong>Alta:</strong> <span id="atendAlta">-</span></div>
+                    </div>
+                </div>
+
+                <form id="formAlterarStatus">
+                    <input type="hidden" id="atendimentoId">
+                    
+                    <div class="form-group">
+                        <label>Novo Status <span class="text-danger">*</span></label>
+                        <select class="form-control" id="novoStatus" required>
+                            <option value="">Selecione...</option>
+                            <option value="Aguardando Triagem">Aguardando Triagem</option>
+                            <option value="Aguardando Médico">Aguardando Médico</option>
+                            <option value="Em Atendimento">Em Atendimento</option>
+                            <option value="Em Observação">Em Observação</option>
+                            <option value="Aguardando Medicação">Aguardando Medicação</option>
+                            <option value="Medicamentos Dispensados">Medicamentos Dispensados</option>
+                            <option value="Internado">Internado</option>
+                            <option value="Alta">Alta</option>
+                            <option value="Evasão">Evasão</option>
+                            <option value="Óbito">Óbito</option>
+                            <option value="Transferência">Transferência</option>
+                            <option value="Finalizado">Finalizado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Motivo da Alteração <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="motivoAlteracao" rows="3" placeholder="Descreva o motivo desta alteração manual..." required></textarea>
+                        <small class="form-text text-muted">Este motivo será registrado no log</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-warning" onclick="salvarNovoStatus()">
+                    <i class="fas fa-save"></i> Confirmar Alteração
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Buscar ao pressionar Enter
+$('#searchAtendimento').on('keypress', function(e) {
+    if (e.which === 13) {
+        buscarAtendimento();
+    }
+});
+
+function buscarAtendimento() {
+    const termo = $('#searchAtendimento').val().trim();
+    
+    if (termo.length < 2) {
+        alert('Digite ao menos 2 caracteres para buscar');
+        return;
+    }
+    
+    $.ajax({
+        url: '/administrador/atendimentos/buscar',
+        method: 'GET',
+        data: { termo: termo },
+        success: function(response) {
+            if (response.success) {
+                exibirResultados(response.atendimentos);
+            }
+        },
+        error: function(xhr) {
+            const response = xhr.responseJSON;
+            alert(response ? response.message : 'Erro ao buscar atendimentos');
+        }
+    });
+}
+
+function exibirResultados(atendimentos) {
+    const container = $('#resultsList');
+    container.empty();
+    
+    if (atendimentos.length === 0) {
+        container.html('<div class="p-3 text-center text-muted">Nenhum atendimento encontrado</div>');
+    } else {
+        atendimentos.forEach(function(a) {
+            const statusBadge = getStatusBadge(a.status);
+            const riscoBadge = getRiscoBadge(a.classificacao_risco);
+            
+            const item = `
+                <div class="search-result-item" onclick="alterarStatus('${a.id}')">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${a.id}</strong> - ${a.paciente_nome}<br>
+                            <small class="text-muted">
+                                ${a.data_atendimento} ${a.hora_atendimento} | 
+                                ${statusBadge} ${riscoBadge}
+                            </small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-warning">
+                            <i class="fas fa-edit"></i> Alterar Status
+                        </button>
+                    </div>
+                </div>
+            `;
+            container.append(item);
+        });
+    }
+    
+    $('#searchResults').show();
+}
+
+function getStatusBadge(status) {
+    const badges = {
+        'Alta': '<span class="badge badge-success">Alta</span>',
+        'Aguardando Triagem': '<span class="badge badge-danger">Aguardando Triagem</span>',
+        'Aguardando Médico': '<span class="badge badge-warning">Aguardando Médico</span>',
+        'Em Observação': '<span class="badge badge-info">Em Observação</span>',
+        'Internado': '<span class="badge badge-info">Internado</span>',
+        'Evasão': '<span class="badge badge-dark">Evasão</span>',
+        'Óbito': '<span class="badge badge-dark">Óbito</span>'
+    };
+    return badges[status] || `<span class="badge badge-secondary">${status || 'Sem status'}</span>`;
+}
+
+function getRiscoBadge(risco) {
+    const badges = {
+        'Vermelho': '<span class="badge badge-danger">Vermelho</span>',
+        'Laranja': '<span class="badge" style="background-color: #fd7e14; color: white;">Laranja</span>',
+        'Amarelo': '<span class="badge badge-warning">Amarelo</span>',
+        'Verde': '<span class="badge badge-success">Verde</span>',
+        'Azul': '<span class="badge badge-primary">Azul</span>'
+    };
+    return badges[risco] || '';
+}
+
+function alterarStatus(id) {
+    $.ajax({
+        url: `/administrador/atendimentos/${id}`,
+        method: 'GET',
+        success: function(response) {
+            if (response.success) {
+                preencherModalStatus(response.atendimento);
+                $('#modalAlterarStatus').modal('show');
+            }
+        },
+        error: function(xhr) {
+            const response = xhr.responseJSON;
+            alert(response ? response.message : 'Erro ao carregar dados do atendimento');
+        }
+    });
+}
+
+function preencherModalStatus(atendimento) {
+    $('#atendimentoId').val(atendimento.id);
+    $('#atendId').text(atendimento.id);
+    $('#atendPaciente').text(atendimento.paciente_nome);
+    $('#atendDataHora').text(`${atendimento.data_atendimento} ${atendimento.hora_atendimento}`);
+    $('#atendStatusAtual').text(atendimento.status || 'Sem status').removeClass().addClass('badge').addClass(
+        atendimento.status === 'Alta' ? 'badge-success' :
+        atendimento.status === 'Aguardando Triagem' ? 'badge-danger' :
+        atendimento.status === 'Aguardando Médico' ? 'badge-warning' :
+        'badge-secondary'
+    );
+    $('#atendClassificacao').text(atendimento.classificacao_risco || 'Não classificado');
+    $('#atendTriagem').text(atendimento.horario_triagem);
+    $('#atendConsulta').text(atendimento.horario_consulta_medica);
+    $('#atendAlta').text(atendimento.horario_alta);
+    $('#novoStatus').val('');
+    $('#motivoAlteracao').val('');
+}
+
+function salvarNovoStatus() {
+    const id = $('#atendimentoId').val();
+    const novoStatus = $('#novoStatus').val();
+    const motivo = $('#motivoAlteracao').val().trim();
+    
+    if (!novoStatus) {
+        alert('Selecione o novo status');
+        return;
+    }
+    
+    if (!motivo) {
+        alert('Informe o motivo da alteração');
+        return;
+    }
+    
+    if (!confirm(`Confirma a alteração de status para "${novoStatus}"?\n\nEsta ação será registrada no log do sistema.`)) {
+        return;
+    }
+    
+    $.ajax({
+        url: `/administrador/atendimentos/${id}/alterar-status`,
+        method: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            status: novoStatus,
+            motivo: motivo
+        }),
+        success: function(response) {
+            alert(response.message);
+            location.reload();
+        },
+        error: function(xhr) {
+            const response = xhr.responseJSON;
+            alert(response ? response.message : 'Erro ao alterar status');
+        }
+    });
+}
+</script>
+{% endblock %}
+

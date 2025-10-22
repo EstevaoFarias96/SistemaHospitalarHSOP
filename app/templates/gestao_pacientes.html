@@ -1,0 +1,457 @@
+{% extends 'base_funcionarios.html' %}
+
+{% block title %}Gestão de Pacientes - HSOP{% endblock %}
+
+{% block styles %}
+<style>
+    .stat-card {
+        border-left: 4px solid #0d6efd;
+        transition: all .2s;
+    }
+    .stat-card:hover {
+        box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+    }
+    .search-result-item {
+        padding: 10px;
+        border-bottom: 1px solid #e9ecef;
+        cursor: pointer;
+        transition: background-color .2s;
+    }
+    .search-result-item:hover {
+        background-color: #f8f9fa;
+    }
+    .badge-idade {
+        font-size: .75rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="mb-1"><i class="fas fa-user-edit text-primary"></i> Gestão de Pacientes</h3>
+            <p class="text-muted mb-0">Correção de dados cadastrais de pacientes</p>
+        </div>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Total de Pacientes</h6>
+                            <h3 class="mb-0">{{ total_pacientes }}</h3>
+                        </div>
+                        <i class="fas fa-users fa-2x text-primary opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card" style="border-left-color:#28a745">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Com Cartão SUS</h6>
+                            <h3 class="mb-0">{{ pacientes_com_sus }}</h3>
+                            <small class="text-muted">{{ ((pacientes_com_sus / total_pacientes) * 100)|round(1) if total_pacientes > 0 else 0 }}%</small>
+                        </div>
+                        <i class="fas fa-id-card fa-2x text-success opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card" style="border-left-color:#17a2b8">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Com CPF</h6>
+                            <h3 class="mb-0">{{ pacientes_com_cpf }}</h3>
+                            <small class="text-muted">{{ ((pacientes_com_cpf / total_pacientes) * 100)|round(1) if total_pacientes > 0 else 0 }}%</small>
+                        </div>
+                        <i class="fas fa-address-card fa-2x text-info opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Busca de Paciente -->
+    <div class="card mb-3">
+        <div class="card-header bg-light">
+            <h6 class="mb-0"><i class="fas fa-search"></i> Buscar Paciente para Editar</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="form-group">
+                        <label>Digite o nome, CPF ou Cartão SUS do paciente</label>
+                        <input type="text" id="searchPaciente" class="form-control" placeholder="Ex: João Silva, 123.456.789-00, 123456789012345" autocomplete="off">
+                        <small class="form-text text-muted">Mínimo 3 caracteres</small>
+                    </div>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button class="btn btn-primary btn-block" onclick="buscarPaciente()">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                </div>
+            </div>
+            <!-- Resultados da busca -->
+            <div id="searchResults" class="mt-3" style="display: none;">
+                <h6 class="text-muted">Resultados da busca:</h6>
+                <div class="border rounded" id="resultsList" style="max-height: 400px; overflow-y: auto;">
+                    <!-- Preenchido dinamicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Últimos Pacientes Cadastrados -->
+    <div class="card">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h6 class="mb-0"><i class="fas fa-clock"></i> Últimos Pacientes Cadastrados</h6>
+            <small class="text-muted">Últimos 100 registros</small>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>CPF</th>
+                            <th>Cartão SUS</th>
+                            <th>Data Nascimento</th>
+                            <th>Sexo</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pac in pacientes %}
+                        <tr>
+                            <td>#{{ pac.id }}</td>
+                            <td><strong>{{ pac.nome }}</strong></td>
+                            <td>{{ pac.cpf or '<span class="text-muted">Não informado</span>'|safe }}</td>
+                            <td>{{ pac.cartao_sus or '<span class="text-muted">Não informado</span>'|safe }}</td>
+                            <td>
+                                {% if pac.data_nascimento %}
+                                    {{ pac.data_nascimento.strftime('%d/%m/%Y') }}
+                                    {% set idade = ((today - pac.data_nascimento).days / 365.25)|int %}
+                                    <span class="badge badge-idade badge-secondary">{{ idade }} anos</span>
+                                {% else %}
+                                    <span class="text-muted">Não informado</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ pac.sexo or '<span class="text-muted">-</span>'|safe }}</td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-primary" onclick="editarPaciente({{ pac.id }})" title="Editar dados">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">Nenhum paciente cadastrado</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Edição -->
+<div class="modal fade" id="modalEditarPaciente" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-user-edit"></i> Editar Dados do Paciente</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formEditarPaciente">
+                    <input type="hidden" id="pacienteId">
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> <strong>Atenção:</strong> Todas as alterações serão registradas no log do sistema.
+                    </div>
+
+                    <h6 class="border-bottom pb-2 mb-3">Dados Pessoais</h6>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label>Nome Completo <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="nome" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Nome Social</label>
+                                <input type="text" class="form-control" id="nome_social">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>CPF</label>
+                                <input type="text" class="form-control" id="cpf" maxlength="14" placeholder="000.000.000-00">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Cartão SUS</label>
+                                <input type="text" class="form-control" id="cartao_sus" maxlength="15">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Data de Nascimento</label>
+                                <input type="date" class="form-control" id="data_nascimento">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Sexo</label>
+                                <select class="form-control" id="sexo">
+                                    <option value="">Selecione...</option>
+                                    <option value="Masculino">Masculino</option>
+                                    <option value="Feminino">Feminino</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Cor/Raça</label>
+                                <select class="form-control" id="cor">
+                                    <option value="Não informada">Não informada</option>
+                                    <option value="Branca">Branca</option>
+                                    <option value="Preta">Preta</option>
+                                    <option value="Parda">Parda</option>
+                                    <option value="Amarela">Amarela</option>
+                                    <option value="Indígena">Indígena</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Filiação</label>
+                        <input type="text" class="form-control" id="filiacao">
+                    </div>
+
+                    <h6 class="border-bottom pb-2 mb-3 mt-4">Endereço e Contato</h6>
+                    <div class="form-group">
+                        <label>Endereço Completo</label>
+                        <input type="text" class="form-control" id="endereco" placeholder="Rua, número, complemento">
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <label>Bairro</label>
+                                <input type="text" class="form-control" id="bairro">
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <label>Município</label>
+                                <input type="text" class="form-control" id="municipio">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Telefone</label>
+                                <input type="text" class="form-control" id="telefone" placeholder="(00) 00000-0000">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="salvarAlteracoes()">
+                    <i class="fas fa-save"></i> Salvar Alterações
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const today = new Date();
+
+// Máscara para CPF
+$('#cpf').on('keyup', function() {
+    let value = $(this).val().replace(/\D/g, '');
+    if (value.length <= 11) {
+        value = value.replace(/(\d{3})(\d)/, '$1.$2');
+        value = value.replace(/(\d{3})(\d)/, '$1.$2');
+        value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        $(this).val(value);
+    }
+});
+
+// Máscara para telefone
+$('#telefone').on('keyup', function() {
+    let value = $(this).val().replace(/\D/g, '');
+    if (value.length <= 11) {
+        value = value.replace(/(\d{2})(\d)/, '($1) $2');
+        value = value.replace(/(\d{5})(\d)/, '$1-$2');
+        $(this).val(value);
+    }
+});
+
+// Buscar ao pressionar Enter
+$('#searchPaciente').on('keypress', function(e) {
+    if (e.which === 13) {
+        buscarPaciente();
+    }
+});
+
+function buscarPaciente() {
+    const termo = $('#searchPaciente').val().trim();
+    
+    if (termo.length < 3) {
+        alert('Digite ao menos 3 caracteres para buscar');
+        return;
+    }
+    
+    $.ajax({
+        url: '/administrador/pacientes/buscar',
+        method: 'GET',
+        data: { termo: termo },
+        success: function(response) {
+            if (response.success) {
+                exibirResultados(response.pacientes);
+            }
+        },
+        error: function(xhr) {
+            const response = xhr.responseJSON;
+            alert(response ? response.message : 'Erro ao buscar pacientes');
+        }
+    });
+}
+
+function exibirResultados(pacientes) {
+    const container = $('#resultsList');
+    container.empty();
+    
+    if (pacientes.length === 0) {
+        container.html('<div class="p-3 text-center text-muted">Nenhum paciente encontrado</div>');
+    } else {
+        pacientes.forEach(function(p) {
+            const item = `
+                <div class="search-result-item" onclick="editarPaciente(${p.id})">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${p.nome}</strong><br>
+                            <small class="text-muted">
+                                CPF: ${p.cpf} | SUS: ${p.cartao_sus} | Nascimento: ${p.data_nascimento}
+                            </small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                    </div>
+                </div>
+            `;
+            container.append(item);
+        });
+    }
+    
+    $('#searchResults').show();
+}
+
+function editarPaciente(id) {
+    $.ajax({
+        url: `/administrador/pacientes/${id}`,
+        method: 'GET',
+        success: function(response) {
+            if (response.success) {
+                preencherFormulario(response.paciente);
+                $('#modalEditarPaciente').modal('show');
+            }
+        },
+        error: function(xhr) {
+            const response = xhr.responseJSON;
+            alert(response ? response.message : 'Erro ao carregar dados do paciente');
+        }
+    });
+}
+
+function preencherFormulario(paciente) {
+    $('#pacienteId').val(paciente.id);
+    $('#nome').val(paciente.nome);
+    $('#nome_social').val(paciente.nome_social || '');
+    $('#cpf').val(paciente.cpf || '');
+    $('#cartao_sus').val(paciente.cartao_sus || '');
+    $('#data_nascimento').val(paciente.data_nascimento || '');
+    $('#sexo').val(paciente.sexo || '');
+    $('#cor').val(paciente.cor || 'Não informada');
+    $('#filiacao').val(paciente.filiacao || '');
+    $('#endereco').val(paciente.endereco || '');
+    $('#bairro').val(paciente.bairro || '');
+    $('#municipio').val(paciente.municipio || '');
+    $('#telefone').val(paciente.telefone || '');
+}
+
+function salvarAlteracoes() {
+    const id = $('#pacienteId').val();
+    
+    if (!$('#nome').val()) {
+        alert('O nome do paciente é obrigatório');
+        return;
+    }
+    
+    const data = {
+        nome: $('#nome').val(),
+        nome_social: $('#nome_social').val(),
+        cpf: $('#cpf').val(),
+        cartao_sus: $('#cartao_sus').val(),
+        data_nascimento: $('#data_nascimento').val(),
+        sexo: $('#sexo').val(),
+        cor: $('#cor').val(),
+        filiacao: $('#filiacao').val(),
+        endereco: $('#endereco').val(),
+        bairro: $('#bairro').val(),
+        municipio: $('#municipio').val(),
+        telefone: $('#telefone').val()
+    };
+    
+    if (!confirm('Confirma a alteração dos dados deste paciente?')) {
+        return;
+    }
+    
+    $.ajax({
+        url: `/administrador/pacientes/${id}/editar`,
+        method: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function(response) {
+            alert(response.message);
+            location.reload();
+        },
+        error: function(xhr) {
+            const response = xhr.responseJSON;
+            alert(response ? response.message : 'Erro ao salvar alterações');
+        }
+    });
+}
+</script>
+{% endblock %}
+

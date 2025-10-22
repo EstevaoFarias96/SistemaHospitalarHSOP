@@ -1,0 +1,366 @@
+{% extends 'base_funcionarios.html' %}
+
+{% block title %}Gestão de Profissionais - HSOP{% endblock %}
+
+{% block styles %}
+<style>
+    .stat-card {
+        border-left: 4px solid #0d6efd;
+        transition: all .2s;
+    }
+    .stat-card:hover {
+        box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+    }
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+        cursor: pointer;
+    }
+    .badge-cargo {
+        font-size: .75rem;
+        padding: .3rem .6rem;
+    }
+    .btn-action {
+        padding: .25rem .5rem;
+        font-size: .875rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="mb-1"><i class="fas fa-user-tie text-primary"></i> Gestão de Profissionais</h3>
+            <p class="text-muted mb-0">Cadastro e gerenciamento de profissionais do hospital</p>
+        </div>
+        <button class="btn btn-primary" onclick="abrirModalCadastro()">
+            <i class="fas fa-plus"></i> Novo Profissional
+        </button>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Total de Profissionais</h6>
+                            <h3 class="mb-0">{{ profissionais|length }}</h3>
+                        </div>
+                        <i class="fas fa-users fa-2x text-primary opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% for cargo, count in cargos_stats.items() %}
+        <div class="col-md-3">
+            <div class="card stat-card" style="border-left-color: {% if cargo == 'Médico' %}#28a745{% elif cargo == 'Enfermeiro' %}#17a2b8{% elif cargo == 'Administrador' %}#ffc107{% else %}#6c757d{% endif %}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">{{ cargo }}s</h6>
+                            <h3 class="mb-0">{{ count }}</h3>
+                        </div>
+                        <i class="fas fa-{% if cargo == 'Médico' %}user-md{% elif cargo == 'Enfermeiro' %}user-nurse{% elif cargo == 'Administrador' %}user-shield{% else %}user{% endif %} fa-2x opacity-50" style="color: {% if cargo == 'Médico' %}#28a745{% elif cargo == 'Enfermeiro' %}#17a2b8{% elif cargo == 'Administrador' %}#ffc107{% else %}#6c757d{% endif %}"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-3">
+        <div class="card-body py-2">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <input type="text" id="searchProfissional" class="form-control form-control-sm" placeholder="🔍 Buscar por nome, CPF, CRM...">
+                </div>
+                <div class="col-md-3">
+                    <select id="filterCargo" class="form-control form-control-sm">
+                        <option value="">Todos os cargos</option>
+                        <option value="Médico">Médico</option>
+                        <option value="Enfermeiro">Enfermeiro</option>
+                        <option value="Administrador">Administrador</option>
+                        <option value="Recepcionista">Recepcionista</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Profissionais -->
+    <div class="card">
+        <div class="card-header bg-light">
+            <h6 class="mb-0"><i class="fas fa-list"></i> Lista de Profissionais</h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" id="tableProfissionais">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Nome</th>
+                            <th>CPF</th>
+                            <th>Cargo</th>
+                            <th>CRM/COREN</th>
+                            <th>Especialidade</th>
+                            <th>Contato</th>
+                            <th class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prof in profissionais %}
+                        <tr data-id="{{ prof.id }}" data-cargo="{{ prof.cargo }}">
+                            <td><strong>{{ prof.nome }}</strong></td>
+                            <td>{{ prof.cpf }}</td>
+                            <td>
+                                <span class="badge badge-cargo {% if prof.cargo == 'Médico' %}badge-success{% elif prof.cargo == 'Enfermeiro' %}badge-info{% elif prof.cargo == 'Administrador' %}badge-warning{% else %}badge-secondary{% endif %}">
+                                    {{ prof.cargo }}
+                                </span>
+                            </td>
+                            <td>{{ prof.crm or prof.coren or '-' }}</td>
+                            <td>{{ prof.especialidade or '-' }}</td>
+                            <td>
+                                <small>
+                                    {% if prof.telefone %}<i class="fas fa-phone"></i> {{ prof.telefone }}<br>{% endif %}
+                                    {% if prof.email %}<i class="fas fa-envelope"></i> {{ prof.email }}{% endif %}
+                                </small>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-primary btn-action" onclick="editarProfissional({{ prof.id }})" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning btn-action" onclick="resetarSenha({{ prof.id }})" title="Resetar Senha">
+                                    <i class="fas fa-key"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">Nenhum profissional cadastrado</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Cadastro -->
+<div class="modal fade" id="modalCadastro" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-user-plus"></i> <span id="modalTitle">Cadastrar Novo Profissional</span></h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formProfissional">
+                    <input type="hidden" id="profissionalId">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label>Nome Completo <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="nome" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>CPF <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="cpf" required maxlength="14" placeholder="000.000.000-00">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Cargo <span class="text-danger">*</span></label>
+                                <select class="form-control" id="cargo" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="Médico">Médico</option>
+                                    <option value="Enfermeiro">Enfermeiro</option>
+                                    <option value="Administrador">Administrador</option>
+                                    <option value="Recepcionista">Recepcionista</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>CRM</label>
+                                <input type="text" class="form-control" id="crm">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>COREN</label>
+                                <input type="text" class="form-control" id="coren">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Especialidade</label>
+                        <input type="text" class="form-control" id="especialidade">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Telefone</label>
+                                <input type="text" class="form-control" id="telefone" placeholder="(00) 00000-0000">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>E-mail</label>
+                                <input type="email" class="form-control" id="email">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-2">
+                        <i class="fas fa-info-circle"></i> A senha inicial será o CPF sem pontuação
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="salvarProfissional()">
+                    <i class="fas fa-save"></i> Salvar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Busca e filtro
+$('#searchProfissional').on('keyup', function() {
+    filtrarTabela();
+});
+
+$('#filterCargo').on('change', function() {
+    filtrarTabela();
+});
+
+function filtrarTabela() {
+    const search = $('#searchProfissional').val().toLowerCase();
+    const cargo = $('#filterCargo').val();
+    
+    $('#tableProfissionais tbody tr').each(function() {
+        const row = $(this);
+        const text = row.text().toLowerCase();
+        const rowCargo = row.data('cargo');
+        
+        const matchSearch = search === '' || text.includes(search);
+        const matchCargo = cargo === '' || rowCargo === cargo;
+        
+        row.toggle(matchSearch && matchCargo);
+    });
+}
+
+// Máscara para CPF
+$('#cpf').on('keyup', function() {
+    let value = $(this).val().replace(/\D/g, '');
+    if (value.length <= 11) {
+        value = value.replace(/(\d{3})(\d)/, '$1.$2');
+        value = value.replace(/(\d{3})(\d)/, '$1.$2');
+        value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        $(this).val(value);
+    }
+});
+
+// Máscara para telefone
+$('#telefone').on('keyup', function() {
+    let value = $(this).val().replace(/\D/g, '');
+    if (value.length <= 11) {
+        value = value.replace(/(\d{2})(\d)/, '($1) $2');
+        value = value.replace(/(\d{5})(\d)/, '$1-$2');
+        $(this).val(value);
+    }
+});
+
+function abrirModalCadastro() {
+    $('#modalTitle').text('Cadastrar Novo Profissional');
+    $('#formProfissional')[0].reset();
+    $('#profissionalId').val('');
+    $('#cpf').prop('disabled', false);
+    $('#modalCadastro').modal('show');
+}
+
+function editarProfissional(id) {
+    // Buscar dados da linha
+    const row = $(`tr[data-id="${id}"]`);
+    const nome = row.find('td:eq(0)').text();
+    const cpf = row.find('td:eq(1)').text();
+    const cargo = row.data('cargo');
+    
+    $('#modalTitle').text('Editar Profissional');
+    $('#profissionalId').val(id);
+    $('#nome').val(nome);
+    $('#cpf').val(cpf).prop('disabled', true);
+    $('#cargo').val(cargo);
+    $('#modalCadastro').modal('show');
+}
+
+function salvarProfissional() {
+    const id = $('#profissionalId').val();
+    const data = {
+        nome: $('#nome').val(),
+        cpf: $('#cpf').val(),
+        cargo: $('#cargo').val(),
+        crm: $('#crm').val(),
+        coren: $('#coren').val(),
+        especialidade: $('#especialidade').val(),
+        telefone: $('#telefone').val(),
+        email: $('#email').val()
+    };
+    
+    if (!data.nome || !data.cpf || !data.cargo) {
+        alert('Preencha os campos obrigatórios');
+        return;
+    }
+    
+    const url = id ? `/administrador/profissionais/${id}/editar` : '/administrador/profissionais/cadastrar';
+    const method = id ? 'PUT' : 'POST';
+    
+    $.ajax({
+        url: url,
+        method: method,
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        success: function(response) {
+            alert(response.message);
+            location.reload();
+        },
+        error: function(xhr) {
+            const response = xhr.responseJSON;
+            alert(response ? response.message : 'Erro ao salvar profissional');
+        }
+    });
+}
+
+function resetarSenha(id) {
+    if (!confirm('Deseja resetar a senha deste profissional para o CPF?')) {
+        return;
+    }
+    
+    $.ajax({
+        url: `/administrador/profissionais/${id}/resetar-senha`,
+        method: 'POST',
+        success: function(response) {
+            alert(response.message);
+        },
+        error: function(xhr) {
+            const response = xhr.responseJSON;
+            alert(response ? response.message : 'Erro ao resetar senha');
+        }
+    });
+}
+</script>
+{% endblock %}
+

@@ -22,9 +22,29 @@
       </a>
     </li>
     {% if session.get('cargo', '').lower() == 'administrador' %}
+    <li class="nav-item" data-title="Dashboard">
+      <a class="nav-link" href="{{ url_for('main.painel_administrador') }}">
+        <i class="fas fa-tachometer-alt"></i>
+      </a>
+    </li>
     <li class="nav-item" data-title="Relatórios">
       <a class="nav-link" href="{{ url_for('main.relatorios_admin') }}">
         <i class="fas fa-chart-pie"></i>
+      </a>
+    </li>
+    <li class="nav-item" data-title="Gestão de Profissionais">
+      <a class="nav-link" href="{{ url_for('main.gestao_profissionais') }}">
+        <i class="fas fa-user-tie"></i>
+      </a>
+    </li>
+    <li class="nav-item" data-title="Gestão de Pacientes">
+      <a class="nav-link" href="{{ url_for('main.gestao_pacientes') }}">
+        <i class="fas fa-user-edit"></i>
+      </a>
+    </li>
+    <li class="nav-item" data-title="Gestão de Atendimentos">
+      <a class="nav-link" href="{{ url_for('main.gestao_atendimentos') }}">
+        <i class="fas fa-clipboard-list"></i>
       </a>
     </li>
     {% endif %}

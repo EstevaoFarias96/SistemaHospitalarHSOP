@@ -1356,29 +1356,160 @@ def painel_administrador():
             if hora is not None and 0 <= int(hora) < 24:
                 atend_hora_valores[int(hora)] = int(total)
 
-        # 8) Tempo médio de espera para atendimento
-        # Tempo entre chegada (hora_atendimento em triagem) e atendimento médico
-        # Vamos calcular a diferença média entre data_atendimento e quando foi marcado como "Aguardando Médico"
-        # Como não temos campo específico, vamos usar uma aproximação simples baseada em atendimentos concluídos hoje
-        tempo_medio_espera_dia = 0
-        tempo_medio_espera_geral = 0
+        # 8) Calcular tempos médios reais usando os campos de horário
         
-        # Simplificação: calcular tempo médio entre atendimentos do dia (placeholder)
-        # Em produção real, você deve ter timestamps de entrada/saída do status
+        # Tempo médio de TRIAGEM (hora_atendimento até horario_triagem)
+        tempo_medio_triagem = 0
+        qtd_com_triagem = 0
         try:
-            # Aproximação: considerar 30min como média padrão se não houver dados específicos
-            atend_hoje_count = db.session.query(func.count(Atendimento.id)).filter(
-                Atendimento.data_atendimento == hoje_data,
-                Atendimento.status.in_(['Finalizado', 'Alta'])
+            resultado_triagem = db.session.query(
+                func.avg(
+                    func.extract('epoch', Atendimento.horario_triagem - 
+                    func.cast(func.concat(Atendimento.data_atendimento, ' ', Atendimento.hora_atendimento), db.DateTime))
+                ) / 60.0  # Converter para minutos
+            ).filter(
+                Atendimento.horario_triagem.isnot(None),
+                Atendimento.hora_atendimento.isnot(None)
+            ).scalar()
+            
+            if resultado_triagem:
+                tempo_medio_triagem = round(float(resultado_triagem), 1)
+            
+            qtd_com_triagem = db.session.query(func.count(Atendimento.id)).filter(
+                Atendimento.horario_triagem.isnot(None)
             ).scalar() or 0
+        except Exception as e:
+            logging.warning(f"Erro ao calcular tempo médio de triagem: {str(e)}")
+            tempo_medio_triagem = 0
+
+        # Tempo médio de CONSULTA MÉDICA (horario_triagem até horario_consulta_medica)
+        tempo_medio_consulta = 0
+        qtd_com_consulta = 0
+        try:
+            resultado_consulta = db.session.query(
+                func.avg(
+                    func.extract('epoch', Atendimento.horario_consulta_medica - Atendimento.horario_triagem) / 60.0
+                )
+            ).filter(
+                Atendimento.horario_triagem.isnot(None),
+                Atendimento.horario_consulta_medica.isnot(None)
+            ).scalar()
             
-            if atend_hoje_count > 0:
-                tempo_medio_espera_dia = 30  # Placeholder - ajustar com lógica real
+            if resultado_consulta:
+                tempo_medio_consulta = round(float(resultado_consulta), 1)
             
-            tempo_medio_espera_geral = 35  # Placeholder - ajustar com lógica real
-        except Exception:
-            tempo_medio_espera_dia = 0
-            tempo_medio_espera_geral = 0
+            qtd_com_consulta = db.session.query(func.count(Atendimento.id)).filter(
+                Atendimento.horario_consulta_medica.isnot(None)
+            ).scalar() or 0
+        except Exception as e:
+            logging.warning(f"Erro ao calcular tempo médio de consulta: {str(e)}")
+            tempo_medio_consulta = 0
+
+        # Tempo médio de OBSERVAÇÃO (entrada até saída de observação)
+        tempo_medio_observacao = 0
+        qtd_com_observacao = 0
+        try:
+            resultado_observacao = db.session.query(
+                func.avg(
+                    func.extract('epoch', Atendimento.horario_alta - Atendimento.horario_observacao) / 60.0
+                )
+            ).filter(
+                Atendimento.horario_observacao.isnot(None),
+                Atendimento.horario_alta.isnot(None)
+            ).scalar()
+            
+            if resultado_observacao:
+                tempo_medio_observacao = round(float(resultado_observacao), 1)
+            
+            qtd_com_observacao = db.session.query(func.count(Atendimento.id)).filter(
+                Atendimento.horario_observacao.isnot(None)
+            ).scalar() or 0
+        except Exception as e:
+            logging.warning(f"Erro ao calcular tempo médio de observação: {str(e)}")
+            tempo_medio_observacao = 0
+
+        # Tempo médio de INTERNAÇÃO (entrada até saída)
+        tempo_medio_internacao = 0
+        qtd_com_internacao = 0
+        try:
+            resultado_internacao = db.session.query(
+                func.avg(
+                    func.extract('epoch', Atendimento.horario_alta - Atendimento.horario_internacao) / 60.0
+                )
+            ).filter(
+                Atendimento.horario_internacao.isnot(None),
+                Atendimento.horario_alta.isnot(None)
+            ).scalar()
+            
+            if resultado_internacao:
+                tempo_medio_internacao = round(float(resultado_internacao), 1)
+            
+            qtd_com_internacao = db.session.query(func.count(Atendimento.id)).filter(
+                Atendimento.horario_internacao.isnot(None)
+            ).scalar() or 0
+        except Exception as e:
+            logging.warning(f"Erro ao calcular tempo médio de internação: {str(e)}")
+            tempo_medio_internacao = 0
+
+        # Tempo TOTAL (chegada até alta)
+        tempo_medio_total = 0
+        qtd_finalizados = 0
+        try:
+            resultado_total = db.session.query(
+                func.avg(
+                    func.extract('epoch', Atendimento.horario_alta - 
+                    func.cast(func.concat(Atendimento.data_atendimento, ' ', Atendimento.hora_atendimento), db.DateTime)) / 60.0
+                )
+            ).filter(
+                Atendimento.hora_atendimento.isnot(None),
+                Atendimento.horario_alta.isnot(None)
+            ).scalar()
+            
+            if resultado_total:
+                tempo_medio_total = round(float(resultado_total), 1)
+            
+            qtd_finalizados = db.session.query(func.count(Atendimento.id)).filter(
+                Atendimento.horario_alta.isnot(None)
+            ).scalar() or 0
+        except Exception as e:
+            logging.warning(f"Erro ao calcular tempo médio total: {str(e)}")
+            tempo_medio_total = 0
+
+        # 9) Tempo médio de espera POR CLASSIFICAÇÃO DE RISCO (triagem até consulta)
+        tempos_por_risco = []
+        try:
+            resultados_risco = db.session.query(
+                func.coalesce(Atendimento.classificacao_risco, 'Não classificado').label('classificacao'),
+                func.avg(
+                    func.extract('epoch', Atendimento.horario_consulta_medica - Atendimento.horario_triagem) / 60.0
+                ).label('tempo_medio'),
+                func.count(Atendimento.id).label('quantidade')
+            ).filter(
+                Atendimento.horario_triagem.isnot(None),
+                Atendimento.horario_consulta_medica.isnot(None)
+            ).group_by(
+                func.coalesce(Atendimento.classificacao_risco, 'Não classificado')
+            ).all()
+            
+            for classificacao, tempo, qtd in resultados_risco:
+                tempos_por_risco.append({
+                    'classificacao': classificacao,
+                    'tempo_medio': round(float(tempo), 1) if tempo else 0,
+                    'quantidade': int(qtd)
+                })
+        except Exception as e:
+            logging.warning(f"Erro ao calcular tempos por risco: {str(e)}")
+            tempos_por_risco = []
+
+        # 9) Pacientes aguardando triagem
+        aguardando_triagem = db.session.query(func.count(Atendimento.id)).filter(
+            Atendimento.status == 'Aguardando Triagem'
+        ).scalar() or 0
+
+        # 10) Pacientes aguardando médico
+        aguardando_medico = db.session.query(func.count(Atendimento.id)).filter(
+            Atendimento.status == 'Aguardando Médico'
+        ).scalar() or 0
 
         contexto = dict(
             total_internacoes_hoje=total_internacoes_hoje,
@@ -1393,8 +1524,24 @@ def painel_administrador():
             fluxo_altas=fluxo_altas,
             atend_hora_labels=atend_hora_labels,
             atend_hora_valores=atend_hora_valores,
-            tempo_medio_espera_dia=tempo_medio_espera_dia,
-            tempo_medio_espera_geral=tempo_medio_espera_geral,
+            # Tempos médios por etapa
+            tempo_medio_triagem=tempo_medio_triagem,
+            tempo_medio_consulta=tempo_medio_consulta,
+            tempo_medio_observacao=tempo_medio_observacao,
+            tempo_medio_internacao=tempo_medio_internacao,
+            tempo_medio_total=tempo_medio_total,
+            # Quantidades por etapa
+            qtd_com_triagem=qtd_com_triagem,
+            qtd_com_consulta=qtd_com_consulta,
+            qtd_com_observacao=qtd_com_observacao,
+            qtd_com_internacao=qtd_com_internacao,
+            qtd_finalizados=qtd_finalizados,
+            # Tempos por classificação de risco
+            tempos_por_risco=tempos_por_risco,
+            # Aguardando
+            aguardando_triagem=aguardando_triagem,
+            aguardando_medico=aguardando_medico,
+            # Listas
             alertas_tecnicos=[],
             ultimas_alteracoes=[],
         )
@@ -1419,6 +1566,514 @@ def relatorios_admin():
         logging.error(traceback.format_exc())
         flash('Erro ao acessar o gerador de relatórios.', 'danger')
         return redirect(url_for('main.index'))
+
+@bp.route('/administrador/profissionais')
+@login_required
+def gestao_profissionais():
+    try:
+        user = get_current_user()
+        if not user or user.cargo.strip().lower() != 'administrador':
+            flash('Acesso restrito a administradores.', 'danger')
+            return redirect(url_for('main.index'))
+        
+        # Buscar todos os profissionais
+        profissionais = db.session.query(Funcionario).order_by(Funcionario.nome).all()
+        
+        # Contar por cargo
+        cargos_count = db.session.query(
+            Funcionario.cargo,
+            func.count(Funcionario.id)
+        ).group_by(Funcionario.cargo).all()
+        
+        cargos_stats = {cargo: count for cargo, count in cargos_count}
+        
+        return render_template('gestao_profissionais.html', 
+                             profissionais=profissionais,
+                             cargos_stats=cargos_stats)
+    except Exception as e:
+        logging.error(f"Erro ao acessar gestão de profissionais: {str(e)}")
+        logging.error(traceback.format_exc())
+        flash('Erro ao acessar gestão de profissionais.', 'danger')
+        return redirect(url_for('main.index'))
+
+@bp.route('/administrador/profissionais/cadastrar', methods=['POST'])
+@login_required
+def cadastrar_profissional():
+    try:
+        user = get_current_user()
+        if not user or user.cargo.strip().lower() != 'administrador':
+            return jsonify({'success': False, 'message': 'Acesso negado'}), 403
+        
+        data = request.get_json()
+        
+        # Validar dados obrigatórios
+        if not data.get('nome') or not data.get('cpf') or not data.get('cargo'):
+            return jsonify({'success': False, 'message': 'Nome, CPF e cargo são obrigatórios'}), 400
+        
+        # Verificar se CPF já existe
+        cpf_exists = db.session.query(Funcionario).filter_by(cpf=data['cpf']).first()
+        if cpf_exists:
+            return jsonify({'success': False, 'message': 'CPF já cadastrado'}), 400
+        
+        # Criar novo profissional
+        novo_profissional = Funcionario(
+            nome=data['nome'],
+            cpf=data['cpf'],
+            cargo=data['cargo'],
+            crm=data.get('crm'),
+            coren=data.get('coren'),
+            especialidade=data.get('especialidade'),
+            telefone=data.get('telefone'),
+            email=data.get('email')
+        )
+        
+        # Gerar senha inicial (CPF sem pontuação)
+        senha_inicial = data['cpf'].replace('.', '').replace('-', '')
+        novo_profissional.set_password(senha_inicial)
+        
+        db.session.add(novo_profissional)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True, 
+            'message': 'Profissional cadastrado com sucesso',
+            'profissional_id': novo_profissional.id
+        })
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Erro ao cadastrar profissional: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro ao cadastrar profissional'}), 500
+
+@bp.route('/administrador/profissionais/<int:id>/editar', methods=['PUT'])
+@login_required
+def editar_profissional(id):
+    try:
+        user = get_current_user()
+        if not user or user.cargo.strip().lower() != 'administrador':
+            return jsonify({'success': False, 'message': 'Acesso negado'}), 403
+        
+        profissional = db.session.query(Funcionario).get(id)
+        if not profissional:
+            return jsonify({'success': False, 'message': 'Profissional não encontrado'}), 404
+        
+        data = request.get_json()
+        
+        # Atualizar dados
+        if data.get('nome'):
+            profissional.nome = data['nome']
+        if data.get('cargo'):
+            profissional.cargo = data['cargo']
+        if data.get('crm'):
+            profissional.crm = data['crm']
+        if data.get('coren'):
+            profissional.coren = data['coren']
+        if data.get('especialidade'):
+            profissional.especialidade = data['especialidade']
+        if data.get('telefone'):
+            profissional.telefone = data['telefone']
+        if data.get('email'):
+            profissional.email = data['email']
+        
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'Profissional atualizado com sucesso'})
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Erro ao editar profissional: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro ao editar profissional'}), 500
+
+@bp.route('/administrador/profissionais/<int:id>/resetar-senha', methods=['POST'])
+@login_required
+def resetar_senha_profissional(id):
+    try:
+        user = get_current_user()
+        if not user or user.cargo.strip().lower() != 'administrador':
+            return jsonify({'success': False, 'message': 'Acesso negado'}), 403
+        
+        profissional = db.session.query(Funcionario).get(id)
+        if not profissional:
+            return jsonify({'success': False, 'message': 'Profissional não encontrado'}), 404
+        
+        # Resetar senha para CPF
+        senha_inicial = profissional.cpf.replace('.', '').replace('-', '')
+        profissional.set_password(senha_inicial)
+        
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'Senha resetada com sucesso para o CPF'})
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Erro ao resetar senha: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro ao resetar senha'}), 500
+
+@bp.route('/administrador/pacientes')
+@login_required
+def gestao_pacientes():
+    try:
+        user = get_current_user()
+        if not user or user.cargo.strip().lower() != 'administrador':
+            flash('Acesso restrito a administradores.', 'danger')
+            return redirect(url_for('main.index'))
+        
+        # Buscar pacientes com paginação (últimos 100)
+        pacientes = db.session.query(Paciente).order_by(Paciente.id.desc()).limit(100).all()
+        
+        # Estatísticas
+        total_pacientes = db.session.query(func.count(Paciente.id)).scalar() or 0
+        pacientes_com_sus = db.session.query(func.count(Paciente.id)).filter(
+            Paciente.cartao_sus.isnot(None),
+            Paciente.cartao_sus != ''
+        ).scalar() or 0
+        pacientes_com_cpf = db.session.query(func.count(Paciente.id)).filter(
+            Paciente.cpf.isnot(None),
+            Paciente.cpf != ''
+        ).scalar() or 0
+        
+        return render_template('gestao_pacientes.html',
+                             pacientes=pacientes,
+                             total_pacientes=total_pacientes,
+                             pacientes_com_sus=pacientes_com_sus,
+                             pacientes_com_cpf=pacientes_com_cpf,
+                             today=datetime.now(ZoneInfo("America/Sao_Paulo")).date())
+    except Exception as e:
+        logging.error(f"Erro ao acessar gestão de pacientes: {str(e)}")
+        logging.error(traceback.format_exc())
+        flash('Erro ao acessar gestão de pacientes.', 'danger')
+        return redirect(url_for('main.index'))
+
+@bp.route('/administrador/pacientes/buscar')
+@login_required
+def buscar_pacientes_admin():
+    try:
+        user = get_current_user()
+        if not user or user.cargo.strip().lower() != 'administrador':
+            return jsonify({'success': False, 'message': 'Acesso negado'}), 403
+        
+        termo = request.args.get('termo', '').strip()
+        if not termo or len(termo) < 3:
+            return jsonify({'success': False, 'message': 'Digite ao menos 3 caracteres'}), 400
+        
+        # Buscar por nome, CPF ou cartão SUS
+        pacientes = db.session.query(Paciente).filter(
+            db.or_(
+                Paciente.nome.ilike(f'%{termo}%'),
+                Paciente.cpf.ilike(f'%{termo}%'),
+                Paciente.cartao_sus.ilike(f'%{termo}%')
+            )
+        ).order_by(Paciente.nome).limit(50).all()
+        
+        resultado = [{
+            'id': p.id,
+            'nome': p.nome,
+            'cpf': p.cpf or 'Não informado',
+            'cartao_sus': p.cartao_sus or 'Não informado',
+            'data_nascimento': p.data_nascimento.strftime('%d/%m/%Y') if p.data_nascimento else 'Não informado',
+            'sexo': p.sexo or 'Não informado',
+            'telefone': p.telefone or 'Não informado'
+        } for p in pacientes]
+        
+        return jsonify({'success': True, 'pacientes': resultado})
+    except Exception as e:
+        logging.error(f"Erro ao buscar pacientes: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro ao buscar pacientes'}), 500
+
+@bp.route('/administrador/pacientes/<int:id>')
+@login_required
+def obter_paciente(id):
+    try:
+        user = get_current_user()
+        if not user or user.cargo.strip().lower() != 'administrador':
+            return jsonify({'success': False, 'message': 'Acesso negado'}), 403
+        
+        paciente = db.session.query(Paciente).get(id)
+        if not paciente:
+            return jsonify({'success': False, 'message': 'Paciente não encontrado'}), 404
+        
+        dados = {
+            'id': paciente.id,
+            'nome': paciente.nome,
+            'nome_social': paciente.nome_social,
+            'cpf': paciente.cpf,
+            'cartao_sus': paciente.cartao_sus,
+            'data_nascimento': paciente.data_nascimento.strftime('%Y-%m-%d') if paciente.data_nascimento else '',
+            'sexo': paciente.sexo,
+            'cor': paciente.cor,
+            'filiacao': paciente.filiacao,
+            'endereco': paciente.endereco,
+            'bairro': paciente.bairro,
+            'municipio': paciente.municipio,
+            'telefone': paciente.telefone,
+            'identificado': paciente.identificado,
+            'descricao_nao_identificado': paciente.descricao_nao_identificado
+        }
+        
+        return jsonify({'success': True, 'paciente': dados})
+    except Exception as e:
+        logging.error(f"Erro ao obter paciente: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro ao obter dados do paciente'}), 500
+
+@bp.route('/administrador/pacientes/<int:id>/editar', methods=['PUT'])
+@login_required
+def editar_paciente(id):
+    try:
+        user = get_current_user()
+        if not user or user.cargo.strip().lower() != 'administrador':
+            return jsonify({'success': False, 'message': 'Acesso negado'}), 403
+        
+        paciente = db.session.query(Paciente).get(id)
+        if not paciente:
+            return jsonify({'success': False, 'message': 'Paciente não encontrado'}), 404
+        
+        data = request.get_json()
+        
+        # Registrar alterações para log
+        alteracoes = []
+        
+        # Atualizar campos
+        if 'nome' in data and data['nome'] != paciente.nome:
+            alteracoes.append(f"Nome: {paciente.nome} → {data['nome']}")
+            paciente.nome = data['nome']
+        
+        if 'nome_social' in data:
+            paciente.nome_social = data['nome_social']
+        
+        if 'cpf' in data and data['cpf'] != paciente.cpf:
+            # Verificar se CPF já existe em outro paciente
+            if data['cpf']:
+                cpf_existe = db.session.query(Paciente).filter(
+                    Paciente.cpf == data['cpf'],
+                    Paciente.id != id
+                ).first()
+                if cpf_existe:
+                    return jsonify({'success': False, 'message': 'CPF já cadastrado para outro paciente'}), 400
+            alteracoes.append(f"CPF: {paciente.cpf} → {data['cpf']}")
+            paciente.cpf = data['cpf']
+        
+        if 'cartao_sus' in data and data['cartao_sus'] != paciente.cartao_sus:
+            # Verificar se cartão SUS já existe
+            if data['cartao_sus']:
+                sus_existe = db.session.query(Paciente).filter(
+                    Paciente.cartao_sus == data['cartao_sus'],
+                    Paciente.id != id
+                ).first()
+                if sus_existe:
+                    return jsonify({'success': False, 'message': 'Cartão SUS já cadastrado para outro paciente'}), 400
+            alteracoes.append(f"Cartão SUS: {paciente.cartao_sus} → {data['cartao_sus']}")
+            paciente.cartao_sus = data['cartao_sus']
+        
+        if 'data_nascimento' in data:
+            from datetime import datetime
+            if data['data_nascimento']:
+                nova_data = datetime.strptime(data['data_nascimento'], '%Y-%m-%d').date()
+                if nova_data != paciente.data_nascimento:
+                    alteracoes.append(f"Data Nascimento alterada")
+                paciente.data_nascimento = nova_data
+        
+        if 'sexo' in data:
+            paciente.sexo = data['sexo']
+        
+        if 'cor' in data:
+            paciente.cor = data['cor']
+        
+        if 'filiacao' in data:
+            paciente.filiacao = data['filiacao']
+        
+        if 'endereco' in data:
+            paciente.endereco = data['endereco']
+        
+        if 'bairro' in data:
+            paciente.bairro = data['bairro']
+        
+        if 'municipio' in data:
+            paciente.municipio = data['municipio']
+        
+        if 'telefone' in data:
+            paciente.telefone = data['telefone']
+        
+        db.session.commit()
+        
+        # Log das alterações
+        if alteracoes:
+            logging.info(f"Paciente {id} editado por {user.nome}. Alterações: {', '.join(alteracoes)}")
+        
+        return jsonify({'success': True, 'message': 'Paciente atualizado com sucesso'})
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Erro ao editar paciente: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro ao editar paciente'}), 500
+
+@bp.route('/administrador/atendimentos')
+@login_required
+def gestao_atendimentos():
+    try:
+        user = get_current_user()
+        if not user or user.cargo.strip().lower() != 'administrador':
+            flash('Acesso restrito a administradores.', 'danger')
+            return redirect(url_for('main.index'))
+        
+        # Buscar atendimentos recentes (últimos 100)
+        atendimentos = db.session.query(Atendimento).join(
+            Paciente, Atendimento.paciente_id == Paciente.id
+        ).order_by(Atendimento.data_atendimento.desc(), Atendimento.hora_atendimento.desc()).limit(100).all()
+        
+        # Estatísticas por status
+        stats_status = db.session.query(
+            Atendimento.status,
+            func.count(Atendimento.id)
+        ).filter(
+            Atendimento.status.isnot(None)
+        ).group_by(Atendimento.status).all()
+        
+        status_count = {status: count for status, count in stats_status}
+        total_atendimentos = sum(status_count.values())
+        
+        # Atendimentos abertos (não finalizados)
+        atendimentos_abertos = db.session.query(func.count(Atendimento.id)).filter(
+            Atendimento.status.notin_(['Alta', 'Evasão', 'Óbito', 'Transferência', 'Finalizado'])
+        ).scalar() or 0
+        
+        return render_template('gestao_atendimentos.html',
+                             atendimentos=atendimentos,
+                             status_count=status_count,
+                             total_atendimentos=total_atendimentos,
+                             atendimentos_abertos=atendimentos_abertos,
+                             today=datetime.now(ZoneInfo("America/Sao_Paulo")).date())
+    except Exception as e:
+        logging.error(f"Erro ao acessar gestão de atendimentos: {str(e)}")
+        logging.error(traceback.format_exc())
+        flash('Erro ao acessar gestão de atendimentos.', 'danger')
+        return redirect(url_for('main.index'))
+
+@bp.route('/administrador/atendimentos/buscar')
+@login_required
+def buscar_atendimentos_admin():
+    try:
+        user = get_current_user()
+        if not user or user.cargo.strip().lower() != 'administrador':
+            return jsonify({'success': False, 'message': 'Acesso negado'}), 403
+        
+        termo = request.args.get('termo', '').strip()
+        if not termo or len(termo) < 2:
+            return jsonify({'success': False, 'message': 'Digite ao menos 2 caracteres'}), 400
+        
+        # Buscar por ID do atendimento ou nome do paciente
+        atendimentos = db.session.query(Atendimento).join(
+            Paciente, Atendimento.paciente_id == Paciente.id
+        ).filter(
+            db.or_(
+                Atendimento.id.ilike(f'%{termo}%'),
+                Paciente.nome.ilike(f'%{termo}%'),
+                Paciente.cpf.ilike(f'%{termo}%')
+            )
+        ).order_by(Atendimento.data_atendimento.desc()).limit(50).all()
+        
+        resultado = []
+        for atend in atendimentos:
+            paciente = atend.paciente
+            resultado.append({
+                'id': atend.id,
+                'paciente_nome': paciente.nome,
+                'paciente_cpf': paciente.cpf or 'Não informado',
+                'data_atendimento': atend.data_atendimento.strftime('%d/%m/%Y') if atend.data_atendimento else 'Não informado',
+                'hora_atendimento': atend.hora_atendimento.strftime('%H:%M') if atend.hora_atendimento else 'Não informado',
+                'status': atend.status or 'Sem status',
+                'classificacao_risco': atend.classificacao_risco or 'Não classificado'
+            })
+        
+        return jsonify({'success': True, 'atendimentos': resultado})
+    except Exception as e:
+        logging.error(f"Erro ao buscar atendimentos: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro ao buscar atendimentos'}), 500
+
+@bp.route('/administrador/atendimentos/<string:id>')
+@login_required
+def obter_atendimento(id):
+    try:
+        user = get_current_user()
+        if not user or user.cargo.strip().lower() != 'administrador':
+            return jsonify({'success': False, 'message': 'Acesso negado'}), 403
+        
+        atendimento = db.session.query(Atendimento).get(id)
+        if not atendimento:
+            return jsonify({'success': False, 'message': 'Atendimento não encontrado'}), 404
+        
+        paciente = atendimento.paciente
+        
+        dados = {
+            'id': atendimento.id,
+            'paciente_id': paciente.id,
+            'paciente_nome': paciente.nome,
+            'paciente_cpf': paciente.cpf or 'Não informado',
+            'data_atendimento': atendimento.data_atendimento.strftime('%d/%m/%Y') if atendimento.data_atendimento else '',
+            'hora_atendimento': atendimento.hora_atendimento.strftime('%H:%M') if atendimento.hora_atendimento else '',
+            'status': atendimento.status or '',
+            'classificacao_risco': atendimento.classificacao_risco or '',
+            'triagem': atendimento.triagem or '',
+            'conduta_final': atendimento.conduta_final or '',
+            'horario_triagem': atendimento.horario_triagem.strftime('%d/%m/%Y %H:%M') if atendimento.horario_triagem else 'Não realizado',
+            'horario_consulta_medica': atendimento.horario_consulta_medica.strftime('%d/%m/%Y %H:%M') if atendimento.horario_consulta_medica else 'Não realizado',
+            'horario_alta': atendimento.horario_alta.strftime('%d/%m/%Y %H:%M') if atendimento.horario_alta else 'Não realizado'
+        }
+        
+        return jsonify({'success': True, 'atendimento': dados})
+    except Exception as e:
+        logging.error(f"Erro ao obter atendimento: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro ao obter dados do atendimento'}), 500
+
+@bp.route('/administrador/atendimentos/<string:id>/alterar-status', methods=['PUT'])
+@login_required
+def alterar_status_atendimento(id):
+    try:
+        user = get_current_user()
+        if not user or user.cargo.strip().lower() != 'administrador':
+            return jsonify({'success': False, 'message': 'Acesso negado'}), 403
+        
+        atendimento = db.session.query(Atendimento).get(id)
+        if not atendimento:
+            return jsonify({'success': False, 'message': 'Atendimento não encontrado'}), 404
+        
+        data = request.get_json()
+        novo_status = data.get('status', '').strip()
+        motivo = data.get('motivo', '').strip()
+        
+        if not novo_status:
+            return jsonify({'success': False, 'message': 'Status é obrigatório'}), 400
+        
+        # Registrar alteração no log
+        status_anterior = atendimento.status
+        atendimento.status = novo_status
+        
+        # Se o status for finalizado, registrar horário de alta se não tiver
+        if novo_status in ['Alta', 'Evasão', 'Óbito', 'Transferência', 'Finalizado']:
+            if not atendimento.horario_alta:
+                atendimento.horario_alta = datetime.now()
+        
+        db.session.commit()
+        
+        # Log completo da alteração
+        logging.warning(f"STATUS ALTERADO MANUALMENTE - Atendimento: {id} | Paciente: {atendimento.paciente.nome} | "
+                       f"Status: {status_anterior} → {novo_status} | "
+                       f"Alterado por: {user.nome} (ID: {user.id}) | "
+                       f"Motivo: {motivo or 'Não informado'}")
+        
+        return jsonify({
+            'success': True, 
+            'message': 'Status atualizado com sucesso',
+            'novo_status': novo_status
+        })
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Erro ao alterar status do atendimento: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro ao alterar status'}), 500
 
 @bp.route('/administrador/relatorios/internacoes')
 @login_required
