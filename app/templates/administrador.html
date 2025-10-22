@@ -6,125 +6,215 @@
 <style>
     .kpi-card {
         border: none;
-        border-left: 6px solid #0d6efd;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        border-left: 4px solid #0d6efd;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        transition: all .2s;
+    }
+    .kpi-card:hover {
+        box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
     }
     .kpi-icon {
-        width: 48px;
-        height: 48px;
+        width: 36px;
+        height: 36px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border-radius: 8px;
+        border-radius: 6px;
         background: rgba(13,110,253,.1);
         color: #0d6efd;
+        font-size: 1.1rem;
     }
     .card-header-min {
-        padding: .75rem 1rem;
+        padding: .4rem .6rem;
         background-color: #f8f9fa;
         border-bottom: 1px solid #e9ecef;
         font-weight: 600;
+        font-size: .85rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
-    .table-sm td, .table-sm th { padding: .5rem; }
-    .muted { color: #6c757d; font-size: .875rem; }
+    .expand-icon {
+        cursor: pointer;
+        opacity: .5;
+        transition: opacity .2s;
+    }
+    .expand-icon:hover { opacity: 1; }
+    .table-sm td, .table-sm th { padding: .35rem .5rem; font-size: .85rem; }
+    .muted { color: #6c757d; font-size: .8rem; }
+    .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: #fff;
+        border-bottom: 1px solid #e9ecef;
+        padding: .4rem 1rem;
+        margin: 0 -1rem 0 -1rem;
+    }
+    .compact .card-body { padding: .5rem; }
+    .compact .h3 { font-size: 1.2rem; margin-bottom: 0; }
+    .compact .h5 { font-size: 1rem; margin-bottom: 0; }
+    .scroll-section { max-height: 180px; overflow: auto; }
+    .mini-chart-container { height: 80px; position: relative; cursor: pointer; }
+    .clickable-card { cursor: pointer; transition: all .2s; }
+    .clickable-card:hover { box-shadow: 0 3px 8px rgba(0,0,0,0.15); }
+    .stat-label { font-size: .75rem; color: #6c757d; margin-bottom: .1rem; }
+    .stat-value { font-size: 1.1rem; font-weight: 600; }
+    @media (min-width: 1400px) {
+        .col-xxl-3 { flex: 0 0 auto; width: 25%; }
+        .col-xxl-4 { flex: 0 0 auto; width: 33.333333%; }
+        .col-xxl-6 { flex: 0 0 auto; width: 50%; }
+        .col-xxl-2-4 { flex: 0 0 auto; width: 20%; }
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="py-4">
-    <div class="d-flex align-items-center justify-content-between mb-4">
-        <div>
-            <h2 class="mb-1">Painel do Gestor</h2>
-            <div class="muted">Visão geral operacional e técnica do hospital</div>
+<div class="py-2 compact">
+    <div class="topbar d-flex align-items-center justify-content-between mb-3">
+        <div class="d-flex align-items-center">
+            <h2 class="h5 mb-0 me-2">Painel do Gestor</h2>
+            <span class="muted">Visão geral operacional e técnica do hospital</span>
         </div>
-        <div class="text-end">
-            <div class="muted">
-                Atualizado em: <span id="dsb-now">-</span>
-            </div>
+        <div class="text-end muted">
+            Atualizado em: <span id="dsb-now">-</span>
         </div>
     </div>
 
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
+    <div class="row g-2 mb-2">
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2 col-xxl-2-4">
             <div class="card kpi-card h-100">
-                <div class="card-body d-flex align-items-center justify-content-between">
+                <div class="card-body d-flex align-items-center justify-content-between p-2">
                     <div>
-                        <div class="muted">Internações hoje</div>
-                        <div class="h3 mb-0">{{ total_internacoes_hoje|default(0) }}</div>
+                        <div class="stat-label">Internações hoje</div>
+                        <div class="stat-value">{{ total_internacoes_hoje|default(0) }}</div>
                     </div>
-                    <div class="kpi-icon" aria-hidden="true"><i class="fas fa-hospital-user"></i></div>
+                    <div class="kpi-icon"><i class="fas fa-hospital-user"></i></div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2 col-xxl-2-4">
             <div class="card kpi-card h-100" style="border-left-color:#20c997">
-                <div class="card-body d-flex align-items-center justify-content-between">
+                <div class="card-body d-flex align-items-center justify-content-between p-2">
                     <div>
-                        <div class="muted">Ocupação de leitos</div>
-                        <div class="h3 mb-0">{{ taxa_ocupacao|default(0) }}%</div>
+                        <div class="stat-label">Ocupação leitos</div>
+                        <div class="stat-value">{{ taxa_ocupacao|default(0) }}%</div>
                     </div>
-                    <div class="kpi-icon" style="background:rgba(32,201,151,.1);color:#20c997" aria-hidden="true"><i class="fas fa-procedures"></i></div>
+                    <div class="kpi-icon" style="background:rgba(32,201,151,.1);color:#20c997"><i class="fas fa-procedures"></i></div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2 col-xxl-2-4">
             <div class="card kpi-card h-100" style="border-left-color:#fd7e14">
-                <div class="card-body d-flex align-items-center justify-content-between">
+                <div class="card-body d-flex align-items-center justify-content-between p-2">
                     <div>
-                        <div class="muted">Tempo médio de permanência</div>
-                        <div class="h3 mb-0">{{ tempo_medio_permanencia|default(0) }} d</div>
+                        <div class="stat-label">Tempo médio perm.</div>
+                        <div class="stat-value">{{ tempo_medio_permanencia|default(0) }}d</div>
                     </div>
-                    <div class="kpi-icon" style="background:rgba(253,126,20,.1);color:#fd7e14" aria-hidden="true"><i class="fas fa-clock"></i></div>
+                    <div class="kpi-icon" style="background:rgba(253,126,20,.1);color:#fd7e14"><i class="fas fa-clock"></i></div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2 col-xxl-2-4">
             <div class="card kpi-card h-100" style="border-left-color:#dc3545">
-                <div class="card-body d-flex align-items-center justify-content-between">
+                <div class="card-body d-flex align-items-center justify-content-between p-2">
                     <div>
-                        <div class="muted">Em observação</div>
-                        <div class="h3 mb-0">{{ pacientes_observacao|default(0) }}</div>
+                        <div class="stat-label">Em observação</div>
+                        <div class="stat-value">{{ pacientes_observacao|default(0) }}</div>
                     </div>
-                    <div class="kpi-icon" style="background:rgba(220,53,69,.1);color:#dc3545" aria-hidden="true"><i class="fas fa-heartbeat"></i></div>
+                    <div class="kpi-icon" style="background:rgba(220,53,69,.1);color:#dc3545"><i class="fas fa-heartbeat"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2 col-xxl-2-4">
+            <div class="card kpi-card h-100" style="border-left-color:#6f42c1">
+                <div class="card-body d-flex align-items-center justify-content-between p-2">
+                    <div>
+                        <div class="stat-label">Atend. hoje</div>
+                        <div class="stat-value">{{ total_atendimentos_hoje|default(0) }}</div>
+                    </div>
+                    <div class="kpi-icon" style="background:rgba(111,66,193,.1);color:#6f42c1"><i class="fas fa-users"></i></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row g-3 mb-4">
-        <div class="col-lg-6">
-            <div class="card h-100">
-                <div class="card-header-min">Atendimentos hoje por classificação de risco</div>
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="muted">Total hoje</div>
-                        <div class="h5 mb-0">{{ total_atendimentos_hoje|default(0) }}</div>
+    <div class="row g-2 mb-2">
+        <div class="col-md-6 col-lg-4 col-xxl-3">
+            <div class="card clickable-card" onclick="expandChart('chartClassificacaoRisco')">
+                <div class="card-header-min">
+                    <span>Classificação de risco</span>
+                    <i class="fas fa-expand-alt expand-icon"></i>
+                </div>
+                <div class="card-body p-2">
+                    <div class="mini-chart-container">
+                        <canvas id="chartClassificacaoRisco" aria-label="Gráfico de atendimentos por classificação de risco" role="img"></canvas>
                     </div>
-                    <canvas id="chartClassificacaoRisco" height="160" aria-label="Gráfico de atendimentos por classificação de risco" role="img"></canvas>
                 </div>
             </div>
         </div>
-        <div class="col-lg-6">
-            <div class="card h-100">
-                <div class="card-header-min">Entradas x Altas (últimos 7 dias)</div>
-                <div class="card-body">
-                    <canvas id="chartFluxo" height="160" aria-label="Gráfico de entradas e altas na última semana" role="img"></canvas>
+        <div class="col-md-6 col-lg-4 col-xxl-3">
+            <div class="card clickable-card" onclick="expandChart('chartFluxo')">
+                <div class="card-header-min">
+                    <span>Entradas x Altas (7d)</span>
+                    <i class="fas fa-expand-alt expand-icon"></i>
+                </div>
+                <div class="card-body p-2">
+                    <div class="mini-chart-container">
+                        <canvas id="chartFluxo" aria-label="Gráfico de entradas e altas na última semana" role="img"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4 col-xxl-3">
+            <div class="card clickable-card" onclick="expandChart('chartAtendimentosHora')">
+                <div class="card-header-min">
+                    <span>Atendimentos por hora</span>
+                    <i class="fas fa-expand-alt expand-icon"></i>
+                </div>
+                <div class="card-body p-2">
+                    <div class="mini-chart-container">
+                        <canvas id="chartAtendimentosHora" aria-label="Gráfico de atendimentos por hora no dia" role="img"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4 col-xxl-3">
+            <div class="card">
+                <div class="card-header-min">
+                    <span>Tempo médio de espera</span>
+                </div>
+                <div class="card-body p-2">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="stat-label">Hoje</div>
+                            <div class="stat-value">{{ tempo_medio_espera_dia|default(0) }} min</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-label">Geral</div>
+                            <div class="stat-value">{{ tempo_medio_espera_geral|default(0) }} min</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="row g-3 mb-4">
+    <div class="row g-2 mb-2">
         <div class="col-lg-6">
-            <div class="card h-100">
-                <div class="card-header-min">Alertas técnicos em fichas</div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
+            <div class="card">
+                <div class="card-header-min">
+                    <span>Alertas técnicos em fichas</span>
+                    <span class="badge bg-danger">{{ alertas_tecnicos|default([])|length }}</span>
+                </div>
+                <div class="card-body p-0 scroll-section">
+                    <div class="table-responsive mb-0">
                         <table class="table table-sm mb-0">
                             <thead class="thead-light">
                                 <tr>
                                     <th>Paciente</th>
-                                    <th>Atendimento</th>
+                                    <th>Atend.</th>
                                     <th>Problema</th>
                                     <th class="text-end">Ação</th>
                                 </tr>
@@ -136,12 +226,12 @@
                                     <td>#{{ alerta.atendimento_id }}</td>
                                     <td>{{ alerta.problema }}</td>
                                     <td class="text-end">
-                                        <a href="{{ alerta.url|default('#') }}" class="btn btn-sm btn-outline-primary">Revisar</a>
+                                        <a href="{{ alerta.url|default('#') }}" class="btn btn-sm btn-outline-primary py-0 px-1">Ver</a>
                                     </td>
                                 </tr>
                                 {% else %}
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted py-4">Sem alertas no momento</td>
+                                    <td colspan="4" class="text-center text-muted py-2">Sem alertas</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -151,20 +241,22 @@
             </div>
         </div>
         <div class="col-lg-6">
-            <div class="card h-100">
-                <div class="card-header-min">Últimas alterações técnicas</div>
-                <div class="card-body">
-                    <ul class="list-group list-group-flush">
+            <div class="card">
+                <div class="card-header-min">
+                    <span>Últimas alterações técnicas</span>
+                </div>
+                <div class="card-body p-0 scroll-section">
+                    <ul class="list-group list-group-flush mb-0">
                         {% for alt in ultimas_alteracoes|default([]) %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-1 px-2">
                             <div>
-                                <div><strong>{{ alt.titulo }}</strong></div>
+                                <div style="font-size:.85rem;"><strong>{{ alt.titulo }}</strong></div>
                                 <div class="muted">{{ alt.usuario }} • {{ alt.data }}</div>
                             </div>
-                            <a href="{{ alt.url|default('#') }}" class="btn btn-sm btn-outline-secondary">Ver</a>
+                            <a href="{{ alt.url|default('#') }}" class="btn btn-sm btn-outline-secondary py-0 px-1">Ver</a>
                         </li>
                         {% else %}
-                        <li class="list-group-item text-center text-muted">Nenhuma alteração recente</li>
+                        <li class="list-group-item text-center text-muted py-2">Nenhuma alteração recente</li>
                         {% endfor %}
                     </ul>
                 </div>
@@ -173,28 +265,47 @@
     </div>
 
     <div class="card">
-        <div class="card-header-min">Ações rápidas do gestor</div>
-        <div class="card-body">
+        <div class="card-header-min">
+            <span>Ações rápidas do gestor</span>
+        </div>
+        <div class="card-body p-2">
             <div class="row g-2">
-                <div class="col-md-3">
-                    <a href="{{ url_for('index') if false else '#' }}" class="btn btn-outline-primary w-100">
-                        <i class="fas fa-database mr-1"></i> Normalizar CID/Procedimentos
+                <div class="col-6 col-md-3">
+                    <a href="{{ url_for('index') if false else '#' }}" class="btn btn-sm btn-outline-primary w-100">
+                        <i class="fas fa-database"></i> Normalizar CID
                     </a>
                 </div>
-                <div class="col-md-3">
-                    <a href="#" class="btn btn-outline-primary w-100">
-                        <i class="fas fa-link mr-1"></i> Vincular atendimentos duplicados
+                <div class="col-6 col-md-3">
+                    <a href="#" class="btn btn-sm btn-outline-primary w-100">
+                        <i class="fas fa-link"></i> Vincular atend.
                     </a>
                 </div>
-                <div class="col-md-3">
-                    <a href="#" class="btn btn-outline-primary w-100">
-                        <i class="fas fa-file-medical-alt mr-1"></i> Corrigir prescrições
+                <div class="col-6 col-md-3">
+                    <a href="#" class="btn btn-sm btn-outline-primary w-100">
+                        <i class="fas fa-file-medical-alt"></i> Corrigir prescrições
                     </a>
                 </div>
-                <div class="col-md-3">
-                    <a href="#" class="btn btn-outline-primary w-100">
-                        <i class="fas fa-user-shield mr-1"></i> Revisar permissões
+                <div class="col-6 col-md-3">
+                    <a href="#" class="btn btn-sm btn-outline-primary w-100">
+                        <i class="fas fa-user-shield"></i> Revisar permissões
                     </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para expandir gráficos -->
+<div class="modal fade" id="chartModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="chartModalTitle">Gráfico</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div style="height: 400px; position: relative;">
+                    <canvas id="chartModalCanvas"></canvas>
                 </div>
             </div>
         </div>
@@ -206,29 +317,88 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
     (function() {
+        var chartInstances = {};
+        var modalChart = null;
+
         var nowEl = document.getElementById('dsb-now');
         if (nowEl) {
             var now = new Date();
             nowEl.textContent = now.toLocaleString('pt-BR');
         }
+
+        // Função para expandir gráfico no modal
+        window.expandChart = function(chartId) {
+            var originalChart = chartInstances[chartId];
+            if (!originalChart) return;
+
+            var modalCanvas = document.getElementById('chartModalCanvas');
+            var modalTitle = document.getElementById('chartModalTitle');
+
+            // Definir título do modal
+            var titles = {
+                'chartClassificacaoRisco': 'Atendimentos por Classificação de Risco',
+                'chartFluxo': 'Entradas x Altas (Últimos 7 dias)',
+                'chartAtendimentosHora': 'Atendimentos por Hora (Hoje)'
+            };
+            modalTitle.textContent = titles[chartId] || 'Gráfico';
+
+            // Destruir gráfico anterior do modal se existir
+            if (modalChart) {
+                modalChart.destroy();
+            }
+
+            // Criar nova instância do gráfico no modal
+            var config = JSON.parse(JSON.stringify(originalChart.config));
+            config.options.maintainAspectRatio = false;
+            modalChart = new Chart(modalCanvas.getContext('2d'), config);
+
+            // Abrir modal usando jQuery (Bootstrap 4)
+            $('#chartModal').modal('show');
+        };
+
         var ctxRisco = document.getElementById('chartClassificacaoRisco');
         if (ctxRisco) {
-            var labelsRisco = {{ porta_risco_labels|default(["Vermelho","Laranja","Amarelo","Verde","Azul","Não classificado"])|tojson }};
-            var dataRisco = {{ porta_risco_valores|default([0,0,0,0,0,0])|tojson }};
-            new Chart(ctxRisco, {
+            var labelsRisco = {{ porta_risco_labels|default([])|tojson }};
+            var dataRisco = {{ porta_risco_valores|default([])|tojson }};
+            
+            // Se não houver dados, usar valores padrão para exibição
+            if (labelsRisco.length === 0) {
+                labelsRisco = ["Vermelho","Laranja","Amarelo","Verde","Azul","Não classificado"];
+                dataRisco = [0,0,0,0,0,0];
+            }
+            var triageBg = {
+                'Vermelho': 'rgba(220,53,69,0.2)',
+                'Laranja': 'rgba(253,126,20,0.2)',
+                'Amarelo': 'rgba(255,193,7,0.2)',
+                'Verde': 'rgba(32,201,151,0.2)',
+                'Azul': 'rgba(13,110,253,0.2)',
+                'Não classificado': 'rgba(108,117,125,0.2)'
+            };
+            var triageBorder = {
+                'Vermelho': 'rgba(220,53,69,1)',
+                'Laranja': 'rgba(253,126,20,1)',
+                'Amarelo': 'rgba(255,193,7,1)',
+                'Verde': 'rgba(32,201,151,1)',
+                'Azul': 'rgba(13,110,253,1)',
+                'Não classificado': 'rgba(108,117,125,1)'
+            };
+            var bgColorsRisco = labelsRisco.map(function(l){ return triageBg[l] || 'rgba(13,110,253,0.2)'; });
+            var borderColorsRisco = labelsRisco.map(function(l){ return triageBorder[l] || 'rgba(13,110,253,1)'; });
+            chartInstances['chartClassificacaoRisco'] = new Chart(ctxRisco, {
                 type: 'bar',
                 data: {
                     labels: labelsRisco,
                     datasets: [{
                         label: 'Atendimentos',
                         data: dataRisco,
-                        backgroundColor: 'rgba(13,110,253,0.2)',
-                        borderColor: 'rgba(13,110,253,1)',
+                        backgroundColor: bgColorsRisco,
+                        borderColor: borderColorsRisco,
                         borderWidth: 1
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     scales: { y: { beginAtZero: true } },
                     plugins: { legend: { display: false } }
                 }
@@ -236,10 +406,17 @@
         }
         var ctxFluxo = document.getElementById('chartFluxo');
         if (ctxFluxo) {
-            var labelsFluxo = {{ fluxo_labels|default(["D-6","D-5","D-4","D-3","D-2","D-1","Hoje"])|tojson }};
-            var entradas = {{ fluxo_entradas|default([10,14,9,12,15,11,13])|tojson }};
-            var altas = {{ fluxo_altas|default([8,12,7,10,12,9,12])|tojson }};
-            new Chart(ctxFluxo, {
+            var labelsFluxo = {{ fluxo_labels|default([])|tojson }};
+            var entradas = {{ fluxo_entradas|default([])|tojson }};
+            var altas = {{ fluxo_altas|default([])|tojson }};
+            
+            // Se não houver dados, usar valores padrão
+            if (labelsFluxo.length === 0) {
+                labelsFluxo = ["D-6","D-5","D-4","D-3","D-2","D-1","Hoje"];
+                entradas = [0,0,0,0,0,0,0];
+                altas = [0,0,0,0,0,0,0];
+            }
+            chartInstances['chartFluxo'] = new Chart(ctxFluxo, {
                 type: 'line',
                 data: {
                     labels: labelsFluxo,
@@ -250,7 +427,40 @@
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } },
                     plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+
+        var ctxHora = document.getElementById('chartAtendimentosHora');
+        if (ctxHora) {
+            var labelsHora = {{ atend_hora_labels|default([])|tojson }};
+            var valoresHora = {{ atend_hora_valores|default([])|tojson }};
+            
+            // Se não houver dados, usar valores padrão
+            if (labelsHora.length === 0) {
+                labelsHora = ["00h","01h","02h","03h","04h","05h","06h","07h","08h","09h","10h","11h","12h","13h","14h","15h","16h","17h","18h","19h","20h","21h","22h","23h"];
+                valoresHora = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+            }
+            chartInstances['chartAtendimentosHora'] = new Chart(ctxHora, {
+                type: 'bar',
+                data: {
+                    labels: labelsHora,
+                    datasets: [{
+                        label: 'Atendimentos',
+                        data: valoresHora,
+                        backgroundColor: 'rgba(13,110,253,0.2)',
+                        borderColor: 'rgba(13,110,253,1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true } },
+                    plugins: { legend: { display: false } }
                 }
             });
         }
