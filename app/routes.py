@@ -527,9 +527,7 @@ def api_medico_assumir_atendimento(atendimento_id):
         if not atendimento.horario_consulta_medica:
             atendimento.horario_consulta_medica = agora
 
-        # Se estava aguardando médico, mantém ou atualiza status para refletir início de consulta
-        if atendimento.status and 'aguardando' in atendimento.status.lower():
-            atendimento.status = 'Em Atendimento'
+        # Não alterar o status aqui; permanecer em "Aguardando Médico" até definir conduta
 
         # Garante médico responsável
         atendimento.medico_id = atendimento.medico_id or current_user.id

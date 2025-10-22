@@ -31488,3 +31488,48 @@ werkzeug.exceptions.InternalServerError: 500 Internal Server Error: Erro interno
 2025-10-20 13:20:56,710 [INFO] __init__:72 - LoginManager inicializado com sucesso
 2025-10-20 13:20:56,892 [INFO] __init__:90 - Blueprints registrados com sucesso
 2025-10-20 13:20:56,895 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-22 10:59:50,361 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-22 10:59:50,361 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-22 10:59:50,361 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-22 10:59:50,361 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-22 10:59:50,361 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-22 10:59:50,367 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-22 10:59:50,367 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-22 10:59:50,638 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-10-22 10:59:50,641 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-22 10:59:50,819 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-22 10:59:50,819 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-22 10:59:50,819 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-22 10:59:50,819 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-22 10:59:50,819 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-22 10:59:50,823 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-22 10:59:50,823 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-22 10:59:50,961 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-10-22 10:59:50,964 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-22 11:00:04,486 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-22 11:00:04,486 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-22 11:00:04,486 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-22 11:00:04,486 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-22 11:00:04,486 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-22 11:00:04,529 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-22 11:00:04,529 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-22 11:00:04,698 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-10-22 11:00:04,717 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-22 11:00:16,171 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-22 11:00:16,171 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-22 11:00:16,171 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-22 11:00:16,171 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-22 11:00:16,171 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-22 11:00:16,190 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-22 11:00:16,190 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-22 11:00:16,328 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-10-22 11:00:16,342 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-22 11:00:45,085 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-22 11:00:45,085 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-22 11:00:45,085 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-22 11:00:45,085 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-22 11:00:45,085 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-22 11:00:45,090 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-22 11:00:45,090 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-22 11:00:45,248 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-10-22 11:00:45,250 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
