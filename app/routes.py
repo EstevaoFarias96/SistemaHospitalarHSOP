@@ -12618,6 +12618,11 @@ def assinar_triagem_normal(atendimento_id):
         else:
             atendimento.observacao = assinatura_texto
 
+        # Garantir status correto após finalizar triagem
+        status_atual = (atendimento.status or '').strip().lower()
+        if 'aguardando medico' not in status_atual:
+            atendimento.status = 'Aguardando Medico'
+
         db.session.commit()
 
         logging.info(f'Triagem normal assinada para atendimento {atendimento_id} por {current_user.nome}')
@@ -12673,6 +12678,11 @@ def assinar_triagem_gestante(atendimento_id):
             atendimento.observacao += f"\n\n{assinatura_texto}"
         else:
             atendimento.observacao = assinatura_texto
+
+        # Garantir status correto após finalizar triagem (gestante)
+        status_atual = (atendimento.status or '').strip().lower()
+        if 'aguardando medico' not in status_atual:
+            atendimento.status = 'Aguardando Medico'
 
         db.session.commit()
 
