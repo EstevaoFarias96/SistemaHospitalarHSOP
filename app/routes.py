@@ -474,7 +474,10 @@ def api_medico_atendimentos_aguardando():
             return jsonify({'success': False, 'message': 'Acesso não autorizado'}), 403
 
         atendimentos = Atendimento.query.filter(
-            Atendimento.status.ilike('%aguardando medico%')
+            db.or_(
+                Atendimento.status.ilike('%aguardando%medico%'),
+                Atendimento.status.ilike('%aguardando%médico%')
+            )
         ).order_by(Atendimento.horario_triagem.desc().nullslast(), Atendimento.data_atendimento.desc()).all()
 
         def calcular_idade(data_nascimento):
@@ -1667,14 +1670,14 @@ def listar_pacientes_internados():
         
         pacientes_list = []
         
-        # Buscar pacientes com status "Internado" na tabela atendimentos
+        # Buscar pacientes com status "Internado" (case-insensitive) na tabela atendimentos
         # Inclui tanto pacientes ainda internados quanto aqueles com alta mas com prontuário para fechar
         # Exclui APENAS pacientes com dieta = '1' (prontuário fechado)
         # Inclui pacientes com dieta NULL ou dieta começando com 'PENDENTE:' (alta definida mas prontuário não fechado)
         internacoes = db.session.query(Internacao).join(
             Atendimento, Internacao.atendimento_id == Atendimento.id
         ).filter(
-            Atendimento.status == 'Internado',
+            Atendimento.status.ilike('%internado%'),
             db.or_(Internacao.dieta.is_(None), Internacao.dieta != '1')
         ).all()
         
@@ -1707,6 +1710,34 @@ def listar_pacientes_internados():
                     'prontuario_para_fechar': prontuario_para_fechar,
                     'status_atendimento': atendimento.status
                 })
+
+        # Adicionar também atendimentos com status "Internado" que não possuem registro em Internacao
+        ids_com_internacao = {i.atendimento_id for i in internacoes}
+        atendimentos_sem_internacao = Atendimento.query.filter(
+            Atendimento.status.ilike('%internado%'),
+            ~Atendimento.id.in_(ids_com_internacao)
+        ).all()
+
+        for at in atendimentos_sem_internacao:
+            pac = Paciente.query.get(at.paciente_id)
+            if not pac:
+                continue
+            pacientes_list.append({
+                'atendimento_id': at.id,
+                'nome': pac.nome,
+                'cpf': pac.cpf,
+                'data_nascimento': pac.data_nascimento.strftime('%Y-%m-%d') if pac.data_nascimento else None,
+                'leito': '-',
+                'data_internacao': (at.horario_internacao.strftime('%Y-%m-%d %H:%M') if getattr(at, 'horario_internacao', None) else None),
+                'data_alta': None,
+                'diagnostico': 'Não informado',
+                'diagnostico_inicial': None,
+                'cid_principal': None,
+                'carater_internacao': None,
+                'tem_alta': False,
+                'prontuario_para_fechar': False,
+                'status_atendimento': at.status
+            })
         
         return jsonify({
             'success': True,

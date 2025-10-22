@@ -142,6 +142,27 @@
       $(containerSel).html(html);
     }
 
+    function setTabCount(tabId, baseLabel, count){
+      const n = (typeof count === 'number' && count >= 0) ? count : 0;
+      $('#'+tabId).text(`${baseLabel} (${n})`);
+    }
+
+    function carregarContadores(){
+      Promise.all([
+        fetch('/api/medico/atendimentos/aguardando').then(r=>r.json()).catch(()=>({atendimentos:[]})),
+        fetch('/api/medico/atendimentos/aguardando-triagem').then(r=>r.json()).catch(()=>({atendimentos:[]})),
+        fetch('/api/medico/atendimentos/gestantes').then(r=>r.json()).catch(()=>({atendimentos:[]})),
+        fetch('/api/medico/atendimentos/alta-medicacao').then(r=>r.json()).catch(()=>({atendimentos:[]})),
+        fetch('/api/medico/atendimentos/reavaliacao-medicacao').then(r=>r.json()).catch(()=>({atendimentos:[]}))
+      ]).then(([aguardando, triagem, gestantes, alta, reav])=>{
+        setTabCount('tab-aguardando', 'Aguardando Médico', (aguardando.atendimentos||[]).length);
+        setTabCount('tab-triagem', 'Aguardando Triagem', (triagem.atendimentos||[]).length);
+        setTabCount('tab-gestantes', 'Gestantes', (gestantes.atendimentos||[]).length);
+        setTabCount('tab-alta', 'Alta após medicação', (alta.atendimentos||[]).length);
+        setTabCount('tab-reavaliacao', 'Reavaliação', (reav.atendimentos||[]).length);
+      });
+    }
+
     function carregarAba(tipo) {
       if (tipo === 'aguardando') {
         fetch('/api/medico/atendimentos/aguardando')
@@ -149,6 +170,7 @@
           .then(data => {
             if (!data.success) { $('#lista-aguardando').html('<p class="text-danger">Erro ao carregar</p>'); return; }
             renderLista('#lista-aguardando', data.atendimentos, '<div class="text-center py-5"><i class="fas fa-check-circle fa-3x text-success mb-3"></i><h5>Nenhum atendimento aguardando</h5></div>');
+            setTabCount('tab-aguardando', 'Aguardando Médico', (data.atendimentos||[]).length);
           })
           .catch(() => { $('#lista-aguardando').html('<p class="text-danger">Erro ao carregar dados</p>'); });
       } else if (tipo === 'triagem') {
@@ -157,6 +179,7 @@
           .then(data => {
             if (!data.success) { $('#lista-triagem').html('<p class="text-danger">Erro ao carregar</p>'); return; }
             renderLista('#lista-triagem', data.atendimentos, '<div class="text-center py-5"><i class="fas fa-info-circle fa-3x text-secondary mb-3"></i><h5>Sem pacientes aguardando triagem</h5></div>');
+            setTabCount('tab-triagem', 'Aguardando Triagem', (data.atendimentos||[]).length);
           })
           .catch(() => { $('#lista-triagem').html('<p class="text-danger">Erro ao carregar dados</p>'); });
       } else if (tipo === 'alta') {
@@ -165,6 +188,7 @@
           .then(data => {
             if (!data.success) { $('#lista-alta').html('<p class="text-danger">Erro ao carregar</p>'); return; }
             renderLista('#lista-alta', data.atendimentos, '<div class="text-center py-5"><i class="fas fa-info-circle fa-3x text-secondary mb-3"></i><h5>Sem pacientes em alta após medicação</h5></div>');
+            setTabCount('tab-alta', 'Alta após medicação', (data.atendimentos||[]).length);
           })
           .catch(() => { $('#lista-alta').html('<p class="text-danger">Erro ao carregar dados</p>'); });
       } else if (tipo === 'gestantes') {
@@ -173,6 +197,7 @@
           .then(data => {
             if (!data.success) { $('#lista-gestantes').html('<p class="text-danger">Erro ao carregar</p>'); return; }
             renderLista('#lista-gestantes', data.atendimentos, '<div class="text-center py-5"><i class="fas fa-baby fa-3x text-secondary mb-3"></i><h5>Sem pacientes gestantes</h5></div>');
+            setTabCount('tab-gestantes', 'Gestantes', (data.atendimentos||[]).length);
           })
           .catch(() => { $('#lista-gestantes').html('<p class="text-danger">Erro ao carregar dados</p>'); });
       } else if (tipo === 'reavaliacao') {
@@ -181,6 +206,7 @@
           .then(data => {
             if (!data.success) { $('#lista-reavaliacao').html('<p class="text-danger">Erro ao carregar</p>'); return; }
             renderLista('#lista-reavaliacao', data.atendimentos, '<div class="text-center py-5"><i class="fas fa-info-circle fa-3x text-secondary mb-3"></i><h5>Sem pacientes para reavaliação</h5></div>');
+            setTabCount('tab-reavaliacao', 'Reavaliação', (data.atendimentos||[]).length);
           })
           .catch(() => { $('#lista-reavaliacao').html('<p class="text-danger">Erro ao carregar dados</p>'); });
       }
@@ -188,6 +214,7 @@
 
     $(function(){
       carregarAba('aguardando');
+      carregarContadores();
       $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
         const id = $(e.target).attr('id');
         if (id === 'tab-aguardando') carregarAba('aguardando');
@@ -195,6 +222,7 @@
         if (id === 'tab-gestantes') carregarAba('gestantes');
         if (id === 'tab-alta') carregarAba('alta');
         if (id === 'tab-reavaliacao') carregarAba('reavaliacao');
+        carregarContadores();
       });
       $('#btnAtualizar').click(function(){
         const btn = $(this); const icon = btn.find('i');
@@ -205,6 +233,7 @@
         if (activeId === 'tab-gestantes') carregarAba('gestantes');
         if (activeId === 'tab-alta') carregarAba('alta');
         if (activeId === 'tab-reavaliacao') carregarAba('reavaliacao');
+        carregarContadores();
         setTimeout(()=>{ btn.prop('disabled', false); icon.removeClass('fa-spin'); }, 800);
       });
     });
