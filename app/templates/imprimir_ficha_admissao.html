@@ -791,7 +791,7 @@
                         <span class="info-label">Data/Hora</span>
                         <span class="info-value">
                             {% if internacao.data_internacao %}
-                                {{ internacao.data_internacao.strftime('%d/%m/%Y %H:%M') }}
+                                {{ internacao.data_internacao|datetime_br }}
                             {% endif %}
                         </span>
                     </div>

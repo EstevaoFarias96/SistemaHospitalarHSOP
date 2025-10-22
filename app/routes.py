@@ -1783,7 +1783,7 @@ def buscar_pacientes_admin():
 
 @bp.route('/administrador/pacientes/<int:id>')
 @login_required
-def obter_paciente(id):
+def obter_paciente_admin(id):
     try:
         user = get_current_user()
         if not user or user.cargo.strip().lower() != 'administrador':
@@ -8260,12 +8260,9 @@ def imprimir_ficha_atendimento(atendimento_id):
         # Buscar a internação relacionada (se houver)
         internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
 
-        # Helpers para formatação
+        # Helpers para formatação com conversão para horário do Brasil (UTC-3)
         def fmt_datetime(dt):
-            try:
-                return dt.strftime('%d/%m/%Y %H:%M') if dt else None
-            except Exception:
-                return None
+            return formatar_datetime_br(dt, '%d/%m/%Y %H:%M') if dt else None
 
         # Buscar prescrições médicas relacionadas e processar medicamentos
         prescricoes_processadas = []
@@ -8335,13 +8332,14 @@ def imprimir_ficha_atendimento(atendimento_id):
                              atendimento_dx=atendimento.dx or '',
                              atendimento_fr=atendimento.fr or '',
                              atendimento_alergias=atendimento.alergias or '',
-                             atendimento_horario_triagem=atendimento.horario_triagem.strftime('%H:%M') if atendimento.horario_triagem else '',
+                             atendimento_horario_triagem=fmt_datetime(atendimento.horario_triagem) or 'Não realizado',
                              atendimento_triagem=atendimento.triagem or '',
-                             atendimento_horario_consulta_medica=atendimento.horario_consulta_medica.strftime('%H:%M') if atendimento.horario_consulta_medica else '',
+                             atendimento_horario_consulta_medica=fmt_datetime(atendimento.horario_consulta_medica) or 'Não realizado',
                              atendimento_anamnese_exame_fisico=atendimento.anamnese_exame_fisico or '',
                              atendimento_reavaliacao=atendimento.reavaliacao or '',
                              atendimento_exames=atendimento.exames or '',
                              atendimento_conduta_final=atendimento.conduta_final or '',
+                             atendimento_observacao=atendimento.observacao or '',
                              # Dados do médico
                              medico_nome=medico.nome if medico else '',
                              medico_crm=medico.numero_profissional if medico else '')

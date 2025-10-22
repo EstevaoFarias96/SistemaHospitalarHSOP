@@ -330,11 +330,11 @@
             </div>
             <div class="patient-field">
                 <span class="patient-label">Data Admissão:</span>
-                <span class="patient-value">{{ internacao.data_internacao.strftime('%d/%m/%Y %H:%M') if internacao.data_internacao else 'Não informado' }}</span>
+                <span class="patient-value">{{ internacao.data_internacao|datetime_br if internacao.data_internacao else 'Não informado' }}</span>
             </div>
             <div class="patient-field">
                 <span class="patient-label">Data Evolução:</span>
-                <span class="patient-value">{{ evolucao.data_evolucao.strftime('%d/%m/%Y %H:%M') if evolucao.data_evolucao else 'Não informado' }}</span>
+                <span class="patient-value">{{ evolucao.data_evolucao|datetime_br if evolucao.data_evolucao else 'Não informado' }}</span>
             </div>
             <div class="patient-field">
                 <span class="patient-label">Alergias:</span>

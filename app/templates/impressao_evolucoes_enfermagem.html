@@ -307,7 +307,7 @@
             </div>
             <div class="patient-field">
                 <span class="patient-label">Data Internação:</span>
-                <span class="patient-value">{{ internacao.data_internacao.strftime('%d/%m/%Y %H:%M') if internacao.data_internacao else 'Não informado' }}</span>
+                <span class="patient-value">{{ internacao.data_internacao|datetime_br if internacao.data_internacao else 'Não informado' }}</span>
             </div>
             <div class="patient-field">
                 <span class="patient-label">ID Atendimento:</span>

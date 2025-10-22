@@ -32009,3 +32009,246 @@ AssertionError: View function mapping is overwriting an existing endpoint functi
 AssertionError: View function mapping is overwriting an existing endpoint function: main.obter_paciente
 
 2025-10-22 14:30:31,321 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-22 14:34:08,643 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-22 14:34:08,643 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-22 14:34:08,643 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-22 14:34:08,643 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-22 14:34:08,643 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-22 14:34:08,649 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-22 14:34:08,649 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-22 14:34:08,821 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.obter_paciente
+2025-10-22 14:34:08,821 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.obter_paciente
+
+2025-10-22 14:34:08,824 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-22 14:38:04,594 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-22 14:38:04,594 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-22 14:38:04,594 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-22 14:38:04,594 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-22 14:38:04,595 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-22 14:38:04,604 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-22 14:38:04,604 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-22 14:38:04,851 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.obter_paciente
+2025-10-22 14:38:04,852 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.obter_paciente
+
+2025-10-22 14:38:04,855 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-22 14:39:43,624 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-22 14:39:43,624 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-22 14:39:43,625 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-22 14:39:43,625 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-22 14:39:43,625 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-22 14:39:43,630 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-22 14:39:43,630 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-22 14:39:43,865 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.obter_paciente
+2025-10-22 14:39:43,865 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.obter_paciente
+
+2025-10-22 14:39:43,868 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-22 14:39:54,378 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-22 14:39:54,378 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-22 14:39:54,378 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-22 14:39:54,378 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-22 14:39:54,378 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-22 14:39:54,384 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-22 14:39:54,385 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-22 14:39:54,601 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.obter_paciente
+2025-10-22 14:39:54,602 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.obter_paciente
+
+2025-10-22 14:39:54,604 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-22 14:40:53,486 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-22 14:40:53,486 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-22 14:40:53,486 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-22 14:40:53,486 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-22 14:40:53,486 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-22 14:40:53,491 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-22 14:40:53,491 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-22 14:40:53,626 [ERROR] __init__:92 - Erro ao registrar blueprint: View function mapping is overwriting an existing endpoint function: main.obter_paciente
+2025-10-22 14:40:53,627 [ERROR] __init__:93 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 88, in create_app
+    app.register_blueprint(main_bp)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 595, in register_blueprint
+    blueprint.register(self, options)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 335, in register
+    deferred(state)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 434, in <lambda>
+    lambda s: s.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/blueprints.py", line 110, in add_url_rule
+    self.app.add_url_rule(
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/scaffold.py", line 47, in wrapper_func
+    return f(self, *args, **kwargs)
+  File "/home/estevaofilho/.local/lib/python3.10/site-packages/flask/sansio/app.py", line 657, in add_url_rule
+    raise AssertionError(
+AssertionError: View function mapping is overwriting an existing endpoint function: main.obter_paciente
+
+2025-10-22 14:40:53,629 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-22 14:41:13,013 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-22 14:41:13,013 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-22 14:41:13,013 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-22 14:41:13,013 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-22 14:41:13,013 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-22 14:41:13,019 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-22 14:41:13,020 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-22 14:41:13,270 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-10-22 14:41:13,273 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-22 14:41:33,571 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-22 14:41:33,571 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-22 14:41:33,571 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-22 14:41:33,571 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-22 14:41:33,571 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-22 14:41:33,577 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-22 14:41:33,577 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-22 14:41:33,776 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-10-22 14:41:33,778 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-22 14:42:09,388 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-22 14:42:09,388 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-22 14:42:09,388 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-22 14:42:09,388 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-22 14:42:09,388 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-22 14:42:09,393 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-22 14:42:09,393 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-22 14:42:09,653 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-10-22 14:42:09,655 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-22 14:44:22,802 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-22 14:44:22,802 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-22 14:44:22,802 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-22 14:44:22,802 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-22 14:44:22,802 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-22 14:44:22,821 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-22 14:44:22,821 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-22 14:44:22,975 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-10-22 14:44:22,996 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-22 14:52:50,061 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-22 14:52:50,062 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-22 14:52:50,062 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-22 14:52:50,062 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-22 14:52:50,062 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-22 14:52:50,085 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-22 14:52:50,085 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-22 14:52:50,319 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-10-22 14:52:50,354 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-22 14:53:23,155 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-22 14:53:23,155 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-22 14:53:23,155 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-22 14:53:23,155 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-22 14:53:23,155 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-22 14:53:23,179 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-22 14:53:23,179 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-22 14:53:23,409 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-10-22 14:53:23,440 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-22 14:53:40,006 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-22 14:53:40,006 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-22 14:53:40,006 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-22 14:53:40,006 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-22 14:53:40,006 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-22 14:53:40,032 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-22 14:53:40,032 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-22 14:53:40,268 [INFO] __init__:90 - Blueprints registrados com sucesso
+2025-10-22 14:53:40,306 [INFO] __init__:99 - Tabelas do banco de dados criadas/verificadas
+2025-10-22 14:54:07,946 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-22 14:54:07,946 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-22 14:54:07,946 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-22 14:54:07,946 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-22 14:54:07,946 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-22 14:54:07,965 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-22 14:54:07,966 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-22 14:54:07,997 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-22 14:54:08,106 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-10-22 14:54:08,124 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-10-22 14:56:34,946 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-22 14:56:34,946 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-22 14:56:34,946 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-22 14:56:34,946 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-22 14:56:34,946 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-22 14:56:34,966 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-22 14:56:34,967 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-22 14:56:35,000 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-22 14:56:35,130 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-10-22 14:56:35,147 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-10-22 14:57:11,035 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-22 14:57:11,035 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-22 14:57:11,035 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-22 14:57:11,035 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-22 14:57:11,035 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-22 14:57:11,057 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-22 14:57:11,057 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-22 14:57:11,090 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-22 14:57:11,302 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-10-22 14:57:11,344 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-10-22 14:57:41,090 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-22 14:57:41,090 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-22 14:57:41,090 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-22 14:57:41,090 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-22 14:57:41,090 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-22 14:57:41,096 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-22 14:57:41,096 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-22 14:57:41,141 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-22 14:57:41,278 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-10-22 14:57:41,280 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas

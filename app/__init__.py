@@ -82,6 +82,30 @@ def create_app():
         logger.error(f"Erro durante configuração inicial: {str(e)}")
         logger.error(traceback.format_exc())
 
+    # Adicionar filtros customizados do Jinja2
+    try:
+        from app.timezone_helper import formatar_datetime_br, formatar_data_br, formatar_hora_br
+        
+        @app.template_filter('datetime_br')
+        def datetime_br_filter(dt, formato='%d/%m/%Y %H:%M'):
+            """Filtro para formatar datetime em horário do Brasil"""
+            return formatar_datetime_br(dt, formato) if dt else ''
+        
+        @app.template_filter('data_br')
+        def data_br_filter(dt):
+            """Filtro para formatar apenas data em formato brasileiro"""
+            return formatar_data_br(dt) if dt else ''
+        
+        @app.template_filter('hora_br')
+        def hora_br_filter(dt):
+            """Filtro para formatar apenas hora em formato brasileiro"""
+            return formatar_hora_br(dt) if dt else ''
+        
+        logger.info("Filtros Jinja2 customizados registrados")
+    except Exception as e:
+        logger.error(f"Erro ao registrar filtros Jinja2: {str(e)}")
+        logger.error(traceback.format_exc())
+
     # Registrar Blueprints
     try:
         from app.routes import bp as main_bp, internacoes_especiais_bp
