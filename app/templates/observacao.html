@@ -327,12 +327,15 @@
           let urlFichaPaciente;
           if (cargoUsuario === 'enfermeiro') {
             urlFichaPaciente = `/observacao/evolucao-paciente-enfermeiro/${p.atendimento_id}`;
+          } else if (cargoUsuario === 'medico' || cargoUsuario === 'multi') {
+            urlFichaPaciente = `/observacao/evolucao-paciente-medico/${p.atendimento_id}`;
           } else {
+            // Fallback: tentar a rota de médico para qualquer outro caso
             urlFichaPaciente = `/observacao/evolucao-paciente-medico/${p.atendimento_id}`;
           }
 
-          // Definir se deve mostrar o botão "Definir Conduta" (apenas para médicos)
-          const botaoConduta = cargoUsuario === 'medico' || cargoUsuario === 'multi' ? 
+          // Definir se deve mostrar o botão "Definir Conduta" (apenas para médicos e multi)
+          const botaoConduta = (cargoUsuario === 'medico' || cargoUsuario === 'multi') ? 
             `<button class="btn btn-sm btn-success ms-2" onclick="definirConduta('${p.atendimento_id}', '${p.nome}')">Definir Conduta</button>` : 
             '';
 

@@ -12696,20 +12696,40 @@ def observacao_paciente_medico(atendimento_id):
     try:
         # Verificar se o usuário é médico
         current_user = get_current_user()
-        if current_user.cargo.lower() != 'medico':
+        if current_user.cargo.lower() not in ['medico', 'multi']:
             flash('Acesso restrito a médicos.', 'danger')
             return redirect(url_for('main.observacao_lobby'))
         
-        # Buscar dados do paciente e internação
-        observacao = ListaObservacao.query.filter_by(id_atendimento=atendimento_id).first()
-        if not observacao:
-            flash('Observação não encontrada.', 'danger')
+        # Buscar atendimento primeiro
+        atendimento = Atendimento.query.filter_by(id=atendimento_id).first()
+        if not atendimento:
+            flash('Atendimento não encontrado.', 'danger')
             return redirect(url_for('main.observacao_lobby'))
         
-        paciente = Paciente.query.get(observacao.id_paciente)
+        # Verificar se o atendimento está em observação
+        if atendimento.status != 'Em Observação':
+            flash('Este atendimento não está em observação.', 'warning')
+            return redirect(url_for('main.observacao_lobby'))
+        
+        # Buscar paciente
+        paciente = Paciente.query.get(atendimento.paciente_id)
         if not paciente:
             flash('Paciente não encontrado.', 'danger')
             return redirect(url_for('main.observacao_lobby'))
+        
+        # Buscar ou criar registro de observação
+        observacao = ListaObservacao.query.filter_by(id_atendimento=atendimento_id).first()
+        if not observacao:
+            # Criar registro de observação automaticamente se não existir
+            observacao = ListaObservacao(
+                id_atendimento=atendimento_id,
+                id_paciente=paciente.id,
+                medico_entrada=current_user.nome,
+                data_entrada=datetime.now()
+            )
+            db.session.add(observacao)
+            db.session.commit()
+            logging.info(f"Registro de observação criado automaticamente para atendimento {atendimento_id}")
         
         # Buscar dados da internação para compatibilidade com o template
         internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
@@ -12735,16 +12755,43 @@ def observacao_paciente_enfermeiro(atendimento_id):
             flash('Acesso restrito a enfermeiros.', 'danger')
             return redirect(url_for('main.observacao_lobby'))
         
-        # Buscar dados do paciente e internação
-        observacao = ListaObservacao.query.filter_by(id_atendimento=atendimento_id).first()
-        if not observacao:
-            flash('Observação não encontrada.', 'danger')
+        # Buscar atendimento primeiro
+        atendimento = Atendimento.query.filter_by(id=atendimento_id).first()
+        if not atendimento:
+            flash('Atendimento não encontrado.', 'danger')
             return redirect(url_for('main.observacao_lobby'))
         
-        paciente = Paciente.query.get(observacao.id_paciente)
+        # Verificar se o atendimento está em observação
+        if atendimento.status != 'Em Observação':
+            flash('Este atendimento não está em observação.', 'warning')
+            return redirect(url_for('main.observacao_lobby'))
+        
+        # Buscar paciente
+        paciente = Paciente.query.get(atendimento.paciente_id)
         if not paciente:
             flash('Paciente não encontrado.', 'danger')
             return redirect(url_for('main.observacao_lobby'))
+        
+        # Buscar ou criar registro de observação
+        observacao = ListaObservacao.query.filter_by(id_atendimento=atendimento_id).first()
+        if not observacao:
+            # Criar registro de observação automaticamente se não existir
+            # Para enfermeiro, usamos o médico do atendimento se disponível
+            medico_entrada = None
+            if atendimento.medico_id:
+                medico = Funcionario.query.get(atendimento.medico_id)
+                if medico:
+                    medico_entrada = medico.nome
+            
+            observacao = ListaObservacao(
+                id_atendimento=atendimento_id,
+                id_paciente=paciente.id,
+                medico_entrada=medico_entrada,
+                data_entrada=datetime.now()
+            )
+            db.session.add(observacao)
+            db.session.commit()
+            logging.info(f"Registro de observação criado automaticamente para atendimento {atendimento_id} por enfermeiro")
         
         # Buscar dados da internação para compatibilidade com o template
         internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
