@@ -1087,6 +1087,7 @@ def api_encerrar_atendimento(atendimento_id):
         dados = request.get_json() or {}
         conduta_final = (dados.get('conduta_final') or '').strip().upper()
         conduta_norm = normalize_status(conduta_final)
+        status_customizado = dados.get('status')  # Aceitar status personalizado do frontend
 
         atendimento = Atendimento.query.get(atendimento_id)
         if not atendimento:
@@ -1095,8 +1096,13 @@ def api_encerrar_atendimento(atendimento_id):
         # Atualiza conduta final registrada
         if conduta_final:
             atendimento.conduta_final = conduta_final
-            # Sincronizar status normalizado (sem acentos) no campo status
-            atendimento.status = conduta_norm
+            # Se foi enviado um status personalizado, usar ele; senão, usar conduta normalizada
+            if status_customizado:
+                atendimento.status = status_customizado
+                logging.info(f"Status personalizado aplicado: {status_customizado}")
+            else:
+                # Sincronizar status normalizado (sem acentos) no campo status
+                atendimento.status = conduta_norm
 
         # Horário do servidor menos 3 horas
         agora = datetime.utcnow() - timedelta(hours=3)
@@ -1109,21 +1115,28 @@ def api_encerrar_atendimento(atendimento_id):
         # Para condutas de encerramento (alta, evasão, etc.), registrar horário de alta
         if conduta_final and conduta_norm != 'REAVALIACAO':
             atendimento.horario_alta = agora
-            # Registrar fluxo do paciente com status exatamente igual à Conduta Final
+            # Registrar fluxo do paciente com status personalizado ou conduta final
+            status_para_fluxo = status_customizado if status_customizado else conduta_final
             try:
                 fluxo = FluxoPaciente(
                     id_atendimento=atendimento.id,
                     id_medico=current_user.id if current_user else None,
                     id_enfermeiro=None,
                     nome_paciente=atendimento.paciente.nome if atendimento.paciente else '',
-                    mudanca_status=conduta_final,
+                    mudanca_status=status_para_fluxo,
                     mudanca_hora=agora
                 )
                 db.session.add(fluxo)
+                logging.info(f"FluxoPaciente registrado: {status_para_fluxo}")
             except Exception as e:
                 logging.error(f"Falha ao registrar FluxoPaciente no encerramento: {str(e)}")
             db.session.commit()
-            return jsonify({'success': True, 'message': f'Atendimento encerrado com conduta: {conduta_final}'})
+            
+            mensagem_sucesso = f'Atendimento encerrado com conduta: {conduta_final}'
+            if status_customizado:
+                mensagem_sucesso += f' (Status: {status_customizado})'
+            
+            return jsonify({'success': True, 'message': mensagem_sucesso})
 
         # Para OBSERVAÇÃO e INTERNAMENTO o frontend usará endpoints dedicados
         return jsonify({'success': False, 'message': 'Use os fluxos de Observação ou Internamento para concluir esta conduta.'}), 400

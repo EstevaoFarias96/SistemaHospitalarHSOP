@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ficha de Atendimento Médico - {{ paciente_nome }}</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    
     <style>
         /* ===== CONFIGURAÇÕES DE IMPRESSÃO PROFISSIONAL ===== */
         @page {
@@ -413,16 +420,196 @@
         .prescricao-item-separator {
             border-bottom: 1px dashed #ccc;
         }
+
+        /* ===== ESTILOS DO MENU LATERAL ===== */
+        .sidebar {
+            width: 60px;
+            height: 100vh;
+            background: linear-gradient(180deg, #1a237e 0%, #283593 100%);
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding-top: 20px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        }
+        
+        .sidebar:hover {
+            width: 200px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+        }
+        
+        .nav-pills {
+            flex-direction: column;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .nav-pills .nav-link {
+            margin: 5px 10px;
+            border-radius: 8px;
+            padding: 12px;
+            color: rgba(255,255,255,0.85);
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .nav-pills .nav-link:hover {
+            background-color: rgba(255,255,255,0.08);
+            transform: translateX(5px);
+            color: white;
+        }
+        
+        .nav-pills .nav-link i {
+            font-size: 1.3rem;
+            min-width: 30px;
+            text-align: center;
+            transition: transform 0.3s ease;
+            color: white !important;
+            opacity: 1 !important;
+            display: inline-block !important;
+            visibility: visible !important;
+        }
+        
+        .nav-pills .nav-link:hover i {
+            transform: scale(1.15);
+        }
+        
+        .nav-pills .nav-link.active i {
+            color: white !important;
+            opacity: 1 !important;
+        }
+        
+        .nav-pills .nav-link span {
+            margin-left: 10px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            white-space: nowrap;
+            color: white;
+        }
+        
+        .sidebar:hover .nav-pills .nav-link span {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .nav-pills .nav-link.active {
+            background-color: #1565c0;
+            color: white;
+            box-shadow: 0 2px 4px rgba(21,101,192,0.3);
+        }
+        
+        /* Fallback para ícones que não carregaram */
+        .nav-pills .nav-link[href="#fichaSection"] i::before {
+            content: "📄" !important;
+            font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important;
+            font-style: normal !important;
+        }
+        
+        .nav-pills .nav-link[href="#fichaReferenciaSection"] i::before {
+            content: "📋" !important;
+            font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important;
+            font-style: normal !important;
+        }
+        
+        /* Quando Font Awesome carrega corretamente, esconde o fallback */
+        .nav-pills .nav-link i.fa::before,
+        .nav-pills .nav-link i.fas::before,
+        .nav-pills .nav-link i.far::before {
+            content: none !important;
+        }
+
+        /* Ajuste do conteúdo principal */
+        .main-content {
+            margin-left: 60px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar:hover + .main-content {
+            margin-left: 200px;
+        }
+
+        /* Seções de conteúdo */
+        .content-section {
+            display: none;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+
+        /* Ajuste do print-button para não conflitar */
+        .print-button {
+            left: 80px !important;
+        }
+
+        /* Estilos para fichas de referência */
+        .fichas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .ficha-card {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+        }
+
+        .ficha-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            border-color: #007bff;
+        }
+
+        @media print {
+            .sidebar {
+                display: none !important;
+            }
+            .main-content {
+                margin-left: 0 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Menu Lateral -->
+    <div class="sidebar no-print">
+        <nav class="nav nav-pills flex-column">
+            <a class="nav-link active" href="#fichaSection" data-bs-toggle="pill" title="Ficha de Atendimento">
+                <i class="fas fa-file-medical" aria-hidden="true"></i>
+                <span>Ficha de Atendimento</span>
+            </a>
+            <a class="nav-link" href="#fichaReferenciaSection" data-bs-toggle="pill" title="Ficha de Referência">
+                <i class="fas fa-file-export" aria-hidden="true"></i>
+                <span>Ficha de Referência</span>
+            </a>
+        </nav>
+    </div>
+
     <!-- BOTÃO DE IMPRESSÃO (não aparece na impressão) -->
     <button class="print-button no-print" onclick="window.print()">
         🖨️ Imprimir
     </button>
 
-    <!-- ========== PÁGINA 1 - FRENTE ========== -->
-    <div class="page">
+    <!-- Conteúdo Principal -->
+    <div class="main-content">
+        <!-- ========== SEÇÃO: FICHA DE ATENDIMENTO ========== -->
+        <div id="fichaSection" class="content-section active">
+            <!-- ========== PÁGINA 1 - FRENTE ========== -->
+            <div class="page">
         <!-- CABEÇALHO COM LOGOS -->
         <div class="header">
             <div class="header-logo-container">
@@ -756,8 +943,216 @@
 
         <div class="page-identifier">Página 2/2 - Atendimento Nº {{ atendimento_id }}</div>
     </div>
+        </div>
+        <!-- FIM SEÇÃO: FICHA DE ATENDIMENTO -->
+
+        <!-- ========== SEÇÃO: FICHAS DE REFERÊNCIA ========== -->
+        <div id="fichaReferenciaSection" class="content-section">
+            <div class="container-fluid py-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-file-export me-2"></i>Fichas de Referência
+                        </h5>
+                        <button class="btn btn-light btn-sm" id="btn_nova_ficha_referencia" data-bs-toggle="modal" data-bs-target="#modalNovaFichaReferencia">
+                            <i class="fas fa-plus-circle"></i> Nova Ficha de Referência
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="listaFichasReferencia">
+                            <div class="text-center py-4">
+                                <i class="fas fa-spinner fa-spin text-primary"></i> 
+                                Carregando fichas de referência...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- FIM SEÇÃO: FICHAS DE REFERÊNCIA -->
+    </div>
+    <!-- FIM main-content -->
+
+    <!-- Modal para Nova Ficha de Referência -->
+    <div class="modal fade" id="modalNovaFichaReferencia" tabindex="-1" aria-labelledby="modalNovaFichaReferenciaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content shadow-lg border-0 rounded-lg">
+                <div class="modal-header bg-gradient-primary text-white" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;">
+                    <h5 class="modal-title fw-bold" id="modalNovaFichaReferenciaLabel">
+                        <i class="fas fa-file-export me-2"></i>Nova Ficha de Referência
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="alert alert-info d-flex align-items-center mb-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <div>
+                            <strong>Orientação:</strong> Preencha as informações necessárias para o encaminhamento do paciente. O texto de referência é o campo principal para detalhar a situação clínica.
+                        </div>
+                    </div>
+                    
+                    <form id="formFichaReferencia">
+                        <!-- Primeira linha: Unidade de Referência e Tipo de Encaminhamento -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control form-control-lg" id="unidade_referencia" name="unidade_referencia" placeholder="Ex: Hospital Regional, UPA Central...">
+                                    <label for="unidade_referencia">
+                                        <i class="fas fa-hospital me-1 text-primary"></i>Unidade de Referência
+                                    </label>
+                                </div>
+                                <div class="form-text">Ex: Hospital de Referência, Centro da Vida, etc..</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold mb-3">
+                                    <i class="fas fa-share me-1 text-success"></i>Tipo de Encaminhamento
+                                </label>
+                                <div class="d-flex flex-column gap-2">
+                                    <div class="form-check form-check-lg p-3 border rounded bg-light">
+                                        <input class="form-check-input form-check-input-lg" type="checkbox" id="encaminhamento_ambulatorial" name="encaminhamento_ambulatorial" value="Ambulatorial">
+                                        <label class="form-check-label fw-semibold" for="encaminhamento_ambulatorial">
+                                            <i class="fas fa-clinic-medical me-2 text-info"></i>Ambulatorial
+                                            <small class="d-block text-muted">Consultas e procedimentos ambulatoriais</small>
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-lg p-3 border rounded bg-light">
+                                        <input class="form-check-input form-check-input-lg" type="checkbox" id="encaminhamento_hospitalar" name="encaminhamento_hospitalar" value="Hospitalar">
+                                        <label class="form-check-label fw-semibold" for="encaminhamento_hospitalar">
+                                            <i class="fas fa-hospital me-2 text-danger"></i>Hospitalar
+                                            <small class="d-block text-muted">Internação e cuidados hospitalares</small>
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-lg p-3 border rounded bg-light">
+                                        <input class="form-check-input form-check-input-lg" type="checkbox" id="encaminhamento_auxilio_diagnostico" name="encaminhamento_auxilio_diagnostico" value="Auxilio Diagnostico">
+                                        <label class="form-check-label fw-semibold" for="encaminhamento_auxilio_diagnostico">
+                                            <i class="fas fa-x-ray me-2 text-warning"></i>Auxílio Diagnóstico
+                                            <small class="d-block text-muted">Exames e procedimentos diagnósticos</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Segunda linha: Procedimento -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <textarea class="form-control" id="procedimento" name="procedimento" rows="3" style="height: 100px;" placeholder="Descreva o procedimento solicitado..."></textarea>
+                                    <label for="procedimento">
+                                        <i class="fas fa-cogs me-1 text-warning"></i>Procedimento Solicitado
+                                    </label>
+                                </div>
+                                <div class="form-text">Descreva procedimentos específicos, cirurgias ou tratamentos recomendados</div>
+                            </div>
+                        </div>
+
+                        <!-- Terceira linha: Texto de Referência (Campo Principal) -->
+                        <div class="row">
+                            <div class="col-12">
+                                <label for="texto_referencia" class="form-label fw-bold text-primary mb-3">
+                                    <i class="fas fa-file-text me-2"></i>Texto de Referência (Campo Principal)
+                                </label>
+                                <div class="border border-primary border-2 rounded p-2">
+                                    <textarea class="form-control form-control-lg border-0" 
+                                              id="texto_referencia" 
+                                              name="texto_referencia" 
+                                              rows="10" 
+                                              style="resize: vertical; min-height: 280px; font-size: 14px; line-height: 1.6;"
+                                              placeholder="Digite aqui os detalhes da referência:&#10;&#10;• História clínica resumida&#10;• Motivo do encaminhamento&#10;• Exames realizados&#10;• Tratamentos já tentados&#10;• Observações importantes&#10;&#10;Seja detalhado para facilitar o atendimento na unidade de destino."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer bg-light border-0 p-4">
+                    <button type="button" class="btn btn-outline-secondary btn-lg me-2" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </button>
+                    <button type="button" 
+                            class="btn btn-success btn-lg px-4" 
+                            id="btn_salvar_ficha_referencia">
+                        <i class="fas fa-save me-2"></i>Salvar Ficha de Referência
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Script para fichas de referência -->
+    <script src="/static/js/modal_ficha_fix.js"></script>
+
+    <!-- Campo oculto para o ID do atendimento -->
+    <input type="hidden" id="atendimento_id" value="{{ atendimento_id }}">
 
     <script>
+        // Inicializar módulo de fichas de referência quando a página carregar
+        $(document).ready(function() {
+            console.log('🎬 Inicializando página de ficha de atendimento médico...');
+            console.log('📋 ID do Atendimento:', $('#atendimento_id').val());
+            
+            // Verificar se Font Awesome foi carregado
+            console.log('🔍 Verificando Font Awesome...');
+            const iconElements = $('.sidebar i');
+            console.log('📌 Quantidade de ícones encontrados:', iconElements.length);
+            iconElements.each(function(index) {
+                console.log(`Ícone ${index + 1}:`, $(this).attr('class'));
+            });
+            
+            // Verificar se o menu lateral está visível
+            const sidebar = $('.sidebar');
+            console.log('📐 Sidebar width:', sidebar.width());
+            console.log('📍 Sidebar display:', sidebar.css('display'));
+            console.log('👁️ Sidebar visibility:', sidebar.css('visibility'));
+            
+            // Garantir que os links do menu funcionem
+            $('.nav-pills .nav-link').on('click', function(e) {
+                e.preventDefault();
+                const target = $(this).attr('href');
+                console.log('🔗 Link clicado:', target);
+                
+                // Remover active de todos
+                $('.nav-pills .nav-link').removeClass('active');
+                $('.content-section').removeClass('active');
+                
+                // Adicionar active no clicado
+                $(this).addClass('active');
+                $(target).addClass('active');
+                
+                console.log('✅ Seção ativada:', target);
+            });
+            
+            // Verificar se a função de inicialização existe
+            if (typeof inicializarModuloFichasReferencia === 'function') {
+                console.log('✅ Função inicializarModuloFichasReferencia encontrada');
+                try {
+                    inicializarModuloFichasReferencia();
+                    console.log('✅ Módulo de fichas de referência inicializado com sucesso');
+                } catch (error) {
+                    console.error('❌ Erro ao inicializar módulo de fichas:', error);
+                }
+            } else {
+                console.error('❌ Função inicializarModuloFichasReferencia não encontrada');
+            }
+
+            // Carregar fichas quando a aba for clicada
+            $('a[href="#fichaReferenciaSection"]').on('click', function() {
+                console.log('📂 Aba de fichas de referência clicada');
+                if (typeof carregarFichasReferencia === 'function') {
+                    carregarFichasReferencia();
+                }
+            });
+        });
+
         // Script para impressão automática ao carregar (opcional)
         // window.onload = function() { window.print(); }
     </script>

@@ -743,6 +743,39 @@
       animation: fadeInTab 0.3s ease-in-out !important;
     }
 
+    /* ===== ESTILOS PARA CARDS DE FICHAS DE REFERÊNCIA ===== */
+    #listaFichasReferencia .card {
+      transition: all 0.3s ease;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    #listaFichasReferencia .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+    }
+
+    #listaFichasReferencia .card-header {
+      border-bottom: 2px solid rgba(255,255,255,0.2);
+      font-weight: 600;
+    }
+
+    #listaFichasReferencia .card-body h6 {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+
+    #listaFichasReferencia .card-body .bg-light {
+      background-color: #f8f9fa !important;
+      transition: background-color 0.2s ease;
+      padding: 12px !important;
+    }
+
+    #listaFichasReferencia .card-body .bg-light:hover {
+      background-color: #e9ecef !important;
+    }
+
     /* ===== MELHORIAS PARA IMPRESSÃO ===== */
     @media print {
       .sidebar { display: none; }
@@ -762,6 +795,7 @@
       <a class="nav-link" href="#" data-target="prescricaoSection"><i class="fas fa-prescription-bottle-alt"></i><span>Prescrição</span></a>
       <a class="nav-link" href="#" data-target="receituarioSection"><i class="fas fa-receipt"></i><span>Receituário</span></a>
       <a class="nav-link" href="#" data-target="atestadoSection"><i class="fas fa-file-medical"></i><span>Atestado</span></a>
+      <a class="nav-link" href="#" data-target="fichaReferenciaSection"><i class="fas fa-file-export"></i><span>Ficha de Referência</span></a>
       <a class="nav-link" href="#" data-target="enfermagemSection"><i class="fas fa-user-nurse"></i><span>Ficha de Enfermagem</span></a>
       <hr class="mx-3 my-2" style="opacity:.2">
       <a class="nav-link" href="/imprimir/ficha_atendimento/{{ atendimento.id }}" target="_blank" aria-label="Imprimir ficha de atendimento"><i class="fas fa-print"></i><span>Imprimir Ficha</span></a>
@@ -1086,6 +1120,29 @@
       </div>
     </div>
 
+    <!-- Seção: Ficha de Referência -->
+    <div id="fichaReferenciaSection" class="section">
+      <div class="card">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-3">
+            <i class="fas fa-file-export"></i>
+            <h5 class="mb-0">Fichas de Referência</h5>
+          </div>
+          <button class="btn btn-light btn-sm" id="btn_nova_ficha_referencia" data-bs-toggle="modal" data-bs-target="#modalNovaFichaReferencia">
+            <i class="fas fa-plus-circle me-1"></i>Nova Ficha
+          </button>
+        </div>
+        <div class="card-body">
+          <div id="listaFichasReferencia">
+            <div class="text-center py-4">
+              <i class="fas fa-spinner fa-spin text-primary fa-2x"></i>
+              <p class="mt-3 text-muted">Carregando fichas de referência...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Seção: Ficha de Enfermagem -->
     <div id="enfermagemSection" class="section">
       <div class="card">
@@ -1106,6 +1163,7 @@
     </div>
 
     <input type="hidden" id="ATENDIMENTO_ID" value="{{ atendimento.id }}">
+    <input type="hidden" id="atendimento_id" value="{{ atendimento.id }}">
     <input type="hidden" id="user_id" value="{{ session.get('user_id', 0) }}">
     </div>
   </div>
@@ -1567,10 +1625,32 @@
         }
 
         // ALTAS/EVASÃO/RECUSAS/TERMO -> encerrar direto
-        fetch(`/api/atendimento/${ATENDIMENTO_ID}/encerrar`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ conduta_final: conduta }) })
+        const payloadEncerramento = { 
+          conduta_final: conduta
+        };
+        
+        // Se for EVASÃO, atualizar status para "Evasão"
+        if (v === 'EVASAO POR CONTA PROPRIA') {
+          payloadEncerramento.status = 'Evasão';
+          console.log('🚨 Evasão detectada - atualizando status para "Evasão"');
+        }
+        
+        console.log('📤 Enviando encerramento com payload:', payloadEncerramento);
+        
+        fetch(`/api/atendimento/${ATENDIMENTO_ID}/encerrar`, { 
+          method: 'PUT', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify(payloadEncerramento) 
+        })
           .then(r=>r.json())
           .then(d=>{
             if (d.success){
+              console.log('✅ Atendimento encerrado com sucesso');
+              
+              if (v === 'EVASAO POR CONTA PROPRIA') {
+                console.log('✅ Status atualizado para "Evasão"');
+              }
+              
               modalEnc.hide();
               // Se for reavaliação, mantemos a ficha aberta e apenas informamos sucesso
               if ((conduta||'').toUpperCase().indexOf('REAVALIA') >= 0){
@@ -1579,9 +1659,15 @@
                 $('#btnImprimirFicha').attr('href', `/imprimir/ficha_atendimento/${ATENDIMENTO_ID}`);
                 modalPos.show();
               }
-            } else { alert('Erro: ' + (d.message||'Falha ao encerrar')); }
+            } else { 
+              console.error('❌ Erro ao encerrar:', d.message);
+              alert('Erro: ' + (d.message||'Falha ao encerrar')); 
+            }
           })
-          .catch(err=>alert('Erro: '+err));
+          .catch(err=>{
+            console.error('❌ Erro na requisição de encerramento:', err);
+            alert('Erro: '+err);
+          });
       });
     });
   </script>
@@ -2256,6 +2342,408 @@
   <!-- Adicionar Quill.js para editores ricos -->
   <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
   <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+  <!-- Script para fichas de referência -->
+  <script src="/static/js/modal_ficha_fix.js"></script>
+
+  <!-- Modal para Nova Ficha de Referência -->
+  <div class="modal fade" id="modalNovaFichaReferencia" tabindex="-1" aria-labelledby="modalNovaFichaReferenciaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content shadow-lg border-0 rounded-lg">
+        <div class="modal-header bg-gradient-primary text-white" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;">
+          <h5 class="modal-title fw-bold" id="modalNovaFichaReferenciaLabel">
+            <i class="fas fa-file-export me-2"></i>Nova Ficha de Referência
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="alert alert-info d-flex align-items-center mb-4">
+            <i class="fas fa-info-circle me-2"></i>
+            <div>
+              <strong>Orientação:</strong> Preencha as informações necessárias para o encaminhamento do paciente. O texto de referência é o campo principal para detalhar a situação clínica.
+            </div>
+          </div>
+          
+          <form id="formFichaReferencia">
+            <!-- Primeira linha: Unidade de Referência e Tipo de Encaminhamento -->
+            <div class="row mb-4">
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input type="text" class="form-control form-control-lg" id="unidade_referencia" name="unidade_referencia" placeholder="Ex: Hospital Regional, UPA Central...">
+                  <label for="unidade_referencia">
+                    <i class="fas fa-hospital me-1 text-primary"></i>Unidade de Referência
+                  </label>
+                </div>
+                <div class="form-text">Ex: Hospital de Referência, Centro da Vida, etc..</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold mb-3">
+                  <i class="fas fa-share me-1 text-success"></i>Tipo de Encaminhamento
+                </label>
+                <div class="d-flex flex-column gap-2">
+                  <div class="form-check form-check-lg p-3 border rounded bg-light">
+                    <input class="form-check-input form-check-input-lg" type="checkbox" id="encaminhamento_ambulatorial" name="encaminhamento_ambulatorial" value="Ambulatorial">
+                    <label class="form-check-label fw-semibold" for="encaminhamento_ambulatorial">
+                      <i class="fas fa-clinic-medical me-2 text-info"></i>Ambulatorial
+                      <small class="d-block text-muted">Consultas e procedimentos ambulatoriais</small>
+                    </label>
+                  </div>
+                  <div class="form-check form-check-lg p-3 border rounded bg-light">
+                    <input class="form-check-input form-check-input-lg" type="checkbox" id="encaminhamento_hospitalar" name="encaminhamento_hospitalar" value="Hospitalar">
+                    <label class="form-check-label fw-semibold" for="encaminhamento_hospitalar">
+                      <i class="fas fa-hospital me-2 text-danger"></i>Hospitalar
+                      <small class="d-block text-muted">Internação e cuidados hospitalares</small>
+                    </label>
+                  </div>
+                  <div class="form-check form-check-lg p-3 border rounded bg-light">
+                    <input class="form-check-input form-check-input-lg" type="checkbox" id="encaminhamento_auxilio_diagnostico" name="encaminhamento_auxilio_diagnostico" value="Auxilio Diagnostico">
+                    <label class="form-check-label fw-semibold" for="encaminhamento_auxilio_diagnostico">
+                      <i class="fas fa-x-ray me-2 text-warning"></i>Auxílio Diagnóstico
+                      <small class="d-block text-muted">Exames e procedimentos diagnósticos</small>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Segunda linha: Procedimento -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <div class="form-floating">
+                  <textarea class="form-control" id="procedimento" name="procedimento" rows="3" style="height: 100px;" placeholder="Descreva o procedimento solicitado..."></textarea>
+                  <label for="procedimento">
+                    <i class="fas fa-cogs me-1 text-warning"></i>Procedimento Solicitado
+                  </label>
+                </div>
+                <div class="form-text">Descreva procedimentos específicos, cirurgias ou tratamentos recomendados</div>
+              </div>
+            </div>
+
+            <!-- Terceira linha: Texto de Referência (Campo Principal) -->
+            <div class="row">
+              <div class="col-12">
+                <label for="texto_referencia" class="form-label fw-bold text-primary mb-3">
+                  <i class="fas fa-file-text me-2"></i>Texto de Referência (Campo Principal)
+                </label>
+                <div class="border border-primary border-2 rounded p-2">
+                  <textarea class="form-control form-control-lg border-0" 
+                            id="texto_referencia" 
+                            name="texto_referencia" 
+                            rows="10" 
+                            style="resize: vertical; min-height: 280px; font-size: 14px; line-height: 1.6;"
+                            placeholder="Digite aqui os detalhes da referência:&#10;&#10;• História clínica resumida&#10;• Motivo do encaminhamento&#10;• Exames realizados&#10;• Tratamentos já tentados&#10;• Observações importantes&#10;&#10;Seja detalhado para facilitar o atendimento na unidade de destino."></textarea>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer bg-light border-0 p-4">
+          <button type="button" class="btn btn-outline-secondary btn-lg me-2" data-bs-dismiss="modal">
+            <i class="fas fa-times me-2"></i>Cancelar
+          </button>
+          <button type="button" 
+                  class="btn btn-success btn-lg px-4" 
+                  id="btn_salvar_ficha_referencia">
+            <i class="fas fa-save me-2"></i>Salvar Ficha de Referência
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== FUNÇÃO PARA SALVAR FICHA DE REFERÊNCIA =====
+    function salvarFichaReferencia() {
+      console.log('🚀 Iniciando salvarFichaReferencia()');
+      
+      // Prevenir múltiplas execuções simultâneas
+      const btnSalvar = document.getElementById('btn_salvar_ficha_referencia');
+      if (btnSalvar && btnSalvar.disabled) {
+        console.log('⚠️ Botão já está processando, ignorando clique duplo');
+        return;
+      }
+      
+      const texto_referencia = document.getElementById('texto_referencia').value;
+      const procedimento = document.getElementById('procedimento').value;
+      const unidade_referencia = document.getElementById('unidade_referencia').value;
+      
+      // Coletar checkboxes de encaminhamento
+      const encaminhamentoCheckboxes = [];
+      if (document.getElementById('encaminhamento_ambulatorial')?.checked) {
+        encaminhamentoCheckboxes.push('Ambulatorial');
+      }
+      if (document.getElementById('encaminhamento_hospitalar')?.checked) {
+        encaminhamentoCheckboxes.push('Hospitalar');
+      }
+      if (document.getElementById('encaminhamento_auxilio_diagnostico')?.checked) {
+        encaminhamentoCheckboxes.push('Auxilio Diagnostico');
+      }
+      const encaminhamento_atendimento = encaminhamentoCheckboxes.join(', ');
+      
+      console.log('📝 Valores dos campos:');
+      console.log('  - texto_referencia:', texto_referencia);
+      console.log('  - encaminhamento_atendimento:', encaminhamento_atendimento);
+      console.log('  - procedimento:', procedimento);
+      console.log('  - unidade_referencia:', unidade_referencia);
+      
+      // Validação básica - pelo menos um campo deve ter conteúdo
+      if (!texto_referencia && !encaminhamento_atendimento && !procedimento && !unidade_referencia) {
+        console.log('❌ Validação falhou: nenhum campo preenchido');
+        alert('Por favor, preencha pelo menos um dos campos da ficha de referência.');
+        return;
+      }
+      
+      console.log('✅ Validação passou');
+      
+      // Mostrar indicador de carregamento
+      if (!btnSalvar) {
+        console.error('❌ Botão btn_salvar_ficha_referencia não encontrado!');
+        alert('Erro: Botão de salvamento não encontrado.');
+        return;
+      }
+      
+      const textoOriginal = btnSalvar.innerHTML;
+      btnSalvar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+      btnSalvar.disabled = true;
+      
+      console.log('🔄 Botão de salvamento configurado para loading');
+      
+      // Obter ID do atendimento
+      const atendimentoId = document.getElementById('ATENDIMENTO_ID')?.value || 
+                           document.getElementById('atendimento_id')?.value;
+      
+      console.log('🆔 ID do atendimento:', atendimentoId);
+      
+      if (!atendimentoId) {
+        console.error('❌ ID de atendimento não encontrado');
+        alert('Erro: ID de atendimento não encontrado');
+        btnSalvar.innerHTML = textoOriginal;
+        btnSalvar.disabled = false;
+        return;
+      }
+      
+      // Preparar dados para envio
+      const dados = {
+        atendimento_id: atendimentoId,
+        texto_referencia: texto_referencia,
+        encaminhamento_atendimento: encaminhamento_atendimento,
+        procedimento: procedimento,
+        unidade_referencia: unidade_referencia
+      };
+      
+      console.log('📦 Dados da ficha de referência sendo enviados:', dados);
+      console.log('🌐 URL da requisição: /api/fichas-referencia');
+      
+      // Enviar requisição
+      $.ajax({
+        url: '/api/fichas-referencia',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(dados),
+        success: function(response) {
+          console.log('✅ Resposta de sucesso recebida:', response);
+          
+          if (response.success) {
+            console.log('🎉 Ficha criada com sucesso!');
+            
+            // Limpar formulário
+            document.getElementById('formFichaReferencia').reset();
+            
+            // Fechar modal
+            $('#modalNovaFichaReferencia').modal('hide');
+            
+            // Mostrar mensagem de sucesso
+            alert('Ficha de referência criada com sucesso!');
+            
+            // Recarregar lista de fichas
+            if (typeof carregarFichasReferencia === 'function') {
+              setTimeout(carregarFichasReferencia, 500);
+            }
+          } else {
+            console.error('❌ Erro na resposta:', response.message);
+            alert('Erro ao criar ficha: ' + (response.message || 'Erro desconhecido'));
+          }
+        },
+        error: function(xhr, status, error) {
+          console.error('❌ Erro na requisição AJAX:', error);
+          console.error('Status:', status);
+          console.error('Response:', xhr.responseText);
+          alert('Erro ao salvar ficha de referência: ' + error);
+        },
+        complete: function() {
+          // Restaurar botão
+          btnSalvar.innerHTML = textoOriginal;
+          btnSalvar.disabled = false;
+        }
+      });
+    }
+
+    // ===== FUNÇÃO PARA IMPRIMIR FICHA DE REFERÊNCIA =====
+    function imprimirFichaReferencia(fichaId) {
+      console.log('🖨️ Imprimindo ficha de referência ID:', fichaId);
+      window.open(`/clinica/ficha-referencia/${fichaId}/imprimir`, '_blank');
+    }
+
+    // ===== FUNÇÃO PARA CARREGAR FICHAS DE REFERÊNCIA =====
+    function carregarFichasReferencia() {
+      console.log('📂 Carregando fichas de referência...');
+      
+      const atendimentoId = document.getElementById('ATENDIMENTO_ID')?.value || 
+                           document.getElementById('atendimento_id')?.value;
+      
+      if (!atendimentoId) {
+        console.error('❌ ID de atendimento não encontrado');
+        $('#listaFichasReferencia').html('<div class="alert alert-warning">ID de atendimento não encontrado</div>');
+        return;
+      }
+      
+      $('#listaFichasReferencia').html(`
+        <div class="text-center py-4">
+          <i class="fas fa-spinner fa-spin text-primary fa-2x"></i>
+          <p class="mt-3 text-muted">Carregando fichas de referência...</p>
+        </div>
+      `);
+      
+      $.ajax({
+        url: `/api/fichas-referencia/lista/${atendimentoId}`,
+        method: 'GET',
+        success: function(response) {
+          console.log('✅ Fichas carregadas:', response);
+          
+          if (response.success && response.fichas && response.fichas.length > 0) {
+            // Adicionar estatísticas
+            let html = `
+              <div class="alert alert-success mb-4">
+                <div class="row text-center">
+                  <div class="col-md-12">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>${response.fichas.length}</strong> ficha${response.fichas.length > 1 ? 's' : ''} de referência encontrada${response.fichas.length > 1 ? 's' : ''}
+                  </div>
+                </div>
+              </div>
+              <div class="row g-3">
+            `;
+            
+            response.fichas.forEach(function(ficha, index) {
+              // Formatar data de criação
+              let dataExibicao = 'Data não informada';
+              if (ficha.data_criacao_pretty) {
+                dataExibicao = ficha.data_criacao_pretty;
+              } else if (ficha.data && ficha.hora) {
+                dataExibicao = `${ficha.data} ${ficha.hora}`;
+              } else if (ficha.data) {
+                dataExibicao = ficha.data;
+              }
+              
+              html += `
+                <div class="col-12">
+                  <div class="card border-primary shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <i class="fas fa-file-export me-2"></i>
+                          <strong>Ficha de Referência #${ficha.id || (index + 1)}</strong>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                          <small><i class="fas fa-calendar me-1"></i>${dataExibicao}</small>
+                          <button class="btn btn-light btn-sm" onclick="imprimirFichaReferencia(${ficha.id})" title="Imprimir Ficha">
+                            <i class="fas fa-print"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-body">
+                      ${ficha.unidade_referencia ? `
+                        <div class="mb-3">
+                          <h6 class="text-primary mb-2">
+                            <i class="fas fa-hospital me-2"></i>Unidade de Referência
+                          </h6>
+                          <div class="p-2 bg-light rounded border">${ficha.unidade_referencia}</div>
+                        </div>
+                      ` : ''}
+                      
+                      ${ficha.encaminhamento_atendimento ? `
+                        <div class="mb-3">
+                          <h6 class="text-success mb-2">
+                            <i class="fas fa-share me-2"></i>Tipo de Encaminhamento
+                          </h6>
+                          <div class="p-2 bg-light rounded border">${ficha.encaminhamento_atendimento}</div>
+                        </div>
+                      ` : ''}
+                      
+                      ${ficha.procedimento ? `
+                        <div class="mb-3">
+                          <h6 class="text-warning mb-2">
+                            <i class="fas fa-cogs me-2"></i>Procedimento Solicitado
+                          </h6>
+                          <div class="p-2 bg-light rounded border">${ficha.procedimento}</div>
+                        </div>
+                      ` : ''}
+                      
+                      ${ficha.texto_referencia ? `
+                        <div class="mb-0">
+                          <h6 class="text-info mb-2">
+                            <i class="fas fa-file-text me-2"></i>Texto de Referência
+                          </h6>
+                          <div class="p-3 bg-light rounded border" style="white-space: pre-wrap;">${ficha.texto_referencia}</div>
+                        </div>
+                      ` : ''}
+                    </div>
+                  </div>
+                </div>
+              `;
+            });
+            
+            html += '</div>';
+            $('#listaFichasReferencia').html(html);
+          } else {
+            $('#listaFichasReferencia').html(`
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Nenhuma ficha de referência encontrada para este atendimento.
+              </div>
+            `);
+          }
+        },
+        error: function(xhr, status, error) {
+          console.error('❌ Erro ao carregar fichas:', error);
+          $('#listaFichasReferencia').html(`
+            <div class="alert alert-danger">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              Erro ao carregar fichas de referência.
+            </div>
+          `);
+        }
+      });
+    }
+
+    // ===== INICIALIZAÇÃO =====
+    $(document).ready(function() {
+      console.log('🎬 Inicializando ficha de atendimento médico...');
+      console.log('📋 ID do Atendimento:', $('#ATENDIMENTO_ID').val());
+      
+      // Verificar se a função de inicialização existe
+      if (typeof inicializarModuloFichasReferencia === 'function') {
+        console.log('✅ Função inicializarModuloFichasReferencia encontrada');
+        try {
+          inicializarModuloFichasReferencia();
+          console.log('✅ Módulo de fichas de referência inicializado com sucesso');
+        } catch (error) {
+          console.error('❌ Erro ao inicializar módulo de fichas:', error);
+        }
+      } else {
+        console.log('⚠️ Função inicializarModuloFichasReferencia não encontrada (usando implementação local)');
+      }
+
+      // Carregar fichas quando a seção for ativada
+      $(document).on('click', '[data-target="fichaReferenciaSection"]', function() {
+        console.log('📂 Seção de fichas de referência ativada');
+        setTimeout(function() {
+          carregarFichasReferencia();
+        }, 100);
+      });
+    });
+  </script>
 
 </body>
 </html>
