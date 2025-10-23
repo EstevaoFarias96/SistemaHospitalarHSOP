@@ -226,6 +226,42 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-6 col-lg-4 col-xxl-3">
+            <div class="card clickable-card" onclick="expandTemposMedios()">
+                <div class="card-header-min">
+                    <span>Tempo por classificação (min)</span>
+                    <i class="fas fa-expand-alt expand-icon"></i>
+                </div>
+                <div class="card-body p-2">
+                    <div style="font-size: .7rem;">
+                        {% if tempos_por_risco %}
+                            {% for item in tempos_por_risco[:5] %}
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span>
+                                    {% if item.classificacao == 'Vermelho' %}
+                                        <span class="badge badge-danger" style="font-size: .6rem;">{{ item.classificacao }}</span>
+                                    {% elif item.classificacao == 'Laranja' %}
+                                        <span class="badge badge-warning" style="font-size: .6rem;">{{ item.classificacao }}</span>
+                                    {% elif item.classificacao == 'Amarelo' %}
+                                        <span class="badge" style="background-color: #ffc107; color: #000; font-size: .6rem;">{{ item.classificacao }}</span>
+                                    {% elif item.classificacao == 'Verde' %}
+                                        <span class="badge badge-success" style="font-size: .6rem;">{{ item.classificacao }}</span>
+                                    {% elif item.classificacao == 'Azul' %}
+                                        <span class="badge badge-info" style="font-size: .6rem;">{{ item.classificacao }}</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary" style="font-size: .6rem;">{{ item.classificacao }}</span>
+                                    {% endif %}
+                                </span>
+                                <span class="stat-value" style="font-size: .85rem;">{{ item.tempo_medio }}min</span>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center text-muted" style="font-size: .7rem; padding: 1rem 0;">Sem dados</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="row g-2 mb-2">
@@ -563,13 +599,14 @@
                         </div>
                     </div>
                     <div class="col-lg-6">
-                        <h6 class="font-weight-bold mb-3">Tempo de Espera por Classificação de Risco</h6>
+                        <h6 class="font-weight-bold mb-3">Tempo de Consulta por Classificação de Risco</h6>
+                        <p class="text-muted small mb-3"><i class="fas fa-info-circle"></i> Tempo desde a triagem até o final da consulta médica</p>
                         <div class="table-responsive">
                             <table class="table table-sm table-bordered">
                                 <thead class="thead-light">
                                     <tr>
                                         <th>Classificação</th>
-                                        <th class="text-center">Tempo até Consulta</th>
+                                        <th class="text-center">Tempo Médio</th>
                                         <th class="text-center">Casos</th>
                                     </tr>
                                 </thead>
@@ -577,8 +614,22 @@
                                     {% if tempos_por_risco %}
                                         {% for item in tempos_por_risco %}
                                         <tr>
-                                            <td><strong>{{ item.classificacao }}</strong></td>
-                                            <td class="text-center">{{ item.tempo_medio }} min</td>
+                                            <td>
+                                                {% if item.classificacao == 'Vermelho' %}
+                                                    <span class="badge badge-danger">{{ item.classificacao }}</span>
+                                                {% elif item.classificacao == 'Laranja' %}
+                                                    <span class="badge badge-warning">{{ item.classificacao }}</span>
+                                                {% elif item.classificacao == 'Amarelo' %}
+                                                    <span class="badge" style="background-color: #ffc107; color: #000;">{{ item.classificacao }}</span>
+                                                {% elif item.classificacao == 'Verde' %}
+                                                    <span class="badge badge-success">{{ item.classificacao }}</span>
+                                                {% elif item.classificacao == 'Azul' %}
+                                                    <span class="badge badge-info">{{ item.classificacao }}</span>
+                                                {% else %}
+                                                    <span class="badge badge-secondary">{{ item.classificacao }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-center"><strong>{{ item.tempo_medio }} min</strong></td>
                                             <td class="text-center">{{ item.quantidade }}</td>
                                         </tr>
                                         {% endfor %}

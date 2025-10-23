@@ -615,3 +615,21 @@ class FluxoPaciente(db.Model):
     nome_paciente = db.Column(db.String(150), nullable=False)
     mudanca_status = db.Column(db.Text, nullable=False)
     mudanca_hora = db.Column(db.DateTime, default=datetime.utcnow)
+
+class MedicacoesPadrao(db.Model):
+    __tablename__ = "medicacoes_padrao"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nome_comercial = Column(String(100), nullable=True)
+    principio_ativo = Column(String(100), nullable=False)
+    apresentacao = Column(String(100), nullable=True)
+    via_administracao = Column(String(50), nullable=True)
+    dose_padrao = Column(String(50), nullable=True)
+    frequencia_padrao = Column(String(50), nullable=True)
+    duracao_padrao = Column(String(50), nullable=True)
+    indicacao_principal = Column(String(150), nullable=True)
+    restricoes = Column(Text, nullable=True)
+    observacoes = Column(Text, nullable=True)
+
+    def __repr__(self):
+        return f"<MedicacoesPadrao(id={self.id}, principio_ativo='{self.principio_ativo}')>"

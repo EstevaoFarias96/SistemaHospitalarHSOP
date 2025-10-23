@@ -247,6 +247,9 @@
               <option value="Óbito" data-color="dark">
                 <i class="fas fa-cross"></i> Óbito
               </option>
+              <option value="Evasão" data-color="dark">
+                <i class="fas fa-person-running"></i> Evasão
+              </option>
               <option value="Internar" data-color="primary">
                 <i class="fas fa-bed"></i> Internar
               </option>
@@ -418,7 +421,7 @@
       
       if (conduta === 'Internar') {
         leitoDiv.slideDown();
-        indicator.removeClass('d-none alert-info alert-success alert-warning alert-danger')
+        indicator.removeClass('d-none alert-info alert-success alert-warning alert-danger alert-dark')
                  .addClass('alert-primary');
         icon.removeClass().addClass('fas fa-bed');
         description.text('Paciente será internado. Selecione o leito apropriado.');
@@ -428,7 +431,7 @@
         
         // Mostrar indicador baseado na conduta
         if (conduta) {
-          indicator.removeClass('d-none alert-info alert-success alert-warning alert-danger alert-primary');
+          indicator.removeClass('d-none alert-info alert-success alert-warning alert-danger alert-primary alert-dark');
           
           switch(conduta) {
             case 'Alta':
@@ -450,6 +453,11 @@
               indicator.addClass('alert-danger');
               icon.removeClass().addClass('fas fa-cross');
               description.text('Registrar óbito do paciente.');
+              break;
+            case 'Evasão':
+              indicator.addClass('alert-dark');
+              icon.removeClass().addClass('fas fa-person-running');
+              description.text('Registrar evasão do paciente.');
               break;
           }
         } else {

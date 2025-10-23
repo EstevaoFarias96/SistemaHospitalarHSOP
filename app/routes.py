@@ -19,7 +19,7 @@ from docxtpl import DocxTemplate
 from docx import Document
 from io import BytesIO
 from app import db
-from app.models import Funcionario,PrescricaoEnfermagemTemplate,Leito,AdmissaoEnfermagem, AtendimentosGestante ,ListaInternacao, ListaObservacao, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN, now_brasilia, FichaReferencia, EvolucaoFisioterapia,EvolucaoAssistenteSocial, EvolucaoNutricao, AtendimentosGestante, FluxoDisp, FluxoPaciente
+from app.models import Funcionario,PrescricaoEnfermagemTemplate,Leito,MedicacoesPadrao,AdmissaoEnfermagem, AtendimentosGestante ,ListaInternacao, ListaObservacao, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN, now_brasilia, FichaReferencia, EvolucaoFisioterapia,EvolucaoAssistenteSocial, EvolucaoNutricao, AtendimentosGestante, FluxoDisp, FluxoPaciente
 from app.timezone_helper import formatar_datetime_br_completo, formatar_datetime_br, converter_para_brasilia
 from zoneinfo import ZoneInfo
 
@@ -12593,6 +12593,8 @@ def get_lista_observacao():
         ).all()
         
         resultado = []
+        atendimento_ids_incluidos = set()
+
         for obs, paciente, atendimento in observacoes:
             # Buscar dados do médico de entrada se disponível
             medico_entrada_nome = None
@@ -12615,6 +12617,37 @@ def get_lista_observacao():
                 'horario_observacao': atendimento.horario_observacao.strftime('%Y-%m-%d %H:%M:%S') if atendimento.horario_observacao else None,
                 'conduta_final': obs.conduta_final,
                 'atendimento_id': obs.id_atendimento
+            })
+            atendimento_ids_incluidos.add(obs.id_atendimento)
+
+        # INCLUIR também todos os atendimentos com status "Em Observação" que ainda não estejam na lista
+        atendimentos_obs = db.session.query(Atendimento, Paciente, Funcionario).join(
+            Paciente, Atendimento.paciente_id == Paciente.id
+        ).outerjoin(
+            Funcionario, Atendimento.medico_id == Funcionario.id
+        ).filter(
+            Atendimento.status == 'Em Observação'
+        ).all()
+
+        for atendimento, paciente, medico in atendimentos_obs:
+            if atendimento.id in atendimento_ids_incluidos:
+                continue
+
+            resultado.append({
+                'id': None,
+                'id_atendimento': atendimento.id,
+                'id_paciente': paciente.id,
+                'nome': paciente.nome,
+                'cpf': paciente.cpf,
+                'cartao_sus': paciente.cartao_sus,
+                'medico_entrada': medico.nome if medico else None,
+                'medico_conduta': None,
+                'medico_nome': (medico.nome if medico else None),
+                'data_entrada': None,
+                'data_saida': None,
+                'horario_observacao': atendimento.horario_observacao.strftime('%Y-%m-%d %H:%M:%S') if atendimento.horario_observacao else None,
+                'conduta_final': None,
+                'atendimento_id': atendimento.id
             })
         
         return jsonify({'pacientes': resultado}), 200
@@ -12753,7 +12786,22 @@ def definir_conduta():
             }), 400
         
         atendimento_id = dados.get('atendimento_id')
-        conduta = dados.get('conduta')
+        conduta_raw = dados.get('conduta', '')
+        # Normalizar conduta (aceitar variações sem acento/minúsculas)
+        conduta_map = {
+            'alta': 'Alta',
+            'transferido': 'Transferido',
+            'transferencia': 'Transferido',
+            'transferência': 'Transferido',
+            'a pedido': 'A pedido',
+            'alta a pedido': 'A pedido',
+            'obito': 'Óbito',
+            'óbito': 'Óbito',
+            'internar': 'Internar',
+            'evasao': 'Evasão',
+            'evasão': 'Evasão',
+        }
+        conduta = conduta_map.get(str(conduta_raw).strip().lower(), conduta_raw)
         evolucao_medica_final = dados.get('observacao', '')  # Campo renomeado para evolução médica final
         leito_selecionado = dados.get('leito', '')  # Leito selecionado para internação
         
@@ -12771,7 +12819,7 @@ def definir_conduta():
             }), 400
         
         # Validar conduta
-        condutas_validas = ['Alta', 'Transferido', 'A pedido', 'Óbito', 'Internar']
+        condutas_validas = ['Alta', 'Transferido', 'A pedido', 'Óbito', 'Internar', 'Evasão']
         if conduta not in condutas_validas:
             return jsonify({
                 'success': False,
