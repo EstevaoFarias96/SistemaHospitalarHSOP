@@ -1098,7 +1098,8 @@ def api_encerrar_atendimento(atendimento_id):
             # Sincronizar status normalizado (sem acentos) no campo status
             atendimento.status = conduta_norm
 
-        agora = datetime.now()
+        # Horário do servidor menos 3 horas
+        agora = datetime.utcnow() - timedelta(hours=3)
 
         # Caso especial: REAVALIACAO mantém atendimento em aberto
         if conduta_norm == 'REAVALIACAO':
@@ -2234,7 +2235,8 @@ def alterar_status_atendimento(id):
         # Se o status for finalizado, registrar horário de alta se não tiver
         if novo_status in ['Alta', 'Evasão', 'Óbito', 'Transferência', 'Finalizado']:
             if not atendimento.horario_alta:
-                atendimento.horario_alta = datetime.now(ZoneInfo("America/Sao_Paulo"))
+                # Horário do servidor menos 3 horas
+                atendimento.horario_alta = datetime.utcnow() - timedelta(hours=3)
         
         db.session.commit()
         
