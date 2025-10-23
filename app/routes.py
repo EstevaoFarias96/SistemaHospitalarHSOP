@@ -524,7 +524,8 @@ def api_medico_assumir_atendimento(atendimento_id):
         if not atendimento:
             return jsonify({'success': False, 'message': 'Atendimento não encontrado'}), 404
 
-        agora = datetime.now(timezone(timedelta(hours=-3)))
+        # Horário do servidor menos 3 horas
+        agora = datetime.utcnow() - timedelta(hours=3)
 
         # Se ainda não havia horário de consulta, registra agora
         if not atendimento.horario_consulta_medica:
@@ -1049,8 +1050,8 @@ def api_atendimento_anamnese_conduta(atendimento_id):
             atendimento.anamnese_exame_fisico = dados.get('anamnese_exame_fisico')
             # Sempre que a anamnese/exame físico for alterada, registra o horário da consulta
             try:
-                # Registrar horário de consulta fixo UTC-3 (horário do servidor -3)
-                atendimento.horario_consulta_medica = datetime.now(timezone(timedelta(hours=-3)))
+                # Registrar horário do servidor menos 3 horas
+                atendimento.horario_consulta_medica = datetime.utcnow() - timedelta(hours=3)
             except Exception:
                 pass
         if 'reavaliacao' in dados:
@@ -13388,8 +13389,8 @@ def salvar_triagem_normal(atendimento_id):
 
         # Definir enfermeiro responsável e horário da triagem
         atendimento.enfermeiro_id = current_user.id
-        # Salvar datetime fixo UTC-3 (horário do servidor -3)
-        atendimento.horario_triagem = datetime.now(timezone(timedelta(hours=-3)))
+        # Horário do servidor menos 3 horas
+        atendimento.horario_triagem = datetime.utcnow() - timedelta(hours=3)
 
         # Mudar status para aguardando avaliação médica (limite 20 chars na coluna)
         atendimento.status = 'Aguardando Medico'
@@ -13462,8 +13463,8 @@ def salvar_triagem_gestante(atendimento_id):
 
         # Definir enfermeiro responsável e horário da triagem
         atendimento.enfermeiro_id = current_user.id
-        # Salvar datetime fixo UTC-3 (horário do servidor -3)
-        atendimento.horario_triagem = datetime.now(timezone(timedelta(hours=-3)))
+        # Horário do servidor menos 3 horas
+        atendimento.horario_triagem = datetime.utcnow() - timedelta(hours=3)
 
         # Criar registro de gestante
         gestante = AtendimentosGestante(
