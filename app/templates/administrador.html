@@ -179,12 +179,12 @@
         <div class="col-md-6 col-lg-4 col-xxl-3">
             <div class="card clickable-card" onclick="expandChartFluxo()">
                 <div class="card-header-min">
-                    <span>Entradas x Altas (7d)</span>
+                    <span>Internações por dia (7d)</span>
                     <i class="fas fa-expand-alt expand-icon"></i>
                 </div>
                 <div class="card-body p-2">
                     <div class="mini-chart-container">
-                        <canvas id="chartFluxo" aria-label="Gráfico de entradas e altas na última semana" role="img"></canvas>
+                        <canvas id="chartFluxo" aria-label="Gráfico de internações na última semana" role="img"></canvas>
                     </div>
                 </div>
             </div>
@@ -232,8 +232,8 @@
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-header-min">
-                    <span>Alertas técnicos em fichas</span>
-                    <span class="badge bg-danger">{{ alertas_tecnicos|default([])|length }}</span>
+                    <span>Últimas consultas realizadas</span>
+                    <span class="badge bg-info">{{ ultimas_consultas|default([])|length }}</span>
                 </div>
                 <div class="card-body p-0 scroll-section">
                     <div class="table-responsive mb-0">
@@ -241,24 +241,40 @@
                             <thead class="thead-light">
                                 <tr>
                                     <th>Paciente</th>
-                                    <th>Atend.</th>
-                                    <th>Problema</th>
-                                    <th class="text-end">Ação</th>
+                                    <th>Idade</th>
+                                    <th>Risco</th>
+                                    <th>Médico</th>
+                                    <th>Enfermeiro</th>
+                                    <th class="text-center">Tempo</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for alerta in alertas_tecnicos|default([]) %}
+                                {% for consulta in ultimas_consultas|default([]) %}
                                 <tr>
-                                    <td>{{ alerta.paciente }}</td>
-                                    <td>#{{ alerta.atendimento_id }}</td>
-                                    <td>{{ alerta.problema }}</td>
-                                    <td class="text-end">
-                                        <a href="{{ alerta.url|default('#') }}" class="btn btn-sm btn-outline-primary py-0 px-1">Ver</a>
+                                    <td><strong>{{ consulta.paciente_nome }}</strong><br><small class="text-muted">#{{ consulta.id_atendimento }}</small></td>
+                                    <td>{{ consulta.idade }} anos</td>
+                                    <td>
+                                        {% if consulta.classificacao_risco == 'Vermelho' %}
+                                            <span class="badge badge-danger">Vermelho</span>
+                                        {% elif consulta.classificacao_risco == 'Laranja' %}
+                                            <span class="badge badge-warning">Laranja</span>
+                                        {% elif consulta.classificacao_risco == 'Amarelo' %}
+                                            <span class="badge" style="background-color: #ffc107; color: #000;">Amarelo</span>
+                                        {% elif consulta.classificacao_risco == 'Verde' %}
+                                            <span class="badge badge-success">Verde</span>
+                                        {% elif consulta.classificacao_risco == 'Azul' %}
+                                            <span class="badge badge-info">Azul</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">{{ consulta.classificacao_risco }}</span>
+                                        {% endif %}
                                     </td>
+                                    <td><small>{{ consulta.medico }}</small></td>
+                                    <td><small>{{ consulta.enfermeiro }}</small></td>
+                                    <td class="text-center"><strong>{{ consulta.tempo_consulta }}</strong> min</td>
                                 </tr>
                                 {% else %}
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted py-2">Sem alertas</td>
+                                    <td colspan="6" class="text-center text-muted py-2">Nenhuma consulta registrada</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -270,22 +286,46 @@
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-header-min">
-                    <span>Últimas alterações técnicas</span>
+                    <span>Últimos pacientes internados</span>
+                    <span class="badge bg-primary">{{ ultimas_internacoes|default([])|length }}</span>
                 </div>
                 <div class="card-body p-0 scroll-section">
-                    <ul class="list-group list-group-flush mb-0">
-                        {% for alt in ultimas_alteracoes|default([]) %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center py-1 px-2">
-                            <div>
-                                <div style="font-size:.85rem;"><strong>{{ alt.titulo }}</strong></div>
-                                <div class="muted">{{ alt.usuario }} • {{ alt.data }}</div>
-                            </div>
-                            <a href="{{ alt.url|default('#') }}" class="btn btn-sm btn-outline-secondary py-0 px-1">Ver</a>
-                        </li>
-                        {% else %}
-                        <li class="list-group-item text-center text-muted py-2">Nenhuma alteração recente</li>
-                        {% endfor %}
-                    </ul>
+                    <div class="table-responsive mb-0">
+                        <table class="table table-sm mb-0">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Paciente</th>
+                                    <th>Diagnóstico</th>
+                                    <th>Médico</th>
+                                    <th class="text-center">Observ.</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for internacao in ultimas_internacoes|default([]) %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ internacao.paciente_nome }}</strong><br>
+                                        <small class="text-muted">{{ internacao.data_internacao }}</small><br>
+                                        <small class="text-info">Leito: {{ internacao.leito }}</small>
+                                    </td>
+                                    <td><small>{{ internacao.diagnostico }}</small></td>
+                                    <td><small>{{ internacao.medico }}</small></td>
+                                    <td class="text-center">
+                                        {% if internacao.estava_em_observacao %}
+                                            <span class="badge badge-warning"><i class="fas fa-check"></i> Sim</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary"><i class="fas fa-times"></i> Não</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-2">Nenhuma internação recente</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -371,12 +411,12 @@
     </div>
 </div>
 
-<!-- Modal para expandir gráfico de fluxo -->
+<!-- Modal para expandir gráfico de internações -->
 <div class="modal fade" id="modalFluxo" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
-                <h5 class="modal-title"><i class="fas fa-exchange-alt"></i> Análise de Fluxo - Entradas x Altas</h5>
+                <h5 class="modal-title"><i class="fas fa-bed"></i> Análise de Internações por Dia</h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -389,30 +429,28 @@
                         </div>
                     </div>
                     <div class="col-lg-5">
-                        <h6 class="font-weight-bold mb-3">Análise Diária (Últimos 7 dias)</h6>
+                        <h6 class="font-weight-bold mb-3">Internações Diárias (Últimos 7 dias)</h6>
                         <div class="table-responsive">
                             <table class="table table-sm table-striped">
                                 <thead class="thead-dark">
                                     <tr>
                                         <th>Data</th>
-                                        <th class="text-center">Entradas</th>
-                                        <th class="text-center">Altas</th>
-                                        <th class="text-center">Saldo</th>
+                                        <th class="text-center">Internações</th>
+                                        <th class="text-center">%</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabelaFluxoDetalhes">
-                                    <tr><td colspan="4" class="text-center">Carregando...</td></tr>
+                                    <tr><td colspan="3" class="text-center">Carregando...</td></tr>
                                 </tbody>
                             </table>
                         </div>
                         <hr>
                         <h6 class="font-weight-bold mb-2">Estatísticas do Período</h6>
                         <ul class="list-unstyled">
-                            <li><strong>Total de entradas:</strong> <span id="fluxoTotalEntradas">-</span></li>
-                            <li><strong>Total de altas:</strong> <span id="fluxoTotalAltas">-</span></li>
-                            <li><strong>Saldo líquido:</strong> <span id="fluxoSaldo">-</span></li>
-                            <li><strong>Média de entradas/dia:</strong> <span id="fluxoMediaEntradas">-</span></li>
-                            <li><strong>Taxa de ocupação:</strong> <span id="fluxoTaxaOcupacao">-</span>%</li>
+                            <li><strong>Total de internações:</strong> <span id="fluxoTotalEntradas">-</span></li>
+                            <li><strong>Média por dia:</strong> <span id="fluxoMediaEntradas">-</span></li>
+                            <li><strong>Dia com mais internações:</strong> <span id="fluxoDiaMaior">-</span></li>
+                            <li><strong>Taxa de ocupação atual:</strong> <span id="fluxoTaxaOcupacao">-</span>%</li>
                         </ul>
                     </div>
                 </div>
@@ -583,7 +621,7 @@
         // Armazenar dados para análise
         var dadosAnalise = {
             risco: { labels: [], valores: [], datas: [] },
-            fluxo: { labels: [], entradas: [], altas: [], datas: [] },
+            fluxo: { labels: [], entradas: [], datas: [] },
             hora: { labels: [], valores: [] }
         };
 
@@ -609,8 +647,7 @@
                                 'Laranja': 'rgba(253,126,20,0.7)',
                                 'Amarelo': 'rgba(255,193,7,0.7)',
                                 'Verde': 'rgba(32,201,151,0.7)',
-                                'Azul': 'rgba(13,110,253,0.7)',
-                                'Não classificado': 'rgba(108,117,125,0.7)'
+                                'Azul': 'rgba(13,110,253,0.7)'
                             };
                             return cores[l] || 'rgba(108,117,125,0.7)';
                         })
@@ -653,11 +690,10 @@
             $('#modalRisco').modal('show');
         };
 
-        // Função para expandir gráfico de FLUXO com análise
+        // Função para expandir gráfico de INTERNAÇÕES com análise
         window.expandChartFluxo = function() {
             var labelsFluxo = dadosAnalise.fluxo.labels;
             var entradas = dadosAnalise.fluxo.entradas;
-            var altas = dadosAnalise.fluxo.altas;
             
             if (labelsFluxo.length === 0) return;
 
@@ -669,46 +705,49 @@
                 data: {
                     labels: labelsFluxo,
                     datasets: [
-                        { label: 'Entradas', data: entradas, backgroundColor: 'rgba(32,201,151,0.7)', borderColor: '#20c997', borderWidth: 2 },
-                        { label: 'Altas', data: altas, backgroundColor: 'rgba(253,126,20,0.7)', borderColor: '#fd7e14', borderWidth: 2 }
+                        { label: 'Internações', data: entradas, backgroundColor: 'rgba(32,201,151,0.7)', borderColor: '#20c997', borderWidth: 2 }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: { y: { beginAtZero: true } },
-                    plugins: { legend: { position: 'bottom' } }
+                    plugins: { legend: { display: false } }
                 }
             });
 
             // Popular tabela de detalhes
             var tbody = $('#tabelaFluxoDetalhes');
             tbody.empty();
-            var totalEntradas = 0, totalAltas = 0;
+            var totalEntradas = 0;
+            var maxEntradas = 0;
+            var diaMaiorIdx = 0;
             
             for (var i = 0; i < labelsFluxo.length; i++) {
-                var saldo = entradas[i] - altas[i];
-                var saldoClass = saldo > 0 ? 'text-success' : (saldo < 0 ? 'text-danger' : '');
                 totalEntradas += entradas[i];
-                totalAltas += altas[i];
+                if (entradas[i] > maxEntradas) {
+                    maxEntradas = entradas[i];
+                    diaMaiorIdx = i;
+                }
+            }
+            
+            for (var i = 0; i < labelsFluxo.length; i++) {
+                var perc = totalEntradas > 0 ? ((entradas[i] / totalEntradas) * 100).toFixed(1) : 0;
                 
                 tbody.append(
                     '<tr><td>' + labelsFluxo[i] + '</td>' +
-                    '<td class="text-center text-success"><strong>' + entradas[i] + '</strong></td>' +
-                    '<td class="text-center text-danger"><strong>' + altas[i] + '</strong></td>' +
-                    '<td class="text-center ' + saldoClass + '"><strong>' + (saldo > 0 ? '+' : '') + saldo + '</strong></td></tr>'
+                    '<td class="text-center"><strong>' + entradas[i] + '</strong></td>' +
+                    '<td class="text-center">' + perc + '%</td></tr>'
                 );
             }
 
             // Calcular estatísticas
-            var saldoLiquido = totalEntradas - totalAltas;
             var mediaEntradas = (totalEntradas / labelsFluxo.length).toFixed(1);
             var taxaOcup = {{ taxa_ocupacao|default(0) }};
             
             $('#fluxoTotalEntradas').text(totalEntradas);
-            $('#fluxoTotalAltas').text(totalAltas);
-            $('#fluxoSaldo').text((saldoLiquido > 0 ? '+' : '') + saldoLiquido);
             $('#fluxoMediaEntradas').text(mediaEntradas);
+            $('#fluxoDiaMaior').text(labelsFluxo[diaMaiorIdx] + ' (' + maxEntradas + ' internações)');
             $('#fluxoTaxaOcupacao').text(taxaOcup);
 
             $('#modalFluxo').modal('show');
@@ -880,8 +919,8 @@
             
             // Se não houver dados, usar valores padrão para exibição
             if (labelsRisco.length === 0) {
-                labelsRisco = ["Vermelho","Laranja","Amarelo","Verde","Azul","Não classificado"];
-                dataRisco = [0,0,0,0,0,0];
+                labelsRisco = ["Vermelho","Laranja","Amarelo","Verde","Azul"];
+                dataRisco = [0,0,0,0,0];
             }
             var triageBg = {
                 'Vermelho': 'rgba(220,53,69,0.2)',
@@ -899,8 +938,12 @@
                 'Azul': 'rgba(13,110,253,1)',
                 'Não classificado': 'rgba(108,117,125,1)'
             };
-            var bgColorsRisco = labelsRisco.map(function(l){ return triageBg[l] || 'rgba(13,110,253,0.2)'; });
-            var borderColorsRisco = labelsRisco.map(function(l){ return triageBorder[l] || 'rgba(13,110,253,1)'; });
+            var bgColorsRisco = labelsRisco.map(function(l){ 
+                return triageBg[l] || 'rgba(108,117,125,0.2)'; 
+            });
+            var borderColorsRisco = labelsRisco.map(function(l){ 
+                return triageBorder[l] || 'rgba(108,117,125,1)'; 
+            });
             
             // Armazenar dados para análise
             dadosAnalise.risco.labels = labelsRisco;
@@ -930,34 +973,30 @@
         if (ctxFluxo) {
             var labelsFluxo = {{ fluxo_labels|default([])|tojson }};
             var entradas = {{ fluxo_entradas|default([])|tojson }};
-            var altas = {{ fluxo_altas|default([])|tojson }};
             
             // Se não houver dados, usar valores padrão
             if (labelsFluxo.length === 0) {
                 labelsFluxo = ["D-6","D-5","D-4","D-3","D-2","D-1","Hoje"];
                 entradas = [0,0,0,0,0,0,0];
-                altas = [0,0,0,0,0,0,0];
             }
             
             // Armazenar dados para análise
             dadosAnalise.fluxo.labels = labelsFluxo;
             dadosAnalise.fluxo.entradas = entradas;
-            dadosAnalise.fluxo.altas = altas;
             
             chartInstances['chartFluxo'] = new Chart(ctxFluxo, {
-                type: 'line',
+                type: 'bar',
                 data: {
                     labels: labelsFluxo,
                     datasets: [
-                        { label: 'Entradas', data: entradas, borderColor: '#20c997', backgroundColor: 'rgba(32,201,151,.15)', tension: .3, fill: true },
-                        { label: 'Altas', data: altas, borderColor: '#fd7e14', backgroundColor: 'rgba(253,126,20,.15)', tension: .3, fill: true }
+                        { label: 'Internações', data: entradas, backgroundColor: 'rgba(32,201,151,0.6)', borderColor: '#20c997', borderWidth: 1 }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: { y: { beginAtZero: true } },
-                    plugins: { legend: { position: 'bottom' } }
+                    plugins: { legend: { display: false } }
                 }
             });
         }

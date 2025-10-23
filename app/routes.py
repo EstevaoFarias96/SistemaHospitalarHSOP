@@ -1280,24 +1280,34 @@ def painel_administrador():
         except Exception:
             taxa_ocupacao = 0
 
-        # 3) Pacientes em observação (sem data_saida)
-        pacientes_observacao = db.session.query(func.count(ListaObservacao.id)).filter(
-            ListaObservacao.data_saida.is_(None)
+        # 3) Pacientes em observação (status "Em Observação")
+        pacientes_observacao = db.session.query(func.count(Atendimento.id)).filter(
+            Atendimento.status == 'Em Observação'
         ).scalar() or 0
 
         # 4) Tempo médio de permanência (em dias) para altas concluídas
-        # Usa média do intervalo em segundos dividido por 86400 (PostgreSQL)
+        # Usa média do intervalo em segundos dividido por 86400, removendo outliers
         tempo_medio_permanencia = 0
         try:
-            media_segundos = db.session.query(
-                func.avg(func.extract('epoch', Internacao.data_alta - Internacao.data_internacao))
+            # Calcula tempos em dias, removendo outliers (< 0.1 dias ou > 180 dias)
+            internacoes_com_tempo = db.session.query(
+                func.extract('epoch', Internacao.data_alta - Internacao.data_internacao).label('tempo_segundos')
             ).filter(
                 Internacao.data_internacao.isnot(None),
                 Internacao.data_alta.isnot(None)
+            ).subquery()
+            
+            media_segundos = db.session.query(
+                func.avg(internacoes_com_tempo.c.tempo_segundos)
+            ).filter(
+                internacoes_com_tempo.c.tempo_segundos >= 8640,  # >= 0.1 dia (2.4 horas)
+                internacoes_com_tempo.c.tempo_segundos <= 15552000  # <= 180 dias
             ).scalar()
+            
             if media_segundos is not None:
                 tempo_medio_permanencia = round(float(media_segundos) / 86400.0, 1)
-        except Exception:
+        except Exception as e:
+            logging.warning(f"Erro ao calcular tempo médio de permanência: {str(e)}")
             tempo_medio_permanencia = 0
 
         # 5) Atendimentos na porta hoje por classificação de risco
@@ -1307,21 +1317,22 @@ def painel_administrador():
         ).scalar() or 0
 
         grupos = db.session.query(
-            func.coalesce(Atendimento.classificacao_risco, 'Não classificado'),
+            Atendimento.classificacao_risco,
             func.count(Atendimento.id)
         ).filter(
-            Atendimento.data_atendimento == hoje_data
+            Atendimento.data_atendimento == hoje_data,
+            Atendimento.classificacao_risco.isnot(None),
+            Atendimento.classificacao_risco != ''
         ).group_by(
-            func.coalesce(Atendimento.classificacao_risco, 'Não classificado')
+            Atendimento.classificacao_risco
         ).all()
 
         porta_risco_labels = [g[0] for g in grupos]
         porta_risco_valores = [int(g[1]) for g in grupos]
 
-        # 6) Fluxo de entradas x altas (últimos 7 dias)
+        # 6) Número de pacientes internados por dia (últimos 7 dias)
         fluxo_labels = []
         fluxo_entradas = []
-        fluxo_altas = []
         for i in range(6, -1, -1):
             dia = (inicio_dia - timedelta(days=i)).date()
             if i == 0:
@@ -1334,16 +1345,16 @@ def painel_administrador():
                 func.date(Internacao.data_internacao) == dia
             ).scalar() or 0
             fluxo_entradas.append(entradas_dia)
-            
-            # Contar altas no dia
-            altas_dia = db.session.query(func.count(Internacao.id)).filter(
-                func.date(Internacao.data_alta) == dia
-            ).scalar() or 0
-            fluxo_altas.append(altas_dia)
 
-        # 7) Atendimentos por hora do dia (hoje)
-        atend_hora_labels = [f'{h:02d}h' for h in range(24)]
-        atend_hora_valores = [0] * 24
+        # 7) Atendimentos por hora do dia (só mostrar até a hora atual)
+        hora_atual = agora_br.hour
+        atend_hora_labels = []
+        atend_hora_valores = []
+        
+        # Criar labels e valores apenas até a hora atual
+        for h in range(hora_atual + 1):
+            atend_hora_labels.append(f'{h:02d}h')
+            atend_hora_valores.append(0)
         
         atendimentos_hora = db.session.query(
             func.extract('hour', Atendimento.hora_atendimento).label('hora'),
@@ -1353,23 +1364,31 @@ def painel_administrador():
         ).group_by('hora').all()
         
         for hora, total in atendimentos_hora:
-            if hora is not None and 0 <= int(hora) < 24:
+            if hora is not None and 0 <= int(hora) <= hora_atual:
                 atend_hora_valores[int(hora)] = int(total)
 
         # 8) Calcular tempos médios reais usando os campos de horário
+        # Removendo outliers: tempos < 1 min ou > 600 min (10 horas)
         
         # Tempo médio de TRIAGEM (hora_atendimento até horario_triagem)
         tempo_medio_triagem = 0
         qtd_com_triagem = 0
         try:
-            resultado_triagem = db.session.query(
-                func.avg(
-                    func.extract('epoch', Atendimento.horario_triagem - 
-                    func.cast(func.concat(Atendimento.data_atendimento, ' ', Atendimento.hora_atendimento), db.DateTime))
-                ) / 60.0  # Converter para minutos
+            # Criar subquery para calcular tempos em minutos
+            tempos_triagem = db.session.query(
+                (func.extract('epoch', Atendimento.horario_triagem - 
+                 func.cast(func.concat(Atendimento.data_atendimento, ' ', Atendimento.hora_atendimento), db.DateTime)) / 60.0).label('tempo_min')
             ).filter(
                 Atendimento.horario_triagem.isnot(None),
                 Atendimento.hora_atendimento.isnot(None)
+            ).subquery()
+            
+            # Calcular média removendo outliers
+            resultado_triagem = db.session.query(
+                func.avg(tempos_triagem.c.tempo_min)
+            ).filter(
+                tempos_triagem.c.tempo_min >= 1,    # >= 1 minuto
+                tempos_triagem.c.tempo_min <= 600   # <= 10 horas
             ).scalar()
             
             if resultado_triagem:
@@ -1382,17 +1401,25 @@ def painel_administrador():
             logging.warning(f"Erro ao calcular tempo médio de triagem: {str(e)}")
             tempo_medio_triagem = 0
 
-        # Tempo médio de CONSULTA MÉDICA (horario_triagem até horario_consulta_medica)
+        # Tempo médio de CONSULTA MÉDICA (horario_atendimento até horario_consulta_medica)
         tempo_medio_consulta = 0
         qtd_com_consulta = 0
         try:
-            resultado_consulta = db.session.query(
-                func.avg(
-                    func.extract('epoch', Atendimento.horario_consulta_medica - Atendimento.horario_triagem) / 60.0
-                )
+            # Criar subquery para calcular tempos em minutos
+            tempos_consulta = db.session.query(
+                (func.extract('epoch', Atendimento.horario_consulta_medica - 
+                 func.cast(func.concat(Atendimento.data_atendimento, ' ', Atendimento.hora_atendimento), db.DateTime)) / 60.0).label('tempo_min')
             ).filter(
-                Atendimento.horario_triagem.isnot(None),
+                Atendimento.hora_atendimento.isnot(None),
                 Atendimento.horario_consulta_medica.isnot(None)
+            ).subquery()
+            
+            # Calcular média removendo outliers
+            resultado_consulta = db.session.query(
+                func.avg(tempos_consulta.c.tempo_min)
+            ).filter(
+                tempos_consulta.c.tempo_min >= 1,    # >= 1 minuto
+                tempos_consulta.c.tempo_min <= 600   # <= 10 horas
             ).scalar()
             
             if resultado_consulta:
@@ -1409,13 +1436,18 @@ def painel_administrador():
         tempo_medio_observacao = 0
         qtd_com_observacao = 0
         try:
-            resultado_observacao = db.session.query(
-                func.avg(
-                    func.extract('epoch', Atendimento.horario_alta - Atendimento.horario_observacao) / 60.0
-                )
+            tempos_observacao = db.session.query(
+                (func.extract('epoch', Atendimento.horario_alta - Atendimento.horario_observacao) / 60.0).label('tempo_min')
             ).filter(
                 Atendimento.horario_observacao.isnot(None),
                 Atendimento.horario_alta.isnot(None)
+            ).subquery()
+            
+            resultado_observacao = db.session.query(
+                func.avg(tempos_observacao.c.tempo_min)
+            ).filter(
+                tempos_observacao.c.tempo_min >= 1,
+                tempos_observacao.c.tempo_min <= 600
             ).scalar()
             
             if resultado_observacao:
@@ -1432,13 +1464,18 @@ def painel_administrador():
         tempo_medio_internacao = 0
         qtd_com_internacao = 0
         try:
-            resultado_internacao = db.session.query(
-                func.avg(
-                    func.extract('epoch', Atendimento.horario_alta - Atendimento.horario_internacao) / 60.0
-                )
+            tempos_internacao = db.session.query(
+                (func.extract('epoch', Atendimento.horario_alta - Atendimento.horario_internacao) / 60.0).label('tempo_min')
             ).filter(
                 Atendimento.horario_internacao.isnot(None),
                 Atendimento.horario_alta.isnot(None)
+            ).subquery()
+            
+            resultado_internacao = db.session.query(
+                func.avg(tempos_internacao.c.tempo_min)
+            ).filter(
+                tempos_internacao.c.tempo_min >= 1,
+                tempos_internacao.c.tempo_min <= 600
             ).scalar()
             
             if resultado_internacao:
@@ -1455,14 +1492,19 @@ def painel_administrador():
         tempo_medio_total = 0
         qtd_finalizados = 0
         try:
-            resultado_total = db.session.query(
-                func.avg(
-                    func.extract('epoch', Atendimento.horario_alta - 
-                    func.cast(func.concat(Atendimento.data_atendimento, ' ', Atendimento.hora_atendimento), db.DateTime)) / 60.0
-                )
+            tempos_total = db.session.query(
+                (func.extract('epoch', Atendimento.horario_alta - 
+                 func.cast(func.concat(Atendimento.data_atendimento, ' ', Atendimento.hora_atendimento), db.DateTime)) / 60.0).label('tempo_min')
             ).filter(
                 Atendimento.hora_atendimento.isnot(None),
                 Atendimento.horario_alta.isnot(None)
+            ).subquery()
+            
+            resultado_total = db.session.query(
+                func.avg(tempos_total.c.tempo_min)
+            ).filter(
+                tempos_total.c.tempo_min >= 1,
+                tempos_total.c.tempo_min <= 600
             ).scalar()
             
             if resultado_total:
@@ -1475,20 +1517,31 @@ def painel_administrador():
             logging.warning(f"Erro ao calcular tempo médio total: {str(e)}")
             tempo_medio_total = 0
 
-        # 9) Tempo médio de espera POR CLASSIFICAÇÃO DE RISCO (triagem até consulta)
+        # 9) Tempo médio de espera POR CLASSIFICAÇÃO DE RISCO (horario_atendimento até horario_consulta)
+        # Removendo outliers: tempos < 1 min ou > 600 min (10 horas)
         tempos_por_risco = []
         try:
-            resultados_risco = db.session.query(
+            # Criar subquery com tempos calculados
+            tempos_risco_sq = db.session.query(
                 func.coalesce(Atendimento.classificacao_risco, 'Não classificado').label('classificacao'),
-                func.avg(
-                    func.extract('epoch', Atendimento.horario_consulta_medica - Atendimento.horario_triagem) / 60.0
-                ).label('tempo_medio'),
-                func.count(Atendimento.id).label('quantidade')
+                (func.extract('epoch', Atendimento.horario_consulta_medica - 
+                 func.cast(func.concat(Atendimento.data_atendimento, ' ', Atendimento.hora_atendimento), db.DateTime)) / 60.0).label('tempo_min'),
+                Atendimento.id
             ).filter(
-                Atendimento.horario_triagem.isnot(None),
+                Atendimento.hora_atendimento.isnot(None),
                 Atendimento.horario_consulta_medica.isnot(None)
+            ).subquery()
+            
+            # Calcular média por classificação removendo outliers
+            resultados_risco = db.session.query(
+                tempos_risco_sq.c.classificacao,
+                func.avg(tempos_risco_sq.c.tempo_min).label('tempo_medio'),
+                func.count(tempos_risco_sq.c.id).label('quantidade')
+            ).filter(
+                tempos_risco_sq.c.tempo_min >= 1,
+                tempos_risco_sq.c.tempo_min <= 600
             ).group_by(
-                func.coalesce(Atendimento.classificacao_risco, 'Não classificado')
+                tempos_risco_sq.c.classificacao
             ).all()
             
             for classificacao, tempo, qtd in resultados_risco:
@@ -1511,6 +1564,134 @@ def painel_administrador():
             Atendimento.status == 'Aguardando Médico'
         ).scalar() or 0
 
+        # 11) Últimas consultas realizadas (últimas 10 com horario_consulta_medica preenchido)
+        ultimas_consultas = []
+        try:
+            consultas_query = db.session.query(
+                Atendimento,
+                Paciente,
+                Funcionario.nome.label('medico_nome'),
+                Funcionario
+            ).join(
+                Paciente, Atendimento.paciente_id == Paciente.id
+            ).outerjoin(
+                Funcionario, Atendimento.medico_id == Funcionario.id
+            ).filter(
+                Atendimento.horario_consulta_medica.isnot(None),
+                Atendimento.hora_atendimento.isnot(None)
+            ).order_by(
+                Atendimento.horario_consulta_medica.desc()
+            ).limit(10).all()
+            
+            for atendimento, paciente, medico_nome, medico_obj in consultas_query:
+                # Calcular idade
+                idade = 0
+                if paciente.data_nascimento:
+                    hoje = date.today()
+                    idade = hoje.year - paciente.data_nascimento.year - (
+                        (hoje.month, hoje.day) < (paciente.data_nascimento.month, paciente.data_nascimento.day)
+                    )
+                
+                # Calcular tempo da consulta em minutos
+                tempo_consulta = 0
+                try:
+                    if atendimento.horario_consulta_medica and atendimento.hora_atendimento:
+                        # Combinar data e hora do atendimento
+                        dt_atendimento = datetime.combine(atendimento.data_atendimento, atendimento.hora_atendimento)
+                        
+                        # Calcular diferença
+                        if isinstance(atendimento.horario_consulta_medica, datetime):
+                            diferenca = atendimento.horario_consulta_medica - dt_atendimento
+                            tempo_consulta = round(diferenca.total_seconds() / 60.0)
+                except Exception as e:
+                    logging.warning(f"Erro ao calcular tempo de consulta: {str(e)}")
+                    tempo_consulta = 0
+                
+                # Nome do enfermeiro
+                enfermeiro_nome = "Não atribuído"
+                if atendimento.enfermeiro_id:
+                    enfermeiro = db.session.query(Funcionario).get(atendimento.enfermeiro_id)
+                    if enfermeiro:
+                        enfermeiro_nome = enfermeiro.nome
+                
+                ultimas_consultas.append({
+                    'id_atendimento': atendimento.id,
+                    'paciente_nome': paciente.nome,
+                    'classificacao_risco': atendimento.classificacao_risco or 'Não informado',
+                    'idade': idade,
+                    'medico': medico_nome or 'Não atribuído',
+                    'enfermeiro': enfermeiro_nome,
+                    'tempo_consulta': tempo_consulta,
+                    'horario_consulta': atendimento.horario_consulta_medica.strftime('%d/%m/%Y %H:%M') if atendimento.horario_consulta_medica else '-'
+                })
+        except Exception as e:
+            logging.error(f"Erro ao buscar últimas consultas: {str(e)}")
+            logging.error(traceback.format_exc())
+            ultimas_consultas = []
+
+        # 12) Últimos pacientes internados (últimas 10 internações)
+        ultimas_internacoes = []
+        try:
+            internacoes_query = db.session.query(
+                Internacao,
+                Paciente,
+                Funcionario.nome.label('medico_nome')
+            ).join(
+                Paciente, Internacao.paciente_id == Paciente.id
+            ).outerjoin(
+                Funcionario, Internacao.medico_id == Funcionario.id
+            ).filter(
+                Internacao.data_internacao.isnot(None)
+            ).order_by(
+                Internacao.data_internacao.desc()
+            ).limit(10).all()
+            
+            for internacao, paciente, medico_nome in internacoes_query:
+                # Verificar se estava em observação antes da internação
+                estava_em_observacao = False
+                if internacao.atendimento_id:
+                    # Verificar na tabela lista_observacao
+                    obs = db.session.query(ListaObservacao).filter(
+                        ListaObservacao.id_atendimento == internacao.atendimento_id
+                    ).first()
+                    if obs:
+                        estava_em_observacao = True
+                    else:
+                        # Verificar pelo status do atendimento
+                        atend = db.session.query(Atendimento).filter(
+                            Atendimento.id == internacao.atendimento_id
+                        ).first()
+                        if atend and atend.horario_observacao:
+                            estava_em_observacao = True
+                
+                # Pegar diagnóstico (pode ser de vários campos)
+                diagnostico = internacao.diagnostico_inicial or internacao.diagnostico or internacao.justificativa_internacao_sinais_e_sintomas or 'Não informado'
+                # Limitar tamanho do diagnóstico para exibição
+                if len(diagnostico) > 100:
+                    diagnostico = diagnostico[:97] + '...'
+                
+                # Formatar data de internação
+                data_internacao_fmt = '-'
+                if internacao.data_internacao:
+                    if isinstance(internacao.data_internacao, datetime):
+                        data_internacao_fmt = internacao.data_internacao.strftime('%d/%m/%Y %H:%M')
+                    else:
+                        data_internacao_fmt = str(internacao.data_internacao)
+                
+                ultimas_internacoes.append({
+                    'id_internacao': internacao.id,
+                    'paciente_nome': paciente.nome,
+                    'diagnostico': diagnostico,
+                    'medico': medico_nome or 'Não atribuído',
+                    'estava_em_observacao': estava_em_observacao,
+                    'data_internacao': data_internacao_fmt,
+                    'leito': internacao.leito or 'Não definido'
+                })
+        except Exception as e:
+            logging.error(f"Erro ao buscar últimas internações: {str(e)}")
+            logging.error(traceback.format_exc())
+            ultimas_internacoes = []
+
         contexto = dict(
             total_internacoes_hoje=total_internacoes_hoje,
             taxa_ocupacao=taxa_ocupacao,
@@ -1521,7 +1702,6 @@ def painel_administrador():
             porta_risco_valores=porta_risco_valores,
             fluxo_labels=fluxo_labels,
             fluxo_entradas=fluxo_entradas,
-            fluxo_altas=fluxo_altas,
             atend_hora_labels=atend_hora_labels,
             atend_hora_valores=atend_hora_valores,
             # Tempos médios por etapa
@@ -1542,8 +1722,8 @@ def painel_administrador():
             aguardando_triagem=aguardando_triagem,
             aguardando_medico=aguardando_medico,
             # Listas
-            alertas_tecnicos=[],
-            ultimas_alteracoes=[],
+            ultimas_consultas=ultimas_consultas,
+            ultimas_internacoes=ultimas_internacoes,
         )
         return render_template('administrador.html', **contexto)
     except Exception as e:
