@@ -256,21 +256,27 @@
                 </a>
               </li>
               <li class="nav-item">
+                <a class="nav-link" id="aguardando-medico-tab" data-toggle="tab" href="#aguardando-medico" role="tab">
+                  <i class="fas fa-user-md mr-1"></i>Aguardando Médico
+                  <span class="badge badge-info ml-2" id="count-aguardando-medico">0</span>
+                </a>
+              </li>
+              <li class="nav-item">
                 <a class="nav-link" id="internados-tab" data-toggle="tab" href="#internados" role="tab">
-                  <i class="fas fa-procedures mr-1"></i>Pacientes Internados
+                  <i class="fas fa-procedures mr-1"></i>Internado
                   <span class="badge badge-primary ml-2" id="count-internados">0</span>
                 </a>
               </li>
               <li class="nav-item">
                 <a class="nav-link" id="observacao-tab" data-toggle="tab" href="#observacao" role="tab">
-                  <i class="fas fa-eye mr-1"></i>Em Observação
+                  <i class="fas fa-eye mr-1"></i>Observação
                   <span class="badge badge-warning ml-2" id="count-observacao">0</span>
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" id="todos-tab" data-toggle="tab" href="#todos" role="tab">
-                  <i class="fas fa-list mr-1"></i>Todos
-                  <span class="badge badge-secondary ml-2" id="count-todos">0</span>
+                <a class="nav-link" id="atendimentos-dia-tab" data-toggle="tab" href="#atendimentos-dia" role="tab">
+                  <i class="fas fa-calendar-day mr-1"></i>Atendimentos do Dia
+                  <span class="badge badge-secondary ml-2" id="count-atendimentos-dia">0</span>
                 </a>
               </li>
             </ul>
@@ -284,6 +290,18 @@
                       <span class="sr-only">Carregando...</span>
                     </div>
                     <p class="mt-3 text-muted">Carregando pacientes aguardando triagem...</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Aguardando Médico -->
+              <div class="tab-pane fade" id="aguardando-medico" role="tabpanel">
+                <div id="lista-aguardando-medico">
+                  <div class="text-center py-5">
+                    <div class="spinner-border text-info" role="status">
+                      <span class="sr-only">Carregando...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Carregando pacientes aguardando médico...</p>
                   </div>
                 </div>
               </div>
@@ -312,14 +330,14 @@
                 </div>
               </div>
 
-              <!-- Todos -->
-              <div class="tab-pane fade" id="todos" role="tabpanel">
-                <div id="lista-todos">
+              <!-- Atendimentos do Dia -->
+              <div class="tab-pane fade" id="atendimentos-dia" role="tabpanel">
+                <div id="lista-atendimentos-dia">
                   <div class="text-center py-5">
                     <div class="spinner-border text-primary" role="status">
                       <span class="sr-only">Carregando...</span>
                     </div>
-                    <p class="mt-3 text-muted">Carregando todos os pacientes...</p>
+                    <p class="mt-3 text-muted">Carregando atendimentos de hoje...</p>
                   </div>
                 </div>
               </div>
@@ -365,47 +383,65 @@
     });
 
     function carregarStatusPacientes() {
-      // Carregar pacientes aguardando triagem
-      fetch('/api/pacientes/status/aguardando-triagem')
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            exibirPacientes('aguardando', data.pacientes);
-            $('#count-aguardando').text(data.pacientes.length);
-          }
-        })
-        .catch(error => {
-          console.error('Erro ao carregar pacientes aguardando triagem:', error);
+      const reqs = [
+        fetch('/api/pacientes/status/aguardando-triagem').then(r => r.json()).catch(() => ({ success: false, pacientes: [] })),
+        fetch('/api/pacientes/status/aguardando-medico').then(r => r.json()).catch(() => ({ success: false, pacientes: [] })),
+        fetch('/api/pacientes/status/internados').then(r => r.json()).catch(() => ({ success: false, pacientes: [] })),
+        fetch('/api/pacientes/status/observacao').then(r => r.json()).catch(() => ({ success: false, pacientes: [] }))
+      ];
+
+      Promise.all(reqs).then(([aguardando, aguardandoMedico, internados, observacao]) => {
+        // Aguardando Triagem
+        if (aguardando && aguardando.success) {
+          exibirPacientes('aguardando', aguardando.pacientes);
+          $('#count-aguardando').text(aguardando.pacientes.length);
+        } else {
           $('#lista-aguardando').html('<p class="text-danger text-center">Erro ao carregar dados</p>');
-        });
+        }
 
-      // Carregar pacientes internados
-      fetch('/api/pacientes/status/internados')
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            exibirPacientes('internados', data.pacientes);
-            $('#count-internados').text(data.pacientes.length);
-          }
-        })
-        .catch(error => {
-          console.error('Erro ao carregar pacientes internados:', error);
+        // Aguardando Médico
+        if (aguardandoMedico && aguardandoMedico.success) {
+          exibirPacientes('aguardando-medico', aguardandoMedico.pacientes);
+          $('#count-aguardando-medico').text(aguardandoMedico.pacientes.length);
+        } else {
+          $('#lista-aguardando-medico').html('<p class="text-danger text-center">Erro ao carregar dados</p>');
+        }
+
+        // Internados
+        if (internados && internados.success) {
+          exibirPacientes('internados', internados.pacientes);
+          $('#count-internados').text(internados.pacientes.length);
+        } else {
           $('#lista-internados').html('<p class="text-danger text-center">Erro ao carregar dados</p>');
-        });
+        }
 
-      // Carregar pacientes em observação
-      fetch('/api/pacientes/status/observacao')
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            exibirPacientes('observacao', data.pacientes);
-            $('#count-observacao').text(data.pacientes.length);
-          }
-        })
-        .catch(error => {
-          console.error('Erro ao carregar pacientes em observação:', error);
+        // Observação
+        if (observacao && observacao.success) {
+          exibirPacientes('observacao', observacao.pacientes);
+          $('#count-observacao').text(observacao.pacientes.length);
+        } else {
           $('#lista-observacao').html('<p class="text-danger text-center">Erro ao carregar dados</p>');
-        });
+        }
+
+        // Atendimentos do Dia (UTC-3 / America/Sao_Paulo)
+        try {
+          const marcados = [];
+          const addMarcados = (lista, status) => {
+            (lista || []).forEach(p => marcados.push({ ...p, status }));
+          };
+          if (aguardando && aguardando.success) addMarcados(aguardando.pacientes, 'Aguardando Triagem');
+          if (aguardandoMedico && aguardandoMedico.success) addMarcados(aguardandoMedico.pacientes, 'Aguardando Médico');
+          if (internados && internados.success) addMarcados(internados.pacientes, 'Internado');
+          if (observacao && observacao.success) addMarcados(observacao.pacientes, 'Observação');
+
+          const doDia = marcados.filter(p => isSameDayInSaoPaulo(p.data_entrada));
+          exibirPacientes('atendimentos-dia', doDia);
+          $('#count-atendimentos-dia').text(doDia.length);
+        } catch (e) {
+          console.error('Erro ao montar Atendimentos do Dia:', e);
+          $('#lista-atendimentos-dia').html('<p class="text-danger text-center">Erro ao carregar dados</p>');
+        }
+      });
     }
 
     function exibirPacientes(tipo, pacientes) {
@@ -428,10 +464,18 @@
 
         if (tipo === 'aguardando') {
           statusBadge = '<span class="badge badge-info status-badge">Aguardando Triagem</span>';
+        } else if (tipo === 'aguardando-medico') {
+          statusBadge = '<span class="badge badge-info status-badge">Aguardando Médico</span>';
         } else if (tipo === 'internados') {
           statusBadge = '<span class="badge badge-primary status-badge">Internado</span>';
         } else if (tipo === 'observacao') {
           statusBadge = '<span class="badge badge-warning status-badge">Observação</span>';
+        } else if (tipo === 'atendimentos-dia') {
+          const s = (paciente.status || '').toLowerCase();
+          if (s.includes('triagem')) statusBadge = '<span class="badge badge-info status-badge">Aguardando Triagem</span>';
+          else if (s.includes('médico') || s.includes('medico')) statusBadge = '<span class="badge badge-info status-badge">Aguardando Médico</span>';
+          else if (s.includes('observa')) statusBadge = '<span class="badge badge-warning status-badge">Observação</span>';
+          else statusBadge = '<span class="badge badge-primary status-badge">Internado</span>';
         }
 
         // Campos específicos para cada tipo
@@ -445,6 +489,29 @@
           campoExtra1Valor = paciente.hora_entrada || 'N/A';
           campoExtra2Label = 'Recepcionista';
           campoExtra2Valor = paciente.recepcionista_nome || 'N/A';
+        } else if (tipo === 'aguardando-medico') {
+          campoExtra1Label = 'Hora Triagem';
+          campoExtra1Valor = paciente.hora_triagem || 'N/A';
+          campoExtra2Label = 'Classificação';
+          campoExtra2Valor = paciente.classificacao_risco || 'N/A';
+        } else if (tipo === 'atendimentos-dia') {
+          const st = (paciente.status || '').toLowerCase();
+          if (st.includes('triagem')) {
+            campoExtra1Label = 'Hora Entrada';
+            campoExtra1Valor = paciente.hora_entrada || 'N/A';
+            campoExtra2Label = 'Recepcionista';
+            campoExtra2Valor = paciente.recepcionista_nome || 'N/A';
+          } else if (st.includes('médico') || st.includes('medico')) {
+            campoExtra1Label = 'Hora Triagem';
+            campoExtra1Valor = paciente.hora_triagem || 'N/A';
+            campoExtra2Label = 'Classificação';
+            campoExtra2Valor = paciente.classificacao_risco || 'N/A';
+          } else {
+            campoExtra1Label = 'Leito';
+            campoExtra1Valor = paciente.leito || 'N/A';
+            campoExtra2Label = 'Médico';
+            campoExtra2Valor = paciente.medico_nome || 'N/A';
+          }
         } else {
           campoExtra1Label = 'Leito';
           campoExtra1Valor = paciente.leito || 'N/A';
@@ -504,28 +571,7 @@
 
       $(`#lista-${tipo}`).html(html);
 
-      // Atualizar contador total
-      if (tipo !== 'todos') {
-        const totalAguardando = $('#count-aguardando').text() || 0;
-        const totalInternados = $('#count-internados').text() || 0;
-        const totalObservacao = $('#count-observacao').text() || 0;
-        $('#count-todos').text(parseInt(totalAguardando) + parseInt(totalInternados) + parseInt(totalObservacao));
-      }
-
-      // Preencher aba "Todos" quando todas as categorias forem carregadas
-      if (tipo === 'internados') {
-        Promise.all([
-          fetch('/api/pacientes/status/aguardando-triagem').then(r => r.json()),
-          fetch('/api/pacientes/status/observacao').then(r => r.json())
-        ]).then(([aguardandoData, observacaoData]) => {
-          if (aguardandoData.success && observacaoData.success) {
-            const todosPacientes = aguardandoData.pacientes.concat(pacientes, observacaoData.pacientes);
-            exibirPacientes('todos', todosPacientes);
-          }
-        }).catch(error => {
-          console.error('Erro ao carregar dados para aba "Todos":', error);
-        });
-      }
+      // Nada a somar aqui; a aba "Atendimentos do Dia" é calculada em carregarStatusPacientes()
     }
 
     function atualizarStatus() {
@@ -556,6 +602,19 @@
       }
 
       return idade;
+    }
+
+    function isSameDayInSaoPaulo(dateStr) {
+      if (!dateStr) return false;
+      try {
+        const tz = 'America/Sao_Paulo';
+        const d = new Date(dateStr);
+        const dTz = new Date(d.toLocaleString('en-US', { timeZone: tz }));
+        const nowTz = new Date(new Date().toLocaleString('en-US', { timeZone: tz }));
+        return dTz.getFullYear() === nowTz.getFullYear() && dTz.getMonth() === nowTz.getMonth() && dTz.getDate() === nowTz.getDate();
+      } catch (e) {
+        return false;
+      }
     }
 
     function formatarCPF(cpf) {

@@ -11945,9 +11945,11 @@ def api_pacientes_internados():
         if current_user.cargo.lower() != 'recepcionista':
             return jsonify({'success': False, 'message': 'Acesso não autorizado'}), 403
 
-        # Buscar pacientes internados ativos (sem data de alta)
-        internacoes_ativas = Internacao.query.filter(
-            Internacao.data_alta.is_(None)
+        # Buscar apenas pacientes cujo atendimento esteja com status exatamente "Internado"
+        internacoes_ativas = db.session.query(Internacao).join(
+            Atendimento, Internacao.atendimento_id == Atendimento.id
+        ).filter(
+            Atendimento.status == 'Internado'
         ).all()
 
         pacientes_data = []
@@ -12020,6 +12022,51 @@ def api_pacientes_observacao():
 
     except Exception as e:
         logging.error(f"Erro ao buscar pacientes em observação: {str(e)}")
+        return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
+
+
+@bp.route('/api/pacientes/status/aguardando-medico')
+@login_required
+def api_pacientes_aguardando_medico():
+    """
+    API para obter lista de pacientes aguardando atendimento médico (para recepcionistas).
+    """
+    try:
+        current_user = get_current_user()
+        if current_user.cargo.lower() != 'recepcionista':
+            return jsonify({'success': False, 'message': 'Acesso não autorizado'}), 403
+
+        atendimentos = Atendimento.query.filter(
+            db.or_(
+                Atendimento.status.ilike('%aguardando%medico%'),
+                Atendimento.status.ilike('%aguardando%médico%')
+            )
+        ).all()
+
+        pacientes_data = []
+        for a in atendimentos:
+            paciente = Paciente.query.get(a.paciente_id)
+            if not paciente:
+                continue
+            medico = Funcionario.query.get(a.medico_id) if hasattr(a, 'medico_id') else None
+
+            pacientes_data.append({
+                'id': paciente.id,
+                'nome': paciente.nome,
+                'cpf': paciente.cpf,
+                'data_nascimento': paciente.data_nascimento.strftime('%Y-%m-%d') if paciente.data_nascimento else None,
+                'data_entrada': a.data_atendimento.isoformat() if a.data_atendimento else None,
+                'hora_triagem': a.horario_triagem.strftime('%H:%M') if getattr(a, 'horario_triagem', None) else None,
+                'classificacao_risco': getattr(a, 'classificacao_risco', None),
+                'medico_nome': medico.nome if medico else None,
+                'atendimento_id': a.id
+            })
+
+        return jsonify({'success': True, 'pacientes': pacientes_data, 'total': len(pacientes_data)})
+
+    except Exception as e:
+        logging.error(f"Erro ao buscar pacientes aguardando médico: {str(e)}")
+        logging.error(traceback.format_exc())
         return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
 
 
