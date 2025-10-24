@@ -19,7 +19,7 @@ from docxtpl import DocxTemplate
 from docx import Document
 from io import BytesIO
 from app import db
-from app.models import Funcionario,PrescricaoEnfermagemTemplate,Leito,MedicacoesPadrao,AdmissaoEnfermagem, AtendimentosGestante ,ListaInternacao, ListaObservacao, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN, now_brasilia, FichaReferencia, EvolucaoFisioterapia,EvolucaoAssistenteSocial, EvolucaoNutricao, AtendimentosGestante, FluxoDisp, FluxoPaciente
+from app.models import Funcionario,PrescricaoEnfermagemTemplate,Leito,PrescricaoEmergencia,MedicacoesPadrao,AdmissaoEnfermagem, AtendimentosGestante ,ListaInternacao, ListaObservacao, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN, now_brasilia, FichaReferencia, EvolucaoFisioterapia,EvolucaoAssistenteSocial, EvolucaoNutricao, AtendimentosGestante, FluxoDisp, FluxoPaciente
 from app.timezone_helper import formatar_datetime_br_completo, formatar_datetime_br, converter_para_brasilia
 from zoneinfo import ZoneInfo
 
@@ -55,6 +55,161 @@ def get_current_user():
     if 'user_id' not in session:
         return None
     return Funcionario.query.get(session['user_id'])
+
+# ====== API: Prescrições de Emergência (porta) ======
+@bp.route('/api/prescricoes-emergencia/<string:atendimento_id>', methods=['GET'])
+@login_required
+def listar_prescricoes_emergencia(atendimento_id):
+    try:
+        atendimento = Atendimento.query.get(atendimento_id)
+        if not atendimento:
+            return jsonify({'success': False, 'message': 'Atendimento não encontrado'}), 404
+
+        prescs = (PrescricaoEmergencia.query
+                  .filter_by(atendimento_id=atendimento_id)
+                  .order_by(PrescricaoEmergencia.horario_prescricao.desc())
+                  .all())
+
+        def serialize(p):
+            return {
+                'id': p.id,
+                'atendimento_id': p.atendimento_id,
+                'medico_id': p.medico_id,
+                'enfermeiro_id': p.enfermeiro_id,
+                'texto_dieta': p.texto_dieta,
+                'texto_procedimento_medico': p.texto_procedimento_medico,
+                'texto_procedimento_multi': p.texto_procedimento_multi,
+                'horario_prescricao': p.horario_prescricao.isoformat() if p.horario_prescricao else None,
+                'medicamentos': p.medicamentos or []
+            }
+
+        return jsonify({'success': True, 'prescricoes': [serialize(p) for p in prescs]})
+    except Exception as e:
+        logging.error(f"Erro ao listar prescrições de emergência: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro interno'}), 500
+
+
+@bp.route('/api/prescricoes-emergencia', methods=['POST'])
+@login_required
+def criar_prescricao_emergencia():
+    try:
+        dados = request.get_json(force=True) or {}
+        atendimento_id = (dados.get('atendimento_id') or '').strip()
+        medico_id = dados.get('medico_id') or session.get('user_id')
+        if not atendimento_id:
+            return jsonify({'success': False, 'message': 'atendimento_id é obrigatório'}), 400
+        if not medico_id:
+            return jsonify({'success': False, 'message': 'medico_id é obrigatório'}), 400
+
+        atendimento = Atendimento.query.get(atendimento_id)
+        if not atendimento:
+            return jsonify({'success': False, 'message': 'Atendimento não encontrado'}), 404
+
+        # Campos opcionais
+        texto_dieta = (dados.get('texto_dieta') or None)
+        texto_proc_med = (dados.get('texto_procedimento_medico') or None)
+        texto_proc_multi = (dados.get('texto_procedimento_multi') or None)
+        medicamentos = dados.get('medicamentos') or []
+        if not isinstance(medicamentos, list):
+            return jsonify({'success': False, 'message': 'medicamentos deve ser uma lista'}), 400
+
+        nova = PrescricaoEmergencia(
+            atendimento_id=atendimento_id,
+            medico_id=medico_id,
+            enfermeiro_id=dados.get('enfermeiro_id'),
+            texto_dieta=texto_dieta,
+            texto_procedimento_medico=texto_proc_med,
+            texto_procedimento_multi=texto_proc_multi,
+            horario_prescricao=converter_para_brasilia(datetime.now(ZoneInfo('America/Sao_Paulo'))),
+            medicamentos=medicamentos
+        )
+        db.session.add(nova)
+        db.session.commit()
+
+        return jsonify({'success': True, 'id': nova.id}), 201
+    except Exception as e:
+        logging.error(f"Erro ao criar prescrição de emergência: {str(e)}")
+        logging.error(traceback.format_exc())
+        db.session.rollback()
+        return jsonify({'success': False, 'message': 'Erro interno ao salvar'}), 500
+
+
+@bp.route('/api/imprimir-prescricao-emergencia-html/<int:prescricao_id>', methods=['GET'])
+@login_required
+def imprimir_prescricao_emergencia_html(prescricao_id):
+    try:
+        p = PrescricaoEmergencia.query.get(prescricao_id)
+        if not p:
+            abort(404, 'Prescrição não encontrada.')
+
+        atendimento = Atendimento.query.get(p.atendimento_id)
+        if not atendimento:
+            abort(404, 'Atendimento não encontrado.')
+
+        paciente = atendimento.paciente
+        medico = Funcionario.query.get(p.medico_id) if p.medico_id else None
+
+        # Renderização simples em HTML para impressão sem depender de internação
+        html = render_template_string(
+            '''<!DOCTYPE html>
+            <html lang="pt-br">
+            <head>
+              <meta charset="utf-8" />
+              <title>Prescrição de Emergência #{{ p.id }}</title>
+              <style>
+                body { font-family: Arial, sans-serif; margin: 24px; }
+                h1 { margin: 0 0 8px 0; }
+                .muted { color: #666; font-size: 12px; }
+                .box { border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+                ul { margin: 6px 0 0 18px; }
+              </style>
+            </head>
+            <body>
+              <h1>Prescrição de Emergência</h1>
+              <div class="muted">ID: {{ p.id }} • Data: {{ p.horario_prescricao.strftime('%d/%m/%Y %H:%M') if p.horario_prescricao else '' }}</div>
+              <div class="box">
+                <strong>Paciente:</strong> {{ paciente.nome or '-' }}<br/>
+                <strong>Atendimento:</strong> {{ atendimento.id }}<br/>
+                <strong>Médico:</strong> {{ (medico.nome if medico else '-') }}
+              </div>
+              {% if p.texto_dieta %}
+              <div class="box">
+                <strong>Dieta</strong>
+                <div>{{ p.texto_dieta|safe }}</div>
+              </div>
+              {% endif %}
+              {% if p.texto_procedimento_medico %}
+              <div class="box">
+                <strong>Procedimentos Médicos</strong>
+                <div>{{ p.texto_procedimento_medico|safe }}</div>
+              </div>
+              {% endif %}
+              {% if p.texto_procedimento_multi %}
+              <div class="box">
+                <strong>Procedimentos Multiprofissionais</strong>
+                <div>{{ p.texto_procedimento_multi|safe }}</div>
+              </div>
+              {% endif %}
+              {% if p.medicamentos %}
+              <div class="box">
+                <strong>Medicamentos</strong>
+                <ul>
+                  {% for m in p.medicamentos %}
+                    <li>{{ m.get('nome_medicamento','') }}{% if m.get('descricao_uso') %} - {{ m.get('descricao_uso') }}{% endif %}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+              {% endif %}
+            </body>
+            </html>''',
+            p=p, atendimento=atendimento, paciente=paciente, medico=medico
+        )
+        return html
+    except Exception as e:
+        logging.error(f"Erro ao imprimir prescrição de emergência: {str(e)}")
+        logging.error(traceback.format_exc())
+        abort(500, f'Erro interno: {str(e)}')
 
 # Rota de teste simples para diagnóstico
 @bp.route('/api/status')
@@ -8459,23 +8614,23 @@ def imprimir_ficha_atendimento(atendimento_id):
         def fmt_datetime(dt):
             return formatar_datetime_br(dt, '%d/%m/%Y %H:%M') if dt else None
 
-        # Buscar prescrições médicas relacionadas e processar medicamentos
+        # Buscar prescrições de emergência (porta) pelo atendimento_id
         prescricoes_processadas = []
-        if internacao:
-            prescricoes = PrescricaoClinica.query.filter_by(
-                atendimentos_clinica_id=internacao.id
-            ).order_by(PrescricaoClinica.horario_prescricao.desc()).all()
+        prescricoes = PrescricaoEmergencia.query.filter_by(
+            atendimento_id=atendimento_id
+        ).order_by(PrescricaoEmergencia.horario_prescricao.desc()).all()
 
-            for prescricao in prescricoes:
-                prescricoes_processadas.append({
-                    'id': prescricao.id,
-                    'horario_prescricao_iso': prescricao.horario_prescricao.isoformat() if prescricao.horario_prescricao else None,
-                    'horario_prescricao_pretty': fmt_datetime(prescricao.horario_prescricao),
-                    'texto_dieta': prescricao.texto_dieta,
-                    'texto_procedimento_medico': prescricao.texto_procedimento_medico,
-                    'texto_procedimento_multi': prescricao.texto_procedimento_multi,
-                    'medicamentos_json': prescricao.medicamentos_json
-                })
+        for prescricao in prescricoes:
+            prescricoes_processadas.append({
+                'id': prescricao.id,
+                'horario_prescricao_iso': prescricao.horario_prescricao.isoformat() if prescricao.horario_prescricao else None,
+                'horario_prescricao_pretty': fmt_datetime(prescricao.horario_prescricao),
+                'texto_dieta': prescricao.texto_dieta,
+                'texto_procedimento_medico': prescricao.texto_procedimento_medico,
+                'texto_procedimento_multi': prescricao.texto_procedimento_multi,
+                'medicamentos_json': prescricao.medicamentos,  # Nova tabela usa campo 'medicamentos'
+                'medicamentos': prescricao.medicamentos  # Disponibiliza também como 'medicamentos'
+            })
 
         # Data atual para o rodapé
         data_impressao = datetime.now(ZoneInfo("America/Sao_Paulo"))

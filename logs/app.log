@@ -33442,3 +33442,1599 @@ sqlalchemy.exc.InvalidRequestError: Table 'funcionarios' is already defined for 
 2025-10-24 08:42:43,777 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
 2025-10-24 08:42:43,885 [INFO] __init__:114 - Blueprints registrados com sucesso
 2025-10-24 08:42:43,888 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-10-24 10:05:01,745 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-24 10:05:01,745 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-24 10:05:01,745 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-24 10:05:01,745 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-24 10:05:01,745 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-24 10:05:01,749 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-24 10:05:01,749 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-24 10:05:01,794 [ERROR] __init__:82 - Erro durante configuração inicial: name 'JSONB' is not defined
+2025-10-24 10:05:01,794 [ERROR] __init__:83 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 75, in create_app
+    from app.models import Funcionario
+  File "/home/estevaofilho/HSOP/HSOP/app/models.py", line 637, in <module>
+    class PrescricaoEmergencia(db.Model):
+  File "/home/estevaofilho/HSOP/HSOP/app/models.py", line 648, in PrescricaoEmergencia
+    medicamentos = db.Column(JSONB, default=list, nullable=False)
+NameError: name 'JSONB' is not defined
+
+2025-10-24 10:05:01,795 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-24 10:05:01,878 [ERROR] __init__:116 - Erro ao registrar blueprint: Table 'funcionarios' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+2025-10-24 10:05:01,884 [ERROR] __init__:117 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 111, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 22, in <module>
+    from app.models import Funcionario,PrescricaoEnfermagemTemplate,Leito,MedicacoesPadrao,AdmissaoEnfermagem, AtendimentosGestante ,ListaInternacao, ListaObservacao, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN, now_brasilia, FichaReferencia, EvolucaoFisioterapia,EvolucaoAssistenteSocial, EvolucaoNutricao, AtendimentosGestante, FluxoDisp, FluxoPaciente
+  File "/home/estevaofilho/HSOP/HSOP/app/models.py", line 15, in <module>
+    class Funcionario(db.Model):
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 92, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 144, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_api.py", line 198, in __init__
+    _as_declarative(reg, cls, dict_)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 244, in _as_declarative
+    return _MapperConfig.setup_mapping(registry, cls, dict_, None, {})
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 325, in setup_mapping
+    return _ClassScanMapperConfig(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 576, in __init__
+    self._setup_table(table)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 1755, in _setup_table
+    table_cls(
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 171, in __table_cls__
+    return sa.Table(*args, **kwargs)
+  File "<string>", line 2, in __new__
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/util/deprecations.py", line 281, in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 429, in __new__
+    return cls._new(*args, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 461, in _new
+    raise exc.InvalidRequestError(
+sqlalchemy.exc.InvalidRequestError: Table 'funcionarios' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+
+2025-10-24 10:05:01,886 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-10-24 10:05:22,486 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-24 10:05:22,486 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-24 10:05:22,486 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-24 10:05:22,486 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-24 10:05:22,486 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-24 10:05:22,491 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-24 10:05:22,491 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-24 10:05:22,532 [ERROR] __init__:82 - Erro durante configuração inicial: name 'JSONB' is not defined
+2025-10-24 10:05:22,533 [ERROR] __init__:83 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 75, in create_app
+    from app.models import Funcionario
+  File "/home/estevaofilho/HSOP/HSOP/app/models.py", line 637, in <module>
+    class PrescricaoEmergencia(db.Model):
+  File "/home/estevaofilho/HSOP/HSOP/app/models.py", line 648, in PrescricaoEmergencia
+    medicamentos = db.Column(JSONB, default=list, nullable=False)
+NameError: name 'JSONB' is not defined
+
+2025-10-24 10:05:22,533 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-24 10:05:22,678 [ERROR] __init__:116 - Erro ao registrar blueprint: Table 'funcionarios' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+2025-10-24 10:05:22,680 [ERROR] __init__:117 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 111, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 22, in <module>
+    from app.models import Funcionario,PrescricaoEnfermagemTemplate,Leito,PrescricaoEmergencia,MedicacoesPadrao,AdmissaoEnfermagem, AtendimentosGestante ,ListaInternacao, ListaObservacao, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN, now_brasilia, FichaReferencia, EvolucaoFisioterapia,EvolucaoAssistenteSocial, EvolucaoNutricao, AtendimentosGestante, FluxoDisp, FluxoPaciente
+  File "/home/estevaofilho/HSOP/HSOP/app/models.py", line 15, in <module>
+    class Funcionario(db.Model):
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 92, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 144, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_api.py", line 198, in __init__
+    _as_declarative(reg, cls, dict_)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 244, in _as_declarative
+    return _MapperConfig.setup_mapping(registry, cls, dict_, None, {})
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 325, in setup_mapping
+    return _ClassScanMapperConfig(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 576, in __init__
+    self._setup_table(table)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 1755, in _setup_table
+    table_cls(
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 171, in __table_cls__
+    return sa.Table(*args, **kwargs)
+  File "<string>", line 2, in __new__
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/util/deprecations.py", line 281, in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 429, in __new__
+    return cls._new(*args, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 461, in _new
+    raise exc.InvalidRequestError(
+sqlalchemy.exc.InvalidRequestError: Table 'funcionarios' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+
+2025-10-24 10:05:22,683 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-10-24 10:13:02,274 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-24 10:13:02,274 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-24 10:13:02,274 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-24 10:13:02,274 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-24 10:13:02,274 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-24 10:13:02,279 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-24 10:13:02,279 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-24 10:13:02,334 [ERROR] __init__:82 - Erro durante configuração inicial: Table 'prescricoes_emergencia' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+2025-10-24 10:13:02,335 [ERROR] __init__:83 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 75, in create_app
+    from app.models import Funcionario
+  File "/home/estevaofilho/HSOP/HSOP/app/models.py", line 659, in <module>
+    class PrescricaoEmergencia(db.Model):
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 92, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 144, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_api.py", line 198, in __init__
+    _as_declarative(reg, cls, dict_)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 244, in _as_declarative
+    return _MapperConfig.setup_mapping(registry, cls, dict_, None, {})
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 325, in setup_mapping
+    return _ClassScanMapperConfig(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 576, in __init__
+    self._setup_table(table)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 1755, in _setup_table
+    table_cls(
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 171, in __table_cls__
+    return sa.Table(*args, **kwargs)
+  File "<string>", line 2, in __new__
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/util/deprecations.py", line 281, in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 429, in __new__
+    return cls._new(*args, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 461, in _new
+    raise exc.InvalidRequestError(
+sqlalchemy.exc.InvalidRequestError: Table 'prescricoes_emergencia' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+
+2025-10-24 10:13:02,336 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-24 10:13:02,415 [ERROR] __init__:116 - Erro ao registrar blueprint: Table 'funcionarios' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+2025-10-24 10:13:02,416 [ERROR] __init__:117 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 111, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 22, in <module>
+    from app.models import Funcionario,PrescricaoEnfermagemTemplate,Leito,PrescricaoEmergencia,MedicacoesPadrao,AdmissaoEnfermagem, AtendimentosGestante ,ListaInternacao, ListaObservacao, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN, now_brasilia, FichaReferencia, EvolucaoFisioterapia,EvolucaoAssistenteSocial, EvolucaoNutricao, AtendimentosGestante, FluxoDisp, FluxoPaciente
+  File "/home/estevaofilho/HSOP/HSOP/app/models.py", line 16, in <module>
+    class Funcionario(db.Model):
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 92, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 144, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_api.py", line 198, in __init__
+    _as_declarative(reg, cls, dict_)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 244, in _as_declarative
+    return _MapperConfig.setup_mapping(registry, cls, dict_, None, {})
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 325, in setup_mapping
+    return _ClassScanMapperConfig(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 576, in __init__
+    self._setup_table(table)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 1755, in _setup_table
+    table_cls(
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 171, in __table_cls__
+    return sa.Table(*args, **kwargs)
+  File "<string>", line 2, in __new__
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/util/deprecations.py", line 281, in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 429, in __new__
+    return cls._new(*args, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 461, in _new
+    raise exc.InvalidRequestError(
+sqlalchemy.exc.InvalidRequestError: Table 'funcionarios' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+
+2025-10-24 10:13:02,419 [ERROR] __init__:125 - Erro ao criar tabelas: (in table 'prescricoes_emergencia', column 'medicamentos'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x76cb99205b40> can't render element of type JSONB
+2025-10-24 10:13:02,428 [ERROR] __init__:126 - Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 137, in _compiler_dispatch
+    meth = getter(visitor)
+AttributeError: 'SQLiteTypeCompiler' object has no attribute 'visit_JSONB'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6716, in visit_create_table
+    processed = self.process(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6747, in visit_create_column
+    text = self.get_column_specification(column, first_pk=first_pk)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/dialects/sqlite/base.py", line 1666, in get_column_specification
+    coltype = self.dialect.type_compiler_instance.process(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 977, in process
+    return type_._compiler_dispatch(self, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 139, in _compiler_dispatch
+    return visitor.visit_unsupported_compilation(self, err, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 982, in visit_unsupported_compilation
+    raise exc.UnsupportedCompilationError(self, element) from err
+sqlalchemy.exc.UnsupportedCompilationError: Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x76cb99205b40> can't render element of type JSONB (Background on this error at: https://sqlalche.me/e/20/l7de)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 122, in create_app
+    db.create_all()
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/extension.py", line 900, in create_all
+    self._call_for_binds(bind_key, "create_all")
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/extension.py", line 881, in _call_for_binds
+    getattr(metadata, op_name)(bind=engine)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 5924, in create_all
+    bind._run_ddl_visitor(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 3248, in _run_ddl_visitor
+    conn._run_ddl_visitor(visitorcallable, element, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 2455, in _run_ddl_visitor
+    ).traverse_single(element)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 664, in traverse_single
+    return meth(obj, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 982, in visit_metadata
+    self.traverse_single(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 664, in traverse_single
+    return meth(obj, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 1020, in visit_table
+    )._invoke_with(self.connection)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 321, in _invoke_with
+    return bind.execute(self)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 1415, in execute
+    return meth(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 187, in _execute_on_connection
+    return connection._execute_ddl(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 1523, in _execute_ddl
+    compiled = ddl.compile(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/elements.py", line 308, in compile
+    return self._compiler(dialect, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 76, in _compiler
+    return dialect.ddl_compiler(dialect, self, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6726, in visit_create_table
+    raise exc.CompileError(
+sqlalchemy.exc.CompileError: (in table 'prescricoes_emergencia', column 'medicamentos'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x76cb99205b40> can't render element of type JSONB
+
+2025-10-24 10:13:45,346 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-24 10:13:45,346 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-24 10:13:45,346 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-24 10:13:45,346 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-24 10:13:45,346 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-24 10:13:45,352 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-24 10:13:45,353 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-24 10:13:45,420 [ERROR] __init__:82 - Erro durante configuração inicial: Table 'prescricoes_emergencia' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+2025-10-24 10:13:45,422 [ERROR] __init__:83 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 75, in create_app
+    from app.models import Funcionario
+  File "/home/estevaofilho/HSOP/HSOP/app/models.py", line 659, in <module>
+    class PrescricaoEmergencia(db.Model):
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 92, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 144, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_api.py", line 198, in __init__
+    _as_declarative(reg, cls, dict_)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 244, in _as_declarative
+    return _MapperConfig.setup_mapping(registry, cls, dict_, None, {})
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 325, in setup_mapping
+    return _ClassScanMapperConfig(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 576, in __init__
+    self._setup_table(table)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 1755, in _setup_table
+    table_cls(
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 171, in __table_cls__
+    return sa.Table(*args, **kwargs)
+  File "<string>", line 2, in __new__
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/util/deprecations.py", line 281, in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 429, in __new__
+    return cls._new(*args, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 461, in _new
+    raise exc.InvalidRequestError(
+sqlalchemy.exc.InvalidRequestError: Table 'prescricoes_emergencia' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+
+2025-10-24 10:13:45,422 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-24 10:13:45,600 [ERROR] __init__:116 - Erro ao registrar blueprint: Table 'funcionarios' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+2025-10-24 10:13:45,601 [ERROR] __init__:117 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 111, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 22, in <module>
+    from app.models import Funcionario,PrescricaoEnfermagemTemplate,Leito,PrescricaoEmergencia,MedicacoesPadrao,AdmissaoEnfermagem, AtendimentosGestante ,ListaInternacao, ListaObservacao, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN, now_brasilia, FichaReferencia, EvolucaoFisioterapia,EvolucaoAssistenteSocial, EvolucaoNutricao, AtendimentosGestante, FluxoDisp, FluxoPaciente
+  File "/home/estevaofilho/HSOP/HSOP/app/models.py", line 16, in <module>
+    class Funcionario(db.Model):
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 92, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 144, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_api.py", line 198, in __init__
+    _as_declarative(reg, cls, dict_)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 244, in _as_declarative
+    return _MapperConfig.setup_mapping(registry, cls, dict_, None, {})
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 325, in setup_mapping
+    return _ClassScanMapperConfig(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 576, in __init__
+    self._setup_table(table)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 1755, in _setup_table
+    table_cls(
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 171, in __table_cls__
+    return sa.Table(*args, **kwargs)
+  File "<string>", line 2, in __new__
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/util/deprecations.py", line 281, in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 429, in __new__
+    return cls._new(*args, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 461, in _new
+    raise exc.InvalidRequestError(
+sqlalchemy.exc.InvalidRequestError: Table 'funcionarios' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+
+2025-10-24 10:13:45,606 [ERROR] __init__:125 - Erro ao criar tabelas: (in table 'prescricoes_emergencia', column 'medicamentos'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x7441520f5b40> can't render element of type JSONB
+2025-10-24 10:13:45,609 [ERROR] __init__:126 - Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 137, in _compiler_dispatch
+    meth = getter(visitor)
+AttributeError: 'SQLiteTypeCompiler' object has no attribute 'visit_JSONB'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6716, in visit_create_table
+    processed = self.process(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6747, in visit_create_column
+    text = self.get_column_specification(column, first_pk=first_pk)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/dialects/sqlite/base.py", line 1666, in get_column_specification
+    coltype = self.dialect.type_compiler_instance.process(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 977, in process
+    return type_._compiler_dispatch(self, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 139, in _compiler_dispatch
+    return visitor.visit_unsupported_compilation(self, err, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 982, in visit_unsupported_compilation
+    raise exc.UnsupportedCompilationError(self, element) from err
+sqlalchemy.exc.UnsupportedCompilationError: Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x7441520f5b40> can't render element of type JSONB (Background on this error at: https://sqlalche.me/e/20/l7de)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 122, in create_app
+    db.create_all()
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/extension.py", line 900, in create_all
+    self._call_for_binds(bind_key, "create_all")
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/extension.py", line 881, in _call_for_binds
+    getattr(metadata, op_name)(bind=engine)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 5924, in create_all
+    bind._run_ddl_visitor(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 3248, in _run_ddl_visitor
+    conn._run_ddl_visitor(visitorcallable, element, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 2455, in _run_ddl_visitor
+    ).traverse_single(element)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 664, in traverse_single
+    return meth(obj, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 982, in visit_metadata
+    self.traverse_single(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 664, in traverse_single
+    return meth(obj, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 1020, in visit_table
+    )._invoke_with(self.connection)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 321, in _invoke_with
+    return bind.execute(self)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 1415, in execute
+    return meth(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 187, in _execute_on_connection
+    return connection._execute_ddl(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 1523, in _execute_ddl
+    compiled = ddl.compile(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/elements.py", line 308, in compile
+    return self._compiler(dialect, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 76, in _compiler
+    return dialect.ddl_compiler(dialect, self, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6726, in visit_create_table
+    raise exc.CompileError(
+sqlalchemy.exc.CompileError: (in table 'prescricoes_emergencia', column 'medicamentos'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x7441520f5b40> can't render element of type JSONB
+
+2025-10-24 10:16:46,203 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-24 10:16:46,203 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-24 10:16:46,203 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-24 10:16:46,203 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-24 10:16:46,203 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-24 10:16:46,208 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-24 10:16:46,208 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-24 10:16:46,276 [ERROR] __init__:82 - Erro durante configuração inicial: Table 'prescricoes_emergencia' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+2025-10-24 10:16:46,277 [ERROR] __init__:83 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 75, in create_app
+    from app.models import Funcionario
+  File "/home/estevaofilho/HSOP/HSOP/app/models.py", line 659, in <module>
+    class PrescricaoEmergencia(db.Model):
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 92, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 144, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_api.py", line 198, in __init__
+    _as_declarative(reg, cls, dict_)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 244, in _as_declarative
+    return _MapperConfig.setup_mapping(registry, cls, dict_, None, {})
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 325, in setup_mapping
+    return _ClassScanMapperConfig(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 576, in __init__
+    self._setup_table(table)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 1755, in _setup_table
+    table_cls(
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 171, in __table_cls__
+    return sa.Table(*args, **kwargs)
+  File "<string>", line 2, in __new__
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/util/deprecations.py", line 281, in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 429, in __new__
+    return cls._new(*args, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 461, in _new
+    raise exc.InvalidRequestError(
+sqlalchemy.exc.InvalidRequestError: Table 'prescricoes_emergencia' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+
+2025-10-24 10:16:46,277 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-24 10:16:46,418 [ERROR] __init__:116 - Erro ao registrar blueprint: Table 'funcionarios' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+2025-10-24 10:16:46,419 [ERROR] __init__:117 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 111, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 22, in <module>
+    from app.models import Funcionario,PrescricaoEnfermagemTemplate,Leito,PrescricaoEmergencia,MedicacoesPadrao,AdmissaoEnfermagem, AtendimentosGestante ,ListaInternacao, ListaObservacao, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN, now_brasilia, FichaReferencia, EvolucaoFisioterapia,EvolucaoAssistenteSocial, EvolucaoNutricao, AtendimentosGestante, FluxoDisp, FluxoPaciente
+  File "/home/estevaofilho/HSOP/HSOP/app/models.py", line 16, in <module>
+    class Funcionario(db.Model):
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 92, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 144, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_api.py", line 198, in __init__
+    _as_declarative(reg, cls, dict_)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 244, in _as_declarative
+    return _MapperConfig.setup_mapping(registry, cls, dict_, None, {})
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 325, in setup_mapping
+    return _ClassScanMapperConfig(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 576, in __init__
+    self._setup_table(table)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 1755, in _setup_table
+    table_cls(
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 171, in __table_cls__
+    return sa.Table(*args, **kwargs)
+  File "<string>", line 2, in __new__
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/util/deprecations.py", line 281, in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 429, in __new__
+    return cls._new(*args, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 461, in _new
+    raise exc.InvalidRequestError(
+sqlalchemy.exc.InvalidRequestError: Table 'funcionarios' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+
+2025-10-24 10:16:46,422 [ERROR] __init__:125 - Erro ao criar tabelas: (in table 'prescricoes_emergencia', column 'medicamentos'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x771a649f5b40> can't render element of type JSONB
+2025-10-24 10:16:46,424 [ERROR] __init__:126 - Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 137, in _compiler_dispatch
+    meth = getter(visitor)
+AttributeError: 'SQLiteTypeCompiler' object has no attribute 'visit_JSONB'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6716, in visit_create_table
+    processed = self.process(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6747, in visit_create_column
+    text = self.get_column_specification(column, first_pk=first_pk)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/dialects/sqlite/base.py", line 1666, in get_column_specification
+    coltype = self.dialect.type_compiler_instance.process(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 977, in process
+    return type_._compiler_dispatch(self, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 139, in _compiler_dispatch
+    return visitor.visit_unsupported_compilation(self, err, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 982, in visit_unsupported_compilation
+    raise exc.UnsupportedCompilationError(self, element) from err
+sqlalchemy.exc.UnsupportedCompilationError: Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x771a649f5b40> can't render element of type JSONB (Background on this error at: https://sqlalche.me/e/20/l7de)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 122, in create_app
+    db.create_all()
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/extension.py", line 900, in create_all
+    self._call_for_binds(bind_key, "create_all")
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/extension.py", line 881, in _call_for_binds
+    getattr(metadata, op_name)(bind=engine)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 5924, in create_all
+    bind._run_ddl_visitor(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 3248, in _run_ddl_visitor
+    conn._run_ddl_visitor(visitorcallable, element, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 2455, in _run_ddl_visitor
+    ).traverse_single(element)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 664, in traverse_single
+    return meth(obj, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 982, in visit_metadata
+    self.traverse_single(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 664, in traverse_single
+    return meth(obj, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 1020, in visit_table
+    )._invoke_with(self.connection)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 321, in _invoke_with
+    return bind.execute(self)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 1415, in execute
+    return meth(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 187, in _execute_on_connection
+    return connection._execute_ddl(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 1523, in _execute_ddl
+    compiled = ddl.compile(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/elements.py", line 308, in compile
+    return self._compiler(dialect, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 76, in _compiler
+    return dialect.ddl_compiler(dialect, self, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6726, in visit_create_table
+    raise exc.CompileError(
+sqlalchemy.exc.CompileError: (in table 'prescricoes_emergencia', column 'medicamentos'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x771a649f5b40> can't render element of type JSONB
+
+2025-10-24 10:24:31,550 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-24 10:24:31,550 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-24 10:24:31,550 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-24 10:24:31,550 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-24 10:24:31,550 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-24 10:24:31,555 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-24 10:24:31,555 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-24 10:24:31,616 [ERROR] __init__:82 - Erro durante configuração inicial: Table 'prescricoes_emergencia' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+2025-10-24 10:24:31,617 [ERROR] __init__:83 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 75, in create_app
+    from app.models import Funcionario
+  File "/home/estevaofilho/HSOP/HSOP/app/models.py", line 659, in <module>
+    class PrescricaoEmergencia(db.Model):
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 92, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 144, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_api.py", line 198, in __init__
+    _as_declarative(reg, cls, dict_)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 244, in _as_declarative
+    return _MapperConfig.setup_mapping(registry, cls, dict_, None, {})
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 325, in setup_mapping
+    return _ClassScanMapperConfig(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 576, in __init__
+    self._setup_table(table)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 1755, in _setup_table
+    table_cls(
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 171, in __table_cls__
+    return sa.Table(*args, **kwargs)
+  File "<string>", line 2, in __new__
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/util/deprecations.py", line 281, in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 429, in __new__
+    return cls._new(*args, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 461, in _new
+    raise exc.InvalidRequestError(
+sqlalchemy.exc.InvalidRequestError: Table 'prescricoes_emergencia' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+
+2025-10-24 10:24:31,617 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-24 10:24:31,703 [ERROR] __init__:116 - Erro ao registrar blueprint: Table 'funcionarios' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+2025-10-24 10:24:31,705 [ERROR] __init__:117 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 111, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 22, in <module>
+    from app.models import Funcionario,PrescricaoEnfermagemTemplate,Leito,PrescricaoEmergencia,MedicacoesPadrao,AdmissaoEnfermagem, AtendimentosGestante ,ListaInternacao, ListaObservacao, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN, now_brasilia, FichaReferencia, EvolucaoFisioterapia,EvolucaoAssistenteSocial, EvolucaoNutricao, AtendimentosGestante, FluxoDisp, FluxoPaciente
+  File "/home/estevaofilho/HSOP/HSOP/app/models.py", line 16, in <module>
+    class Funcionario(db.Model):
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 92, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 144, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_api.py", line 198, in __init__
+    _as_declarative(reg, cls, dict_)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 244, in _as_declarative
+    return _MapperConfig.setup_mapping(registry, cls, dict_, None, {})
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 325, in setup_mapping
+    return _ClassScanMapperConfig(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 576, in __init__
+    self._setup_table(table)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 1755, in _setup_table
+    table_cls(
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 171, in __table_cls__
+    return sa.Table(*args, **kwargs)
+  File "<string>", line 2, in __new__
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/util/deprecations.py", line 281, in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 429, in __new__
+    return cls._new(*args, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 461, in _new
+    raise exc.InvalidRequestError(
+sqlalchemy.exc.InvalidRequestError: Table 'funcionarios' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+
+2025-10-24 10:24:31,708 [ERROR] __init__:125 - Erro ao criar tabelas: (in table 'prescricoes_emergencia', column 'medicamentos'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x77c106909b40> can't render element of type JSONB
+2025-10-24 10:24:31,710 [ERROR] __init__:126 - Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 137, in _compiler_dispatch
+    meth = getter(visitor)
+AttributeError: 'SQLiteTypeCompiler' object has no attribute 'visit_JSONB'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6716, in visit_create_table
+    processed = self.process(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6747, in visit_create_column
+    text = self.get_column_specification(column, first_pk=first_pk)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/dialects/sqlite/base.py", line 1666, in get_column_specification
+    coltype = self.dialect.type_compiler_instance.process(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 977, in process
+    return type_._compiler_dispatch(self, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 139, in _compiler_dispatch
+    return visitor.visit_unsupported_compilation(self, err, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 982, in visit_unsupported_compilation
+    raise exc.UnsupportedCompilationError(self, element) from err
+sqlalchemy.exc.UnsupportedCompilationError: Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x77c106909b40> can't render element of type JSONB (Background on this error at: https://sqlalche.me/e/20/l7de)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 122, in create_app
+    db.create_all()
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/extension.py", line 900, in create_all
+    self._call_for_binds(bind_key, "create_all")
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/extension.py", line 881, in _call_for_binds
+    getattr(metadata, op_name)(bind=engine)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 5924, in create_all
+    bind._run_ddl_visitor(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 3248, in _run_ddl_visitor
+    conn._run_ddl_visitor(visitorcallable, element, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 2455, in _run_ddl_visitor
+    ).traverse_single(element)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 664, in traverse_single
+    return meth(obj, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 982, in visit_metadata
+    self.traverse_single(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 664, in traverse_single
+    return meth(obj, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 1020, in visit_table
+    )._invoke_with(self.connection)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 321, in _invoke_with
+    return bind.execute(self)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 1415, in execute
+    return meth(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 187, in _execute_on_connection
+    return connection._execute_ddl(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 1523, in _execute_ddl
+    compiled = ddl.compile(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/elements.py", line 308, in compile
+    return self._compiler(dialect, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 76, in _compiler
+    return dialect.ddl_compiler(dialect, self, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6726, in visit_create_table
+    raise exc.CompileError(
+sqlalchemy.exc.CompileError: (in table 'prescricoes_emergencia', column 'medicamentos'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x77c106909b40> can't render element of type JSONB
+
+2025-10-24 10:24:58,764 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-24 10:24:58,765 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-24 10:24:58,765 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-24 10:24:58,765 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-24 10:24:58,765 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-24 10:24:58,769 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-24 10:24:58,769 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-24 10:24:58,816 [ERROR] __init__:82 - Erro durante configuração inicial: Table 'prescricoes_emergencia' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+2025-10-24 10:24:58,817 [ERROR] __init__:83 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 75, in create_app
+    from app.models import Funcionario
+  File "/home/estevaofilho/HSOP/HSOP/app/models.py", line 659, in <module>
+    class PrescricaoEmergencia(db.Model):
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 92, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 144, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_api.py", line 198, in __init__
+    _as_declarative(reg, cls, dict_)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 244, in _as_declarative
+    return _MapperConfig.setup_mapping(registry, cls, dict_, None, {})
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 325, in setup_mapping
+    return _ClassScanMapperConfig(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 576, in __init__
+    self._setup_table(table)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 1755, in _setup_table
+    table_cls(
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 171, in __table_cls__
+    return sa.Table(*args, **kwargs)
+  File "<string>", line 2, in __new__
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/util/deprecations.py", line 281, in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 429, in __new__
+    return cls._new(*args, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 461, in _new
+    raise exc.InvalidRequestError(
+sqlalchemy.exc.InvalidRequestError: Table 'prescricoes_emergencia' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+
+2025-10-24 10:24:58,817 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-24 10:24:58,890 [ERROR] __init__:116 - Erro ao registrar blueprint: Table 'funcionarios' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+2025-10-24 10:24:58,891 [ERROR] __init__:117 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 111, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 22, in <module>
+    from app.models import Funcionario,PrescricaoEnfermagemTemplate,Leito,PrescricaoEmergencia,MedicacoesPadrao,AdmissaoEnfermagem, AtendimentosGestante ,ListaInternacao, ListaObservacao, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN, now_brasilia, FichaReferencia, EvolucaoFisioterapia,EvolucaoAssistenteSocial, EvolucaoNutricao, AtendimentosGestante, FluxoDisp, FluxoPaciente
+  File "/home/estevaofilho/HSOP/HSOP/app/models.py", line 16, in <module>
+    class Funcionario(db.Model):
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 92, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 144, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_api.py", line 198, in __init__
+    _as_declarative(reg, cls, dict_)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 244, in _as_declarative
+    return _MapperConfig.setup_mapping(registry, cls, dict_, None, {})
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 325, in setup_mapping
+    return _ClassScanMapperConfig(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 576, in __init__
+    self._setup_table(table)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 1755, in _setup_table
+    table_cls(
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 171, in __table_cls__
+    return sa.Table(*args, **kwargs)
+  File "<string>", line 2, in __new__
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/util/deprecations.py", line 281, in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 429, in __new__
+    return cls._new(*args, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 461, in _new
+    raise exc.InvalidRequestError(
+sqlalchemy.exc.InvalidRequestError: Table 'funcionarios' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+
+2025-10-24 10:24:58,894 [ERROR] __init__:125 - Erro ao criar tabelas: (in table 'prescricoes_emergencia', column 'medicamentos'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x787e7ea05ae0> can't render element of type JSONB
+2025-10-24 10:24:58,896 [ERROR] __init__:126 - Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 137, in _compiler_dispatch
+    meth = getter(visitor)
+AttributeError: 'SQLiteTypeCompiler' object has no attribute 'visit_JSONB'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6716, in visit_create_table
+    processed = self.process(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6747, in visit_create_column
+    text = self.get_column_specification(column, first_pk=first_pk)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/dialects/sqlite/base.py", line 1666, in get_column_specification
+    coltype = self.dialect.type_compiler_instance.process(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 977, in process
+    return type_._compiler_dispatch(self, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 139, in _compiler_dispatch
+    return visitor.visit_unsupported_compilation(self, err, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 982, in visit_unsupported_compilation
+    raise exc.UnsupportedCompilationError(self, element) from err
+sqlalchemy.exc.UnsupportedCompilationError: Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x787e7ea05ae0> can't render element of type JSONB (Background on this error at: https://sqlalche.me/e/20/l7de)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 122, in create_app
+    db.create_all()
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/extension.py", line 900, in create_all
+    self._call_for_binds(bind_key, "create_all")
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/extension.py", line 881, in _call_for_binds
+    getattr(metadata, op_name)(bind=engine)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 5924, in create_all
+    bind._run_ddl_visitor(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 3248, in _run_ddl_visitor
+    conn._run_ddl_visitor(visitorcallable, element, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 2455, in _run_ddl_visitor
+    ).traverse_single(element)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 664, in traverse_single
+    return meth(obj, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 982, in visit_metadata
+    self.traverse_single(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 664, in traverse_single
+    return meth(obj, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 1020, in visit_table
+    )._invoke_with(self.connection)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 321, in _invoke_with
+    return bind.execute(self)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 1415, in execute
+    return meth(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 187, in _execute_on_connection
+    return connection._execute_ddl(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 1523, in _execute_ddl
+    compiled = ddl.compile(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/elements.py", line 308, in compile
+    return self._compiler(dialect, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 76, in _compiler
+    return dialect.ddl_compiler(dialect, self, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6726, in visit_create_table
+    raise exc.CompileError(
+sqlalchemy.exc.CompileError: (in table 'prescricoes_emergencia', column 'medicamentos'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x787e7ea05ae0> can't render element of type JSONB
+
+2025-10-24 10:24:59,100 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-24 10:24:59,100 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-24 10:24:59,100 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-24 10:24:59,100 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-24 10:24:59,100 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-24 10:24:59,104 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-24 10:24:59,104 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-24 10:24:59,161 [ERROR] __init__:82 - Erro durante configuração inicial: Table 'prescricoes_emergencia' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+2025-10-24 10:24:59,162 [ERROR] __init__:83 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 75, in create_app
+    from app.models import Funcionario
+  File "/home/estevaofilho/HSOP/HSOP/app/models.py", line 659, in <module>
+    class PrescricaoEmergencia(db.Model):
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 92, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 144, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_api.py", line 198, in __init__
+    _as_declarative(reg, cls, dict_)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 244, in _as_declarative
+    return _MapperConfig.setup_mapping(registry, cls, dict_, None, {})
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 325, in setup_mapping
+    return _ClassScanMapperConfig(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 576, in __init__
+    self._setup_table(table)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 1755, in _setup_table
+    table_cls(
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 171, in __table_cls__
+    return sa.Table(*args, **kwargs)
+  File "<string>", line 2, in __new__
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/util/deprecations.py", line 281, in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 429, in __new__
+    return cls._new(*args, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 461, in _new
+    raise exc.InvalidRequestError(
+sqlalchemy.exc.InvalidRequestError: Table 'prescricoes_emergencia' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+
+2025-10-24 10:24:59,162 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-24 10:24:59,250 [ERROR] __init__:116 - Erro ao registrar blueprint: Table 'funcionarios' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+2025-10-24 10:24:59,251 [ERROR] __init__:117 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 111, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 22, in <module>
+    from app.models import Funcionario,PrescricaoEnfermagemTemplate,Leito,PrescricaoEmergencia,MedicacoesPadrao,AdmissaoEnfermagem, AtendimentosGestante ,ListaInternacao, ListaObservacao, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN, now_brasilia, FichaReferencia, EvolucaoFisioterapia,EvolucaoAssistenteSocial, EvolucaoNutricao, AtendimentosGestante, FluxoDisp, FluxoPaciente
+  File "/home/estevaofilho/HSOP/HSOP/app/models.py", line 16, in <module>
+    class Funcionario(db.Model):
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 92, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 144, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_api.py", line 198, in __init__
+    _as_declarative(reg, cls, dict_)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 244, in _as_declarative
+    return _MapperConfig.setup_mapping(registry, cls, dict_, None, {})
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 325, in setup_mapping
+    return _ClassScanMapperConfig(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 576, in __init__
+    self._setup_table(table)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 1755, in _setup_table
+    table_cls(
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 171, in __table_cls__
+    return sa.Table(*args, **kwargs)
+  File "<string>", line 2, in __new__
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/util/deprecations.py", line 281, in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 429, in __new__
+    return cls._new(*args, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 461, in _new
+    raise exc.InvalidRequestError(
+sqlalchemy.exc.InvalidRequestError: Table 'funcionarios' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+
+2025-10-24 10:24:59,254 [ERROR] __init__:125 - Erro ao criar tabelas: (in table 'prescricoes_emergencia', column 'medicamentos'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x78005f8f5b40> can't render element of type JSONB
+2025-10-24 10:24:59,256 [ERROR] __init__:126 - Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 137, in _compiler_dispatch
+    meth = getter(visitor)
+AttributeError: 'SQLiteTypeCompiler' object has no attribute 'visit_JSONB'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6716, in visit_create_table
+    processed = self.process(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6747, in visit_create_column
+    text = self.get_column_specification(column, first_pk=first_pk)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/dialects/sqlite/base.py", line 1666, in get_column_specification
+    coltype = self.dialect.type_compiler_instance.process(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 977, in process
+    return type_._compiler_dispatch(self, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 139, in _compiler_dispatch
+    return visitor.visit_unsupported_compilation(self, err, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 982, in visit_unsupported_compilation
+    raise exc.UnsupportedCompilationError(self, element) from err
+sqlalchemy.exc.UnsupportedCompilationError: Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x78005f8f5b40> can't render element of type JSONB (Background on this error at: https://sqlalche.me/e/20/l7de)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 122, in create_app
+    db.create_all()
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/extension.py", line 900, in create_all
+    self._call_for_binds(bind_key, "create_all")
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/extension.py", line 881, in _call_for_binds
+    getattr(metadata, op_name)(bind=engine)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 5924, in create_all
+    bind._run_ddl_visitor(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 3248, in _run_ddl_visitor
+    conn._run_ddl_visitor(visitorcallable, element, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 2455, in _run_ddl_visitor
+    ).traverse_single(element)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 664, in traverse_single
+    return meth(obj, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 982, in visit_metadata
+    self.traverse_single(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 664, in traverse_single
+    return meth(obj, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 1020, in visit_table
+    )._invoke_with(self.connection)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 321, in _invoke_with
+    return bind.execute(self)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 1415, in execute
+    return meth(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 187, in _execute_on_connection
+    return connection._execute_ddl(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 1523, in _execute_ddl
+    compiled = ddl.compile(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/elements.py", line 308, in compile
+    return self._compiler(dialect, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 76, in _compiler
+    return dialect.ddl_compiler(dialect, self, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6726, in visit_create_table
+    raise exc.CompileError(
+sqlalchemy.exc.CompileError: (in table 'prescricoes_emergencia', column 'medicamentos'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x78005f8f5b40> can't render element of type JSONB
+
+2025-10-24 10:25:45,166 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-24 10:25:45,166 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-24 10:25:45,166 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-24 10:25:45,166 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-24 10:25:45,166 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-24 10:25:45,171 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-24 10:25:45,171 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-24 10:25:45,231 [ERROR] __init__:82 - Erro durante configuração inicial: name 'JSONB' is not defined
+2025-10-24 10:25:45,231 [ERROR] __init__:83 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 75, in create_app
+    from app.models import Funcionario
+  File "/home/estevaofilho/HSOP/HSOP/app/models.py", line 663, in <module>
+    class PrescricaoEmergencia(db.Model):
+  File "/home/estevaofilho/HSOP/HSOP/app/models.py", line 674, in PrescricaoEmergencia
+    medicamentos = db.Column(JSONB, default=list, nullable=False)
+NameError: name 'JSONB' is not defined
+
+2025-10-24 10:25:45,231 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-24 10:25:45,304 [ERROR] __init__:116 - Erro ao registrar blueprint: Table 'funcionarios' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+2025-10-24 10:25:45,307 [ERROR] __init__:117 - Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 111, in create_app
+    from app.routes import bp as main_bp, internacoes_especiais_bp
+  File "/home/estevaofilho/HSOP/HSOP/app/routes.py", line 22, in <module>
+    from app.models import Funcionario,PrescricaoEnfermagemTemplate,Leito,PrescricaoEmergencia,MedicacoesPadrao,AdmissaoEnfermagem, AtendimentosGestante ,ListaInternacao, ListaObservacao, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN, now_brasilia, FichaReferencia, EvolucaoFisioterapia,EvolucaoAssistenteSocial, EvolucaoNutricao, AtendimentosGestante, FluxoDisp, FluxoPaciente
+  File "/home/estevaofilho/HSOP/HSOP/app/models.py", line 20, in <module>
+    class Funcionario(db.Model):
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 92, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 144, in __init__
+    super().__init__(name, bases, d, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_api.py", line 198, in __init__
+    _as_declarative(reg, cls, dict_)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 244, in _as_declarative
+    return _MapperConfig.setup_mapping(registry, cls, dict_, None, {})
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 325, in setup_mapping
+    return _ClassScanMapperConfig(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 576, in __init__
+    self._setup_table(table)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/orm/decl_base.py", line 1755, in _setup_table
+    table_cls(
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/model.py", line 171, in __table_cls__
+    return sa.Table(*args, **kwargs)
+  File "<string>", line 2, in __new__
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/util/deprecations.py", line 281, in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 429, in __new__
+    return cls._new(*args, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 461, in _new
+    raise exc.InvalidRequestError(
+sqlalchemy.exc.InvalidRequestError: Table 'funcionarios' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
+
+2025-10-24 10:25:45,309 [ERROR] __init__:125 - Erro ao criar tabelas: (in table 'prescricoes_emergencia', column 'medicamentos'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x73989ec05b40> can't render element of type JSONB
+2025-10-24 10:25:45,311 [ERROR] __init__:126 - Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 137, in _compiler_dispatch
+    meth = getter(visitor)
+AttributeError: 'SQLiteTypeCompiler' object has no attribute 'visit_JSONB'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6716, in visit_create_table
+    processed = self.process(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6747, in visit_create_column
+    text = self.get_column_specification(column, first_pk=first_pk)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/dialects/sqlite/base.py", line 1666, in get_column_specification
+    coltype = self.dialect.type_compiler_instance.process(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 977, in process
+    return type_._compiler_dispatch(self, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 139, in _compiler_dispatch
+    return visitor.visit_unsupported_compilation(self, err, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 982, in visit_unsupported_compilation
+    raise exc.UnsupportedCompilationError(self, element) from err
+sqlalchemy.exc.UnsupportedCompilationError: Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x73989ec05b40> can't render element of type JSONB (Background on this error at: https://sqlalche.me/e/20/l7de)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 122, in create_app
+    db.create_all()
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/extension.py", line 900, in create_all
+    self._call_for_binds(bind_key, "create_all")
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/extension.py", line 881, in _call_for_binds
+    getattr(metadata, op_name)(bind=engine)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 5924, in create_all
+    bind._run_ddl_visitor(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 3248, in _run_ddl_visitor
+    conn._run_ddl_visitor(visitorcallable, element, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 2455, in _run_ddl_visitor
+    ).traverse_single(element)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 664, in traverse_single
+    return meth(obj, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 982, in visit_metadata
+    self.traverse_single(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 664, in traverse_single
+    return meth(obj, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 1020, in visit_table
+    )._invoke_with(self.connection)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 321, in _invoke_with
+    return bind.execute(self)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 1415, in execute
+    return meth(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 187, in _execute_on_connection
+    return connection._execute_ddl(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 1523, in _execute_ddl
+    compiled = ddl.compile(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/elements.py", line 308, in compile
+    return self._compiler(dialect, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 76, in _compiler
+    return dialect.ddl_compiler(dialect, self, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6726, in visit_create_table
+    raise exc.CompileError(
+sqlalchemy.exc.CompileError: (in table 'prescricoes_emergencia', column 'medicamentos'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x73989ec05b40> can't render element of type JSONB
+
+2025-10-24 10:26:38,252 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-24 10:26:38,252 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-24 10:26:38,252 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-24 10:26:38,252 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-24 10:26:38,252 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-24 10:26:38,256 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-24 10:26:38,256 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-24 10:26:38,309 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-24 10:26:38,430 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-10-24 10:26:38,433 [ERROR] __init__:125 - Erro ao criar tabelas: (in table 'prescricoes_emergencia', column 'medicamentos'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x76fc4fe05b40> can't render element of type JSONB
+2025-10-24 10:26:38,435 [ERROR] __init__:126 - Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 137, in _compiler_dispatch
+    meth = getter(visitor)
+AttributeError: 'SQLiteTypeCompiler' object has no attribute 'visit_JSONB'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6716, in visit_create_table
+    processed = self.process(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6747, in visit_create_column
+    text = self.get_column_specification(column, first_pk=first_pk)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/dialects/sqlite/base.py", line 1666, in get_column_specification
+    coltype = self.dialect.type_compiler_instance.process(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 977, in process
+    return type_._compiler_dispatch(self, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 139, in _compiler_dispatch
+    return visitor.visit_unsupported_compilation(self, err, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 982, in visit_unsupported_compilation
+    raise exc.UnsupportedCompilationError(self, element) from err
+sqlalchemy.exc.UnsupportedCompilationError: Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x76fc4fe05b40> can't render element of type JSONB (Background on this error at: https://sqlalche.me/e/20/l7de)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 122, in create_app
+    db.create_all()
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/extension.py", line 900, in create_all
+    self._call_for_binds(bind_key, "create_all")
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/extension.py", line 881, in _call_for_binds
+    getattr(metadata, op_name)(bind=engine)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 5924, in create_all
+    bind._run_ddl_visitor(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 3248, in _run_ddl_visitor
+    conn._run_ddl_visitor(visitorcallable, element, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 2455, in _run_ddl_visitor
+    ).traverse_single(element)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 664, in traverse_single
+    return meth(obj, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 982, in visit_metadata
+    self.traverse_single(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 664, in traverse_single
+    return meth(obj, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 1020, in visit_table
+    )._invoke_with(self.connection)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 321, in _invoke_with
+    return bind.execute(self)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 1415, in execute
+    return meth(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 187, in _execute_on_connection
+    return connection._execute_ddl(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 1523, in _execute_ddl
+    compiled = ddl.compile(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/elements.py", line 308, in compile
+    return self._compiler(dialect, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 76, in _compiler
+    return dialect.ddl_compiler(dialect, self, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6726, in visit_create_table
+    raise exc.CompileError(
+sqlalchemy.exc.CompileError: (in table 'prescricoes_emergencia', column 'medicamentos'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x76fc4fe05b40> can't render element of type JSONB
+
+2025-10-24 10:26:53,935 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-24 10:26:53,935 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-24 10:26:53,935 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-24 10:26:53,935 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-24 10:26:53,936 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-24 10:26:53,940 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-24 10:26:53,941 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-24 10:26:54,003 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-24 10:26:54,146 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-10-24 10:26:54,149 [ERROR] __init__:125 - Erro ao criar tabelas: (in table 'prescricoes_emergencia', column 'medicamentos'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x704f41bedb40> can't render element of type JSONB
+2025-10-24 10:26:54,152 [ERROR] __init__:126 - Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 137, in _compiler_dispatch
+    meth = getter(visitor)
+AttributeError: 'SQLiteTypeCompiler' object has no attribute 'visit_JSONB'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6716, in visit_create_table
+    processed = self.process(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6747, in visit_create_column
+    text = self.get_column_specification(column, first_pk=first_pk)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/dialects/sqlite/base.py", line 1666, in get_column_specification
+    coltype = self.dialect.type_compiler_instance.process(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 977, in process
+    return type_._compiler_dispatch(self, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 139, in _compiler_dispatch
+    return visitor.visit_unsupported_compilation(self, err, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 982, in visit_unsupported_compilation
+    raise exc.UnsupportedCompilationError(self, element) from err
+sqlalchemy.exc.UnsupportedCompilationError: Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x704f41bedb40> can't render element of type JSONB (Background on this error at: https://sqlalche.me/e/20/l7de)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 122, in create_app
+    db.create_all()
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/extension.py", line 900, in create_all
+    self._call_for_binds(bind_key, "create_all")
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/extension.py", line 881, in _call_for_binds
+    getattr(metadata, op_name)(bind=engine)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 5924, in create_all
+    bind._run_ddl_visitor(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 3248, in _run_ddl_visitor
+    conn._run_ddl_visitor(visitorcallable, element, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 2455, in _run_ddl_visitor
+    ).traverse_single(element)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 664, in traverse_single
+    return meth(obj, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 982, in visit_metadata
+    self.traverse_single(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 664, in traverse_single
+    return meth(obj, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 1020, in visit_table
+    )._invoke_with(self.connection)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 321, in _invoke_with
+    return bind.execute(self)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 1415, in execute
+    return meth(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 187, in _execute_on_connection
+    return connection._execute_ddl(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 1523, in _execute_ddl
+    compiled = ddl.compile(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/elements.py", line 308, in compile
+    return self._compiler(dialect, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 76, in _compiler
+    return dialect.ddl_compiler(dialect, self, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6726, in visit_create_table
+    raise exc.CompileError(
+sqlalchemy.exc.CompileError: (in table 'prescricoes_emergencia', column 'medicamentos'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x704f41bedb40> can't render element of type JSONB
+
+2025-10-24 10:27:22,879 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-24 10:27:22,879 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-24 10:27:22,879 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-24 10:27:22,879 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-24 10:27:22,879 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-24 10:27:22,884 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-24 10:27:22,884 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-24 10:27:22,948 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-24 10:27:23,157 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-10-24 10:27:23,160 [ERROR] __init__:125 - Erro ao criar tabelas: (in table 'prescricoes_emergencia', column 'medicamentos'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x72f551af1b40> can't render element of type JSONB
+2025-10-24 10:27:23,162 [ERROR] __init__:126 - Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 137, in _compiler_dispatch
+    meth = getter(visitor)
+AttributeError: 'SQLiteTypeCompiler' object has no attribute 'visit_JSONB'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6716, in visit_create_table
+    processed = self.process(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6747, in visit_create_column
+    text = self.get_column_specification(column, first_pk=first_pk)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/dialects/sqlite/base.py", line 1666, in get_column_specification
+    coltype = self.dialect.type_compiler_instance.process(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 977, in process
+    return type_._compiler_dispatch(self, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 139, in _compiler_dispatch
+    return visitor.visit_unsupported_compilation(self, err, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 982, in visit_unsupported_compilation
+    raise exc.UnsupportedCompilationError(self, element) from err
+sqlalchemy.exc.UnsupportedCompilationError: Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x72f551af1b40> can't render element of type JSONB (Background on this error at: https://sqlalche.me/e/20/l7de)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 122, in create_app
+    db.create_all()
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/extension.py", line 900, in create_all
+    self._call_for_binds(bind_key, "create_all")
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/extension.py", line 881, in _call_for_binds
+    getattr(metadata, op_name)(bind=engine)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 5924, in create_all
+    bind._run_ddl_visitor(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 3248, in _run_ddl_visitor
+    conn._run_ddl_visitor(visitorcallable, element, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 2455, in _run_ddl_visitor
+    ).traverse_single(element)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 664, in traverse_single
+    return meth(obj, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 982, in visit_metadata
+    self.traverse_single(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 664, in traverse_single
+    return meth(obj, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 1020, in visit_table
+    )._invoke_with(self.connection)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 321, in _invoke_with
+    return bind.execute(self)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 1415, in execute
+    return meth(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 187, in _execute_on_connection
+    return connection._execute_ddl(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 1523, in _execute_ddl
+    compiled = ddl.compile(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/elements.py", line 308, in compile
+    return self._compiler(dialect, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 76, in _compiler
+    return dialect.ddl_compiler(dialect, self, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6726, in visit_create_table
+    raise exc.CompileError(
+sqlalchemy.exc.CompileError: (in table 'prescricoes_emergencia', column 'medicamentos'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x72f551af1b40> can't render element of type JSONB
+
+2025-10-24 10:27:28,989 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-24 10:27:28,989 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-24 10:27:28,989 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-24 10:27:28,989 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-24 10:27:28,989 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-24 10:27:28,994 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-24 10:27:28,994 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-24 10:27:29,050 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-24 10:27:29,184 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-10-24 10:27:29,187 [ERROR] __init__:125 - Erro ao criar tabelas: (in table 'prescricoes_emergencia', column 'medicamentos'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x79abf0005ae0> can't render element of type JSONB
+2025-10-24 10:27:29,189 [ERROR] __init__:126 - Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 137, in _compiler_dispatch
+    meth = getter(visitor)
+AttributeError: 'SQLiteTypeCompiler' object has no attribute 'visit_JSONB'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6716, in visit_create_table
+    processed = self.process(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6747, in visit_create_column
+    text = self.get_column_specification(column, first_pk=first_pk)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/dialects/sqlite/base.py", line 1666, in get_column_specification
+    coltype = self.dialect.type_compiler_instance.process(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 977, in process
+    return type_._compiler_dispatch(self, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 139, in _compiler_dispatch
+    return visitor.visit_unsupported_compilation(self, err, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 982, in visit_unsupported_compilation
+    raise exc.UnsupportedCompilationError(self, element) from err
+sqlalchemy.exc.UnsupportedCompilationError: Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x79abf0005ae0> can't render element of type JSONB (Background on this error at: https://sqlalche.me/e/20/l7de)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 122, in create_app
+    db.create_all()
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/extension.py", line 900, in create_all
+    self._call_for_binds(bind_key, "create_all")
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/extension.py", line 881, in _call_for_binds
+    getattr(metadata, op_name)(bind=engine)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 5924, in create_all
+    bind._run_ddl_visitor(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 3248, in _run_ddl_visitor
+    conn._run_ddl_visitor(visitorcallable, element, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 2455, in _run_ddl_visitor
+    ).traverse_single(element)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 664, in traverse_single
+    return meth(obj, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 982, in visit_metadata
+    self.traverse_single(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 664, in traverse_single
+    return meth(obj, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 1020, in visit_table
+    )._invoke_with(self.connection)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 321, in _invoke_with
+    return bind.execute(self)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 1415, in execute
+    return meth(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 187, in _execute_on_connection
+    return connection._execute_ddl(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 1523, in _execute_ddl
+    compiled = ddl.compile(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/elements.py", line 308, in compile
+    return self._compiler(dialect, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 76, in _compiler
+    return dialect.ddl_compiler(dialect, self, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6726, in visit_create_table
+    raise exc.CompileError(
+sqlalchemy.exc.CompileError: (in table 'prescricoes_emergencia', column 'medicamentos'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x79abf0005ae0> can't render element of type JSONB
+
+2025-10-24 10:27:29,385 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-24 10:27:29,385 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-24 10:27:29,385 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-24 10:27:29,385 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-24 10:27:29,385 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-24 10:27:29,389 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-24 10:27:29,389 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-24 10:27:29,439 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-24 10:27:29,565 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-10-24 10:27:29,568 [ERROR] __init__:125 - Erro ao criar tabelas: (in table 'prescricoes_emergencia', column 'medicamentos'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x79e5cd201b40> can't render element of type JSONB
+2025-10-24 10:27:29,571 [ERROR] __init__:126 - Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 137, in _compiler_dispatch
+    meth = getter(visitor)
+AttributeError: 'SQLiteTypeCompiler' object has no attribute 'visit_JSONB'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6716, in visit_create_table
+    processed = self.process(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6747, in visit_create_column
+    text = self.get_column_specification(column, first_pk=first_pk)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/dialects/sqlite/base.py", line 1666, in get_column_specification
+    coltype = self.dialect.type_compiler_instance.process(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 977, in process
+    return type_._compiler_dispatch(self, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 139, in _compiler_dispatch
+    return visitor.visit_unsupported_compilation(self, err, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 982, in visit_unsupported_compilation
+    raise exc.UnsupportedCompilationError(self, element) from err
+sqlalchemy.exc.UnsupportedCompilationError: Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x79e5cd201b40> can't render element of type JSONB (Background on this error at: https://sqlalche.me/e/20/l7de)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/estevaofilho/HSOP/HSOP/app/__init__.py", line 122, in create_app
+    db.create_all()
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/extension.py", line 900, in create_all
+    self._call_for_binds(bind_key, "create_all")
+  File "/usr/local/lib/python3.10/dist-packages/flask_sqlalchemy/extension.py", line 881, in _call_for_binds
+    getattr(metadata, op_name)(bind=engine)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/schema.py", line 5924, in create_all
+    bind._run_ddl_visitor(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 3248, in _run_ddl_visitor
+    conn._run_ddl_visitor(visitorcallable, element, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 2455, in _run_ddl_visitor
+    ).traverse_single(element)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 664, in traverse_single
+    return meth(obj, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 982, in visit_metadata
+    self.traverse_single(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 664, in traverse_single
+    return meth(obj, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 1020, in visit_table
+    )._invoke_with(self.connection)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 321, in _invoke_with
+    return bind.execute(self)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 1415, in execute
+    return meth(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 187, in _execute_on_connection
+    return connection._execute_ddl(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/engine/base.py", line 1523, in _execute_ddl
+    compiled = ddl.compile(
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/elements.py", line 308, in compile
+    return self._compiler(dialect, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/ddl.py", line 76, in _compiler
+    return dialect.ddl_compiler(dialect, self, **kw)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+  File "/usr/local/lib/python3.10/dist-packages/sqlalchemy/sql/compiler.py", line 6726, in visit_create_table
+    raise exc.CompileError(
+sqlalchemy.exc.CompileError: (in table 'prescricoes_emergencia', column 'medicamentos'): Compiler <sqlalchemy.dialects.sqlite.base.SQLiteTypeCompiler object at 0x79e5cd201b40> can't render element of type JSONB
+
+2025-10-24 10:28:09,482 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-24 10:28:09,482 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-24 10:28:09,482 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-24 10:28:09,482 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-24 10:28:09,482 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-24 10:28:09,488 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-24 10:28:09,488 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-24 10:28:09,537 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-24 10:28:09,682 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-10-24 10:28:09,694 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-10-24 10:28:20,117 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-24 10:28:20,118 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-24 10:28:20,118 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-24 10:28:20,118 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-24 10:28:20,118 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-24 10:28:20,123 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-24 10:28:20,123 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-24 10:28:20,171 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-24 10:28:20,314 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-10-24 10:28:20,317 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-10-24 10:28:28,808 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-24 10:28:28,808 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-24 10:28:28,808 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-24 10:28:28,808 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-24 10:28:28,808 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-24 10:28:28,813 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-24 10:28:28,813 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-24 10:28:28,863 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-24 10:28:29,004 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-10-24 10:28:29,007 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-10-24 10:30:09,925 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-24 10:30:09,925 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-24 10:30:09,925 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-24 10:30:09,925 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-24 10:30:09,925 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-24 10:30:09,949 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-24 10:30:09,949 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-24 10:30:09,996 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-24 10:30:10,143 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-10-24 10:30:10,183 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-10-24 10:37:02,433 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-24 10:37:02,433 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-24 10:37:02,433 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-24 10:37:02,433 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-24 10:37:02,433 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-24 10:37:02,460 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-24 10:37:02,460 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-24 10:37:02,507 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-24 10:37:02,736 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-10-24 10:37:02,760 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-10-24 10:39:37,212 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-24 10:39:37,212 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-24 10:39:37,212 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-24 10:39:37,212 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-24 10:39:37,212 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-24 10:39:37,231 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-24 10:39:37,231 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-24 10:39:37,267 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-24 10:39:37,462 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-10-24 10:39:37,480 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-10-24 10:46:22,803 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-24 10:46:22,803 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-24 10:46:22,803 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-24 10:46:22,803 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-24 10:46:22,803 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-24 10:46:22,811 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-24 10:46:22,811 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-24 10:46:22,865 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-24 10:46:23,034 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-10-24 10:46:23,038 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-10-24 10:46:41,763 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-24 10:46:41,763 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-24 10:46:41,763 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-24 10:46:41,763 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-24 10:46:41,763 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-24 10:46:41,788 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-24 10:46:41,788 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-24 10:46:41,836 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-24 10:46:42,022 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-10-24 10:46:42,077 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-10-24 10:48:10,797 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-24 10:48:10,798 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-24 10:48:10,798 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-24 10:48:10,798 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-24 10:48:10,798 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-24 10:48:10,804 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-24 10:48:10,804 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-24 10:48:10,880 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-24 10:48:11,057 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-10-24 10:48:11,061 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-10-24 10:48:12,401 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-24 10:48:12,401 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-24 10:48:12,401 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-24 10:48:12,401 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-24 10:48:12,401 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-24 10:48:12,407 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-24 10:48:12,407 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-24 10:48:12,457 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-24 10:48:12,609 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-10-24 10:48:12,612 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas

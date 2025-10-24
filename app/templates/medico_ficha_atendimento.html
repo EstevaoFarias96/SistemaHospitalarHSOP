@@ -1024,10 +1024,6 @@
           </button>
         </div>
         <div class="card-body">
-          <div id="prescricaoAvisoSemInternacao" class="alert alert-info border-0" style="display:none;">
-            <i class="fas fa-info-circle me-2"></i>
-            <strong>Informação:</strong> Prescrições estão disponíveis após iniciar uma internação ou observação vinculada a este atendimento.
-          </div>
           <div id="listaPrescricoes" class="loading-state">
             <i class="fas fa-spinner fa-spin"></i> 
             <span>Carregando prescrições médicas...</span>
@@ -1742,9 +1738,9 @@
   </div>
 
   <script>
-    // Prescrição - lógica baseada na clínica, usando endpoints existentes
+    // Prescrição - agora por atendimento (emergência), sem exigir internação
     $(function(){
-      let internacaoId = null;
+      /* internacaoId removido: prescrições por atendimento */
       const ATENDIMENTO_ID = document.getElementById('ATENDIMENTO_ID').value;
       window.medicamentosAdicionados = [];
 
@@ -1829,56 +1825,49 @@
           cont.html('<div class="text-center text-muted py-3">Nenhuma prescrição encontrada.</div>');
           return;
         }
-        let html = '';
+        
+        let html = `
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered table-hover">
+              <thead class="table-primary">
+                <tr>
+                  <th style="width: 15%;">Data/Hora</th>
+                  <th style="width: 20%;">Dieta</th>
+                  <th style="width: 30%;">Medicamentos</th>
+                  <th style="width: 17%;">Proc. Médicos</th>
+                  <th style="width: 18%;">Proc. Multi</th>
+                </tr>
+              </thead>
+              <tbody>`;
+        
         lista.forEach(p => {
-          const dataTxt = p.horario_prescricao || p.data || '';
-          const titulo = 'Prescrição Médica';
+          const dataTxt = p.horario_prescricao ? new Date(p.horario_prescricao).toLocaleString('pt-BR', {
+            day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+          }) : '-';
           const temMeds = Array.isArray(p.medicamentos) && p.medicamentos.length > 0;
+          const medsTxt = temMeds ? p.medicamentos.map(m => `• ${m.nome_medicamento}${m.descricao_uso ? ' - ' + m.descricao_uso : ''}`).join('<br>') : '-';
+          
           html += `
-            <div class="prescricao-container">
-              <div class="prescricao-header">
-                <div class="titulo"><i class="fas fa-pills"></i> ${titulo}</div>
-                <div class="acoes">
-                  <small class="text-white-50">${dataTxt}</small>
-                  ${p.id ? `<a class=\"btn btn-sm btn-light\" href=\"/api/imprimir-prescricao-html/${p.id}\" target=\"_blank\"><i class=\"fas fa-print\"></i></a>` : ''}
-                </div>
-              </div>
-              <div class="prescricao-body">
-                ${p.texto_dieta ? `
-                  <div class="prescricao-section">
-                    <h6><i class=\"fas fa-utensils me-1\"></i>Dieta</h6>
-                    <div>${p.texto_dieta}</div>
-                  </div>` : ''}
-                ${temMeds ? `
-                  <div class="prescricao-section prescricao-meds">
-                    <h6><i class=\"fas fa-capsules me-1\"></i>Medicamentos</h6>
-                    <ul>${p.medicamentos.map(m=>`<li>${m.nome_medicamento}${m.descricao_uso? ' - ' + m.descricao_uso : ''}</li>`).join('')}</ul>
-                  </div>` : ''}
-                ${p.texto_procedimento_medico ? `
-                  <div class="prescricao-section">
-                    <h6><i class=\"fas fa-user-md me-1\"></i>Procedimentos Médicos</h6>
-                    <div>${p.texto_procedimento_medico}</div>
-                  </div>` : ''}
-                ${p.texto_procedimento_multi ? `
-                  <div class="prescricao-section">
-                    <h6><i class=\"fas fa-users me-1\"></i>Procedimentos Multiprofissionais</h6>
-                    <div>${p.texto_procedimento_multi}</div>
-                  </div>` : ''}
-              </div>
-            </div>`;
+            <tr>
+              <td><small class="text-muted">${dataTxt}</small></td>
+              <td>${p.texto_dieta || '-'}</td>
+              <td><small>${medsTxt}</small></td>
+              <td>${p.texto_procedimento_medico || '-'}</td>
+              <td>${p.texto_procedimento_multi || '-'}</td>
+            </tr>`;
         });
+        
+        html += `
+              </tbody>
+            </table>
+          </div>`;
+        
         cont.html(html);
       }
 
       function carregarPrescricoes(){
-        if (!internacaoId){
-          $('#prescricaoAvisoSemInternacao').show();
-          $('#listaPrescricoes').html('');
-          return;
-        }
-        $('#prescricaoAvisoSemInternacao').hide();
         $('#listaPrescricoes').html('<div class="text-center text-muted py-3"><i class="fas fa-spinner fa-spin"></i> Carregando prescrições...</div>');
-        fetch(`/api/prescricoes/${internacaoId}`)
+        fetch(`/api/prescricoes-emergencia/${ATENDIMENTO_ID}`)
           .then(r => r.json())
           .then(d => {
             const lista = d.prescricoes || d.data || d || [];
@@ -1888,16 +1877,7 @@
             $('#listaPrescricoes').html('<div class="text-center text-danger">Erro ao carregar prescrições</div>');
           });
       }
-
-      // Obter internacao pelo atendimento (se não existir, permitirá criar durante POST)
-      fetch(`/api/internacao/${ATENDIMENTO_ID}`)
-        .then(r => r.json())
-        .then(d => {
-          const inter = d.internacao || d;
-          if (inter && inter.id){ internacaoId = inter.id; }
-          carregarPrescricoes();
-        })
-        .catch(()=> carregarPrescricoes());
+      carregarPrescricoes();
 
       // Abrir modal Nova Prescrição
       const modalNP = new bootstrap.Modal(document.getElementById('modalNovaPrescricao'));
@@ -1932,7 +1912,6 @@
       $('#btn_salvar_prescricao').on('click', function(){
         const dados = {
           atendimento_id: ATENDIMENTO_ID,
-          atendimentos_clinica_id: internacaoId || null,
           texto_dieta: $('#texto_dieta').val().trim() || null,
           texto_procedimento_medico: $('#texto_procedimento_medico').val().trim() || null,
           texto_procedimento_multi: $('#texto_procedimento_multi').val().trim() || null,
@@ -1940,12 +1919,10 @@
         };
         const btn = $(this); const original = btn.html();
         btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Salvando...');
-        fetch('/api/prescricoes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dados) })
+        fetch('/api/prescricoes-emergencia', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dados) })
           .then(r => r.json())
           .then(resp => {
             if (resp.success){
-              // Atualizar internacaoId se foi criada pela API
-              if (resp.atendimentos_clinica_id){ internacaoId = resp.atendimentos_clinica_id; }
               modalNP.hide();
               carregarPrescricoes();
             } else {

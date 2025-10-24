@@ -1,5 +1,7 @@
 from datetime import datetime, date, time, timezone, timedelta
 from sqlalchemy import func, Column, Integer, String, Date, Time, Text, DateTime, Numeric, Boolean, ForeignKey
+# Tipo JSON portátil: usa JSON genérico que funciona tanto em SQLite quanto em PostgreSQL
+from sqlalchemy import JSON as JSONType
 from sqlalchemy.orm import relationship
 from . import db
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -633,3 +635,26 @@ class MedicacoesPadrao(db.Model):
 
     def __repr__(self):
         return f"<MedicacoesPadrao(id={self.id}, principio_ativo='{self.principio_ativo}')>"
+
+
+class PrescricaoEmergencia(db.Model):
+    __tablename__ = 'prescricoes_emergencia'
+
+    id = db.Column(db.BigInteger, primary_key=True)
+    atendimento_id = db.Column(db.String(8), db.ForeignKey('atendimentos.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=False)
+    medico_id = db.Column(db.Integer, db.ForeignKey('funcionarios.id', onupdate='CASCADE'), nullable=False)
+    enfermeiro_id = db.Column(db.Integer, db.ForeignKey('funcionarios.id', onupdate='CASCADE'), nullable=True)
+    texto_dieta = db.Column(db.Text, nullable=True)
+    texto_procedimento_medico = db.Column(db.Text, nullable=True)
+    texto_procedimento_multi = db.Column(db.Text, nullable=True)
+    horario_prescricao = db.Column(db.DateTime(timezone=True), default=now_brasilia, nullable=False)
+    medicamentos = db.Column(JSONType, default=list, nullable=False)
+
+    atendimento = db.relationship('Atendimento', backref=db.backref('prescricoes_emergencia', cascade='all, delete-orphan'))
+    medico = db.relationship('Funcionario', foreign_keys=[medico_id])
+    enfermeiro = db.relationship('Funcionario', foreign_keys=[enfermeiro_id])
+
+    def __repr__(self):
+        return f"<PrescricaoEmergencia id={self.id} atendimento={self.atendimento_id}>"
+
+ 
