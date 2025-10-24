@@ -12,6 +12,16 @@
     .card-item { border: none; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
     .risk-badge { font-weight: 600; }
     .triagem-text { white-space: pre-wrap; }
+    #resultadosPesquisa { 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+      border: 1px solid #ddd;
+      border-top: none;
+      margin-top: -1px;
+    }
+    #inputPesquisaAtendimento:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
   </style>
 </head>
 <body>
@@ -23,7 +33,11 @@
             <h3 class="mb-0"><i class="fas fa-user-md text-primary mr-2"></i>Atendimentos</h3>
             <small class="text-muted">Visualize por categoria</small>
           </div>
-          <div>
+          <div class="d-flex align-items-center">
+            <div class="position-relative mr-3" style="width: 300px;">
+              <input type="text" id="inputPesquisaAtendimento" class="form-control" placeholder="Pesquisar por nº atendimento..." autocomplete="off">
+              <div id="resultadosPesquisa" class="list-group position-absolute w-100" style="z-index: 1000; max-height: 300px; overflow-y: auto; display: none;"></div>
+            </div>
             <a href="/medico" class="btn btn-outline-secondary"><i class="fas fa-arrow-left mr-1"></i>Voltar</a>
             <button id="btnAtualizar" class="btn btn-primary ml-2"><i class="fas fa-sync-alt mr-1"></i>Atualizar</button>
           </div>
@@ -38,9 +52,6 @@
           </li>
           <li class="nav-item" role="presentation">
             <a class="nav-link" id="tab-gestantes" data-toggle="tab" href="#pane-gestantes" role="tab" aria-controls="pane-gestantes" aria-selected="false">Gestantes</a>
-          </li>
-          <li class="nav-item" role="presentation">
-            <a class="nav-link" id="tab-alta" data-toggle="tab" href="#pane-alta" role="tab" aria-controls="pane-alta" aria-selected="false">Alta após medicação</a>
           </li>
           <li class="nav-item" role="presentation">
             <a class="nav-link" id="tab-reavaliacao" data-toggle="tab" href="#pane-reavaliacao" role="tab" aria-controls="pane-reavaliacao" aria-selected="false">Reavaliação</a>
@@ -66,14 +77,6 @@
             </div>
           </div>
         </div>
-      <div class="tab-pane fade" id="pane-alta" role="tabpanel" aria-labelledby="tab-alta">
-        <div id="lista-alta">
-          <div class="text-center py-5">
-            <div class="spinner-border text-primary" role="status"><span class="sr-only">Carregando...</span></div>
-            <p class="text-muted mt-3">Carregando altas após medicação...</p>
-          </div>
-        </div>
-      </div>
       <div class="tab-pane fade" id="pane-gestantes" role="tabpanel" aria-labelledby="tab-gestantes">
         <div id="lista-gestantes">
           <div class="text-center py-5">
@@ -152,13 +155,11 @@
         fetch('/api/medico/atendimentos/aguardando').then(r=>r.json()).catch(()=>({atendimentos:[]})),
         fetch('/api/medico/atendimentos/aguardando-triagem').then(r=>r.json()).catch(()=>({atendimentos:[]})),
         fetch('/api/medico/atendimentos/gestantes').then(r=>r.json()).catch(()=>({atendimentos:[]})),
-        fetch('/api/medico/atendimentos/alta-medicacao').then(r=>r.json()).catch(()=>({atendimentos:[]})),
         fetch('/api/medico/atendimentos/reavaliacao-medicacao').then(r=>r.json()).catch(()=>({atendimentos:[]}))
-      ]).then(([aguardando, triagem, gestantes, alta, reav])=>{
+      ]).then(([aguardando, triagem, gestantes, reav])=>{
         setTabCount('tab-aguardando', 'Aguardando Médico', (aguardando.atendimentos||[]).length);
         setTabCount('tab-triagem', 'Aguardando Triagem', (triagem.atendimentos||[]).length);
         setTabCount('tab-gestantes', 'Gestantes', (gestantes.atendimentos||[]).length);
-        setTabCount('tab-alta', 'Alta após medicação', (alta.atendimentos||[]).length);
         setTabCount('tab-reavaliacao', 'Reavaliação', (reav.atendimentos||[]).length);
       });
     }
@@ -182,15 +183,6 @@
             setTabCount('tab-triagem', 'Aguardando Triagem', (data.atendimentos||[]).length);
           })
           .catch(() => { $('#lista-triagem').html('<p class="text-danger">Erro ao carregar dados</p>'); });
-      } else if (tipo === 'alta') {
-        fetch('/api/medico/atendimentos/alta-medicacao')
-          .then(r => r.json())
-          .then(data => {
-            if (!data.success) { $('#lista-alta').html('<p class="text-danger">Erro ao carregar</p>'); return; }
-            renderLista('#lista-alta', data.atendimentos, '<div class="text-center py-5"><i class="fas fa-info-circle fa-3x text-secondary mb-3"></i><h5>Sem pacientes em alta após medicação</h5></div>');
-            setTabCount('tab-alta', 'Alta após medicação', (data.atendimentos||[]).length);
-          })
-          .catch(() => { $('#lista-alta').html('<p class="text-danger">Erro ao carregar dados</p>'); });
       } else if (tipo === 'gestantes') {
         fetch('/api/medico/atendimentos/gestantes')
           .then(r => r.json())
@@ -220,7 +212,6 @@
         if (id === 'tab-aguardando') carregarAba('aguardando');
         if (id === 'tab-triagem') carregarAba('triagem');
         if (id === 'tab-gestantes') carregarAba('gestantes');
-        if (id === 'tab-alta') carregarAba('alta');
         if (id === 'tab-reavaliacao') carregarAba('reavaliacao');
         carregarContadores();
       });
@@ -231,10 +222,74 @@
         if (activeId === 'tab-aguardando') carregarAba('aguardando');
         if (activeId === 'tab-triagem') carregarAba('triagem');
         if (activeId === 'tab-gestantes') carregarAba('gestantes');
-        if (activeId === 'tab-alta') carregarAba('alta');
         if (activeId === 'tab-reavaliacao') carregarAba('reavaliacao');
         carregarContadores();
         setTimeout(()=>{ btn.prop('disabled', false); icon.removeClass('fa-spin'); }, 800);
+      });
+
+      // Pesquisa de atendimentos por número
+      let timeoutPesquisa;
+      $('#inputPesquisaAtendimento').on('input', function(){
+        const termo = $(this).val().trim();
+        clearTimeout(timeoutPesquisa);
+        if (termo.length < 2) {
+          $('#resultadosPesquisa').hide().html('');
+          return;
+        }
+        timeoutPesquisa = setTimeout(() => {
+          fetch(`/api/medico/atendimento/buscar?numero=${encodeURIComponent(termo)}`)
+            .then(r => r.json())
+            .then(data => {
+              if (!data.success || !data.atendimentos || data.atendimentos.length === 0) {
+                $('#resultadosPesquisa').html('<div class="list-group-item text-muted">Nenhum atendimento encontrado</div>').show();
+                return;
+              }
+              let html = '';
+              data.atendimentos.forEach(atend => {
+                const statusClass = atend.status_finalizado ? 'badge-secondary' : 'badge-success';
+                const statusText = atend.status_finalizado ? 'Finalizado' : 'Aberto';
+                html += `<a href="#" class="list-group-item list-group-item-action item-atendimento" data-atendimento-id="${atend.id}" data-status="${atend.status}" data-status-finalizado="${atend.status_finalizado}">
+                  <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">Atendimento #${atend.id}</h6>
+                    <small><span class="badge ${statusClass}">${statusText}</span></small>
+                  </div>
+                  <div class="d-flex w-100 justify-content-between">
+                    <small class="text-muted">${atend.paciente_nome || 'Sem nome'}</small>
+                    <small class="text-muted">${atend.data_atendimento ? new Date(atend.data_atendimento).toLocaleDateString('pt-BR') : ''}</small>
+                  </div>
+                  <small class="text-muted">Status: ${atend.status || 'N/A'}</small>
+                </a>`;
+              });
+              $('#resultadosPesquisa').html(html).show();
+            })
+            .catch(() => {
+              $('#resultadosPesquisa').html('<div class="list-group-item text-danger">Erro ao buscar atendimentos</div>').show();
+            });
+        }, 400);
+      });
+
+      // Clique em item de atendimento
+      $(document).on('click', '.item-atendimento', function(e){
+        e.preventDefault();
+        const atendimentoId = $(this).data('atendimento-id');
+        const status = ($(this).data('status') || '').toLowerCase();
+        const statusFinalizado = $(this).data('status-finalizado');
+        
+        // Verifica se é ALTA ou ALTA APOS MEDICACAO
+        if (statusFinalizado || status.includes('alta') || status.includes('finalizado')) {
+          if (confirm('Este atendimento já foi finalizado. Deseja reabrir esse prontuário?')) {
+            window.location.href = `/medico/atendimento/${atendimentoId}`;
+          }
+        } else {
+          window.location.href = `/medico/atendimento/${atendimentoId}`;
+        }
+      });
+
+      // Fechar resultados ao clicar fora
+      $(document).on('click', function(e) {
+        if (!$(e.target).closest('#inputPesquisaAtendimento, #resultadosPesquisa').length) {
+          $('#resultadosPesquisa').hide();
+        }
       });
     });
   </script>

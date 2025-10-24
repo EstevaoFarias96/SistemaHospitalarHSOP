@@ -877,6 +877,60 @@ def api_medico_atendimentos_gestantes():
         logging.error(traceback.format_exc())
         return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
 
+
+@bp.route('/api/medico/atendimento/buscar', methods=['GET'])
+@login_required
+def api_medico_buscar_atendimento():
+    """
+    Busca atendimentos por número (ID) para reabrir prontuário.
+    Retorna informações do atendimento incluindo status.
+    """
+    try:
+        current_user = get_current_user()
+        if not current_user:
+            return jsonify({'success': False, 'message': 'Usuário não autenticado.'}), 401
+
+        if current_user.cargo.lower() not in ['medico', 'multi', 'admin']:
+            return jsonify({'success': False, 'message': 'Acesso não autorizado'}), 403
+
+        numero = request.args.get('numero', '').strip()
+        if len(numero) < 2:
+            return jsonify({'success': False, 'message': 'Digite pelo menos 2 caracteres'}), 400
+
+        # Busca atendimentos que contenham o número digitado
+        atendimentos = Atendimento.query.filter(
+            Atendimento.id.like(f'%{numero}%')
+        ).order_by(Atendimento.data_atendimento.desc()).limit(20).all()
+
+        resultado = []
+        for a in atendimentos:
+            paciente = Paciente.query.get(a.paciente_id)
+            if not paciente:
+                continue
+            
+            # Verificar se está finalizado
+            status_lower = (a.status or '').lower()
+            status_finalizado = (
+                'finalizado' in status_lower or 
+                'alta' in status_lower
+            )
+            
+            resultado.append({
+                'id': a.id,
+                'paciente_nome': paciente.nome,
+                'data_atendimento': a.data_atendimento.strftime('%Y-%m-%d %H:%M:%S') if a.data_atendimento else None,
+                'status': a.status,
+                'status_finalizado': status_finalizado
+            })
+
+        return jsonify({'success': True, 'atendimentos': resultado, 'total': len(resultado)})
+
+    except Exception as e:
+        logging.error(f"Erro ao buscar atendimentos: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
+
+
 @bp.route('/medico/aguardando-medico', methods=['GET'])
 @login_required
 def pagina_medico_aguardando_medico():
