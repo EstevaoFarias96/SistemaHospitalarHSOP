@@ -12993,8 +12993,9 @@ def definir_conduta():
             
         else:
             # Conduta: Alta, Transferido, A pedido ou Óbito
-            # IMPORTANTE: NÃO mudar status aqui - manter 'Internado' até fechar prontuário
+            # Atualizar status do atendimento para refletir a conduta e remover da lista de "Em Observação"
             # Armazenar conduta pendente no campo dieta
+            atendimento.status = conduta
             internacao.dieta = f'PENDENTE:{conduta}'
             atendimento.conduta_final = f"{conduta.upper()} - {evolucao_medica_final}" if evolucao_medica_final else conduta.upper()
             logging.info(f"Conduta pendente armazenada: {conduta} (será aplicada ao fechar prontuário)")
