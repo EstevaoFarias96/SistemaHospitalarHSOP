@@ -340,7 +340,7 @@
             '';
 
           const linha = `
-            <tr>
+            <tr id="row-at-${p.atendimento_id}" data-atendimento-id="${p.atendimento_id}">
               <td>${p.nome}</td>
               <td>${horario ? horario.toLocaleString() : '---'}</td>
               <td>${p.medico_nome || '---'}</td>
@@ -351,7 +351,7 @@
               </td>
             </tr>
           `;          const linhaAlerta = `
-            <tr class="table-danger-custom">
+            <tr class="table-danger-custom" id="row-at-${p.atendimento_id}" data-atendimento-id="${p.atendimento_id}">
               <td>${p.nome}</td>
               <td>${horario ? horario.toLocaleString() : '---'}</td>
               <td>${p.medico_nome || '---'}</td>
@@ -522,11 +522,8 @@
         success: function(response) {
           showAlert('Conduta definida com sucesso!', 'success');
           $('#modalDefinirConduta').modal('hide');
-          
-          // Recarregar a página após um breve delay
-          setTimeout(function() {
-            location.reload();
-          }, 1500);
+          // Remover paciente da lista em tempo real
+          removePacienteDaLista(atendimentoId);
         },
         error: function(xhr, status, error) {
           let errorMessage = 'Erro ao definir conduta.';
@@ -542,6 +539,27 @@
       });
     }
 
+    // Remove a linha do paciente pelas duas listas e atualiza placeholders
+    function removePacienteDaLista(atendimentoId) {
+      const rowSelector = `#row-at-${atendimentoId}`;
+      const $row = $(rowSelector);
+      if ($row.length) {
+        $row.remove();
+      }
+      atualizarPlaceholders();
+    }
+
+    function atualizarPlaceholders() {
+      const $obs = $('#tabelaObservacao');
+      const $cond = $('#tabelaConduta');
+      if ($obs.children('tr').length === 0) {
+        $obs.html('<tr><td colspan="5" class="text-center text-muted">Nenhum paciente em observação.</td></tr>');
+      }
+      if ($cond.children('tr').length === 0) {
+        $cond.html('<tr><td colspan="5" class="text-center text-muted">Nenhum paciente aguardando conduta há mais de 24h.</td></tr>');
+      }
+    }
+
     // Função para mostrar alertas mais elegantes
     function showAlert(message, type) {
       const alertClass = type === 'success' ? 'alert-success' : 
@@ -553,15 +571,15 @@
                        'fa-times-circle';
       
       const alertHtml = `
-        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+        <div class="alert ${alertClass} alert-dismissible fade show app-alert" role="alert">
           <i class="fas ${alertIcon} me-2"></i>
           ${message}
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         </div>
       `;
       
-      // Remover alertas anteriores
-      $('.alert').remove();
+      // Remover apenas alertas globais gerados por esta função
+      $('.app-alert').remove();
       
       // Adicionar novo alerta no topo da página
       $('body').prepend(alertHtml);
