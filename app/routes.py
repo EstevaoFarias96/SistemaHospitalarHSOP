@@ -1815,17 +1815,25 @@ def painel_administrador():
                         (hoje.month, hoje.day) < (paciente.data_nascimento.month, paciente.data_nascimento.day)
                     )
                 
-                # Calcular tempo da consulta em minutos
+                # Calcular tempo da triagem até consulta médica em minutos
                 tempo_consulta = 0
                 try:
-                    if atendimento.horario_consulta_medica and atendimento.hora_atendimento:
-                        # Combinar data e hora do atendimento
-                        dt_atendimento = datetime.combine(atendimento.data_atendimento, atendimento.hora_atendimento)
+                    if atendimento.horario_consulta_medica and atendimento.horario_triagem:
+                        # Horário da triagem
+                        if isinstance(atendimento.horario_triagem, datetime):
+                            dt_triagem = atendimento.horario_triagem
+                        else:
+                            dt_triagem = datetime.combine(atendimento.data_atendimento, atendimento.horario_triagem)
+                        
+                        # Horário da consulta médica
+                        if isinstance(atendimento.horario_consulta_medica, datetime):
+                            dt_consulta = atendimento.horario_consulta_medica
+                        else:
+                            dt_consulta = datetime.combine(atendimento.data_atendimento, atendimento.horario_consulta_medica)
                         
                         # Calcular diferença
-                        if isinstance(atendimento.horario_consulta_medica, datetime):
-                            diferenca = atendimento.horario_consulta_medica - dt_atendimento
-                            tempo_consulta = round(diferenca.total_seconds() / 60.0)
+                        diferenca = dt_consulta - dt_triagem
+                        tempo_consulta = round(diferenca.total_seconds() / 60.0)
                 except Exception as e:
                     logging.warning(f"Erro ao calcular tempo de consulta: {str(e)}")
                     tempo_consulta = 0
@@ -1837,6 +1845,25 @@ def painel_administrador():
                     if enfermeiro:
                         enfermeiro_nome = enfermeiro.nome
                 
+                # Calcular tempo até triagem (hora_atendimento até horario_triagem)
+                tempo_ate_triagem = '-'
+                try:
+                    if atendimento.horario_triagem and atendimento.hora_atendimento:
+                        # Combinar data e hora do atendimento (chegada)
+                        dt_atendimento = datetime.combine(atendimento.data_atendimento, atendimento.hora_atendimento)
+                        
+                        # Hora da triagem
+                        if isinstance(atendimento.horario_triagem, datetime):
+                            dt_triagem = atendimento.horario_triagem
+                        else:
+                            dt_triagem = datetime.combine(atendimento.data_atendimento, atendimento.horario_triagem)
+                        
+                        # Calcular diferença
+                        diferenca = dt_triagem - dt_atendimento
+                        tempo_ate_triagem = round(diferenca.total_seconds() / 60.0)
+                except:
+                    tempo_ate_triagem = '-'
+                
                 ultimas_consultas.append({
                     'id_atendimento': atendimento.id,
                     'paciente_nome': paciente.nome,
@@ -1845,6 +1872,7 @@ def painel_administrador():
                     'medico': medico_nome or 'Não atribuído',
                     'enfermeiro': enfermeiro_nome,
                     'tempo_consulta': tempo_consulta,
+                    'tempo_ate_triagem': tempo_ate_triagem,
                     'horario_consulta': atendimento.horario_consulta_medica.strftime('%d/%m/%Y %H:%M') if atendimento.horario_consulta_medica else '-'
                 })
         except Exception as e:
@@ -1901,6 +1929,76 @@ def painel_administrador():
                     else:
                         data_internacao_fmt = str(internacao.data_internacao)
                 
+                # Calcular idade do paciente
+                idade_paciente = '-'
+                if paciente.data_nascimento:
+                    try:
+                        if isinstance(paciente.data_nascimento, str):
+                            data_nasc = datetime.strptime(paciente.data_nascimento, '%Y-%m-%d').date()
+                        else:
+                            data_nasc = paciente.data_nascimento
+                        idade_paciente = (agora_br.date() - data_nasc).days // 365
+                    except:
+                        idade_paciente = '-'
+                
+                # Calcular tempo internado
+                tempo_internado = '-'
+                if internacao.data_internacao:
+                    try:
+                        if isinstance(internacao.data_internacao, datetime):
+                            data_int = internacao.data_internacao
+                        else:
+                            data_int = datetime.strptime(str(internacao.data_internacao), '%Y-%m-%d %H:%M:%S')
+                        
+                        if data_int.tzinfo is None:
+                            data_int = data_int.replace(tzinfo=ZoneInfo("America/Sao_Paulo"))
+                        
+                        delta = agora_br - data_int
+                        dias = delta.days
+                        horas = delta.seconds // 3600
+                        
+                        if dias > 0:
+                            tempo_internado = f"{dias}d {horas}h"
+                        else:
+                            tempo_internado = f"{horas}h"
+                    except:
+                        tempo_internado = '-'
+                
+                # Buscar CID
+                cid = internacao.cid_principal or 'Sem CID'
+                
+                # Buscar última evolução médica
+                ultima_evolucao_medica = 'Sem evolução'
+                try:
+                    from app.models import EvolucaoMedica
+                    evo_med = db.session.query(EvolucaoMedica).filter(
+                        EvolucaoMedica.id_internacao == internacao.id
+                    ).order_by(EvolucaoMedica.data_evolucao.desc()).first()
+                    
+                    if evo_med and evo_med.data_evolucao:
+                        if isinstance(evo_med.data_evolucao, datetime):
+                            ultima_evolucao_medica = evo_med.data_evolucao.strftime('%d/%m %H:%M')
+                        else:
+                            ultima_evolucao_medica = str(evo_med.data_evolucao)
+                except:
+                    ultima_evolucao_medica = 'Sem evolução'
+                
+                # Buscar última evolução de enfermagem
+                ultima_evolucao_enfermagem = 'Sem evolução'
+                try:
+                    from app.models import EvolucaoEnfermagem
+                    evo_enf = db.session.query(EvolucaoEnfermagem).filter(
+                        EvolucaoEnfermagem.id_internacao == internacao.id
+                    ).order_by(EvolucaoEnfermagem.data_evolucao.desc()).first()
+                    
+                    if evo_enf and evo_enf.data_evolucao:
+                        if isinstance(evo_enf.data_evolucao, datetime):
+                            ultima_evolucao_enfermagem = evo_enf.data_evolucao.strftime('%d/%m %H:%M')
+                        else:
+                            ultima_evolucao_enfermagem = str(evo_enf.data_evolucao)
+                except:
+                    ultima_evolucao_enfermagem = 'Sem evolução'
+                
                 ultimas_internacoes.append({
                     'id_internacao': internacao.id,
                     'paciente_nome': paciente.nome,
@@ -1908,12 +2006,95 @@ def painel_administrador():
                     'medico': medico_nome or 'Não atribuído',
                     'estava_em_observacao': estava_em_observacao,
                     'data_internacao': data_internacao_fmt,
-                    'leito': internacao.leito or 'Não definido'
+                    'leito': internacao.leito or 'Não definido',
+                    'idade': idade_paciente,
+                    'cid': cid,
+                    'tempo_internado': tempo_internado,
+                    'ultima_evolucao_medica': ultima_evolucao_medica,
+                    'ultima_evolucao_enfermagem': ultima_evolucao_enfermagem
                 })
         except Exception as e:
             logging.error(f"Erro ao buscar últimas internações: {str(e)}")
             logging.error(traceback.format_exc())
             ultimas_internacoes = []
+
+        # Dados adicionais para o modo TV
+        # 1) Média de idade dos pacientes de hoje
+        media_idade_hoje = 0
+        try:
+            atendimentos_hoje = db.session.query(Atendimento).filter(
+                Atendimento.data_atendimento >= inicio_dia,
+                Atendimento.data_atendimento < fim_dia
+            ).all()
+            
+            idades = []
+            for atend in atendimentos_hoje:
+                if atend.paciente and atend.paciente.data_nascimento:
+                    try:
+                        if isinstance(atend.paciente.data_nascimento, str):
+                            data_nasc = datetime.strptime(atend.paciente.data_nascimento, '%Y-%m-%d').date()
+                        else:
+                            data_nasc = atend.paciente.data_nascimento
+                        idade = (agora_br.date() - data_nasc).days // 365
+                        if 0 <= idade <= 120:
+                            idades.append(idade)
+                    except:
+                        continue
+            
+            if idades:
+                media_idade_hoje = round(sum(idades) / len(idades))
+        except Exception as e:
+            logging.error(f"Erro ao calcular média de idade: {str(e)}")
+            media_idade_hoje = 0
+
+        # 2) Divisão por sexo dos pacientes de hoje
+        divisao_sexo_masculino = 0
+        divisao_sexo_feminino = 0
+        try:
+            atendimentos_hoje = db.session.query(Atendimento).filter(
+                Atendimento.data_atendimento >= inicio_dia,
+                Atendimento.data_atendimento < fim_dia
+            ).all()
+            
+            for atend in atendimentos_hoje:
+                if atend.paciente and atend.paciente.sexo:
+                    sexo_lower = str(atend.paciente.sexo).strip().lower()
+                    if sexo_lower in ['m', 'masculino', 'masc']:
+                        divisao_sexo_masculino += 1
+                    elif sexo_lower in ['f', 'feminino', 'fem']:
+                        divisao_sexo_feminino += 1
+        except Exception as e:
+            logging.error(f"Erro ao calcular divisão por sexo: {str(e)}")
+            divisao_sexo_masculino = 0
+            divisao_sexo_feminino = 0
+
+        # 3) Bairros mais comuns (top 6)
+        bairros_labels = []
+        bairros_valores = []
+        try:
+            bairros_query = db.session.query(
+                Paciente.bairro,
+                func.count(Atendimento.id).label('total')
+            ).join(
+                Atendimento, Atendimento.paciente_id == Paciente.id
+            ).filter(
+                Atendimento.data_atendimento >= inicio_dia,
+                Atendimento.data_atendimento < fim_dia,
+                Paciente.bairro.isnot(None),
+                Paciente.bairro != ''
+            ).group_by(
+                Paciente.bairro
+            ).order_by(
+                func.count(Atendimento.id).desc()
+            ).limit(6).all()
+            
+            for bairro, total in bairros_query:
+                bairros_labels.append(bairro.strip())
+                bairros_valores.append(total)
+        except Exception as e:
+            logging.error(f"Erro ao buscar bairros mais comuns: {str(e)}")
+            bairros_labels = []
+            bairros_valores = []
 
         contexto = dict(
             total_internacoes_hoje=total_internacoes_hoje,
@@ -1947,6 +2128,12 @@ def painel_administrador():
             # Listas
             ultimas_consultas=ultimas_consultas,
             ultimas_internacoes=ultimas_internacoes,
+            # Dados para modo TV
+            media_idade_hoje=media_idade_hoje,
+            divisao_sexo_masculino=divisao_sexo_masculino,
+            divisao_sexo_feminino=divisao_sexo_feminino,
+            bairros_labels=bairros_labels,
+            bairros_valores=bairros_valores,
         )
         return render_template('administrador.html', **contexto)
     except Exception as e:

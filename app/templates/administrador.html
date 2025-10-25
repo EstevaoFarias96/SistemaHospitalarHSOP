@@ -67,6 +67,153 @@
         .col-xxl-6 { flex: 0 0 auto; width: 50%; }
         .col-xxl-2-4 { flex: 0 0 auto; width: 20%; }
     }
+    
+    /* Modo TV */
+    #modoTV {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #a8d5e2 0%, #6fb3d2 100%);
+        z-index: 9999;
+        display: none;
+        overflow: hidden;
+    }
+    #modoTV.active { display: block; }
+    
+    .tv-header {
+        background: rgba(0,0,0,0.3);
+        backdrop-filter: blur(10px);
+        padding: 1.5rem 3rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 3px solid rgba(255,255,255,0.2);
+    }
+    .tv-header h1 {
+        color: white;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    .tv-header .info {
+        color: rgba(255,255,255,0.9);
+        font-size: 1.2rem;
+        text-align: right;
+    }
+    .tv-slide {
+        display: none;
+        height: calc(100vh - 100px);
+        padding: 3rem;
+        animation: slideIn 0.5s ease-in-out;
+    }
+    .tv-slide.active { display: block; }
+    
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateX(50px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    
+    .tv-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        height: 100%;
+        overflow: hidden;
+    }
+    .tv-kpi {
+        background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        color: white;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        transition: transform 0.3s;
+    }
+    .tv-kpi:hover { transform: translateY(-5px); }
+    .tv-kpi-value {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin: 0.5rem 0;
+    }
+    .tv-kpi-label {
+        font-size: 1.2rem;
+        opacity: 0.95;
+        font-weight: 500;
+    }
+    .tv-exit {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(220,53,69,0.9);
+        border: none;
+        color: white;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        border-radius: 10px;
+        cursor: pointer;
+        z-index: 10000;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        transition: all 0.3s;
+    }
+    .tv-exit:hover {
+        background: rgba(220,53,69,1);
+        transform: scale(1.05);
+    }
+    .tv-progress {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        height: 5px;
+        background: rgba(255,255,255,0.9);
+        width: 0%;
+        transition: width 0.1s linear;
+        z-index: 10001;
+    }
+    .tv-table {
+        width: 100%;
+        margin-top: 1rem;
+    }
+    .tv-table thead {
+        background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+        color: white;
+    }
+    .tv-table th {
+        padding: 1rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+    .tv-table td {
+        padding: 1rem;
+        font-size: 1rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .tv-table tbody tr:hover {
+        background: rgba(74,144,226,0.05);
+    }
+    .tv-chart-container {
+        height: 400px;
+        position: relative;
+        margin-top: 2rem;
+    }
+    .tv-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 2rem;
+        text-align: center;
+        border-bottom: 3px solid #667eea;
+        padding-bottom: 1rem;
+    }
+    .badge-tv {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        border-radius: 8px;
+        font-weight: 600;
+    }
 </style>
 {% endblock %}
 
@@ -77,8 +224,13 @@
             <h2 class="h5 mb-0 me-2">Painel do Gestor</h2>
             <span class="muted">Visão geral operacional e técnica do hospital</span>
         </div>
-        <div class="text-end muted">
-            Atualizado em: <span id="dsb-now">-</span>
+        <div class="d-flex align-items-center">
+            <button class="btn btn-sm btn-primary me-2" onclick="iniciarModoTV()">
+                <i class="fas fa-tv"></i> Modo TV
+            </button>
+            <div class="text-end muted">
+                Atualizado em: <span id="dsb-now">-</span>
+            </div>
         </div>
     </div>
 
@@ -654,6 +806,222 @@
         </div>
     </div>
 </div>
+
+<!-- Modo TV -->
+<div id="modoTV">
+    <button class="tv-exit" onclick="sairModoTV()">
+        <i class="fas fa-times"></i> Sair do Modo TV
+    </button>
+    <div class="tv-progress" id="tvProgress"></div>
+    
+    <!-- Slide 1: Visão Geral -->
+    <div class="tv-slide active" id="tvSlide1">
+        <div class="tv-header">
+            <h1><i class="fas fa-hospital"></i> HSOP - Visão Geral</h1>
+            <div class="info">
+                <div id="tvDate">-</div>
+                <div id="tvTime">-</div>
+            </div>
+        </div>
+        <div style="padding: 3rem;">
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="tv-kpi" style="background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);">
+                        <i class="fas fa-bed" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                        <div class="tv-kpi-value">{{ total_internacoes_hoje|default(0) }}</div>
+                        <div class="tv-kpi-label">Pacientes Internados</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="tv-kpi" style="background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);">
+                        <i class="fas fa-heartbeat" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                        <div class="tv-kpi-value">{{ pacientes_observacao|default(0) }}</div>
+                        <div class="tv-kpi-label">Em Observação</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="tv-kpi" style="background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);">
+                        <i class="fas fa-user-md" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                        <div class="tv-kpi-value">{{ aguardando_medico|default(0) }}</div>
+                        <div class="tv-kpi-label">Aguardando Médico</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="tv-kpi" style="background: linear-gradient(135deg, #ffc107 0%, #cc9a06 100%);">
+                        <i class="fas fa-hourglass-half" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                        <div class="tv-kpi-value">{{ aguardando_triagem|default(0) }}</div>
+                        <div class="tv-kpi-label">Aguardando Triagem</div>
+                    </div>
+                </div>
+            </div>
+            <div class="tv-card">
+                <h2 class="tv-title">Atendimentos por Hora (Hoje)</h2>
+                <div class="tv-chart-container">
+                    <canvas id="tvChartHora"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 2: Últimas Consultas -->
+    <div class="tv-slide" id="tvSlide2">
+        <div class="tv-header">
+            <h1><i class="fas fa-stethoscope"></i> Últimas Consultas Realizadas</h1>
+            <div class="info">
+                <div id="tvDate2">-</div>
+                <div id="tvTime2">-</div>
+            </div>
+        </div>
+        <div style="padding: 3rem;">
+            <div class="tv-card" style="overflow-y: auto;">
+                <table class="tv-table table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Paciente</th>
+                            <th>Idade</th>
+                            <th>Risco</th>
+                            <th>Médico</th>
+                            <th>Enfermeiro</th>
+                            <th class="text-center">Tempo até Triagem</th>
+                            <th class="text-center">Tempo Triagem → Consulta</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for consulta in ultimas_consultas|default([]) %}
+                        <tr>
+                            <td><strong style="font-size: 1.1rem;">{{ consulta.paciente_nome }}</strong></td>
+                            <td>{{ consulta.idade }} anos</td>
+                            <td>
+                                {% if consulta.classificacao_risco == 'Vermelho' %}
+                                    <span class="badge badge-danger badge-tv">Vermelho</span>
+                                {% elif consulta.classificacao_risco == 'Laranja' %}
+                                    <span class="badge badge-warning badge-tv">Laranja</span>
+                                {% elif consulta.classificacao_risco == 'Amarelo' %}
+                                    <span class="badge badge-tv" style="background-color: #ffc107; color: #000;">Amarelo</span>
+                                {% elif consulta.classificacao_risco == 'Verde' %}
+                                    <span class="badge badge-success badge-tv">Verde</span>
+                                {% elif consulta.classificacao_risco == 'Azul' %}
+                                    <span class="badge badge-info badge-tv">Azul</span>
+                                {% else %}
+                                    <span class="badge badge-secondary badge-tv">{{ consulta.classificacao_risco }}</span>
+                                {% endif %}
+                            </td>
+                            <td><strong>{{ consulta.medico }}</strong></td>
+                            <td>{{ consulta.enfermeiro }}</td>
+                            <td class="text-center"><strong style="font-size: 1.1rem; color: #0d6efd;">{{ consulta.tempo_ate_triagem|default('-') }} min</strong></td>
+                            <td class="text-center"><strong style="font-size: 1.1rem; color: #20c997;">{{ consulta.tempo_consulta }} min</strong></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-5">
+                                <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
+                                Nenhuma consulta registrada hoje
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 3: Pacientes Internados -->
+    <div class="tv-slide" id="tvSlide3">
+        <div class="tv-header">
+            <h1><i class="fas fa-procedures"></i> Pacientes Internados</h1>
+            <div class="info">
+                <div id="tvDate3">-</div>
+                <div id="tvTime3">-</div>
+            </div>
+        </div>
+        <div style="padding: 3rem;">
+            <div class="tv-card" style="overflow-y: auto;">
+                <table class="tv-table table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Paciente</th>
+                            <th>Idade</th>
+                            <th>Diagnóstico</th>
+                            <th>CID</th>
+                            <th class="text-center">Tempo Internado</th>
+                            <th>Última Evolução Médica</th>
+                            <th>Última Evolução Enfermagem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for internacao in ultimas_internacoes|default([]) %}
+                        <tr>
+                            <td><strong style="font-size: 1.1rem;">{{ internacao.paciente_nome }}</strong></td>
+                            <td>{{ internacao.idade|default('-') }} anos</td>
+                            <td>{{ internacao.diagnostico|truncate(50) }}</td>
+                            <td><span class="badge badge-info badge-tv">{{ internacao.cid|default('Sem CID') }}</span></td>
+                            <td class="text-center"><strong style="font-size: 1.1rem; color: #fd7e14;">{{ internacao.tempo_internado|default('-') }}</strong></td>
+                            <td><small>{{ internacao.ultima_evolucao_medica|default('Sem evolução')|truncate(40) }}</small></td>
+                            <td><small>{{ internacao.ultima_evolucao_enfermagem|default('Sem evolução')|truncate(40) }}</small></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-5">
+                                <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
+                                Nenhum paciente internado no momento
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Slide 4: Visão do Dia -->
+    <div class="tv-slide" id="tvSlide4">
+        <div class="tv-header">
+            <h1><i class="fas fa-chart-line"></i> Estatísticas do Dia</h1>
+            <div class="info">
+                <div id="tvDate4">-</div>
+                <div id="tvTime4">-</div>
+            </div>
+        </div>
+        <div style="padding: 3rem;">
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="tv-card">
+                        <h3 class="tv-title" style="font-size: 1.5rem;">Perfil dos Pacientes</h3>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div style="padding: 2rem; background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%); border-radius: 15px; color: white; margin-bottom: 1rem;">
+                                    <i class="fas fa-users fa-3x mb-2"></i>
+                                    <div style="font-size: 2.5rem; font-weight: 700;">{{ media_idade_hoje|default(0) }}</div>
+                                    <div style="font-size: 1.1rem;">Idade Média</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="tv-chart-container" style="height: 200px;">
+                                    <canvas id="tvChartSexo"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="tv-card">
+                        <h3 class="tv-title" style="font-size: 1.5rem;">Tempo Médio por Classificação</h3>
+                        <div class="tv-chart-container" style="height: 250px;">
+                            <canvas id="tvChartTempoRisco"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tv-card">
+                <h3 class="tv-title" style="font-size: 1.5rem;">Bairros Mais Comuns</h3>
+                <div class="tv-chart-container" style="height: 300px;">
+                    <canvas id="tvChartBairros"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
@@ -1088,6 +1456,310 @@
             });
         }
     })();
+    
+    // ============ MODO TV ============
+    var tvMode = {
+        active: false,
+        currentSlide: 0,
+        totalSlides: 4,
+        interval: null,
+        progressInterval: null,
+        charts: {},
+        slideTime: 15000, // 15 segundos
+        
+        init: function() {
+            this.active = true;
+            this.currentSlide = 0;
+            document.getElementById('modoTV').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            this.updateDateTime();
+            this.startProgress();
+            this.createCharts();
+            
+            // Atualizar data/hora a cada segundo
+            this.clockInterval = setInterval(() => this.updateDateTime(), 1000);
+            
+            // Trocar slide automaticamente
+            this.interval = setInterval(() => this.nextSlide(), this.slideTime);
+        },
+        
+        exit: function() {
+            this.active = false;
+            document.getElementById('modoTV').classList.remove('active');
+            document.body.style.overflow = '';
+            clearInterval(this.interval);
+            clearInterval(this.progressInterval);
+            clearInterval(this.clockInterval);
+            
+            // Destruir gráficos
+            Object.keys(this.charts).forEach(key => {
+                if (this.charts[key]) this.charts[key].destroy();
+            });
+            this.charts = {};
+        },
+        
+        nextSlide: function() {
+            var slides = document.querySelectorAll('.tv-slide');
+            slides[this.currentSlide].classList.remove('active');
+            
+            this.currentSlide = (this.currentSlide + 1) % this.totalSlides;
+            slides[this.currentSlide].classList.add('active');
+            
+            this.startProgress();
+        },
+        
+        startProgress: function() {
+            var progress = document.getElementById('tvProgress');
+            progress.style.width = '0%';
+            
+            clearInterval(this.progressInterval);
+            
+            var startTime = Date.now();
+            var duration = this.slideTime;
+            
+            this.progressInterval = setInterval(function() {
+                var elapsed = Date.now() - startTime;
+                var percent = Math.min((elapsed / duration) * 100, 100);
+                progress.style.width = percent + '%';
+                
+                if (percent >= 100) {
+                    clearInterval(tvMode.progressInterval);
+                }
+            }, 100);
+        },
+        
+        updateDateTime: function() {
+            var now = new Date();
+            var dateStr = now.toLocaleDateString('pt-BR', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            var timeStr = now.toLocaleTimeString('pt-BR');
+            
+            ['tvDate', 'tvDate2', 'tvDate3', 'tvDate4'].forEach(id => {
+                var el = document.getElementById(id);
+                if (el) el.textContent = dateStr;
+            });
+            
+            ['tvTime', 'tvTime2', 'tvTime3', 'tvTime4'].forEach(id => {
+                var el = document.getElementById(id);
+                if (el) el.textContent = timeStr;
+            });
+        },
+        
+        createCharts: function() {
+            // Gráfico de atendimentos por hora (Slide 1)
+            var ctxHora = document.getElementById('tvChartHora');
+            if (ctxHora) {
+                var labelsHora = {{ atend_hora_labels|default([])|tojson }};
+                var valoresHora = {{ atend_hora_valores|default([])|tojson }};
+                
+                if (labelsHora.length === 0) {
+                    labelsHora = ["00h","01h","02h","03h","04h","05h","06h","07h","08h","09h","10h","11h","12h","13h","14h","15h","16h","17h","18h","19h","20h","21h","22h","23h"];
+                    valoresHora = Array(24).fill(0);
+                }
+                
+                this.charts.tvChartHora = new Chart(ctxHora, {
+                    type: 'line',
+                    data: {
+                        labels: labelsHora,
+                        datasets: [{
+                            label: 'Atendimentos',
+                            data: valoresHora,
+                            backgroundColor: 'rgba(74,144,226,0.3)',
+                            borderColor: 'rgba(74,144,226,1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            fill: true,
+                            pointRadius: 5,
+                            pointBackgroundColor: 'rgba(74,144,226,1)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { 
+                                beginAtZero: true,
+                                ticks: { font: { size: 14 } }
+                            },
+                            x: {
+                                ticks: { font: { size: 14 } }
+                            }
+                        },
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: {
+                                titleFont: { size: 16 },
+                                bodyFont: { size: 14 },
+                                padding: 12
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Gráfico de sexo (Slide 4)
+            var ctxSexo = document.getElementById('tvChartSexo');
+            if (ctxSexo) {
+                // Dados fictícios - você pode substituir pelos dados reais do backend
+                var masculino = {{ divisao_sexo_masculino|default(0) }};
+                var feminino = {{ divisao_sexo_feminino|default(0) }};
+                
+                this.charts.tvChartSexo = new Chart(ctxSexo, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Masculino', 'Feminino'],
+                        datasets: [{
+                            data: [masculino || 50, feminino || 50],
+                            backgroundColor: ['rgba(13,110,253,0.8)', 'rgba(220,53,69,0.8)'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { 
+                                position: 'bottom',
+                                labels: { font: { size: 14 }, padding: 15 }
+                            },
+                            tooltip: {
+                                titleFont: { size: 16 },
+                                bodyFont: { size: 14 }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Gráfico de tempo por risco (Slide 4)
+            var ctxTempoRisco = document.getElementById('tvChartTempoRisco');
+            if (ctxTempoRisco) {
+                var temposRisco = {{ tempos_por_risco|default([])|tojson }};
+                var labelsRisco = [];
+                var valoresRisco = [];
+                var coresRisco = [];
+                
+                if (temposRisco && temposRisco.length > 0) {
+                    temposRisco.forEach(function(item) {
+                        labelsRisco.push(item.classificacao);
+                        valoresRisco.push(item.tempo_medio);
+                        
+                        var cores = {
+                            'Vermelho': 'rgba(220,53,69,0.8)',
+                            'Laranja': 'rgba(253,126,20,0.8)',
+                            'Amarelo': 'rgba(255,193,7,0.8)',
+                            'Verde': 'rgba(32,201,151,0.8)',
+                            'Azul': 'rgba(13,110,253,0.8)'
+                        };
+                        coresRisco.push(cores[item.classificacao] || 'rgba(108,117,125,0.8)');
+                    });
+                } else {
+                    labelsRisco = ['Vermelho', 'Laranja', 'Amarelo', 'Verde', 'Azul'];
+                    valoresRisco = [15, 25, 35, 45, 60];
+                    coresRisco = ['rgba(220,53,69,0.8)', 'rgba(253,126,20,0.8)', 'rgba(255,193,7,0.8)', 'rgba(32,201,151,0.8)', 'rgba(13,110,253,0.8)'];
+                }
+                
+                this.charts.tvChartTempoRisco = new Chart(ctxTempoRisco, {
+                    type: 'bar',
+                    data: {
+                        labels: labelsRisco,
+                        datasets: [{
+                            label: 'Tempo Médio (min)',
+                            data: valoresRisco,
+                            backgroundColor: coresRisco,
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { 
+                                beginAtZero: true,
+                                ticks: { font: { size: 14 } }
+                            },
+                            x: {
+                                ticks: { font: { size: 14 } }
+                            }
+                        },
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: {
+                                titleFont: { size: 16 },
+                                bodyFont: { size: 14 }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Gráfico de bairros (Slide 4)
+            var ctxBairros = document.getElementById('tvChartBairros');
+            if (ctxBairros) {
+                // Dados fictícios - você pode substituir pelos dados reais do backend
+                var bairrosLabels = {{ bairros_labels|default([])|tojson }};
+                var bairrosValores = {{ bairros_valores|default([])|tojson }};
+                
+                if (bairrosLabels.length === 0) {
+                    bairrosLabels = ['Centro', 'Bairro A', 'Bairro B', 'Bairro C', 'Bairro D', 'Outros'];
+                    bairrosValores = [25, 18, 15, 12, 10, 20];
+                }
+                
+                this.charts.tvChartBairros = new Chart(ctxBairros, {
+                    type: 'bar',
+                    data: {
+                        labels: bairrosLabels,
+                        datasets: [{
+                            label: 'Pacientes',
+                            data: bairrosValores,
+                            backgroundColor: 'rgba(74,144,226,0.8)',
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { 
+                                beginAtZero: true,
+                                ticks: { font: { size: 14 } }
+                            },
+                            y: {
+                                ticks: { font: { size: 14 } }
+                            }
+                        },
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: {
+                                titleFont: { size: 16 },
+                                bodyFont: { size: 14 }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    };
+    
+    function iniciarModoTV() {
+        tvMode.init();
+    }
+    
+    function sairModoTV() {
+        tvMode.exit();
+    }
+    
+    // Atalho ESC para sair do modo TV
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && tvMode.active) {
+            sairModoTV();
+        }
+    });
     </script>
 {% endblock %}
 
