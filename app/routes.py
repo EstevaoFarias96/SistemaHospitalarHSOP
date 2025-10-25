@@ -1777,9 +1777,9 @@ def painel_administrador():
             logging.warning(f"Erro ao calcular tempos por risco: {str(e)}")
             tempos_por_risco = []
 
-        # 9) Pacientes aguardando triagem
+        # 9) Pacientes aguardando triagem (status "Em Atendimento")
         aguardando_triagem = db.session.query(func.count(Atendimento.id)).filter(
-            Atendimento.status == 'Aguardando Triagem'
+            Atendimento.status == 'Em Atendimento'
         ).scalar() or 0
 
         # 10) Pacientes aguardando médico
@@ -1967,28 +1967,29 @@ def painel_administrador():
                 # Buscar CID
                 cid = internacao.cid_principal or 'Sem CID'
                 
-                # Buscar última evolução médica
+                # Buscar última evolução médica (EvolucaoAtendimentoClinica)
                 ultima_evolucao_medica = 'Sem evolução'
                 try:
-                    from app.models import EvolucaoMedica
-                    evo_med = db.session.query(EvolucaoMedica).filter(
-                        EvolucaoMedica.id_internacao == internacao.id
-                    ).order_by(EvolucaoMedica.data_evolucao.desc()).first()
+                    from app.models import EvolucaoAtendimentoClinica
+                    evo_med = db.session.query(EvolucaoAtendimentoClinica).filter(
+                        EvolucaoAtendimentoClinica.atendimentos_clinica_id == internacao.id
+                    ).order_by(EvolucaoAtendimentoClinica.data_evolucao.desc()).first()
                     
                     if evo_med and evo_med.data_evolucao:
                         if isinstance(evo_med.data_evolucao, datetime):
                             ultima_evolucao_medica = evo_med.data_evolucao.strftime('%d/%m %H:%M')
                         else:
                             ultima_evolucao_medica = str(evo_med.data_evolucao)
-                except:
+                except Exception as e:
+                    logging.warning(f"Erro ao buscar evolução médica: {str(e)}")
                     ultima_evolucao_medica = 'Sem evolução'
                 
-                # Buscar última evolução de enfermagem
+                # Buscar última evolução de enfermagem (EvolucaoEnfermagem)
                 ultima_evolucao_enfermagem = 'Sem evolução'
                 try:
                     from app.models import EvolucaoEnfermagem
                     evo_enf = db.session.query(EvolucaoEnfermagem).filter(
-                        EvolucaoEnfermagem.id_internacao == internacao.id
+                        EvolucaoEnfermagem.atendimentos_clinica_id == internacao.id
                     ).order_by(EvolucaoEnfermagem.data_evolucao.desc()).first()
                     
                     if evo_enf and evo_enf.data_evolucao:
@@ -1996,7 +1997,8 @@ def painel_administrador():
                             ultima_evolucao_enfermagem = evo_enf.data_evolucao.strftime('%d/%m %H:%M')
                         else:
                             ultima_evolucao_enfermagem = str(evo_enf.data_evolucao)
-                except:
+                except Exception as e:
+                    logging.warning(f"Erro ao buscar evolução de enfermagem: {str(e)}")
                     ultima_evolucao_enfermagem = 'Sem evolução'
                 
                 ultimas_internacoes.append({
