@@ -12678,6 +12678,50 @@ def api_enfermeiro_atendimento():
         return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
 
 
+@bp.route('/api/enfermeiro/atendimentos/<string:atendimento_id>/evasao', methods=['PUT'])
+@login_required
+def api_enfermeiro_marcar_evasao(atendimento_id):
+    """
+    Permite ao enfermeiro marcar o atendimento como Evasão.
+    Efeito: altera o status para "Evasão" e define horário de alta (saindo da fila).
+    A ação é permitida apenas enquanto o atendimento estiver aguardando triagem.
+    """
+    try:
+        user = get_current_user()
+        if not user or user.cargo.lower() not in ['enfermeiro', 'multi']:
+            return jsonify({'success': False, 'message': 'Acesso não autorizado'}), 403
+
+        atendimento = Atendimento.query.get(atendimento_id)
+        if not atendimento:
+            return jsonify({'success': False, 'message': 'Atendimento não encontrado'}), 404
+
+        # Garantir que está em fase de triagem para o enfermeiro poder marcar evasão
+        status_atual = (atendimento.status or '').strip().lower()
+        if 'aguardando triagem' not in status_atual:
+            return jsonify({'success': False, 'message': 'Ação permitida apenas durante a triagem'}), 400
+
+        atendimento.status = 'Evasão'
+        atendimento.conduta_final = 'EVASAO POR CONTA PROPRIA'
+
+        # Registrar horário de alta caso não exista
+        if not getattr(atendimento, 'horario_alta', None):
+            atendimento.horario_alta = datetime.utcnow() - timedelta(hours=3)
+
+        db.session.commit()
+
+        logging.info(
+            f"Atendimento {atendimento_id} marcado como Evasão por {user.nome} (Enfermeiro ID: {user.id})"
+        )
+
+        return jsonify({'success': True, 'message': 'Atendimento marcado como Evasão'})
+
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Erro ao marcar evasão: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
+
+
 @bp.route('/api/enfermeiro/info')
 @login_required
 def api_enfermeiro_info():

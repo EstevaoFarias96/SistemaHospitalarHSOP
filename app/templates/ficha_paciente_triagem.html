@@ -75,8 +75,9 @@
       <button class="btn btn-secondary back-btn" onclick="window.location.href='/enfermeiro'">Voltar ao Menu Principal</button>
       
       <div class="card shadow-sm">
-        <div class="card-header text-center">
-          Ficha de Triagem
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div class="flex-grow-1 text-center">Ficha de Triagem</div>
+          <button id="btnEvasao" type="button" class="btn btn-outline-secondary btn-sm" title="Paciente Evadiu / Não Compareceu">Paciente Evadiu / Não Compareceu</button>
         </div>
         <div class="card-body">
           <!-- Dados do Paciente -->
@@ -384,6 +385,40 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+      // Botão: Paciente Evadiu / Não Compareceu
+      document.addEventListener('DOMContentLoaded', function(){
+        const btnEvasao = document.getElementById('btnEvasao');
+        if (btnEvasao){
+          btnEvasao.addEventListener('click', function(){
+            const atendimentoId = document.getElementById('atendimento_id').value;
+            if (!atendimentoId){
+              alert('Atendimento não identificado.');
+              return;
+            }
+            if (!confirm('Confirmar: marcar como Evasão e retirar da fila?')){
+              return;
+            }
+            fetch('/api/enfermeiro/atendimentos/' + atendimentoId + '/evasao', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(d => {
+              if (d && d.success){
+                alert('Marcado como Evasão com sucesso.');
+                window.location.href = '/enfermeiro';
+              } else {
+                alert('Falha ao marcar evasão: ' + (d && d.message ? d.message : 'erro desconhecido'));
+              }
+            })
+            .catch(err => {
+              console.error('Erro ao marcar evasão:', err);
+              alert('Erro ao marcar evasão.');
+            });
+          });
+        }
+      });
+
       // Toggle do campo DST: exibe campo de texto se checkbox estiver marcado
       document.getElementById('dst_checkbox').addEventListener('change', function() {
         const dstTextContainer = document.getElementById('dstTextContainer');
