@@ -20,7 +20,7 @@ from docx import Document
 from io import BytesIO
 from app import db
 from app.models import Funcionario,PrescricaoEnfermagemTemplate,Leito,PrescricaoEmergencia,MedicacoesPadrao,AdmissaoEnfermagem, AtendimentosGestante ,ListaInternacao, ListaObservacao, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN, now_brasilia, FichaReferencia, EvolucaoFisioterapia,EvolucaoAssistenteSocial, EvolucaoNutricao, AtendimentosGestante, FluxoDisp, FluxoPaciente
-from app.timezone_helper import formatar_datetime_br_completo, formatar_datetime_br, converter_para_brasilia
+from app.timezone_helper import formatar_datetime_br_completo, formatar_datetime_br, converter_para_brasilia, formatar_data_br
 from zoneinfo import ZoneInfo
 
 # Cria o Blueprint principal
@@ -10034,8 +10034,8 @@ def impressao_atestado(atestado_id):
                (hoje.month == paciente.data_nascimento.month and hoje.day < paciente.data_nascimento.day):
                 idade -= 1
         
-        # Formatar data do atestado
-        data_atestado_formatada = atestado.data_atestado.strftime('%d/%m/%Y')
+        # Formatar data do atestado em America/Sao_Paulo (UTC-3)
+        data_atestado_formatada = formatar_data_br(atestado.data_atestado)
         
         # Dados para o template
         contexto = {
