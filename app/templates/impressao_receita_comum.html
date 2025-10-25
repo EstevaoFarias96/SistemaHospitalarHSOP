@@ -64,29 +64,42 @@
     font-size: 12pt;
     margin-bottom: 8px;
   }
-  .patient-name {
-    font-size: 10pt;
-    font-weight: normal;
-    text-align: left;
-    margin-bottom: 5px;
-    padding-bottom: 2px;
+  .patient-info-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8pt;
+    margin-bottom: 8px;
   }
-  .patient-address {
-    font-size: 10pt;
-    font-weight: normal;
-    text-align: left;
-    margin-bottom: 3px;
-    padding-bottom: 2px;
+  .patient-info-table td {
+    padding: 2px 5px;
+    border: 1px solid #999;
+    vertical-align: middle;
+    line-height: 1.2;
+  }
+  .patient-info-table .label {
+    font-weight: bold;
+    background-color: #f0f0f0;
+    white-space: nowrap;
+  }
+  .patient-info-table .value {
+    background-color: #fff;
+  }
+  .patient-info-table tr:first-child .label {
+    width: 15%;
+  }
+  .patient-info-table tr:first-child .value {
+    width: 35%;
   }
   .prescricao-text {
     font-size: 10pt;
     white-space: pre-wrap;
     word-wrap: break-word;
-    line-height: 1.5;
+    line-height: 1.4;
     font-family: 'Courier New', monospace;
     margin: 5px 0 20px 0;
     flex-grow: 1;
-    overflow-y: auto;
+    overflow: visible;
+    max-height: none;
   }
   .footer-info {
     margin-top: auto;
@@ -165,31 +178,43 @@
   margin-bottom: 8px;
 }
 
-.patient-name {
-  font-size: 10pt;
-  font-weight: normal;
-  text-align: left;
-  margin-bottom: 5px;
-  padding-bottom: 2px;
+.patient-info-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 8pt;
+  margin-bottom: 8px;
 }
-
-.patient-address {
-  font-size: 10pt;
-  font-weight: normal;
-  text-align: left;
-  margin-bottom: 3px;
-  padding-bottom: 2px;
+.patient-info-table td {
+  padding: 2px 5px;
+  border: 1px solid #999;
+  vertical-align: middle;
+  line-height: 1.2;
+}
+.patient-info-table .label {
+  font-weight: bold;
+  background-color: #f0f0f0;
+  white-space: nowrap;
+}
+.patient-info-table .value {
+  background-color: #fff;
+}
+.patient-info-table tr:first-child .label {
+  width: 15%;
+}
+.patient-info-table tr:first-child .value {
+  width: 35%;
 }
 
 .prescricao-text {
   font-size: 10pt;
   white-space: pre-wrap;
   word-wrap: break-word;
-  line-height: 1.5;
+  line-height: 1.4;
   font-family: 'Courier New', monospace;
   margin: 5px 0 20px 0;
   flex-grow: 1;
-  overflow-y: auto;
+  overflow: visible;
+  max-height: none;
 }
 
 .footer-info {
@@ -228,13 +253,24 @@
   
   <div class="receituario-title">RECEITUÁRIO</div>
   
-  <div class="patient-name">Paciente: {{ paciente_nome }}</div>
-  <div class="patient-address">Data de Nascimento: {{ paciente_data_nascimento or "Não informado" }}</div>
-  <div class="patient-address">Endereço: {{ paciente_endereco }}</div>
-  
-  <div class="patient-address">Nome da Mãe: {{ paciente_filiacao or "Não informado" }}</div>
-  
-  <div class="patient-address">Cartão SUS: {{ paciente_cartao_sus or "Não informado" }}</div>
+  <table class="patient-info-table">
+    <tr>
+      <td class="label">Paciente:</td>
+      <td class="value">{{ paciente_nome }}</td>
+      <td class="label">Data Nasc.:</td>
+      <td class="value">{{ paciente_data_nascimento or "Não informado" }}</td>
+    </tr>
+    <tr>
+      <td class="label">Endereço:</td>
+      <td class="value" colspan="3">{{ paciente_endereco }}</td>
+    </tr>
+    <tr>
+      <td class="label">Nome da Mãe:</td>
+      <td class="value">{{ paciente_filiacao or "Não informado" }}</td>
+      <td class="label">Cartão SUS:</td>
+      <td class="value">{{ paciente_cartao_sus or "Não informado" }}</td>
+    </tr>
+  </table>
   
   <div class="prescricao-text">{{ receituario_receita|safe }}</div>
   
@@ -261,13 +297,24 @@
   
   <div class="receituario-title">RECEITUÁRIO</div>
   
-  <div class="patient-name">Paciente: {{ paciente_nome }}</div>
-  <div class="patient-address">Data de Nascimento: {{ paciente_data_nascimento or "Não informado" }}</div>
-  <div class="patient-address">Endereço: {{ paciente_endereco }}</div>
-  
-  <div class="patient-address">Nome da Mãe: {{ paciente_filiacao or "Não informado" }}</div>
-  
-  <div class="patient-address">Cartão SUS: {{ paciente_cartao_sus or "Não informado" }}</div>
+  <table class="patient-info-table">
+    <tr>
+      <td class="label">Paciente:</td>
+      <td class="value">{{ paciente_nome }}</td>
+      <td class="label">Data Nasc.:</td>
+      <td class="value">{{ paciente_data_nascimento or "Não informado" }}</td>
+    </tr>
+    <tr>
+      <td class="label">Endereço:</td>
+      <td class="value" colspan="3">{{ paciente_endereco }}</td>
+    </tr>
+    <tr>
+      <td class="label">Nome da Mãe:</td>
+      <td class="value">{{ paciente_filiacao or "Não informado" }}</td>
+      <td class="label">Cartão SUS:</td>
+      <td class="value">{{ paciente_cartao_sus or "Não informado" }}</td>
+    </tr>
+  </table>
   
   <div class="prescricao-text">{{ receituario_receita|safe }}</div>
   
@@ -289,14 +336,68 @@ function obterDataAtual() {
     return `${dia}/${mes}/${ano}`;
 }
 
+// Função para ajustar tamanho da fonte baseado no conteúdo
+function ajustarTamanhoFonte() {
+    const prescricoes = document.querySelectorAll('.prescricao-text');
+    
+    prescricoes.forEach(function(prescricao) {
+        const prescription = prescricao.closest('.prescription');
+        if (!prescription) return;
+        
+        // Obter altura disponível (altura total da receita menos cabeçalho e rodapé)
+        const alturaTotal = prescription.offsetHeight;
+        const alturaCabecalho = prescription.querySelector('.header-prefeitura')?.offsetHeight || 0;
+        const alturaRodape = prescription.querySelector('.footer-info')?.offsetHeight || 0;
+        const alturaTabelaPaciente = prescription.querySelector('.patient-info-table')?.offsetHeight || 0;
+        const alturaTitulo = 30; // Aproximado para título "RECEITUÁRIO"
+        const alturaDisponivel = alturaTotal - alturaCabecalho - alturaRodape - alturaTabelaPaciente - alturaTitulo - 60; // 60px de margem de segurança
+        
+        // Contar linhas de texto (aproximado)
+        const texto = prescricao.textContent || '';
+        const caracteres = texto.length;
+        
+        // Se o conteúdo é muito grande, reduzir o tamanho da fonte
+        let tamanhoFonte = 10; // Tamanho padrão em pt
+        
+        if (caracteres > 1500) {
+            tamanhoFonte = 7;
+        } else if (caracteres > 1200) {
+            tamanhoFonte = 7.5;
+        } else if (caracteres > 900) {
+            tamanhoFonte = 8;
+        } else if (caracteres > 600) {
+            tamanhoFonte = 9;
+        }
+        
+        // Verificar se o conteúdo ainda cabe após ajuste inicial
+        prescricao.style.fontSize = tamanhoFonte + 'pt';
+        
+        // Ajuste fino: se ainda estiver transbordando, reduzir mais
+        let tentativas = 0;
+        while (prescricao.scrollHeight > alturaDisponivel && tamanhoFonte > 6 && tentativas < 5) {
+            tamanhoFonte -= 0.5;
+            prescricao.style.fontSize = tamanhoFonte + 'pt';
+            prescricao.style.lineHeight = '1.3';
+            tentativas++;
+        }
+        
+        console.log(`Ajustado para ${tamanhoFonte}pt (${caracteres} caracteres, altura disponível: ${alturaDisponivel}px)`);
+    });
+}
+
 // Substituir {{data_hoje}} pela data atual automaticamente
 document.addEventListener('DOMContentLoaded', function() {
     const dataAtual = obterDataAtual();
     document.body.innerHTML = document.body.innerHTML.replace(/\{\{data_hoje\}\}/g, dataAtual);
     
-    // Auto-imprimir quando a página carregar
+    // Aguardar renderização completa antes de ajustar
     setTimeout(function() {
-        window.print();
-    }, 500);
+        ajustarTamanhoFonte();
+        
+        // Auto-imprimir quando a página carregar
+        setTimeout(function() {
+            window.print();
+        }, 300);
+    }, 200);
 });
 </script>

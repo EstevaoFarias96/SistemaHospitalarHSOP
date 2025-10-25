@@ -907,6 +907,14 @@
               <div class="vital-sign-value" id="fr">-</div>
             </div>
             <div class="vital-sign-item">
+              <span class="vital-sign-label">Peso</span>
+              <div class="vital-sign-value" id="peso">-</div>
+            </div>
+            <div class="vital-sign-item">
+              <span class="vital-sign-label">DX</span>
+              <div class="vital-sign-value" id="dx">-</div>
+            </div>
+            <div class="vital-sign-item">
               <span class="vital-sign-label">Classificação</span>
               <div class="vital-sign-value" id="classificacao">-</div>
             </div>
@@ -1282,6 +1290,8 @@
           $('#sp02').text(a.sp02||'-');
           $('#temp').text(a.temp||'-');
           $('#fr').text(a.fr||'-');
+          $('#peso').text(a.peso||'-');
+          $('#dx').text(a.dx||'-');
           $('#classificacao').text(a.classificacao_risco||'-');
           $('#badgeRisco').html(badgeRisco(a.classificacao_risco));
           $('#alergias').text(a.alergias||'-');

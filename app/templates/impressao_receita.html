@@ -38,8 +38,8 @@
     font-weight: bold;
   }
   .prescricao-text {
-    font-size: 11pt !important;
-    font-weight: bold;
+    font-size: 8pt !important;
+    font-weight: normal;
   }
   .carimbo-medico {
     font-size: 9pt !important;
@@ -66,30 +66,21 @@
     margin-bottom: 15px;
   }
   .prescricao-text {
-    font-size: 11pt !important;
-    font-weight: bold;
-  }
-  .prescricao-text {
     white-space: pre-wrap !important;
     word-wrap: break-word !important;
-    line-height: 1.5 !important;
+    line-height: 1.4 !important;
     font-family: 'Courier New', monospace !important;
     margin-top: 15px;
     margin-bottom: 15px;
     min-height: 150px;
+    font-size: 8pt !important;
+    font-weight: normal;
+    overflow: visible;
   }
   /* Padronizar elementos em negrito */
   strong, b {
-    font-size: 11pt !important;
+    font-size: 8pt !important;
     font-weight: bold;
-  }
-  /* Preservar formatação na impressão */
-  .prescricao-text {
-    white-space: pre-wrap !important;
-    word-wrap: break-word !important;
-    line-height: 1.3 !important;
-    font-family: 'Courier New', monospace !important;
-    font-size: 11pt !important;
   }
 }
 
@@ -169,14 +160,15 @@
 }
 
 .prescricao-text {
-  font-size: 11pt !important;
+  font-size: 8pt !important;
   white-space: pre-wrap !important;
   word-wrap: break-word;
-  line-height: 1.5;
+  line-height: 1.4;
   font-family: 'Courier New', monospace !important;
   margin-top: 15px;
   margin-bottom: 15px;
   min-height: 150px;
+  overflow: visible;
 }
 
 /* Padronizar todos os elementos de tabela */
@@ -186,13 +178,13 @@ table {
 
 /* Padronizar elementos em negrito para destaque */
 strong, b {
-  font-size: 11pt !important;
+  font-size: 8pt !important;
   font-weight: bold;
 }
 
 /* Padronizar parágrafos */
 p {
-  font-size: 9pt;
+  font-size: 8pt;
   margin: 0;
   padding: 0;
 }
@@ -204,31 +196,33 @@ td {
 
 /* Elementos de destaque específicos */
 td strong, td b {
-  font-size: 11pt !important;
+  font-size: 9pt !important;
   font-weight: bold;
 }
 
-/* Formatação do conteúdo HTML dentro da prescrição */
+/* Formatação do conteúdo HTML dentro da prescrição - PRESERVAR QUEBRAS DE LINHA */
 .prescricao-text p {
-  display: inline;
-  font-size: 11pt !important;
+  display: block !important;
+  font-size: 8pt !important;
   margin: 0;
   padding: 0;
-  white-space: pre-wrap;
+  white-space: pre-wrap !important;
 }
 
 .prescricao-text br {
-  line-height: 1.2;
+  display: block !important;
+  content: "" !important;
+  margin: 0 !important;
 }
 
 .prescricao-text strong, .prescricao-text b {
-  font-size: 11pt !important;
-  font-weight: normal;
+  font-size: 8pt !important;
+  font-weight: bold;
 }
 
 .prescricao-text em, .prescricao-text i {
   font-style: italic;
-  font-size: 11pt !important;
+  font-size: 8pt !important;
 }
 </style>
 
@@ -442,8 +436,41 @@ function processarPrescricao() {
         // Preservar espaços e quebras de linha
         elemento.style.whiteSpace = 'pre-wrap';
         elemento.style.fontFamily = 'Courier New, monospace';
-        elemento.style.fontSize = '11pt';
-        elemento.style.lineHeight = '1.3';
+        elemento.style.overflow = 'visible';
+    });
+}
+
+// Função para ajustar tamanho da fonte baseado no conteúdo
+function ajustarTamanhoFonte() {
+    const prescricoes = document.querySelectorAll('.prescricao-text');
+    
+    prescricoes.forEach(function(prescricao) {
+        const prescription = prescricao.closest('.prescription');
+        if (!prescription) return;
+        
+        // Contar caracteres de texto
+        const texto = prescricao.textContent || '';
+        const caracteres = texto.length;
+        
+        // Ajustar tamanho da fonte baseado na quantidade de conteúdo
+        let tamanhoFonte = 8; // Tamanho padrão em pt (reduzido)
+        
+        if (caracteres > 2000) {
+            tamanhoFonte = 6;
+        } else if (caracteres > 1500) {
+            tamanhoFonte = 6.5;
+        } else if (caracteres > 1200) {
+            tamanhoFonte = 7;
+        } else if (caracteres > 900) {
+            tamanhoFonte = 7.5;
+        }
+        
+        prescricao.style.fontSize = tamanhoFonte + 'pt';
+        prescricao.style.lineHeight = '1.4';
+        prescricao.style.whiteSpace = 'pre-wrap';
+        prescricao.style.overflow = 'visible';
+        
+        console.log(`Receita Especial ajustada para ${tamanhoFonte}pt (${caracteres} caracteres)`);
     });
 }
 
@@ -455,9 +482,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Processar prescrição
     processarPrescricao();
     
-    // Auto-imprimir quando a página carregar
+    // Aguardar renderização e ajustar fonte
     setTimeout(function() {
-        window.print();
-    }, 500);
+        ajustarTamanhoFonte();
+        
+        // Auto-imprimir quando a página carregar
+        setTimeout(function() {
+            window.print();
+        }, 300);
+    }, 200);
 });
 </script>

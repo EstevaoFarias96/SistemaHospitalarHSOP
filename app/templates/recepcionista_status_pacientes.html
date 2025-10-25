@@ -185,6 +185,19 @@
     .sidebar:hover { width: 220px; align-items: flex-start; padding-left: 10px; }
     .sidebar:hover a { justify-content: flex-start; }
     .sidebar:hover .menu-label { display: inline-block; }
+
+    /* Badges de classificação de risco */
+    .badge-risco {
+      font-size: 0.7rem;
+      padding: 0.3rem 0.6rem;
+      font-weight: bold;
+      border-radius: 12px;
+    }
+    .badge-risco-vermelho { background-color: #dc3545; color: white; }
+    .badge-risco-laranja { background-color: #fd7e14; color: white; }
+    .badge-risco-amarelo { background-color: #ffc107; color: #000; }
+    .badge-risco-verde { background-color: #28a745; color: white; }
+    .badge-risco-azul { background-color: #007bff; color: white; }
   </style>
 </head>
 <body>
@@ -296,6 +309,16 @@
 
               <!-- Aguardando Médico -->
               <div class="tab-pane fade" id="aguardando-medico" role="tabpanel">
+                <div class="d-flex justify-content-end mb-3">
+                  <div class="btn-group btn-group-sm" role="group">
+                    <button type="button" class="btn btn-outline-primary active" id="ordenar-hora" onclick="ordenarAguardandoMedico('hora')">
+                      <i class="fas fa-clock mr-1"></i>Por Hora
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" id="ordenar-risco" onclick="ordenarAguardandoMedico('risco')">
+                      <i class="fas fa-exclamation-triangle mr-1"></i>Por Classificação
+                    </button>
+                  </div>
+                </div>
                 <div id="lista-aguardando-medico">
                   <div class="text-center py-5">
                     <div class="spinner-border text-info" role="status">
@@ -353,6 +376,10 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
   <script>
+    // Variável global para armazenar pacientes aguardando médico
+    let pacientesAguardandoMedico = [];
+    let ordenacaoAtualAguardandoMedico = 'hora';
+
     $(document).ready(function() {
       // Carregar nome do usuário
       $.getJSON('/api/recepcionista/nome', function(data) {
@@ -401,7 +428,8 @@
 
         // Aguardando Médico
         if (aguardandoMedico && aguardandoMedico.success) {
-          exibirPacientes('aguardando-medico', aguardandoMedico.pacientes);
+          pacientesAguardandoMedico = aguardandoMedico.pacientes;
+          ordenarAguardandoMedico(ordenacaoAtualAguardandoMedico);
           $('#count-aguardando-medico').text(aguardandoMedico.pacientes.length);
         } else {
           $('#lista-aguardando-medico').html('<p class="text-danger text-center">Erro ao carregar dados</p>');
@@ -493,7 +521,14 @@
           campoExtra1Label = 'Hora Triagem';
           campoExtra1Valor = paciente.hora_triagem || 'N/A';
           campoExtra2Label = 'Classificação';
-          campoExtra2Valor = paciente.classificacao_risco || 'N/A';
+          const risco = paciente.classificacao_risco || 'N/A';
+          let badgeClass = '';
+          if (risco === 'Vermelho') badgeClass = 'badge-risco-vermelho';
+          else if (risco === 'Laranja') badgeClass = 'badge-risco-laranja';
+          else if (risco === 'Amarelo') badgeClass = 'badge-risco-amarelo';
+          else if (risco === 'Verde') badgeClass = 'badge-risco-verde';
+          else if (risco === 'Azul') badgeClass = 'badge-risco-azul';
+          campoExtra2Valor = badgeClass ? `<span class="badge badge-risco ${badgeClass}">${risco}</span>` : risco;
         } else if (tipo === 'atendimentos-dia') {
           const st = (paciente.status || '').toLowerCase();
           if (st.includes('triagem')) {
@@ -505,7 +540,14 @@
             campoExtra1Label = 'Hora Triagem';
             campoExtra1Valor = paciente.hora_triagem || 'N/A';
             campoExtra2Label = 'Classificação';
-            campoExtra2Valor = paciente.classificacao_risco || 'N/A';
+            const risco = paciente.classificacao_risco || 'N/A';
+            let badgeClass = '';
+            if (risco === 'Vermelho') badgeClass = 'badge-risco-vermelho';
+            else if (risco === 'Laranja') badgeClass = 'badge-risco-laranja';
+            else if (risco === 'Amarelo') badgeClass = 'badge-risco-amarelo';
+            else if (risco === 'Verde') badgeClass = 'badge-risco-verde';
+            else if (risco === 'Azul') badgeClass = 'badge-risco-azul';
+            campoExtra2Valor = badgeClass ? `<span class="badge badge-risco ${badgeClass}">${risco}</span>` : risco;
           } else {
             campoExtra1Label = 'Leito';
             campoExtra1Valor = paciente.leito || 'N/A';
@@ -552,7 +594,7 @@
                   </div>
                   <div class="col-6">
                     <small class="text-muted d-block">${campoExtra2Label}</small>
-                    <span class="font-weight-bold">${campoExtra2Valor}</span>
+                    <div class="font-weight-bold">${campoExtra2Valor}</div>
                   </div>
                 </div>
 
@@ -626,6 +668,54 @@
       if (!data) return 'N/A';
       const d = new Date(data);
       return d.toLocaleDateString('pt-BR');
+    }
+
+    function ordenarAguardandoMedico(tipo) {
+      ordenacaoAtualAguardandoMedico = tipo;
+      
+      // Atualizar botões ativos
+      $('#ordenar-hora').removeClass('active');
+      $('#ordenar-risco').removeClass('active');
+      
+      if (tipo === 'hora') {
+        $('#ordenar-hora').addClass('active');
+        // Ordenar por hora da triagem (mais antiga primeiro)
+        pacientesAguardandoMedico.sort((a, b) => {
+          const horaA = a.hora_triagem || '';
+          const horaB = b.hora_triagem || '';
+          return horaA.localeCompare(horaB);
+        });
+      } else if (tipo === 'risco') {
+        $('#ordenar-risco').addClass('active');
+        // Ordenar por classificação de risco (prioridade: Vermelho > Laranja > Amarelo > Verde > Azul)
+        const prioridades = {
+          'Vermelho': 1,
+          'Laranja': 2,
+          'Amarelo': 3,
+          'Verde': 4,
+          'Azul': 5,
+          'N/A': 6
+        };
+        
+        pacientesAguardandoMedico.sort((a, b) => {
+          const riscoA = a.classificacao_risco || 'N/A';
+          const riscoB = b.classificacao_risco || 'N/A';
+          const prioA = prioridades[riscoA] || 999;
+          const prioB = prioridades[riscoB] || 999;
+          
+          if (prioA !== prioB) {
+            return prioA - prioB;
+          }
+          
+          // Se mesma classificação, ordenar por hora
+          const horaA = a.hora_triagem || '';
+          const horaB = b.hora_triagem || '';
+          return horaA.localeCompare(horaB);
+        });
+      }
+      
+      // Exibir pacientes ordenados
+      exibirPacientes('aguardando-medico', pacientesAguardandoMedico);
     }
 
     // Funções de navegação
