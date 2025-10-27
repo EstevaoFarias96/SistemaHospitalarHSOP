@@ -785,6 +785,58 @@
       .nav-tabs { display: none; }
       .tab-pane { display: block !important; }
     }
+
+    /* ===== ALERTA DE FREQUÊNCIA NO MENU ===== */
+    #alertaFrequencia {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.1); }
+    }
+    
+    #linkHistorico {
+      position: relative;
+    }
+    
+    /* ===== ESTILOS PARA TABELA DE HISTÓRICO ===== */
+    #listaHistoricoAtendimentos table tbody tr:hover:not([id^="detalhes_"]) {
+      background-color: rgba(40, 53, 147, 0.05);
+    }
+    
+    #listaHistoricoAtendimentos .btn-group {
+      box-shadow: var(--shadow-sm);
+    }
+    
+    #listaHistoricoAtendimentos .btn-group .btn {
+      transition: all var(--transition-fast);
+    }
+    
+    #listaHistoricoAtendimentos .btn-group .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    #listaHistoricoAtendimentos [id^="detalhes_"] {
+      animation: slideDown 0.3s ease-out;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        max-height: 0;
+      }
+      to {
+        opacity: 1;
+        max-height: 500px;
+      }
+    }
+    
+    #listaHistoricoAtendimentos [id^="detalhes_"] .p-3 {
+      border-left: 4px solid var(--primary-light);
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+    }
   </style>
 </head>
 <body>
@@ -796,6 +848,11 @@
       <a class="nav-link" href="#" data-target="receituarioSection"><i class="fas fa-receipt"></i><span>Receituário</span></a>
       <a class="nav-link" href="#" data-target="atestadoSection"><i class="fas fa-file-medical"></i><span>Atestado</span></a>
       <a class="nav-link" href="#" data-target="fichaReferenciaSection"><i class="fas fa-file-export"></i><span>Ficha de Referência</span></a>
+      <a class="nav-link" href="#" data-target="historicoSection" id="linkHistorico">
+        <i class="fas fa-history"></i>
+        <i class="fas fa-exclamation-circle text-warning" id="alertaFrequencia" style="display:none; font-size:10px; position:absolute; margin-left:-8px; margin-top:-5px;" title="Paciente com mais de 3 atendimentos nos últimos 7 dias"></i>
+        <span>Histórico</span>
+      </a>
       <a class="nav-link" href="#" data-target="enfermagemSection"><i class="fas fa-user-nurse"></i><span>Ficha de Enfermagem</span></a>
       <hr class="mx-3 my-2" style="opacity:.2">
       <a class="nav-link" href="/imprimir/ficha_atendimento/{{ atendimento.id }}" target="_blank" aria-label="Imprimir ficha de atendimento"><i class="fas fa-print"></i><span>Imprimir Ficha</span></a>
@@ -1147,6 +1204,30 @@
       </div>
     </div>
 
+    <!-- Seção: Histórico de Atendimentos -->
+    <div id="historicoSection" class="section">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-3">
+            <i class="fas fa-history"></i>
+            <h5 class="mb-0">Histórico de Atendimentos</h5>
+          </div>
+          <span class="badge bg-info" id="totalAtendimentos">0 atendimentos</span>
+        </div>
+        <div class="card-body">
+          <div id="alertaFrequenciaDetalhado" class="alert alert-warning border-0" style="display:none;">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Atenção:</strong> Este paciente teve <strong id="qtdAtendimentosRecentes">0</strong> atendimentos nos últimos 7 dias.
+          </div>
+          
+          <div id="listaHistoricoAtendimentos" class="loading-state">
+            <i class="fas fa-spinner fa-spin"></i> 
+            <span>Carregando histórico de atendimentos...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Seção: Ficha de Enfermagem -->
     <div id="enfermagemSection" class="section">
       <div class="card">
@@ -1290,7 +1371,13 @@
           $('#sp02').text(a.sp02||'-');
           $('#temp').text(a.temp||'-');
           $('#fr').text(a.fr||'-');
-          $('#peso').text(a.peso||'-');
+          // Formatar peso com unidade
+          if (a.peso && a.peso !== '-') {
+            const pesoFormatado = a.peso.toString().includes('kg') ? a.peso : a.peso + ' kg';
+            $('#peso').text(pesoFormatado);
+          } else {
+            $('#peso').text('-');
+          }
           $('#dx').text(a.dx||'-');
           $('#classificacao').text(a.classificacao_risco||'-');
           $('#badgeRisco').html(badgeRisco(a.classificacao_risco));
@@ -2729,6 +2816,145 @@
           carregarFichasReferencia();
         }, 100);
       });
+    });
+  </script>
+
+  <!-- Script para Histórico de Atendimentos -->
+  <script>
+    let pacienteIdGlobal = null;
+    
+    // Função para carregar histórico de atendimentos
+    function carregarHistoricoAtendimentos() {
+      if (!pacienteIdGlobal) {
+        console.error('ID do paciente não definido');
+        return;
+      }
+      
+      $('#listaHistoricoAtendimentos').html('<div class="loading-state"><i class="fas fa-spinner fa-spin"></i><span>Carregando histórico...</span></div>');
+      
+      fetch(`/api/paciente/${pacienteIdGlobal}/historico-atendimentos`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.success) {
+            // Atualizar badge de total
+            $('#totalAtendimentos').text(`${data.total} atendimento${data.total !== 1 ? 's' : ''}`);
+            
+            // Verificar e exibir alerta de frequência
+            if (data.alerta_frequente) {
+              $('#alertaFrequencia').show(); // Ícone no menu
+              $('#alertaFrequenciaDetalhado').show(); // Alerta na seção
+              $('#qtdAtendimentosRecentes').text(data.atendimentos_ultimos_7_dias);
+            }
+            
+            // Renderizar histórico
+            if (data.historico && data.historico.length > 0) {
+              let html = '<div class="table-responsive"><table class="table table-hover">';
+              html += '<thead class="table-light"><tr>';
+              html += '<th style="width: 12%;">Data</th><th style="width: 8%;">Hora</th><th style="width: 15%;">Status</th><th style="width: 15%;">Classificação</th><th style="width: 25%;">Médico</th><th style="width: 25%;">Ações</th>';
+              html += '</tr></thead><tbody>';
+              
+              data.historico.forEach(atend => {
+                // Badge de classificação de risco
+                let badgeClass = 'secondary';
+                const risco = (atend.classificacao_risco || '').toLowerCase();
+                if (risco.includes('vermelho')) badgeClass = 'danger';
+                else if (risco.includes('laranja') || risco.includes('amarelo')) badgeClass = 'warning';
+                else if (risco.includes('verde')) badgeClass = 'success';
+                else if (risco.includes('azul')) badgeClass = 'primary';
+                
+                html += '<tr>';
+                html += `<td><strong>${atend.data}</strong></td>`;
+                html += `<td>${atend.hora}</td>`;
+                html += `<td><span class="badge bg-${atend.status === 'Alta' ? 'success' : 'info'}">${atend.status}</span></td>`;
+                html += `<td><span class="badge bg-${badgeClass}">${atend.classificacao_risco}</span></td>`;
+                html += `<td><small>${atend.medico}</small></td>`;
+                html += `<td>
+                  <div class="btn-group" role="group">
+                    <button class="btn btn-sm btn-outline-primary" onclick="verDetalhesAtendimento('${atend.id}')" title="Ver detalhes">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <a href="/imprimir/ficha_atendimento/${atend.id}" target="_blank" class="btn btn-sm btn-outline-success" title="Imprimir ficha completa">
+                      <i class="fas fa-print"></i> Ficha
+                    </a>
+                  </div>
+                </td>`;
+                html += '</tr>';
+                
+                // Linha expansível com detalhes
+                html += `<tr id="detalhes_${atend.id}" style="display:none;">`;
+                html += '<td colspan="6" class="bg-light">';
+                html += '<div class="p-3">';
+                html += '<div class="d-flex justify-content-between align-items-start mb-3">';
+                html += '<h6 class="text-primary mb-0"><i class="fas fa-info-circle me-2"></i>Detalhes do Atendimento</h6>';
+                html += `<a href="/imprimir/ficha_atendimento/${atend.id}" target="_blank" class="btn btn-sm btn-success">
+                  <i class="fas fa-print me-1"></i>Imprimir Ficha Completa
+                </a>`;
+                html += '</div>';
+                html += `<div class="mb-2"><strong><i class="fas fa-comment-medical me-2 text-info"></i>Queixa Principal:</strong></div>`;
+                html += `<div class="ps-4 mb-3 text-muted">${atend.triagem.substring(0, 300)}${atend.triagem.length > 300 ? '...' : ''}</div>`;
+                if (atend.anamnese_exame_fisico && atend.anamnese_exame_fisico !== '-') {
+                  html += `<div class="mb-2"><strong><i class="fas fa-stethoscope me-2 text-primary"></i>Anamnese e Exame Físico:</strong></div>`;
+                  html += `<div class="ps-4 mb-3 text-muted">${atend.anamnese_exame_fisico.substring(0, 300)}${atend.anamnese_exame_fisico.length > 300 ? '...' : ''}</div>`;
+                }
+                if (atend.conduta_final && atend.conduta_final !== '-') {
+                  html += `<div class="mb-2"><strong><i class="fas fa-notes-medical me-2 text-success"></i>Conduta Final:</strong></div>`;
+                  html += `<div class="ps-4 text-muted">${atend.conduta_final}</div>`;
+                }
+                html += '<div class="mt-3 text-end">';
+                html += `<small class="text-muted"><i class="fas fa-info-circle me-1"></i>Para ver todos os detalhes, clique em "Imprimir Ficha Completa"</small>`;
+                html += '</div>';
+                html += '</div></td></tr>';
+              });
+              
+              html += '</tbody></table></div>';
+              $('#listaHistoricoAtendimentos').html(html);
+            } else {
+              $('#listaHistoricoAtendimentos').html('<div class="text-center text-muted py-4"><i class="fas fa-inbox fa-2x mb-3 d-block"></i>Nenhum atendimento anterior encontrado.</div>');
+            }
+          } else {
+            $('#listaHistoricoAtendimentos').html('<div class="alert alert-danger">Erro ao carregar histórico</div>');
+          }
+        })
+        .catch(err => {
+          console.error('Erro ao carregar histórico:', err);
+          $('#listaHistoricoAtendimentos').html('<div class="alert alert-danger">Erro ao carregar histórico</div>');
+        });
+    }
+    
+    // Função para expandir/recolher detalhes
+    function verDetalhesAtendimento(atendId) {
+      $(`#detalhes_${atendId}`).toggle();
+    }
+    
+    // Carregar histórico quando a seção for ativada
+    $(document).on('click', '[data-target="historicoSection"]', function() {
+      if (pacienteIdGlobal) {
+        carregarHistoricoAtendimentos();
+      }
+    });
+    
+    // Capturar o ID do paciente quando os dados forem carregados
+    $(function() {
+      const id = document.getElementById('ATENDIMENTO_ID').value;
+      fetch(`/api/atendimento/${id}`)
+        .then(r => r.json())
+        .then(d => {
+          if (d.success && d.data && d.data.paciente) {
+            pacienteIdGlobal = d.data.paciente.id;
+            console.log('Paciente ID capturado:', pacienteIdGlobal);
+            
+            // Carregar histórico em background para verificar alerta
+            fetch(`/api/paciente/${pacienteIdGlobal}/historico-atendimentos`)
+              .then(r => r.json())
+              .then(data => {
+                if (data.success && data.alerta_frequente) {
+                  $('#alertaFrequencia').show();
+                }
+              })
+              .catch(() => {});
+          }
+        })
+        .catch(() => {});
     });
   </script>
 

@@ -273,6 +273,18 @@
           <div class="info-line"><strong>Telefone:</strong> ${p.telefone}</div>
         `);
 
+        // Formatar peso corretamente
+        let pesoFormatado = '---';
+        if (a.peso) {
+          pesoFormatado = a.peso.toString().toLowerCase().includes('kg') ? a.peso : a.peso + ' kg';
+        }
+        
+        // Formatar altura corretamente
+        let alturaFormatada = '---';
+        if (a.altura) {
+          alturaFormatada = a.altura.toString().toLowerCase().includes('m') ? a.altura : a.altura + ' m';
+        }
+        
         $('#dadosTriagem').append(`
           <div class="d-flex justify-content-between">
             <div><strong>Enfermeiro:</strong> ${data.enfermeiro} | <strong>Horário:</strong> ${a.horario_triagem ? new Date(a.horario_triagem).toLocaleString() : '---'}</div>
@@ -284,8 +296,8 @@
             <strong>Pulso:</strong> ${a.pulso || '---'} |
             <strong>SpO2:</strong> ${a.sp02 || '---'} |
             <strong>FR:</strong> ${a.fr || '---'} |
-            <strong>Peso:</strong> ${a.peso ? a.peso + 'kg' : '---'} |
-            <strong>Altura:</strong> ${a.altura ? a.altura + 'm' : '---'} |
+            <strong>Peso:</strong> ${pesoFormatado} |
+            <strong>Altura:</strong> ${alturaFormatada} |
             <strong>DX:</strong> ${a.dx || '---'}
           </div>
           <div class="info-line mt-2"><strong>Alergias:</strong> ${a.alergias || '---'}</div>

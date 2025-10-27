@@ -1063,6 +1063,9 @@ def api_dados_atendimento(atendimento_id):
                 'sp02': atendimento.sp02,
                 'temp': atendimento.temp,
                 'fr': atendimento.fr,
+                'peso': atendimento.peso,
+                'altura': atendimento.altura,
+                'dx': atendimento.dx,
                 'alergias': atendimento.alergias,
                 'anamnese_exame_fisico': atendimento.anamnese_exame_fisico,
                 'conduta_final': atendimento.conduta_final,
@@ -1092,6 +1095,58 @@ def api_dados_atendimento(atendimento_id):
         return jsonify({'success': True, 'data': data})
     except Exception as e:
         logging.error(f"Erro ao obter dados do atendimento: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
+
+
+# API para buscar histórico de atendimentos do paciente
+@bp.route('/api/paciente/<int:paciente_id>/historico-atendimentos', methods=['GET'])
+@login_required
+def api_historico_atendimentos_paciente(paciente_id):
+    try:
+        current_user = get_current_user()
+        if not current_user:
+            return jsonify({'success': False, 'message': 'Usuário não autenticado'}), 401
+        if current_user.cargo.lower() not in ['medico', 'multi', 'admin', 'enfermeiro']:
+            return jsonify({'success': False, 'message': 'Acesso não autorizado'}), 403
+
+        # Buscar todos os atendimentos do paciente, ordenados por data decrescente
+        atendimentos = Atendimento.query.filter_by(paciente_id=paciente_id)\
+            .order_by(Atendimento.data_atendimento.desc(), Atendimento.hora_atendimento.desc())\
+            .limit(20)\
+            .all()
+        
+        # Calcular atendimentos nos últimos 7 dias
+        data_limite = date.today() - timedelta(days=7)
+        atendimentos_recentes = Atendimento.query.filter(
+            Atendimento.paciente_id == paciente_id,
+            Atendimento.data_atendimento >= data_limite
+        ).count()
+        
+        historico = []
+        for atend in atendimentos:
+            medico = Funcionario.query.get(atend.medico_id) if atend.medico_id else None
+            historico.append({
+                'id': atend.id,
+                'data': atend.data_atendimento.strftime('%d/%m/%Y') if atend.data_atendimento else '-',
+                'hora': atend.hora_atendimento.strftime('%H:%M') if atend.hora_atendimento else '-',
+                'status': atend.status or '-',
+                'classificacao_risco': atend.classificacao_risco or '-',
+                'triagem': atend.triagem or '-',
+                'medico': medico.nome if medico else '-',
+                'conduta_final': atend.conduta_final or '-',
+                'anamnese_exame_fisico': atend.anamnese_exame_fisico or '-'
+            })
+        
+        return jsonify({
+            'success': True, 
+            'historico': historico,
+            'total': len(historico),
+            'atendimentos_ultimos_7_dias': atendimentos_recentes,
+            'alerta_frequente': atendimentos_recentes > 3
+        })
+    except Exception as e:
+        logging.error(f"Erro ao buscar histórico de atendimentos: {str(e)}")
         logging.error(traceback.format_exc())
         return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
 
