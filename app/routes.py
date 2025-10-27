@@ -1148,6 +1148,10 @@ def api_historico_atendimentos_paciente(paciente_id):
                 if presc.texto_procedimento_medico:
                     prescricao_texto.append(f"Procedimentos: {presc.texto_procedimento_medico}")
             
+            # Verificar se existe observação ou internação
+            observacao = ListaObservacao.query.filter_by(id_atendimento=atend.id).first()
+            internacao = Internacao.query.filter_by(atendimento_id=atend.id).first()
+            
             historico.append({
                 'id': atend.id,
                 'data': atend.data_atendimento.strftime('%d/%m/%Y') if atend.data_atendimento else '-',
@@ -1158,7 +1162,9 @@ def api_historico_atendimentos_paciente(paciente_id):
                 'medico': medico.nome if medico else '-',
                 'conduta_final': atend.conduta_final or '-',
                 'anamnese_exame_fisico': atend.anamnese_exame_fisico or '-',
-                'prescricao': '\n'.join(prescricao_texto) if prescricao_texto else '-'
+                'prescricao': '\n'.join(prescricao_texto) if prescricao_texto else '-',
+                'tem_observacao': observacao is not None,
+                'tem_internacao': internacao is not None
             })
         
         return jsonify({
