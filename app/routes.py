@@ -1110,9 +1110,15 @@ def api_historico_atendimentos_paciente(paciente_id):
         if current_user.cargo.lower() not in ['medico', 'multi', 'admin', 'enfermeiro']:
             return jsonify({'success': False, 'message': 'Acesso não autorizado'}), 403
 
-        # Buscar todos os atendimentos do paciente, ordenados por data decrescente
-        atendimentos = Atendimento.query.filter_by(paciente_id=paciente_id)\
-            .order_by(Atendimento.data_atendimento.desc(), Atendimento.hora_atendimento.desc())\
+        # Pegar o ID do atendimento atual para excluí-lo do histórico
+        atendimento_atual_id = request.args.get('atendimento_atual_id')
+        
+        # Buscar todos os atendimentos do paciente, ordenados por data decrescente, excluindo o atual
+        query = Atendimento.query.filter_by(paciente_id=paciente_id)
+        if atendimento_atual_id:
+            query = query.filter(Atendimento.id != atendimento_atual_id)
+        
+        atendimentos = query.order_by(Atendimento.data_atendimento.desc(), Atendimento.hora_atendimento.desc())\
             .limit(20)\
             .all()
         
@@ -1126,6 +1132,22 @@ def api_historico_atendimentos_paciente(paciente_id):
         historico = []
         for atend in atendimentos:
             medico = Funcionario.query.get(atend.medico_id) if atend.medico_id else None
+            
+            # Buscar prescrições de emergência do atendimento
+            prescricoes = PrescricaoEmergencia.query.filter_by(atendimento_id=atend.id).all()
+            prescricao_texto = []
+            for presc in prescricoes:
+                if presc.texto_dieta:
+                    prescricao_texto.append(f"Dieta: {presc.texto_dieta}")
+                if presc.medicamentos:
+                    meds = json.loads(presc.medicamentos) if isinstance(presc.medicamentos, str) else presc.medicamentos
+                    if meds:
+                        prescricao_texto.append("Medicamentos:")
+                        for med in meds:
+                            prescricao_texto.append(f"  • {med.get('nome_medicamento', '')} - {med.get('descricao_uso', '')}")
+                if presc.texto_procedimento_medico:
+                    prescricao_texto.append(f"Procedimentos: {presc.texto_procedimento_medico}")
+            
             historico.append({
                 'id': atend.id,
                 'data': atend.data_atendimento.strftime('%d/%m/%Y') if atend.data_atendimento else '-',
@@ -1135,7 +1157,8 @@ def api_historico_atendimentos_paciente(paciente_id):
                 'triagem': atend.triagem or '-',
                 'medico': medico.nome if medico else '-',
                 'conduta_final': atend.conduta_final or '-',
-                'anamnese_exame_fisico': atend.anamnese_exame_fisico or '-'
+                'anamnese_exame_fisico': atend.anamnese_exame_fisico or '-',
+                'prescricao': '\n'.join(prescricao_texto) if prescricao_texto else '-'
             })
         
         return jsonify({

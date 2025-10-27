@@ -837,6 +837,12 @@
       border-left: 4px solid var(--primary-light);
       background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
     }
+    
+    #listaHistoricoAtendimentos .btn-ver-detalhes.active {
+      background-color: var(--primary-main);
+      color: white;
+      border-color: var(--primary-main);
+    }
   </style>
 </head>
 <body>
@@ -2830,9 +2836,11 @@
         return;
       }
       
+      const atendimentoAtualId = document.getElementById('ATENDIMENTO_ID').value;
+      
       $('#listaHistoricoAtendimentos').html('<div class="loading-state"><i class="fas fa-spinner fa-spin"></i><span>Carregando histórico...</span></div>');
       
-      fetch(`/api/paciente/${pacienteIdGlobal}/historico-atendimentos`)
+      fetch(`/api/paciente/${pacienteIdGlobal}/historico-atendimentos?atendimento_atual_id=${atendimentoAtualId}`)
         .then(r => r.json())
         .then(data => {
           if (data.success) {
@@ -2870,7 +2878,7 @@
                 html += `<td><small>${atend.medico}</small></td>`;
                 html += `<td>
                   <div class="btn-group" role="group">
-                    <button class="btn btn-sm btn-outline-primary" onclick="verDetalhesAtendimento('${atend.id}')" title="Ver detalhes">
+                    <button class="btn btn-sm btn-outline-primary btn-ver-detalhes" data-atend-id="${atend.id}" title="Ver detalhes">
                       <i class="fas fa-eye"></i>
                     </button>
                     <a href="/imprimir/ficha_atendimento/${atend.id}" target="_blank" class="btn btn-sm btn-outline-success" title="Imprimir ficha completa">
@@ -2890,16 +2898,25 @@
                   <i class="fas fa-print me-1"></i>Imprimir Ficha Completa
                 </a>`;
                 html += '</div>';
-                html += `<div class="mb-2"><strong><i class="fas fa-comment-medical me-2 text-info"></i>Queixa Principal:</strong></div>`;
-                html += `<div class="ps-4 mb-3 text-muted">${atend.triagem.substring(0, 300)}${atend.triagem.length > 300 ? '...' : ''}</div>`;
+                
+                // Triagem
+                if (atend.triagem && atend.triagem !== '-') {
+                  html += `<div class="mb-2"><strong><i class="fas fa-comment-medical me-2 text-info"></i>Triagem:</strong></div>`;
+                  html += `<div class="ps-4 mb-3 text-muted">${atend.triagem.substring(0, 400)}${atend.triagem.length > 400 ? '...' : ''}</div>`;
+                }
+                
+                // Exame Físico
                 if (atend.anamnese_exame_fisico && atend.anamnese_exame_fisico !== '-') {
-                  html += `<div class="mb-2"><strong><i class="fas fa-stethoscope me-2 text-primary"></i>Anamnese e Exame Físico:</strong></div>`;
-                  html += `<div class="ps-4 mb-3 text-muted">${atend.anamnese_exame_fisico.substring(0, 300)}${atend.anamnese_exame_fisico.length > 300 ? '...' : ''}</div>`;
+                  html += `<div class="mb-2"><strong><i class="fas fa-stethoscope me-2 text-primary"></i>Exame Físico:</strong></div>`;
+                  html += `<div class="ps-4 mb-3 text-muted" style="white-space: pre-wrap;">${atend.anamnese_exame_fisico.substring(0, 400)}${atend.anamnese_exame_fisico.length > 400 ? '...' : ''}</div>`;
                 }
-                if (atend.conduta_final && atend.conduta_final !== '-') {
-                  html += `<div class="mb-2"><strong><i class="fas fa-notes-medical me-2 text-success"></i>Conduta Final:</strong></div>`;
-                  html += `<div class="ps-4 text-muted">${atend.conduta_final}</div>`;
+                
+                // Prescrição
+                if (atend.prescricao && atend.prescricao !== '-') {
+                  html += `<div class="mb-2"><strong><i class="fas fa-pills me-2 text-success"></i>Prescrição:</strong></div>`;
+                  html += `<div class="ps-4 text-muted" style="white-space: pre-wrap;">${atend.prescricao}</div>`;
                 }
+                
                 html += '<div class="mt-3 text-end">';
                 html += `<small class="text-muted"><i class="fas fa-info-circle me-1"></i>Para ver todos os detalhes, clique em "Imprimir Ficha Completa"</small>`;
                 html += '</div>';
@@ -2921,10 +2938,27 @@
         });
     }
     
-    // Função para expandir/recolher detalhes
-    function verDetalhesAtendimento(atendId) {
-      $(`#detalhes_${atendId}`).toggle();
-    }
+    // Event listener delegado para os botões de ver detalhes (criados dinamicamente)
+    $(document).on('click', '.btn-ver-detalhes', function() {
+      const atendId = $(this).data('atend-id');
+      console.log('Clicou em ver detalhes do atendimento:', atendId);
+      
+      const detalhes = $(`#detalhes_${atendId}`);
+      console.log('Elemento detalhes encontrado:', detalhes.length > 0);
+      
+      if (detalhes.is(':visible')) {
+        detalhes.fadeOut(300);
+        $(this).removeClass('active');
+      } else {
+        // Fechar todos os outros detalhes abertos
+        $('[id^="detalhes_"]').fadeOut(300);
+        $('.btn-ver-detalhes').removeClass('active');
+        
+        // Abrir este
+        detalhes.fadeIn(300);
+        $(this).addClass('active');
+      }
+    });
     
     // Carregar histórico quando a seção for ativada
     $(document).on('click', '[data-target="historicoSection"]', function() {
@@ -2935,16 +2969,16 @@
     
     // Capturar o ID do paciente quando os dados forem carregados
     $(function() {
-      const id = document.getElementById('ATENDIMENTO_ID').value;
-      fetch(`/api/atendimento/${id}`)
+      const atendimentoAtualId = document.getElementById('ATENDIMENTO_ID').value;
+      fetch(`/api/atendimento/${atendimentoAtualId}`)
         .then(r => r.json())
         .then(d => {
           if (d.success && d.data && d.data.paciente) {
             pacienteIdGlobal = d.data.paciente.id;
             console.log('Paciente ID capturado:', pacienteIdGlobal);
             
-            // Carregar histórico em background para verificar alerta
-            fetch(`/api/paciente/${pacienteIdGlobal}/historico-atendimentos`)
+            // Carregar histórico em background para verificar alerta (excluindo atendimento atual)
+            fetch(`/api/paciente/${pacienteIdGlobal}/historico-atendimentos?atendimento_atual_id=${atendimentoAtualId}`)
               .then(r => r.json())
               .then(data => {
                 if (data.success && data.alerta_frequente) {
