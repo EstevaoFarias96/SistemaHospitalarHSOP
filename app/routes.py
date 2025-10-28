@@ -2108,50 +2108,91 @@ def painel_administrador():
             ultimas_internacoes = []
 
         # Dados adicionais para o modo TV
+        hoje_date = agora_br.date()
+        logging.info(f"=== INÍCIO CÁLCULOS MODO TV - Data: {hoje_date} ===")
+        
         # 1) Média de idade dos pacientes de hoje
         media_idade_hoje = 0
         try:
-            atendimentos_hoje = db.session.query(Atendimento).filter(
-                Atendimento.data_atendimento >= inicio_dia,
-                Atendimento.data_atendimento < fim_dia
+            # Usar join para garantir que os dados do paciente sejam carregados
+            atendimentos_hoje = db.session.query(Atendimento).join(
+                Paciente, Atendimento.paciente_id == Paciente.id
+            ).filter(
+                Atendimento.data_atendimento == hoje_date
             ).all()
             
+            logging.info(f"Total de atendimentos hoje ({hoje_date}): {len(atendimentos_hoje)}")
+            
             idades = []
+            pacientes_sem_data = 0
             for atend in atendimentos_hoje:
-                if atend.paciente and atend.paciente.data_nascimento:
+                paciente = db.session.query(Paciente).get(atend.paciente_id)
+                if paciente and paciente.data_nascimento:
                     try:
-                        if isinstance(atend.paciente.data_nascimento, str):
-                            data_nasc = datetime.strptime(atend.paciente.data_nascimento, '%Y-%m-%d').date()
+                        if isinstance(paciente.data_nascimento, str):
+                            data_nasc = datetime.strptime(paciente.data_nascimento, '%Y-%m-%d').date()
                         else:
-                            data_nasc = atend.paciente.data_nascimento
+                            data_nasc = paciente.data_nascimento
                         idade = (agora_br.date() - data_nasc).days // 365
                         if 0 <= idade <= 120:
                             idades.append(idade)
-                    except:
+                    except Exception as ex:
+                        logging.warning(f"Erro ao calcular idade do paciente #{paciente.id}: {str(ex)}")
                         continue
+                else:
+                    pacientes_sem_data += 1
+            
+            if pacientes_sem_data > 0:
+                logging.info(f"Pacientes sem data de nascimento: {pacientes_sem_data}")
             
             if idades:
                 media_idade_hoje = round(sum(idades) / len(idades))
+            
+            logging.info(f"Idade média calculada: {media_idade_hoje} (baseado em {len(idades)} pacientes)")
         except Exception as e:
             logging.error(f"Erro ao calcular média de idade: {str(e)}")
+            logging.error(traceback.format_exc())
             media_idade_hoje = 0
 
         # 2) Divisão por sexo dos pacientes de hoje
         divisao_sexo_masculino = 0
         divisao_sexo_feminino = 0
+        sexos_nao_reconhecidos = []
         try:
-            atendimentos_hoje = db.session.query(Atendimento).filter(
-                Atendimento.data_atendimento >= inicio_dia,
-                Atendimento.data_atendimento < fim_dia
+            # Usar join para garantir que os dados do paciente sejam carregados
+            atendimentos_hoje = db.session.query(Atendimento).join(
+                Paciente, Atendimento.paciente_id == Paciente.id
+            ).filter(
+                Atendimento.data_atendimento == hoje_date
             ).all()
             
+            pacientes_sem_sexo = 0
             for atend in atendimentos_hoje:
-                if atend.paciente and atend.paciente.sexo:
-                    sexo_lower = str(atend.paciente.sexo).strip().lower()
-                    if sexo_lower in ['m', 'masculino', 'masc']:
+                paciente = db.session.query(Paciente).get(atend.paciente_id)
+                if paciente and paciente.sexo:
+                    sexo_original = str(paciente.sexo).strip()
+                    sexo_lower = sexo_original.lower()
+                    
+                    # Suporta: M, Masculino, Masc, Homem
+                    if sexo_lower in ['m', 'masculino', 'masc', 'homem']:
                         divisao_sexo_masculino += 1
-                    elif sexo_lower in ['f', 'feminino', 'fem']:
+                    # Suporta: F, Feminino, Fem, Mulher
+                    elif sexo_lower in ['f', 'feminino', 'fem', 'mulher']:
                         divisao_sexo_feminino += 1
+                    else:
+                        # Registrar valores não reconhecidos
+                        if sexo_original not in sexos_nao_reconhecidos:
+                            sexos_nao_reconhecidos.append(sexo_original)
+                            logging.warning(f"Valor de sexo não reconhecido: '{sexo_original}'")
+                else:
+                    pacientes_sem_sexo += 1
+            
+            if pacientes_sem_sexo > 0:
+                logging.info(f"Pacientes sem sexo informado: {pacientes_sem_sexo}")
+            
+            logging.info(f"Divisão por sexo calculada - Masculino: {divisao_sexo_masculino}, Feminino: {divisao_sexo_feminino}")
+            if sexos_nao_reconhecidos:
+                logging.warning(f"Valores de sexo não reconhecidos encontrados: {sexos_nao_reconhecidos}")
         except Exception as e:
             logging.error(f"Erro ao calcular divisão por sexo: {str(e)}")
             divisao_sexo_masculino = 0
@@ -2167,8 +2208,7 @@ def painel_administrador():
             ).join(
                 Atendimento, Atendimento.paciente_id == Paciente.id
             ).filter(
-                Atendimento.data_atendimento >= inicio_dia,
-                Atendimento.data_atendimento < fim_dia,
+                Atendimento.data_atendimento == hoje_date,
                 Paciente.bairro.isnot(None),
                 Paciente.bairro != ''
             ).group_by(
@@ -2188,39 +2228,101 @@ def painel_administrador():
         # 4) Tempo médio de atendimento do dia (hora_atendimento até horario_consulta_medica)
         tempo_medio_atendimento_dia = 0
         try:
+            # Buscar atendimentos de hoje que tenham hora_atendimento E horario_consulta_medica preenchidos
             atendimentos_com_consulta = db.session.query(Atendimento).filter(
-                Atendimento.data_atendimento >= inicio_dia,
-                Atendimento.data_atendimento < fim_dia,
+                Atendimento.data_atendimento == hoje_date,
                 Atendimento.hora_atendimento.isnot(None),
                 Atendimento.horario_consulta_medica.isnot(None)
             ).all()
             
-            tempos_atendimento = []
-            for atend in atendimentos_com_consulta:
-                try:
-                    # Calcular tempo em minutos
-                    if isinstance(atend.hora_atendimento, datetime):
-                        dt_inicio = atend.hora_atendimento
-                    else:
-                        dt_inicio = datetime.combine(atend.data_atendimento, atend.hora_atendimento)
-                    
-                    if isinstance(atend.horario_consulta_medica, datetime):
-                        dt_fim = atend.horario_consulta_medica
-                    else:
-                        dt_fim = datetime.combine(atend.data_atendimento, atend.horario_consulta_medica)
-                    
-                    tempo_min = (dt_fim - dt_inicio).total_seconds() / 60.0
-                    
-                    # Filtrar outliers (tempo entre 1 min e 600 min)
-                    if 1 <= tempo_min <= 600:
-                        tempos_atendimento.append(tempo_min)
-                except Exception:
-                    continue
+            logging.info(f"Atendimentos com consulta médica hoje: {len(atendimentos_com_consulta)}")
             
-            if tempos_atendimento:
-                tempo_medio_atendimento_dia = round(sum(tempos_atendimento) / len(tempos_atendimento))
+            if len(atendimentos_com_consulta) == 0:
+                logging.warning("Nenhum atendimento encontrado com hora_atendimento E horario_consulta_medica preenchidos")
+                tempo_medio_atendimento_dia = 0
+            else:
+                tempos_atendimento = []
+                erros_calculo = 0
+                
+                for idx, atend in enumerate(atendimentos_com_consulta):
+                    try:
+                        # Log detalhado para os primeiros 3 atendimentos
+                        if idx < 3:
+                            logging.info(f"Processando atendimento #{atend.id}:")
+                            logging.info(f"  - data_atendimento: {atend.data_atendimento} (tipo: {type(atend.data_atendimento)})")
+                            logging.info(f"  - hora_atendimento: {atend.hora_atendimento} (tipo: {type(atend.hora_atendimento)})")
+                            logging.info(f"  - horario_consulta_medica: {atend.horario_consulta_medica} (tipo: {type(atend.horario_consulta_medica)})")
+                        
+                        # PASSO 1: Converter hora_atendimento para datetime
+                        if isinstance(atend.hora_atendimento, datetime):
+                            dt_inicio = atend.hora_atendimento
+                        elif isinstance(atend.hora_atendimento, time):
+                            # Se for time, combinar com data_atendimento
+                            dt_inicio = datetime.combine(atend.data_atendimento, atend.hora_atendimento)
+                            # Adicionar timezone se necessário
+                            if dt_inicio.tzinfo is None:
+                                dt_inicio = dt_inicio.replace(tzinfo=ZoneInfo("America/Sao_Paulo"))
+                        else:
+                            logging.warning(f"Atendimento #{atend.id}: hora_atendimento tem tipo inesperado: {type(atend.hora_atendimento)}")
+                            erros_calculo += 1
+                            continue
+                        
+                        # PASSO 2: Converter horario_consulta_medica para datetime
+                        if isinstance(atend.horario_consulta_medica, datetime):
+                            dt_fim = atend.horario_consulta_medica
+                        elif isinstance(atend.horario_consulta_medica, time):
+                            # Se for time, combinar com data_atendimento
+                            dt_fim = datetime.combine(atend.data_atendimento, atend.horario_consulta_medica)
+                            # Adicionar timezone se necessário
+                            if dt_fim.tzinfo is None:
+                                dt_fim = dt_fim.replace(tzinfo=ZoneInfo("America/Sao_Paulo"))
+                        else:
+                            logging.warning(f"Atendimento #{atend.id}: horario_consulta_medica tem tipo inesperado: {type(atend.horario_consulta_medica)}")
+                            erros_calculo += 1
+                            continue
+                        
+                        # PASSO 3: Garantir que ambos tenham ou não tenham timezone
+                        if dt_inicio.tzinfo is None and dt_fim.tzinfo is not None:
+                            dt_inicio = dt_inicio.replace(tzinfo=ZoneInfo("America/Sao_Paulo"))
+                        elif dt_inicio.tzinfo is not None and dt_fim.tzinfo is None:
+                            dt_fim = dt_fim.replace(tzinfo=ZoneInfo("America/Sao_Paulo"))
+                        
+                        # PASSO 4: Calcular diferença em minutos
+                        tempo_min = (dt_fim - dt_inicio).total_seconds() / 60.0
+                        
+                        if idx < 3:
+                            logging.info(f"  - dt_inicio: {dt_inicio}")
+                            logging.info(f"  - dt_fim: {dt_fim}")
+                            logging.info(f"  - tempo calculado: {tempo_min:.1f} min")
+                        
+                        # PASSO 5: Filtrar outliers (tempo entre 1 min e 600 min = 10 horas)
+                        if 1 <= tempo_min <= 600:
+                            tempos_atendimento.append(tempo_min)
+                        else:
+                            if idx < 3:
+                                logging.info(f"  - REJEITADO: tempo fora do range válido (1-600 min)")
+                            logging.debug(f"Atendimento #{atend.id}: tempo fora do range ({tempo_min:.1f} min)")
+                        
+                    except Exception as ex:
+                        logging.warning(f"Erro ao calcular tempo do atendimento #{atend.id}: {str(ex)}")
+                        logging.warning(traceback.format_exc())
+                        erros_calculo += 1
+                        continue
+                
+                # Calcular média
+                if tempos_atendimento:
+                    tempo_medio_atendimento_dia = round(sum(tempos_atendimento) / len(tempos_atendimento))
+                    logging.info(f"✓ Tempo médio de atendimento: {tempo_medio_atendimento_dia} min (baseado em {len(tempos_atendimento)} atendimentos válidos)")
+                else:
+                    logging.warning(f"Nenhum tempo válido calculado! Erros: {erros_calculo}")
+                    tempo_medio_atendimento_dia = 0
+                
+                if erros_calculo > 0:
+                    logging.warning(f"Houve {erros_calculo} erros ao calcular tempos de atendimento")
+                    
         except Exception as e:
             logging.error(f"Erro ao calcular tempo médio de atendimento: {str(e)}")
+            logging.error(traceback.format_exc())
             tempo_medio_atendimento_dia = 0
         
         # 5) Taxas de desfecho dos atendimentos de hoje
@@ -2231,15 +2333,15 @@ def painel_administrador():
         try:
             # Buscar todos os atendimentos de hoje
             total_atend_hoje = db.session.query(func.count(Atendimento.id)).filter(
-                Atendimento.data_atendimento >= inicio_dia,
-                Atendimento.data_atendimento < fim_dia
+                Atendimento.data_atendimento == hoje_date
             ).scalar() or 0
+            
+            logging.info(f"Total de atendimentos para cálculo de taxas: {total_atend_hoje}")
             
             if total_atend_hoje > 0:
                 # Contar altas
                 count_altas = db.session.query(func.count(Atendimento.id)).filter(
-                    Atendimento.data_atendimento >= inicio_dia,
-                    Atendimento.data_atendimento < fim_dia,
+                    Atendimento.data_atendimento == hoje_date,
                     db.or_(
                         Atendimento.status == 'Alta',
                         Atendimento.status.ilike('%alta%')
@@ -2249,8 +2351,7 @@ def painel_administrador():
                 
                 # Contar transferências
                 count_transfer = db.session.query(func.count(Atendimento.id)).filter(
-                    Atendimento.data_atendimento >= inicio_dia,
-                    Atendimento.data_atendimento < fim_dia,
+                    Atendimento.data_atendimento == hoje_date,
                     db.or_(
                         Atendimento.status == 'Transferido',
                         Atendimento.status.ilike('%transfer%')
@@ -2260,8 +2361,7 @@ def painel_administrador():
                 
                 # Contar óbitos
                 count_obitos = db.session.query(func.count(Atendimento.id)).filter(
-                    Atendimento.data_atendimento >= inicio_dia,
-                    Atendimento.data_atendimento < fim_dia,
+                    Atendimento.data_atendimento == hoje_date,
                     db.or_(
                         Atendimento.status == 'Óbito',
                         Atendimento.status.ilike('%obito%'),
@@ -2272,14 +2372,15 @@ def painel_administrador():
                 
                 # Contar evasões
                 count_evasoes = db.session.query(func.count(Atendimento.id)).filter(
-                    Atendimento.data_atendimento >= inicio_dia,
-                    Atendimento.data_atendimento < fim_dia,
+                    Atendimento.data_atendimento == hoje_date,
                     db.or_(
                         Atendimento.status == 'Evasão',
                         Atendimento.status.ilike('%evas%')
                     )
                 ).scalar() or 0
                 taxa_evasao = round((count_evasoes / total_atend_hoje) * 100, 1)
+                
+                logging.info(f"Taxas calculadas - Altas: {taxa_alta}%, Transf: {taxa_transferencia}%, Óbitos: {taxa_obito}%, Evasões: {taxa_evasao}%")
         except Exception as e:
             logging.error(f"Erro ao calcular taxas de desfecho: {str(e)}")
             taxa_alta = 0
