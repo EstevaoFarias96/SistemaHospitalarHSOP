@@ -2185,6 +2185,108 @@ def painel_administrador():
             bairros_labels = []
             bairros_valores = []
 
+        # 4) Tempo médio de atendimento do dia (hora_atendimento até horario_consulta_medica)
+        tempo_medio_atendimento_dia = 0
+        try:
+            atendimentos_com_consulta = db.session.query(Atendimento).filter(
+                Atendimento.data_atendimento >= inicio_dia,
+                Atendimento.data_atendimento < fim_dia,
+                Atendimento.hora_atendimento.isnot(None),
+                Atendimento.horario_consulta_medica.isnot(None)
+            ).all()
+            
+            tempos_atendimento = []
+            for atend in atendimentos_com_consulta:
+                try:
+                    # Calcular tempo em minutos
+                    if isinstance(atend.hora_atendimento, datetime):
+                        dt_inicio = atend.hora_atendimento
+                    else:
+                        dt_inicio = datetime.combine(atend.data_atendimento, atend.hora_atendimento)
+                    
+                    if isinstance(atend.horario_consulta_medica, datetime):
+                        dt_fim = atend.horario_consulta_medica
+                    else:
+                        dt_fim = datetime.combine(atend.data_atendimento, atend.horario_consulta_medica)
+                    
+                    tempo_min = (dt_fim - dt_inicio).total_seconds() / 60.0
+                    
+                    # Filtrar outliers (tempo entre 1 min e 600 min)
+                    if 1 <= tempo_min <= 600:
+                        tempos_atendimento.append(tempo_min)
+                except Exception:
+                    continue
+            
+            if tempos_atendimento:
+                tempo_medio_atendimento_dia = round(sum(tempos_atendimento) / len(tempos_atendimento))
+        except Exception as e:
+            logging.error(f"Erro ao calcular tempo médio de atendimento: {str(e)}")
+            tempo_medio_atendimento_dia = 0
+        
+        # 5) Taxas de desfecho dos atendimentos de hoje
+        taxa_alta = 0
+        taxa_transferencia = 0
+        taxa_obito = 0
+        taxa_evasao = 0
+        try:
+            # Buscar todos os atendimentos de hoje
+            total_atend_hoje = db.session.query(func.count(Atendimento.id)).filter(
+                Atendimento.data_atendimento >= inicio_dia,
+                Atendimento.data_atendimento < fim_dia
+            ).scalar() or 0
+            
+            if total_atend_hoje > 0:
+                # Contar altas
+                count_altas = db.session.query(func.count(Atendimento.id)).filter(
+                    Atendimento.data_atendimento >= inicio_dia,
+                    Atendimento.data_atendimento < fim_dia,
+                    db.or_(
+                        Atendimento.status == 'Alta',
+                        Atendimento.status.ilike('%alta%')
+                    )
+                ).scalar() or 0
+                taxa_alta = round((count_altas / total_atend_hoje) * 100, 1)
+                
+                # Contar transferências
+                count_transfer = db.session.query(func.count(Atendimento.id)).filter(
+                    Atendimento.data_atendimento >= inicio_dia,
+                    Atendimento.data_atendimento < fim_dia,
+                    db.or_(
+                        Atendimento.status == 'Transferido',
+                        Atendimento.status.ilike('%transfer%')
+                    )
+                ).scalar() or 0
+                taxa_transferencia = round((count_transfer / total_atend_hoje) * 100, 1)
+                
+                # Contar óbitos
+                count_obitos = db.session.query(func.count(Atendimento.id)).filter(
+                    Atendimento.data_atendimento >= inicio_dia,
+                    Atendimento.data_atendimento < fim_dia,
+                    db.or_(
+                        Atendimento.status == 'Óbito',
+                        Atendimento.status.ilike('%obito%'),
+                        Atendimento.status.ilike('%óbito%')
+                    )
+                ).scalar() or 0
+                taxa_obito = round((count_obitos / total_atend_hoje) * 100, 1)
+                
+                # Contar evasões
+                count_evasoes = db.session.query(func.count(Atendimento.id)).filter(
+                    Atendimento.data_atendimento >= inicio_dia,
+                    Atendimento.data_atendimento < fim_dia,
+                    db.or_(
+                        Atendimento.status == 'Evasão',
+                        Atendimento.status.ilike('%evas%')
+                    )
+                ).scalar() or 0
+                taxa_evasao = round((count_evasoes / total_atend_hoje) * 100, 1)
+        except Exception as e:
+            logging.error(f"Erro ao calcular taxas de desfecho: {str(e)}")
+            taxa_alta = 0
+            taxa_transferencia = 0
+            taxa_obito = 0
+            taxa_evasao = 0
+
         contexto = dict(
             total_internacoes_hoje=total_internacoes_hoje,
             taxa_ocupacao=taxa_ocupacao,
@@ -2223,6 +2325,13 @@ def painel_administrador():
             divisao_sexo_feminino=divisao_sexo_feminino,
             bairros_labels=bairros_labels,
             bairros_valores=bairros_valores,
+            # Tempo médio de atendimento do dia
+            tempo_medio_atendimento_dia=tempo_medio_atendimento_dia,
+            # Taxas de desfecho
+            taxa_alta=taxa_alta,
+            taxa_transferencia=taxa_transferencia,
+            taxa_obito=taxa_obito,
+            taxa_evasao=taxa_evasao,
         )
         return render_template('administrador.html', **contexto)
     except Exception as e:

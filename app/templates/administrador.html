@@ -75,7 +75,7 @@
         left: 0;
         width: 100vw;
         height: 100vh;
-        background: linear-gradient(135deg, #a8d5e2 0%, #6fb3d2 100%);
+        background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #7dd3fc 100%);
         z-index: 9999;
         display: none;
         overflow: hidden;
@@ -100,13 +100,14 @@
     }
     
     .tv-header {
-        background: rgba(0,0,0,0.3);
+        background: rgba(14,165,233,0.95);
         backdrop-filter: blur(10px);
         padding: 1.5rem 3rem;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-bottom: 3px solid rgba(255,255,255,0.2);
+        border-bottom: 3px solid rgba(56,189,248,0.5);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
     }
     .tv-header h1 {
         color: white;
@@ -114,6 +115,14 @@
         font-weight: 700;
         margin: 0;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .tv-logo {
+        height: 60px;
+        width: auto;
+        filter: brightness(0) invert(1) drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
     }
     .tv-header .info {
         color: rgba(255,255,255,0.9);
@@ -142,15 +151,18 @@
         overflow: hidden;
     }
     .tv-kpi {
-        background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+        background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
         border-radius: 15px;
         padding: 2rem;
         text-align: center;
         color: white;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        box-shadow: 0 10px 30px rgba(14,165,233,0.3);
         transition: transform 0.3s;
     }
-    .tv-kpi:hover { transform: translateY(-5px); }
+    .tv-kpi:hover { 
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(14,165,233,0.4);
+    }
     .tv-kpi-value {
         font-size: 3.5rem;
         font-weight: 700;
@@ -215,6 +227,23 @@
         display: flex;
         align-items: center;
         justify-content: center;
+    }
+    .tv-esc-hint {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(0,0,0,0.6);
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        z-index: 10000;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+    }
+    .tv-esc-hint.show {
+        opacity: 1;
     }
     .tv-progress {
         position: fixed;
@@ -879,12 +908,20 @@
         </div>
     </div>
     
+    <!-- Dica para pressionar ESC (aparece apenas em tela cheia) -->
+    <div class="tv-esc-hint" id="tvEscHint">
+        <i class="fas fa-keyboard mr-2"></i>Pressione <strong>ESC</strong> para sair
+    </div>
+    
     <div class="tv-progress" id="tvProgress"></div>
     
     <!-- Slide 1: Visão Geral -->
     <div class="tv-slide active" id="tvSlide1">
         <div class="tv-header">
-            <h1><i class="fas fa-hospital"></i> HSOP - Visão Geral</h1>
+            <h1>
+                <img src="/static/Imagens/logohssop_1.png" alt="Logo HSOP" class="tv-logo">
+                HSOP - Visão Geral
+            </h1>
             <div class="info">
                 <div id="tvDate">-</div>
                 <div id="tvTime">-</div>
@@ -933,7 +970,10 @@
     <!-- Slide 2: Últimas Consultas -->
     <div class="tv-slide" id="tvSlide2">
         <div class="tv-header">
-            <h1><i class="fas fa-stethoscope"></i> Últimas Consultas Realizadas</h1>
+            <h1>
+                <img src="/static/Imagens/logohssop_1.png" alt="Logo HSOP" class="tv-logo">
+                Últimas Consultas Realizadas
+            </h1>
             <div class="info">
                 <div id="tvDate2">-</div>
                 <div id="tvTime2">-</div>
@@ -995,7 +1035,10 @@
     <!-- Slide 3: Pacientes Internados -->
     <div class="tv-slide" id="tvSlide3">
         <div class="tv-header">
-            <h1><i class="fas fa-procedures"></i> Pacientes Internados</h1>
+            <h1>
+                <img src="/static/Imagens/logohssop_1.png" alt="Logo HSOP" class="tv-logo">
+                Pacientes Internados
+            </h1>
             <div class="info">
                 <div id="tvDate3">-</div>
                 <div id="tvTime3">-</div>
@@ -1040,50 +1083,79 @@
         </div>
     </div>
     
-    <!-- Slide 4: Visão do Dia -->
+    <!-- Slide 4: Estatísticas do Dia -->
     <div class="tv-slide" id="tvSlide4">
         <div class="tv-header">
-            <h1><i class="fas fa-chart-line"></i> Estatísticas do Dia</h1>
+            <h1>
+                <img src="/static/Imagens/logohssop_1.png" alt="Logo HSOP" class="tv-logo">
+                Estatísticas do Dia
+            </h1>
             <div class="info">
                 <div id="tvDate4">-</div>
                 <div id="tvTime4">-</div>
             </div>
         </div>
         <div style="padding: 3rem;">
+            <!-- Parte Superior: 2 Gráficos -->
             <div class="row g-4 mb-4">
                 <div class="col-md-6">
                     <div class="tv-card">
-                        <h3 class="tv-title" style="font-size: 1.5rem;">Perfil dos Pacientes</h3>
-                        <div class="row text-center">
-                            <div class="col-6">
-                                <div style="padding: 2rem; background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%); border-radius: 15px; color: white; margin-bottom: 1rem;">
-                                    <i class="fas fa-users fa-3x mb-2"></i>
-                                    <div style="font-size: 2.5rem; font-weight: 700;">{{ media_idade_hoje|default(0) }}</div>
-                                    <div style="font-size: 1.1rem;">Idade Média</div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="tv-chart-container" style="height: 200px;">
-                                    <canvas id="tvChartSexo"></canvas>
-                                </div>
-                            </div>
+                        <h3 class="tv-title" style="font-size: 1.5rem; margin-bottom: 1.5rem;">
+                            <i class="fas fa-venus-mars mr-2"></i>Atendimentos por Sexo
+                        </h3>
+                        <div class="tv-chart-container" style="height: 350px;">
+                            <canvas id="tvChartSexo"></canvas>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="tv-card">
-                        <h3 class="tv-title" style="font-size: 1.5rem;">Tempo Médio por Classificação</h3>
-                        <div class="tv-chart-container" style="height: 250px;">
-                            <canvas id="tvChartTempoRisco"></canvas>
+                        <h3 class="tv-title" style="font-size: 1.5rem; margin-bottom: 1.5rem;">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>Atendimentos por Classificação de Risco
+                        </h3>
+                        <div class="tv-chart-container" style="height: 350px;">
+                            <canvas id="tvChartRiscoSlide4"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
+            
+            <!-- Parte Inferior: Tabela de Estatísticas -->
             <div class="tv-card">
-                <h3 class="tv-title" style="font-size: 1.5rem;">Bairros Mais Comuns</h3>
-                <div class="tv-chart-container" style="height: 300px;">
-                    <canvas id="tvChartBairros"></canvas>
-                </div>
+                <h3 class="tv-title" style="font-size: 1.5rem; margin-bottom: 1.5rem;">
+                    <i class="fas fa-chart-bar mr-2"></i>Resumo do Dia
+                </h3>
+                <table class="tv-table table table-borderless">
+                    <thead>
+                        <tr>
+                            <th class="text-center" style="font-size: 1.3rem; padding: 1.5rem;">
+                                <i class="fas fa-users" style="color: #0ea5e9; font-size: 2.5rem; display: block; margin-bottom: 0.5rem;"></i>
+                                Total de Atendimentos
+                            </th>
+                            <th class="text-center" style="font-size: 1.3rem; padding: 1.5rem;">
+                                <i class="fas fa-birthday-cake" style="color: #10b981; font-size: 2.5rem; display: block; margin-bottom: 0.5rem;"></i>
+                                Idade Média
+                            </th>
+                            <th class="text-center" style="font-size: 1.3rem; padding: 1.5rem;">
+                                <i class="fas fa-clock" style="color: #f59e0b; font-size: 2.5rem; display: block; margin-bottom: 0.5rem;"></i>
+                                Tempo Médio de Atendimento
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="text-center" style="font-size: 3.5rem; font-weight: 700; color: #0ea5e9; padding: 1rem;">
+                                {{ total_atendimentos_hoje|default(0) }}
+                            </td>
+                            <td class="text-center" style="font-size: 3.5rem; font-weight: 700; color: #10b981; padding: 1rem;">
+                                {{ media_idade_hoje|default(0) }} <span style="font-size: 1.8rem;">anos</span>
+                            </td>
+                            <td class="text-center" style="font-size: 3.5rem; font-weight: 700; color: #f59e0b; padding: 1rem;">
+                                {{ tempo_medio_atendimento_dia|default(0) }} <span style="font-size: 1.8rem;">min</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -1551,6 +1623,24 @@
                 // Entrar em modo tela cheia (F11)
                 this.enterFullscreen();
                 
+                // Esconder botões ao entrar em tela cheia
+                var exitBtn = document.querySelector('.tv-exit');
+                var fullscreenBtn = document.getElementById('tvFullscreenBtn');
+                var escHint = document.getElementById('tvEscHint');
+                if (exitBtn) exitBtn.style.display = 'none';
+                if (fullscreenBtn) fullscreenBtn.style.display = 'none';
+                
+                // Mostrar dica ESC após um pequeno delay
+                setTimeout(() => {
+                    if (escHint) {
+                        escHint.classList.add('show');
+                        // Esconder após 5 segundos
+                        setTimeout(() => {
+                            escHint.classList.remove('show');
+                        }, 5000);
+                    }
+                }, 1500);
+                
                 // Ajustar escala para o televisor
                 this.adjustScale();
                 
@@ -1595,6 +1685,14 @@
             
             // Sair do modo tela cheia
             this.exitFullscreen();
+            
+            // Restaurar visibilidade dos botões (para próxima vez)
+            var exitBtn = document.querySelector('.tv-exit');
+            var fullscreenBtn = document.getElementById('tvFullscreenBtn');
+            var escHint = document.getElementById('tvEscHint');
+            if (exitBtn) exitBtn.style.display = 'block';
+            if (fullscreenBtn) fullscreenBtn.style.display = 'none'; // Mantém escondido
+            if (escHint) escHint.classList.remove('show'); // Esconder dica ESC
             
             // Remover listeners
             document.removeEventListener('fullscreenchange', this.handleFullscreenChange);
@@ -1691,17 +1789,36 @@
                                   document.msFullscreenElement);
             
             var fullscreenBtn = document.getElementById('tvFullscreenBtn');
+            var exitBtn = document.querySelector('.tv-exit');
+            var escHint = document.getElementById('tvEscHint');
             
             if (!isFullscreen && this.active) {
                 // Se saiu da tela cheia mas o modo TV ainda está ativo
-                console.log('Saiu da tela cheia - mostrando botão para reentrar');
+                console.log('Saiu da tela cheia - mostrando botões');
                 if (fullscreenBtn) {
                     fullscreenBtn.style.display = 'block';
                 }
+                if (exitBtn) {
+                    exitBtn.style.display = 'block';
+                }
+                if (escHint) {
+                    escHint.classList.remove('show');
+                }
             } else if (isFullscreen && this.active) {
-                // Está em tela cheia
+                // Está em tela cheia - esconder botões e mostrar dica ESC
+                console.log('Em tela cheia - escondendo botões e mostrando dica ESC');
                 if (fullscreenBtn) {
                     fullscreenBtn.style.display = 'none';
+                }
+                if (exitBtn) {
+                    exitBtn.style.display = 'none';
+                }
+                // Mostrar dica ESC por 5 segundos
+                if (escHint) {
+                    escHint.classList.add('show');
+                    setTimeout(function() {
+                        if (escHint) escHint.classList.remove('show');
+                    }, 5000);
                 }
             }
         },
@@ -1842,8 +1959,9 @@
                         labels: ['Masculino', 'Feminino'],
                         datasets: [{
                             data: [masculino, feminino],
-                            backgroundColor: ['rgba(13,110,253,0.8)', 'rgba(220,53,69,0.8)'],
-                            borderWidth: 0
+                            backgroundColor: ['rgba(14,165,233,0.8)', 'rgba(236,72,153,0.8)'],
+                            borderWidth: 2,
+                            borderColor: '#fff'
                         }]
                     },
                     options: {
@@ -1852,125 +1970,96 @@
                         plugins: {
                             legend: { 
                                 position: 'bottom',
-                                labels: { font: { size: 14 }, padding: 15 }
+                                labels: { 
+                                    font: { size: 16, weight: 'bold' }, 
+                                    padding: 20,
+                                    color: '#2c3e50'
+                                }
                             },
                             tooltip: {
-                                titleFont: { size: 16 },
-                                bodyFont: { size: 14 }
+                                titleFont: { size: 18 },
+                                bodyFont: { size: 16 },
+                                padding: 12,
+                                callbacks: {
+                                    label: function(context) {
+                                        var label = context.label || '';
+                                        var value = context.parsed || 0;
+                                        var total = masculino + feminino;
+                                        var percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return label + ': ' + value + ' (' + percentage + '%)';
+                                    }
+                                }
                             }
                         }
                     }
                 });
             }
             
-            // Gráfico de tempo por risco (Slide 4)
-            var ctxTempoRisco = document.getElementById('tvChartTempoRisco');
-            if (ctxTempoRisco) {
-                var temposRisco = {{ tempos_por_risco|default([])|tojson }};
-                var labelsRisco = [];
-                var valoresRisco = [];
-                var coresRisco = [];
+            // Gráfico de classificação de risco (Slide 4)
+            var ctxRiscoSlide4 = document.getElementById('tvChartRiscoSlide4');
+            if (ctxRiscoSlide4) {
+                var labelsRisco = {{ porta_risco_labels|default([])|tojson }};
+                var valoresRisco = {{ porta_risco_valores|default([])|tojson }};
                 
-                if (temposRisco && temposRisco.length > 0) {
-                    temposRisco.forEach(function(item) {
-                        labelsRisco.push(item.classificacao);
-                        valoresRisco.push(item.tempo_medio);
-                        
-                        var cores = {
-                            'Vermelho': 'rgba(220,53,69,0.8)',
-                            'Laranja': 'rgba(253,126,20,0.8)',
-                            'Amarelo': 'rgba(255,193,7,0.8)',
-                            'Verde': 'rgba(32,201,151,0.8)',
-                            'Azul': 'rgba(13,110,253,0.8)'
-                        };
-                        coresRisco.push(cores[item.classificacao] || 'rgba(108,117,125,0.8)');
-                    });
-                } else {
-                    labelsRisco = ['Vermelho', 'Laranja', 'Amarelo', 'Verde', 'Azul'];
-                    valoresRisco = [15, 25, 35, 45, 60];
-                    coresRisco = ['rgba(220,53,69,0.8)', 'rgba(253,126,20,0.8)', 'rgba(255,193,7,0.8)', 'rgba(32,201,151,0.8)', 'rgba(13,110,253,0.8)'];
+                if (labelsRisco.length === 0) {
+                    labelsRisco = ['Sem dados'];
+                    valoresRisco = [0];
                 }
                 
-                this.charts.tvChartTempoRisco = new Chart(ctxTempoRisco, {
-                    type: 'bar',
+                var coresRisco = labelsRisco.map(function(label) {
+                    var cores = {
+                        'Vermelho': 'rgba(220,53,69,0.8)',
+                        'Laranja': 'rgba(253,126,20,0.8)',
+                        'Amarelo': 'rgba(255,193,7,0.8)',
+                        'Verde': 'rgba(32,201,151,0.8)',
+                        'Azul': 'rgba(13,110,253,0.8)',
+                        'Não classificado': 'rgba(108,117,125,0.8)'
+                    };
+                    return cores[label] || 'rgba(108,117,125,0.8)';
+                });
+                
+                this.charts.tvChartRiscoSlide4 = new Chart(ctxRiscoSlide4, {
+                    type: 'doughnut',
                     data: {
                         labels: labelsRisco,
                         datasets: [{
-                            label: 'Tempo Médio (min)',
                             data: valoresRisco,
                             backgroundColor: coresRisco,
-                            borderWidth: 0
+                            borderWidth: 2,
+                            borderColor: '#fff'
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        scales: {
-                            y: { 
-                                beginAtZero: true,
-                                ticks: { font: { size: 14 } }
+                        plugins: {
+                            legend: { 
+                                position: 'bottom',
+                                labels: { 
+                                    font: { size: 16, weight: 'bold' }, 
+                                    padding: 20,
+                                    color: '#2c3e50'
+                                }
                             },
-                            x: {
-                                ticks: { font: { size: 14 } }
-                            }
-                        },
-                        plugins: { 
-                            legend: { display: false },
                             tooltip: {
-                                titleFont: { size: 16 },
-                                bodyFont: { size: 14 }
+                                titleFont: { size: 18 },
+                                bodyFont: { size: 16 },
+                                padding: 12,
+                                callbacks: {
+                                    label: function(context) {
+                                        var label = context.label || '';
+                                        var value = context.parsed || 0;
+                                        var total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        var percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return label + ': ' + value + ' (' + percentage + '%)';
+                                    }
+                                }
                             }
                         }
                     }
                 });
             }
             
-            // Gráfico de bairros (Slide 4) - Dados reais da base de atendimentos de hoje
-            var ctxBairros = document.getElementById('tvChartBairros');
-            if (ctxBairros) {
-                var bairrosLabels = {{ bairros_labels|default([])|tojson }};
-                var bairrosValores = {{ bairros_valores|default([])|tojson }};
-                
-                // Se não houver dados, mostrar mensagem informativa
-                if (bairrosLabels.length === 0) {
-                    bairrosLabels = ['Sem dados'];
-                    bairrosValores = [0];
-                }
-                
-                this.charts.tvChartBairros = new Chart(ctxBairros, {
-                    type: 'bar',
-                    data: {
-                        labels: bairrosLabels,
-                        datasets: [{
-                            label: 'Pacientes',
-                            data: bairrosValores,
-                            backgroundColor: 'rgba(74,144,226,0.8)',
-                            borderWidth: 0
-                        }]
-                    },
-                    options: {
-                        indexAxis: 'y',
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: { 
-                                beginAtZero: true,
-                                ticks: { font: { size: 14 } }
-                            },
-                            y: {
-                                ticks: { font: { size: 14 } }
-                            }
-                        },
-                        plugins: { 
-                            legend: { display: false },
-                            tooltip: {
-                                titleFont: { size: 16 },
-                                bodyFont: { size: 14 }
-                            }
-                        }
-                    }
-                });
-            }
         }
     };
     
