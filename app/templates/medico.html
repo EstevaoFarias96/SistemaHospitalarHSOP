@@ -11,29 +11,48 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
 
   <style>
-    body {
-      background-color: #f8f9fa;
+    :root {
+      --azul-principal: #4A90E2;
+      --azul-claro: #E8F4FF;
+      --azul-medio: #7AB8F5;
+      --branco-gelo: #F8FCFF;
+      --cinza-texto: #4A5568;
+      --cinza-claro: #E2E8F0;
+      --sombra-suave: 0 2px 12px rgba(74, 144, 226, 0.08);
+      --sombra-media: 0 4px 20px rgba(74, 144, 226, 0.12);
     }
+    
+    body {
+      background: linear-gradient(135deg, var(--branco-gelo) 0%, var(--azul-claro) 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+    }
+    
     .sidebar {
       width: 80px;
       height: 100vh;
-      background-color: #2d2ddcec;
+      background: linear-gradient(180deg, #4A90E2 0%, #357ABD 100%);
       color: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
       padding-top: 20px;
       position: relative;
+      box-shadow: 4px 0 20px rgba(74, 144, 226, 0.15);
     }
+    
     .sidebar ul {
       list-style: none;
       padding: 0;
       width: 100%;
     }
+    
     .sidebar li {
       position: relative;
       width: 100%;
+      margin: 8px 0;
     }
+    
     .sidebar a {
       color: #fff;
       text-align: center;
@@ -42,57 +61,280 @@
       justify-content: center;
       padding: 15px;
       width: 100%;
-      font-size: 18px;
+      font-size: 20px;
       white-space: nowrap;
       text-decoration: none;
+      transition: all 0.3s ease;
+      border-radius: 10px;
+      margin: 0 auto;
     }
+    
+    .sidebar-badge {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      background: #F59E0B;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+    }
+    
+    .sidebar a:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+      transform: translateX(5px);
+    }
+    
     .sidebar a:hover::after {
       content: attr(data-title);
       position: absolute;
       left: 100%;
-      background-color: rgba(0, 0, 0, 0.75);
+      background-color: rgba(0, 0, 0, 0.85);
       color: #fff;
-      padding: 5px 10px;
-      border-radius: 5px;
+      padding: 8px 14px;
+      border-radius: 8px;
       white-space: nowrap;
-      margin-left: 10px;
+      margin-left: 15px;
+      font-size: 13px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+    }
+    
+    .main-content {
+      padding: 30px 40px;
+      position: relative;
+      background-color: transparent;
+    }
+    
+    /* Header Dashboard */
+    .dashboard-header {
+      background: white;
+      border-radius: 16px;
+      padding: 24px 32px;
+      margin-bottom: 24px;
+      box-shadow: var(--sombra-suave);
+      border-left: 5px solid var(--azul-principal);
+    }
+    
+    .dashboard-header h2 {
+      color: var(--azul-principal);
+      font-size: 28px;
+      font-weight: 600;
+      margin: 0 0 8px 0;
+    }
+    
+    .dashboard-header p {
+      color: var(--cinza-texto);
+      margin: 0;
       font-size: 14px;
     }
-    .main-content {
-      padding: 20px;
+    
+    /* Dashboard Cards */
+    .dashboard-cards { 
+      display: none; 
+      max-width: 95%; 
+      margin: 0 auto 24px auto; 
+    }
+    
+    .dashboard-cards .card { 
+      border: 0; 
+      border-radius: 16px; 
+      box-shadow: var(--sombra-media);
+      color: var(--cinza-texto);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      overflow: hidden;
+      background: white;
       position: relative;
     }
-    /* Dashboard */
-    .dashboard-cards { display:none; max-width: 80%; margin: 10px auto 20px auto; }
-    .dashboard-cards .card { border:0; border-radius:12px; box-shadow:0 6px 16px rgba(0,0,0,0.08); color:#333; }
-    .card-metric { text-align:center; padding:24px 12px; }
-    .card-metric h3 { font-size:36px; margin:0; font-weight:700; }
-    .card-metric span { display:block; margin-top:6px; font-size:14px; color:#666; }
-    .quick-actions { display:none; max-width: 80%; margin: 0 auto 10px auto; }
-    .quick-actions .btn { margin: 6px 8px 6px 0; }
-    .subtle-alert { display:none; max-width: 80%; margin: 0 auto 10px auto; }
-    .subtle-alert .card { border:0; border-left: 6px solid #ffc107; border-radius: 10px; box-shadow:0 6px 16px rgba(0,0,0,0.05); }
-    .subtle-alert .card-body { padding: 12px 16px; }
-    .subtle-alert .badge-pill { font-weight: 600; }
+    
+    .dashboard-cards .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 28px rgba(74, 144, 226, 0.18);
+    }
+    
+    .dashboard-cards .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--azul-principal), var(--azul-medio));
+    }
+    
+    .card-metric { 
+      text-align: center; 
+      padding: 32px 20px; 
+    }
+    
+    .card-metric h3 { 
+      font-size: 42px; 
+      margin: 0; 
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--azul-principal), var(--azul-medio));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .card-metric span { 
+      display: block; 
+      margin-top: 10px; 
+      font-size: 15px; 
+      color: var(--cinza-texto);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .card-metric i {
+      font-size: 36px;
+      color: var(--azul-medio);
+      margin-bottom: 16px;
+      opacity: 0.7;
+    }
+    
+    /* Quick Actions */
+    .quick-actions { 
+      display: none; 
+      max-width: 95%; 
+      margin: 0 auto 24px auto;
+      background: white;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: var(--sombra-suave);
+    }
+    
+    .quick-actions-header {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    
+    .quick-actions h5 {
+      color: var(--azul-principal);
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+      margin-right: 8px;
+    }
+    
+    .quick-actions .btn { 
+      margin: 0;
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+    
+    .quick-actions .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    }
+    
+    .quick-actions .btn-primary {
+      background: linear-gradient(135deg, var(--azul-principal), var(--azul-medio));
+      border: none;
+    }
+    
+    .quick-actions .btn-success {
+      background: linear-gradient(135deg, #10B981, #059669);
+      border: none;
+    }
+    
+    .quick-actions .btn-outline-success {
+      background: white;
+      color: #10B981;
+      border: 2px solid #10B981;
+    }
+    
+    .quick-actions .btn-outline-success:hover {
+      background: #10B981;
+      color: white;
+    }
+    
+    .quick-actions .btn-secondary {
+      background: linear-gradient(135deg, #6B7280, #4B5563);
+      border: none;
+    }
+    
+    .quick-actions .btn-outline-dark {
+      background: white;
+      color: #374151;
+      border: 2px solid #374151;
+    }
+    
+    .quick-actions .btn-outline-dark:hover {
+      background: #374151;
+      color: white;
+    }
+    
+    /* Plantão Range */
+    #med-plantao-range {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      right: 30px;
+      text-align: center;
+      color: var(--cinza-texto);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 12px 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      border-left: 4px solid var(--azul-principal);
+      z-index: 100;
+    }
+    
+    /* User Menu */
     .user-menu {
       position: absolute;
       bottom: 20px;
       width: 100%;
       text-align: center;
     }
+    
     .user-menu-button {
       width: 50px;
       height: 50px;
       border-radius: 50%;
       background-color: #fff;
-      color: #2d2ddcec;
+      color: var(--azul-principal);
       display: inline-flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 24px;
-      border: none;
+      font-size: 22px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
+    
+    .user-menu-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+    
     .user-dropdown {
       display: none;
       position: absolute;
@@ -100,26 +342,121 @@
       left: 50%;
       transform: translateX(20px);
       background-color: #fff;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      min-width: 150px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      border: 1px solid var(--cinza-claro);
+      border-radius: 12px;
+      min-width: 180px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
       z-index: 1000;
+      overflow: hidden;
     }
+    
     .user-dropdown a, .user-dropdown span {
       display: block;
-      padding: 10px;
-      color: #333;
+      padding: 12px 16px;
+      color: var(--cinza-texto);
       text-decoration: none;
+      transition: background 0.2s ease;
     }
+    
     .user-dropdown a:hover {
-      background-color: #f8f9fa;
+      background-color: var(--azul-claro);
+      color: var(--azul-principal);
     }
-    .btn-internar {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      z-index: 100;
+    
+    .user-dropdown span {
+      font-weight: 600;
+      border-bottom: 1px solid var(--cinza-claro);
+    }
+    
+    /* Estilos dos Modais */
+    .modal-content {
+      border-radius: 16px;
+      border: none;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    }
+    
+    .modal-header {
+      background: linear-gradient(135deg, var(--azul-principal), var(--azul-medio));
+      color: white;
+      border-radius: 16px 16px 0 0;
+      border-bottom: none;
+      padding: 20px 24px;
+    }
+    
+    .modal-header .modal-title {
+      font-weight: 600;
+      font-size: 20px;
+    }
+    
+    .modal-header .close {
+      color: white;
+      opacity: 0.9;
+      text-shadow: none;
+    }
+    
+    .modal-header .close:hover {
+      opacity: 1;
+    }
+    
+    .modal-body {
+      padding: 24px;
+    }
+    
+    .nav-tabs {
+      border-bottom: 2px solid var(--azul-claro);
+    }
+    
+    .nav-tabs .nav-link {
+      color: var(--cinza-texto);
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+    
+    .nav-tabs .nav-link.active {
+      color: var(--azul-principal);
+      background-color: transparent;
+      border-bottom: 3px solid var(--azul-principal);
+    }
+    
+    .nav-tabs .nav-link:hover:not(.disabled) {
+      color: var(--azul-medio);
+      border-bottom: 3px solid var(--azul-claro);
+    }
+    
+    .nav-tabs .nav-link.disabled {
+      color: var(--cinza-claro);
+      cursor: not-allowed;
+    }
+    
+    .form-control:focus {
+      border-color: var(--azul-principal);
+      box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+    }
+    
+    .btn {
+      transition: all 0.3s ease;
+    }
+    
+    .alert {
+      border-radius: 12px;
+      border: none;
+    }
+    
+    .alert-success {
+      background-color: #D1FAE5;
+      color: #065F46;
+    }
+    
+    .alert-info {
+      background-color: var(--azul-claro);
+      color: #1E40AF;
+    }
+    
+    .alert-warning {
+      background-color: #FEF3C7;
+      color: #92400E;
     }
   </style>
 </head>
@@ -148,6 +485,7 @@
             <a class="nav-link" href="#" onclick="abrirObservacao()">
               <i class="fas fa-eye"></i>
             </a>
+            <span class="sidebar-badge" id="badge-obs-sidebar">0</span>
           </li>
           <li class="nav-item" data-title="Clínica">
             <a class="nav-link" href="#" onclick="abrirClinica()">
@@ -176,64 +514,75 @@
       <div class="col main-content">
         <!-- Home/Dashboard do Médico -->
         <div id="home-medico">
+          <!-- Header do Dashboard -->
+          <div class="dashboard-header">
+            <h2 id="saudacao">Bem-vindo ao sistema de gestão hospitalar</h2>
+          </div>
+
+          <!-- Ações Rápidas -->
           <div class="quick-actions">
-            <div class="d-flex flex-wrap align-items-center">
-              <a class="btn btn-primary" href="/medico/aguardando-medico"><i class="fas fa-clipboard-list mr-1"></i> Aguardando</a>
-              <a class="btn btn-secondary" href="#" onclick="abrirObservacao()"><i class="fas fa-eye mr-1"></i> Observação</a>
-              <a class="btn btn-outline-dark" href="#" onclick="abrirClinica()"><i class="fas fa-procedures mr-1"></i> Clínica</a>
-              <button id="btnInternarPacienteHome" class="btn btn-success"><i class="fas fa-procedures mr-1"></i> Internar Paciente</button>
-              <button id="btnObservacaoPaciente" class="btn btn-outline-success"><i class="fas fa-eye mr-1"></i> Adicionar Observação</button>
+            <div class="quick-actions-header">
+              <h5><i class="fas fa-bolt mr-2"></i>Ações Rápidas</h5>
+              <button id="btnInternarPacienteHome" class="btn btn-success">
+                <i class="fas fa-procedures mr-1"></i> Internar Paciente
+              </button>
+              <button id="btnObservacaoPaciente" class="btn btn-outline-success">
+                <i class="fas fa-eye mr-1"></i> Adicionar Observação
+              </button>
+              <a class="btn btn-primary" href="/medico/aguardando-medico">
+                <i class="fas fa-clipboard-list mr-1"></i> Fila de Aguardo
+              </a>
+              <a class="btn btn-secondary" href="#" onclick="abrirObservacao()">
+                <i class="fas fa-eye mr-1"></i> Observação
+              </a>
+              <a class="btn btn-outline-dark" href="#" onclick="abrirClinica()">
+                <i class="fas fa-stethoscope mr-1"></i> Clínica
+              </a>
             </div>
           </div>
 
-          <div class="subtle-alert" id="alert-observacao-conduta">
-            <div class="card bg-light">
-              <div class="card-body d-flex align-items-center">
-                <i class="fas fa-info-circle text-warning mr-2"></i>
-                <div class="flex-fill">
-                  <strong>Pacientes em observação aguardando conduta</strong>
-                  <span class="text-muted ml-1">verifique a fila de observação</span>
-                </div>
-                <span class="badge badge-pill badge-warning ml-2" id="badge-obs-conduta">0</span>
-              </div>
-            </div>
-          </div>
-
+          <!-- Cards de Métricas -->
           <div class="dashboard-cards">
             <div class="row">
               <div class="col-md-4 mb-3">
-                <div class="card bg-light">
+                <div class="card">
                   <div class="card-body card-metric">
+                    <i class="fas fa-bed"></i>
                     <h3 id="kpi-med-internados">--</h3>
-                    <span>Internados</span>
+                    <span>Pacientes Internados</span>
                   </div>
                 </div>
               </div>
               <div class="col-md-4 mb-3">
-                <div class="card" style="background:#e8f4ff;">
+                <div class="card">
                   <div class="card-body card-metric">
+                    <i class="fas fa-eye"></i>
                     <h3 id="kpi-med-observacao">--</h3>
                     <span>Em Observação</span>
                   </div>
                 </div>
               </div>
               <div class="col-md-4 mb-3">
-                <div class="card" style="background:#eaf9ef;">
+                <div class="card">
                   <div class="card-body card-metric">
+                    <i class="fas fa-user-md"></i>
                     <h3 id="kpi-med-consultas">--</h3>
                     <span>Consultas no Plantão</span>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="text-center text-muted small" id="med-plantao-range"></div>
           </div>
+
         </div>
 
         
       </div>
     </div>
   </div>
+
+  <!-- Informações do Plantão (fixo no bottom) -->
+  <div id="med-plantao-range"></div>
 
   <!-- Modal para Mudar Senha -->
   <div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
@@ -744,7 +1093,9 @@
     $(document).ready(function () {
       // Iniciar na Home
       abrirHomeMedico();
-      $('#home-medico .quick-actions, #home-medico .dashboard-cards').show();
+      $('#home-medico .dashboard-header, #home-medico .quick-actions, #home-medico .dashboard-cards').show();
+      // Mostrar plantão range (sempre visível)
+      $('#med-plantao-range').show();
 
       // Abrir modais diretamente a partir das ações rápidas
       $('#btnInternarPacienteHome').on('click', function(){ $('#internarPacienteModal').modal('show'); });
@@ -756,7 +1107,7 @@
       $.getJSON('/api/medico/nome', function(data) {
         if (data.nome) {
           $('#userNameDisplay').text(data.nome);
-          $('#saudacao').text('Bem-vindo, Dr. ' + data.nome);
+          $('#saudacao').html('<i class="fas fa-user-circle mr-2"></i>Bem-vindo, Dr. ' + data.nome);
         }
       }).fail(function() {
         console.error("Erro ao buscar nome do médico.");
@@ -1506,7 +1857,7 @@
     function abrirHomeMedico(){
       $('.main-content > div').hide();
       $('#home-medico').show();
-      $('#home-medico .quick-actions, #home-medico .dashboard-cards').show();
+      $('#home-medico .dashboard-header, #home-medico .quick-actions, #home-medico .dashboard-cards').show();
     }
 
     function carregarDashboardMedico(){
@@ -1517,13 +1868,13 @@
           $('#kpi-med-internados').text(data.internados);
           $('#kpi-med-observacao').text(data.observacao);
           $('#kpi-med-consultas').text(data.consultas_plantao);
-          // Aviso sutil para observação aguardando conduta
+          // Badge na sidebar para observação aguardando conduta
           if (typeof data.obs_aguardando_conduta === 'number') {
-            $('#badge-obs-conduta').text(data.obs_aguardando_conduta);
+            $('#badge-obs-sidebar').text(data.obs_aguardando_conduta);
             if (data.obs_aguardando_conduta > 0) {
-              $('#alert-observacao-conduta').show();
+              $('#badge-obs-sidebar').css('display', 'flex');
             } else {
-              $('#alert-observacao-conduta').hide();
+              $('#badge-obs-sidebar').css('display', 'none');
             }
           }
           try{
@@ -1532,7 +1883,7 @@
             const pad = n=> String(n).padStart(2,'0');
             const iniStr = `${pad(ini.getDate())}/${pad(ini.getMonth()+1)}/${ini.getFullYear()} ${pad(ini.getHours())}:${pad(ini.getMinutes())}`;
             const fimStr = `${pad(fim.getDate())}/${pad(fim.getMonth()+1)}/${fim.getFullYear()} ${pad(fim.getHours())}:${pad(fim.getMinutes())}`;
-            $('#med-plantao-range').text(`Plantão atual: ${iniStr} até ${fimStr}`);
+            $('#med-plantao-range').html(`<i class="fas fa-clock mr-2"></i>Plantão atual: ${iniStr} até ${fimStr}`);
           } catch(e) {}
         })
         .catch(() => {});
