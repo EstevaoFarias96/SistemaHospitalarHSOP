@@ -60,6 +60,12 @@
             margin-bottom: 10px;
         }
 
+        .allergies-admissao-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+        }
+
         .allergies-section {
             border: 2px solid #000;
             padding: 12px;
@@ -67,6 +73,18 @@
         }
 
         .allergies-content {
+            font-size: 20px;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .admissao-section {
+            border: 2px solid #000;
+            padding: 12px;
+            min-height: 50px;
+        }
+
+        .admissao-content {
             font-size: 20px;
             color: #000;
             font-weight: bold;
@@ -143,15 +161,28 @@
             <!-- NOME DO PACIENTE -->
             <div class="patient-name">{{ paciente.nome }}</div>
 
-            <!-- ALERGIAS -->
-            <div class="allergies-section">
-                <div class="section-title">ALERGIAS</div>
-                <div class="allergies-content">
-                    {% if atendimento.alergias %}
-                        {{ atendimento.alergias }}
-                    {% else %}
-                        Não há alergias registradas
-                    {% endif %}
+            <!-- ALERGIAS E DATA DE ADMISSÃO -->
+            <div class="allergies-admissao-container">
+                <div class="allergies-section">
+                    <div class="section-title">ALERGIAS</div>
+                    <div class="allergies-content">
+                        {% if atendimento.alergias %}
+                            {{ atendimento.alergias }}
+                        {% else %}
+                            Não há alergias registradas
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="admissao-section">
+                    <div class="section-title">DATA DE ADMISSÃO</div>
+                    <div class="admissao-content">
+                        {% if internacao.data_internacao %}
+                            {{ internacao.data_internacao.strftime('%d/%m/%Y') }}
+                        {% else %}
+                            Não informado
+                        {% endif %}
+                    </div>
                 </div>
             </div>
 
