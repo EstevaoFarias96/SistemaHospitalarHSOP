@@ -1861,14 +1861,14 @@ def painel_administrador():
             logging.warning(f"Erro ao calcular tempos por risco: {str(e)}")
             tempos_por_risco = []
 
-        # 9) Pacientes aguardando triagem (status "Em Atendimento")
+        # 9) Pacientes aguardando triagem (mesmo critério usado no enfermeiro.html)
         aguardando_triagem = db.session.query(func.count(Atendimento.id)).filter(
-            Atendimento.status == 'Em Atendimento'
+            Atendimento.status.ilike('%aguardando triagem%')
         ).scalar() or 0
 
-        # 10) Pacientes aguardando médico
+        # 10) Pacientes aguardando médico (status "Aguardando Medico")
         aguardando_medico = db.session.query(func.count(Atendimento.id)).filter(
-            Atendimento.status == 'Aguardando Médico'
+            Atendimento.status == 'Aguardando Medico'
         ).scalar() or 0
 
         # 11) Últimas consultas realizadas (últimas 10 com horario_consulta_medica preenchido)
@@ -1964,7 +1964,7 @@ def painel_administrador():
             logging.error(traceback.format_exc())
             ultimas_consultas = []
 
-        # 12) Últimos pacientes internados (últimas 10 internações)
+        # 12) Últimos pacientes internados (apenas com status "Internado" no atendimento)
         ultimas_internacoes = []
         try:
             internacoes_query = db.session.query(
@@ -1973,10 +1973,13 @@ def painel_administrador():
                 Funcionario.nome.label('medico_nome')
             ).join(
                 Paciente, Internacao.paciente_id == Paciente.id
+            ).join(
+                Atendimento, Internacao.atendimento_id == Atendimento.id
             ).outerjoin(
                 Funcionario, Internacao.medico_id == Funcionario.id
             ).filter(
-                Internacao.data_internacao.isnot(None)
+                Internacao.data_internacao.isnot(None),
+                Atendimento.status == 'Internado'
             ).order_by(
                 Internacao.data_internacao.desc()
             ).limit(10).all()

@@ -73,14 +73,31 @@
         position: fixed;
         top: 0;
         left: 0;
-        width: 100%;
-        height: 100%;
+        width: 100vw;
+        height: 100vh;
         background: linear-gradient(135deg, #a8d5e2 0%, #6fb3d2 100%);
         z-index: 9999;
         display: none;
         overflow: hidden;
+        transition: opacity 0.3s ease;
     }
-    #modoTV.active { display: block; }
+    #modoTV.active { 
+        display: block; 
+        opacity: 1;
+    }
+    
+    /* Ajuste para telas grandes */
+    @media (min-width: 2560px) {
+        #modoTV {
+            font-size: 1.25rem;
+        }
+    }
+    
+    @media (min-width: 3840px) {
+        #modoTV {
+            font-size: 1.5rem;
+        }
+    }
     
     .tv-header {
         background: rgba(0,0,0,0.3);
@@ -162,6 +179,42 @@
     .tv-exit:hover {
         background: rgba(220,53,69,1);
         transform: scale(1.05);
+    }
+    .tv-fullscreen-btn {
+        position: fixed;
+        top: 20px;
+        right: 220px;
+        background: rgba(13,110,253,0.9);
+        border: none;
+        color: white;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        border-radius: 10px;
+        cursor: pointer;
+        z-index: 10000;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        transition: all 0.3s;
+        animation: pulse 2s infinite;
+    }
+    .tv-fullscreen-btn:hover {
+        background: rgba(13,110,253,1);
+        transform: scale(1.05);
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+    .tv-loading {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        z-index: 10002;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     .tv-progress {
         position: fixed;
@@ -812,6 +865,20 @@
     <button class="tv-exit" onclick="sairModoTV()">
         <i class="fas fa-times"></i> Sair do Modo TV
     </button>
+    
+    <!-- Botão para reentrar em tela cheia (aparece quando sai) -->
+    <button class="tv-fullscreen-btn" id="tvFullscreenBtn" style="display: none;" onclick="tvMode.enterFullscreen()">
+        <i class="fas fa-expand"></i> Tela Cheia (F11)
+    </button>
+    
+    <!-- Indicador de carregamento -->
+    <div class="tv-loading" id="tvLoading" style="display: none;">
+        <div style="text-align: center;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 4rem; color: white; margin-bottom: 1rem;"></i>
+            <div style="color: white; font-size: 1.5rem; font-weight: 600;">Preparando Modo TV...</div>
+        </div>
+    </div>
+    
     <div class="tv-progress" id="tvProgress"></div>
     
     <!-- Slide 1: Visão Geral -->
@@ -1470,17 +1537,46 @@
         init: function() {
             this.active = true;
             this.currentSlide = 0;
-            document.getElementById('modoTV').classList.add('active');
+            
+            var modoTVElement = document.getElementById('modoTV');
+            var loadingElement = document.getElementById('tvLoading');
+            
+            // Mostrar modo TV e loading
+            modoTVElement.classList.add('active');
+            loadingElement.style.display = 'flex';
             document.body.style.overflow = 'hidden';
-            this.updateDateTime();
-            this.startProgress();
-            this.createCharts();
             
-            // Atualizar data/hora a cada segundo
-            this.clockInterval = setInterval(() => this.updateDateTime(), 1000);
-            
-            // Trocar slide automaticamente
-            this.interval = setInterval(() => this.nextSlide(), this.slideTime);
+            // Aguardar um pouco para garantir que o DOM está pronto
+            setTimeout(() => {
+                // Entrar em modo tela cheia (F11)
+                this.enterFullscreen();
+                
+                // Ajustar escala para o televisor
+                this.adjustScale();
+                
+                this.updateDateTime();
+                this.startProgress();
+                this.createCharts();
+                
+                // Esconder loading após criar os gráficos
+                setTimeout(() => {
+                    loadingElement.style.display = 'none';
+                }, 500);
+                
+                // Atualizar data/hora a cada segundo
+                this.clockInterval = setInterval(() => this.updateDateTime(), 1000);
+                
+                // Trocar slide automaticamente
+                this.interval = setInterval(() => this.nextSlide(), this.slideTime);
+                
+                // Listener para mudanças de tela cheia
+                document.addEventListener('fullscreenchange', this.handleFullscreenChange.bind(this));
+                document.addEventListener('webkitfullscreenchange', this.handleFullscreenChange.bind(this));
+                document.addEventListener('mozfullscreenchange', this.handleFullscreenChange.bind(this));
+                
+                // Listener para redimensionamento da janela
+                window.addEventListener('resize', this.handleResize.bind(this));
+            }, 100);
         },
         
         exit: function() {
@@ -1496,6 +1592,133 @@
                 if (this.charts[key]) this.charts[key].destroy();
             });
             this.charts = {};
+            
+            // Sair do modo tela cheia
+            this.exitFullscreen();
+            
+            // Remover listeners
+            document.removeEventListener('fullscreenchange', this.handleFullscreenChange);
+            document.removeEventListener('webkitfullscreenchange', this.handleFullscreenChange);
+            document.removeEventListener('mozfullscreenchange', this.handleFullscreenChange);
+            window.removeEventListener('resize', this.handleResize);
+        },
+        
+        // Entrar em modo tela cheia (compatível com vários navegadores)
+        enterFullscreen: function() {
+            var elem = document.documentElement;
+            
+            try {
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen().catch(err => {
+                        console.log('Erro ao entrar em tela cheia:', err);
+                    });
+                } else if (elem.webkitRequestFullscreen) { // Safari
+                    elem.webkitRequestFullscreen();
+                } else if (elem.mozRequestFullScreen) { // Firefox
+                    elem.mozRequestFullScreen();
+                } else if (elem.msRequestFullscreen) { // IE/Edge
+                    elem.msRequestFullscreen();
+                }
+            } catch (err) {
+                console.log('Fullscreen não suportado:', err);
+            }
+        },
+        
+        // Sair do modo tela cheia
+        exitFullscreen: function() {
+            try {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            } catch (err) {
+                console.log('Erro ao sair da tela cheia:', err);
+            }
+        },
+        
+        // Ajustar escala baseado na resolução do televisor
+        adjustScale: function() {
+            var modoTVElement = document.getElementById('modoTV');
+            var screenWidth = window.screen.width;
+            var screenHeight = window.screen.height;
+            
+            console.log('Resolução detectada:', screenWidth + 'x' + screenHeight);
+            
+            // Resetar transformação
+            modoTVElement.style.transform = 'none';
+            modoTVElement.style.transformOrigin = 'top left';
+            
+            // Design base: 1920x1080 (Full HD)
+            var baseWidth = 1920;
+            var baseHeight = 1080;
+            
+            // Calcular escala necessária
+            var scaleX = screenWidth / baseWidth;
+            var scaleY = screenHeight / baseHeight;
+            
+            // Usar a menor escala para manter proporções
+            var scale = Math.min(scaleX, scaleY);
+            
+            // Se a tela for muito diferente de Full HD, ajustar
+            if (screenWidth !== 1920 || screenHeight !== 1080) {
+                // Para 4K (3840x2160) ou outras resoluções grandes
+                if (screenWidth >= 3840) {
+                    scale = 2; // Dobrar o tamanho
+                } else if (screenWidth >= 2560) {
+                    scale = 1.5; // 50% maior
+                } else if (screenWidth <= 1366) {
+                    scale = 0.7; // Reduzir para telas menores
+                }
+                
+                modoTVElement.style.transform = 'scale(' + scale + ')';
+                modoTVElement.style.width = (100 / scale) + '%';
+                modoTVElement.style.height = (100 / scale) + '%';
+                
+                console.log('Escala aplicada:', scale);
+            }
+        },
+        
+        // Tratar mudanças no estado de tela cheia
+        handleFullscreenChange: function() {
+            var isFullscreen = !!(document.fullscreenElement || 
+                                  document.webkitFullscreenElement || 
+                                  document.mozFullScreenElement || 
+                                  document.msFullscreenElement);
+            
+            var fullscreenBtn = document.getElementById('tvFullscreenBtn');
+            
+            if (!isFullscreen && this.active) {
+                // Se saiu da tela cheia mas o modo TV ainda está ativo
+                console.log('Saiu da tela cheia - mostrando botão para reentrar');
+                if (fullscreenBtn) {
+                    fullscreenBtn.style.display = 'block';
+                }
+            } else if (isFullscreen && this.active) {
+                // Está em tela cheia
+                if (fullscreenBtn) {
+                    fullscreenBtn.style.display = 'none';
+                }
+            }
+        },
+        
+        // Tratar redimensionamento da janela
+        handleResize: function() {
+            if (this.active) {
+                this.adjustScale();
+                // Recriar gráficos para ajustar ao novo tamanho
+                setTimeout(() => {
+                    Object.keys(this.charts).forEach(key => {
+                        if (this.charts[key]) {
+                            this.charts[key].resize();
+                        }
+                    });
+                }, 100);
+            }
         },
         
         nextSlide: function() {
@@ -1601,19 +1824,24 @@
                 });
             }
             
-            // Gráfico de sexo (Slide 4)
+            // Gráfico de sexo (Slide 4) - Dados reais da base de atendimentos de hoje
             var ctxSexo = document.getElementById('tvChartSexo');
             if (ctxSexo) {
-                // Dados fictícios - você pode substituir pelos dados reais do backend
                 var masculino = {{ divisao_sexo_masculino|default(0) }};
                 var feminino = {{ divisao_sexo_feminino|default(0) }};
+                
+                // Se não houver dados, mostrar mensagem
+                if (masculino === 0 && feminino === 0) {
+                    masculino = 0;
+                    feminino = 0;
+                }
                 
                 this.charts.tvChartSexo = new Chart(ctxSexo, {
                     type: 'doughnut',
                     data: {
                         labels: ['Masculino', 'Feminino'],
                         datasets: [{
-                            data: [masculino || 50, feminino || 50],
+                            data: [masculino, feminino],
                             backgroundColor: ['rgba(13,110,253,0.8)', 'rgba(220,53,69,0.8)'],
                             borderWidth: 0
                         }]
@@ -1697,16 +1925,16 @@
                 });
             }
             
-            // Gráfico de bairros (Slide 4)
+            // Gráfico de bairros (Slide 4) - Dados reais da base de atendimentos de hoje
             var ctxBairros = document.getElementById('tvChartBairros');
             if (ctxBairros) {
-                // Dados fictícios - você pode substituir pelos dados reais do backend
                 var bairrosLabels = {{ bairros_labels|default([])|tojson }};
                 var bairrosValores = {{ bairros_valores|default([])|tojson }};
                 
+                // Se não houver dados, mostrar mensagem informativa
                 if (bairrosLabels.length === 0) {
-                    bairrosLabels = ['Centro', 'Bairro A', 'Bairro B', 'Bairro C', 'Bairro D', 'Outros'];
-                    bairrosValores = [25, 18, 15, 12, 10, 20];
+                    bairrosLabels = ['Sem dados'];
+                    bairrosValores = [0];
                 }
                 
                 this.charts.tvChartBairros = new Chart(ctxBairros, {
@@ -1754,12 +1982,42 @@
         tvMode.exit();
     }
     
-    // Atalho ESC para sair do modo TV
+    // Atalhos de teclado para o modo TV
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && tvMode.active) {
+        if (!tvMode.active) return;
+        
+        // ESC: Sair do modo TV
+        if (e.key === 'Escape') {
             sairModoTV();
         }
+        
+        // F ou F11: Entrar/reentrar em tela cheia
+        if (e.key === 'f' || e.key === 'F' || e.key === 'F11') {
+            e.preventDefault();
+            tvMode.enterFullscreen();
+        }
+        
+        // Seta direita: Próximo slide
+        if (e.key === 'ArrowRight') {
+            tvMode.nextSlide();
+        }
+        
+        // Seta esquerda: Slide anterior
+        if (e.key === 'ArrowLeft') {
+            var slides = document.querySelectorAll('.tv-slide');
+            slides[tvMode.currentSlide].classList.remove('active');
+            tvMode.currentSlide = (tvMode.currentSlide - 1 + tvMode.totalSlides) % tvMode.totalSlides;
+            slides[tvMode.currentSlide].classList.add('active');
+            tvMode.startProgress();
+        }
     });
+    
+    // Log de informações ao entrar no modo TV
+    console.log('%c🎬 MODO TV HSOP', 'font-size: 20px; font-weight: bold; color: #4A90E2;');
+    console.log('%cAtalhos disponíveis:', 'font-size: 14px; font-weight: bold;');
+    console.log('• ESC: Sair do modo TV');
+    console.log('• F ou F11: Entrar em tela cheia');
+    console.log('• ← →: Navegar entre slides');
     </script>
 {% endblock %}
 
