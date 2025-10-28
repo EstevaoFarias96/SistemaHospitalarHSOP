@@ -12,29 +12,48 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
 
   <style>
-    body {
-      background-color: #f8f9fa;
+    :root {
+      --azul-principal: #4A90E2;
+      --azul-claro: #E8F4FF;
+      --azul-medio: #7AB8F5;
+      --branco-gelo: #F8FCFF;
+      --cinza-texto: #4A5568;
+      --cinza-claro: #E2E8F0;
+      --sombra-suave: 0 2px 12px rgba(74, 144, 226, 0.08);
+      --sombra-media: 0 4px 20px rgba(74, 144, 226, 0.12);
     }
+    
+    body {
+      background: linear-gradient(135deg, var(--branco-gelo) 0%, var(--azul-claro) 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+    }
+    
     .sidebar {
       width: 80px;
       height: 100vh;
-      background-color: #2d2ddcec;
+      background: linear-gradient(180deg, #4A90E2 0%, #357ABD 100%);
       color: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
       padding-top: 20px;
       position: relative;
+      box-shadow: 4px 0 20px rgba(74, 144, 226, 0.15);
     }
+    
     .sidebar ul {
       list-style: none;
       padding: 0;
       width: 100%;
     }
+    
     .sidebar li {
       position: relative;
       width: 100%;
+      margin: 8px 0;
     }
+    
     .sidebar a {
       color: #fff;
       text-align: center;
@@ -43,63 +62,245 @@
       justify-content: center;
       padding: 15px;
       width: 100%;
-      font-size: 18px;
+      font-size: 20px;
       white-space: nowrap;
       text-decoration: none;
+      transition: all 0.3s ease;
+      border-radius: 10px;
+      margin: 0 auto;
     }
+    
+    .sidebar a:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+      transform: translateX(5px);
+    }
+    
     .sidebar a:hover::after {
       content: attr(data-title);
       position: absolute;
       left: 100%;
-      background-color: rgba(0, 0, 0, 0.75);
+      background-color: rgba(0, 0, 0, 0.85);
       color: #fff;
-      padding: 5px 10px;
-      border-radius: 5px;
+      padding: 8px 14px;
+      border-radius: 8px;
       white-space: nowrap;
-      margin-left: 10px;
-      font-size: 14px;
+      margin-left: 15px;
+      font-size: 13px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
     }
+    
     .main-content {
-      padding: 20px;
+      padding: 30px 40px;
+      position: relative;
+      background-color: transparent;
     }
+    
+    /* Header Dashboard */
+    .dashboard-header {
+      background: white;
+      border-radius: 16px;
+      padding: 24px 32px;
+      margin-bottom: 24px;
+      box-shadow: var(--sombra-suave);
+      border-left: 5px solid var(--azul-principal);
+    }
+    
+    .dashboard-header h2 {
+      color: var(--azul-principal);
+      font-size: 28px;
+      font-weight: 600;
+      margin: 0 0 8px 0;
+    }
+    
     /* Cards do dashboard */
     .dashboard-cards {
       display: none;
-      max-width: 80%;
-      margin: 10px auto 20px auto;
+      max-width: 95%;
+      margin: 0 auto 24px auto;
     }
+    
     .dashboard-cards .card {
       border: 0;
-      border-radius: 12px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-      color: #333;
+      border-radius: 16px;
+      box-shadow: var(--sombra-media);
+      color: var(--cinza-texto);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      overflow: hidden;
+      background: white;
+      position: relative;
     }
+    
+    .dashboard-cards .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 28px rgba(74, 144, 226, 0.18);
+    }
+    
+    .dashboard-cards .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--azul-principal), var(--azul-medio));
+    }
+    
     .card-metric {
       text-align: center;
-      padding: 24px 12px;
+      padding: 32px 20px;
     }
+    
     .card-metric h3 {
-      font-size: 36px;
+      font-size: 42px;
       margin: 0;
       font-weight: 700;
+      background: linear-gradient(135deg, var(--azul-principal), var(--azul-medio));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
+    
     .card-metric span {
       display: block;
-      margin-top: 6px;
-      font-size: 14px;
-      color: #666;
+      margin-top: 10px;
+      font-size: 15px;
+      color: var(--cinza-texto);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
+    
+    .card-metric i {
+      font-size: 36px;
+      color: var(--azul-medio);
+      margin-bottom: 16px;
+      opacity: 0.7;
+    }
+    
+    /* Quick Actions */
     .quick-actions {
       display: none;
-      max-width: 80%;
-      margin: 0 auto 10px auto;
+      max-width: 95%;
+      margin: 0 auto 24px auto;
+      background: white;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: var(--sombra-suave);
     }
+    
+    .quick-actions-header {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    
+    .quick-actions h5 {
+      color: var(--azul-principal);
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+      margin-right: 8px;
+    }
+    
     .quick-actions .btn {
-      margin: 6px 8px 6px 0;
+      margin: 0;
+      border-radius: 10px;
+      padding: 10px 20px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     }
+    
+    .quick-actions .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    }
+    
+    .quick-actions .btn-primary {
+      background: linear-gradient(135deg, var(--azul-principal), var(--azul-medio));
+      border: none;
+    }
+    
+    .quick-actions .btn-outline-info {
+      background: white;
+      color: #0EA5E9;
+      border: 2px solid #0EA5E9;
+    }
+    
+    .quick-actions .btn-outline-info:hover {
+      background: #0EA5E9;
+      color: white;
+    }
+    
+    .quick-actions .btn-outline-warning {
+      background: white;
+      color: #F59E0B;
+      border: 2px solid #F59E0B;
+    }
+    
+    .quick-actions .btn-outline-warning:hover {
+      background: #F59E0B;
+      color: white;
+    }
+    
+    .quick-actions .btn-outline-secondary {
+      background: white;
+      color: #6B7280;
+      border: 2px solid #6B7280;
+    }
+    
+    .quick-actions .btn-outline-secondary:hover {
+      background: #6B7280;
+      color: white;
+    }
+    
+    .quick-actions .btn-outline-dark {
+      background: white;
+      color: #374151;
+      border: 2px solid #374151;
+    }
+    
+    .quick-actions .btn-outline-dark:hover {
+      background: #374151;
+      color: white;
+    }
+    
+    .quick-actions .btn-outline-success {
+      background: white;
+      color: #10B981;
+      border: 2px solid #10B981;
+    }
+    
+    .quick-actions .btn-outline-success:hover {
+      background: #10B981;
+      color: white;
+    }
+    
+    /* Plantão Range */
+    #plantao-range {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      right: 30px;
+      text-align: center;
+      color: var(--cinza-texto);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 12px 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      border-left: 4px solid var(--azul-principal);
+      z-index: 100;
+    }
+    
     .hidden {
       display: none;
     }
+    
     /* Menu do usuário na sidebar */
     .user-menu {
       position: absolute;
@@ -107,19 +308,28 @@
       width: 100%;
       text-align: center;
     }
+    
     .user-menu-button {
       width: 50px;
       height: 50px;
       border-radius: 50%;
       background-color: #fff;
-      color: #2d2ddcec;
+      color: var(--azul-principal);
       display: inline-flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 24px;
-      border: none;
+      font-size: 22px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
+    
+    .user-menu-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+    
     .user-dropdown {
       display: none;
       position: absolute;
@@ -127,40 +337,52 @@
       left: 50%;
       transform: translateX(20px);
       background-color: #fff;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      min-width: 150px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      border: 1px solid var(--cinza-claro);
+      border-radius: 12px;
+      min-width: 180px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
       z-index: 1000;
+      overflow: hidden;
     }
+    
     .user-dropdown a, .user-dropdown span {
       display: block;
-      padding: 10px;
-      color: #333;
+      padding: 12px 16px;
+      color: var(--cinza-texto);
       text-decoration: none;
+      transition: background 0.2s ease;
     }
+    
     .user-dropdown a:hover {
-      background-color: #f8f9fa;
+      background-color: var(--azul-claro);
+      color: var(--azul-principal);
+    }
+    
+    .user-dropdown span {
+      font-weight: 600;
+      border-bottom: 1px solid var(--cinza-claro);
     }
     /* Seção de Triagem */
     #triagem-section {
       display: none;
-      max-width: 80%;
+      max-width: 95%;
       margin: 20px auto;
     }
     #triagem-section h2 {
       text-align: center;
       margin-bottom: 20px;
+      color: var(--azul-principal);
     }
     /* Seção de Busca de Pacientes */
     #patient-search-section {
       display: none;
-      max-width: 50%;
+      max-width: 80%;
       margin: 20px auto;
     }
     #patient-search-section h2 {
       text-align: center;
       margin-bottom: 20px;
+      color: var(--azul-principal);
     }
     .search-group {
       margin-bottom: 15px;
@@ -168,35 +390,91 @@
     /* Cards modernos para pacientes de triagem */
     .patient-card {
       border: 0;
-      border-radius: 12px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+      border-radius: 16px;
+      box-shadow: var(--sombra-media);
       background: #fff;
-      padding: 14px 16px;
-      margin-bottom: 14px;
+      padding: 20px;
+      margin-bottom: 16px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .patient-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(74, 144, 226, 0.18);
     }
     .patient-card .title {
       font-weight: 600;
       font-size: 18px;
-      color: #222;
+      color: var(--azul-principal);
     }
     .patient-card .meta {
-      color: #666;
+      color: var(--cinza-texto);
       font-size: 14px;
     }
     .patient-card .badge-info {
-      background: #e7f0ff;
-      color: #2254d3;
+      background: var(--azul-claro);
+      color: var(--azul-principal);
       font-weight: 600;
-      padding: 6px 10px;
+      padding: 6px 12px;
       border-radius: 999px;
       font-size: 12px;
     }
     .patient-card .actions .btn { margin-left: 8px; }
     /* Submenu para histórico */
     .submenu {
-      border: 1px solid #ddd;
-      padding: 10px;
+      border: none;
+      padding: 20px;
       margin-top: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: var(--sombra-suave);
+    }
+    
+    /* Estilos dos Modais */
+    .modal-content {
+      border-radius: 16px;
+      border: none;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    }
+    
+    .modal-header {
+      background: linear-gradient(135deg, var(--azul-principal), var(--azul-medio));
+      color: white;
+      border-radius: 16px 16px 0 0;
+      border-bottom: none;
+      padding: 20px 24px;
+    }
+    
+    .modal-header .modal-title {
+      font-weight: 600;
+      font-size: 20px;
+    }
+    
+    .modal-header .close {
+      color: white;
+      opacity: 0.9;
+      text-shadow: none;
+    }
+    
+    .modal-header .close:hover {
+      opacity: 1;
+    }
+    
+    .modal-body {
+      padding: 24px;
+    }
+    
+    .form-control:focus {
+      border-color: var(--azul-principal);
+      box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+    }
+    
+    .btn {
+      transition: all 0.3s ease;
+    }
+    
+    .alert {
+      border-radius: 12px;
+      border: none;
     }
   </style>
 </head>
@@ -264,45 +542,67 @@
       <div class="col main-content">
         <!-- Home/Dashboard do Enfermeiro -->
         <div id="home-section">
+          <!-- Header do Dashboard -->
+          <div class="dashboard-header">
+            <h2 id="saudacao">Bem-vindo ao sistema de gestão hospitalar</h2>
+          </div>
+
+          <!-- Ações Rápidas -->
           <div class="quick-actions">
-            <div class="d-flex flex-wrap align-items-center">
-              <button class="btn btn-primary" onclick="abrirTriagem()"><i class="fas fa-notes-medical mr-1"></i> Triagem</button>
-              <button class="btn btn-outline-info" onclick="abrirBuscaPacientes()"><i class="fas fa-search mr-1"></i> Buscar Paciente</button>
-              <button class="btn btn-outline-warning" onclick="abrirBuscaFichasAtendimento()"><i class="fas fa-file-medical mr-1"></i> Buscar Fichas</button>
-              <a class="btn btn-outline-secondary" href="/observacao"><i class="fas fa-eye mr-1"></i> Observação</a>
-              <a class="btn btn-outline-dark" href="/clinica"><i class="fas fa-procedures mr-1"></i> Clínica</a>
-              <button class="btn btn-outline-success" onclick="abrirModalCadastroPaciente()"><i class="fas fa-user-plus mr-1"></i> Cadastrar Paciente</button>
+            <div class="quick-actions-header">
+              <h5><i class="fas fa-bolt mr-2"></i>Ações Rápidas</h5>
+              <button class="btn btn-primary" onclick="abrirTriagem()">
+                <i class="fas fa-notes-medical mr-1"></i> Triagem
+              </button>
+              <button class="btn btn-outline-success" onclick="abrirModalCadastroPaciente()">
+                <i class="fas fa-user-plus mr-1"></i> Cadastrar Paciente
+              </button>
+              <button class="btn btn-outline-info" onclick="abrirBuscaPacientes()">
+                <i class="fas fa-search mr-1"></i> Buscar Paciente
+              </button>
+              <button class="btn btn-outline-warning" onclick="abrirBuscaFichasAtendimento()">
+                <i class="fas fa-file-medical mr-1"></i> Buscar Fichas
+              </button>
+              <a class="btn btn-outline-secondary" href="/observacao">
+                <i class="fas fa-eye mr-1"></i> Observação
+              </a>
+              <a class="btn btn-outline-dark" href="/clinica">
+                <i class="fas fa-stethoscope mr-1"></i> Clínica
+              </a>
             </div>
           </div>
 
+          <!-- Cards de Métricas -->
           <div class="dashboard-cards">
             <div class="row">
               <div class="col-md-4 mb-3">
-                <div class="card bg-light">
+                <div class="card">
                   <div class="card-body card-metric">
+                    <i class="fas fa-bed"></i>
                     <h3 id="kpi-internados">--</h3>
-                    <span>Internados</span>
+                    <span>Pacientes Internados</span>
                   </div>
                 </div>
               </div>
               <div class="col-md-4 mb-3">
-                <div class="card" style="background:#e8f4ff;">
+                <div class="card">
                   <div class="card-body card-metric">
+                    <i class="fas fa-eye"></i>
                     <h3 id="kpi-observacao">--</h3>
                     <span>Em Observação</span>
                   </div>
                 </div>
               </div>
               <div class="col-md-4 mb-3">
-                <div class="card" style="background:#eaf9ef;">
+                <div class="card">
                   <div class="card-body card-metric">
+                    <i class="fas fa-notes-medical"></i>
                     <h3 id="kpi-triagens">--</h3>
                     <span>Triagens no Plantão</span>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="text-center text-muted small" id="plantao-range"></div>
           </div>
         </div>
 
@@ -318,8 +618,8 @@
         <!-- Seção: Buscar Fichas de Atendimento -->
         <div id="busca-fichas-atendimento" class="hidden">
           <h2>Buscar Fichas de Atendimento</h2>
-          <div class="card border-0 shadow-sm mb-3" style="max-width:80%;margin:0 auto;">
-            <div class="card-header bg-primary text-white">
+          <div class="card border-0 mb-3" style="max-width:80%;margin:0 auto; border-radius: 16px; box-shadow: var(--sombra-media);">
+            <div class="card-header" style="background: linear-gradient(135deg, var(--azul-principal), var(--azul-medio)); color: white; border-radius: 16px 16px 0 0;">
               <strong><i class="fas fa-search mr-1"></i>Pesquisar por Nome ou CPF</strong>
             </div>
             <div class="card-body">
@@ -375,6 +675,9 @@
     </div>
   </div>
 
+  <!-- Informações do Plantão (fixo no bottom) -->
+  <div id="plantao-range"></div>
+
   <!-- Modal para Mudar Senha -->
   <div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -411,11 +714,11 @@
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <!-- Header do Modal -->
-        <div class="modal-header bg-primary text-white">
+        <div class="modal-header">
           <h5 class="modal-title" id="modalCadastroPacienteLabel">
             <i class="fas fa-user-plus mr-2"></i>Cadastrar Paciente
           </h5>
-          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Fechar">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
             <span>&times;</span>
           </button>
         </div>
@@ -571,12 +874,15 @@
         console.log("Dados do enfermeiro recebidos:", data);
         if(data.nome) {
           $('#userNameDisplay').text(data.nome);
+          $('#saudacao').html('<i class="fas fa-user-nurse mr-2"></i>Bem-vindo(a), ' + data.nome);
         }
       });
 
       // Inicia na Home com Dashboard
       carregarDashboardEnfermeiro();
-      $('#home-section .quick-actions, #home-section .dashboard-cards').show();
+      $('#home-section .dashboard-header, #home-section .quick-actions, #home-section .dashboard-cards').show();
+      // Mostrar plantão range (sempre visível)
+      $('#plantao-range').show();
 
       // Enter na busca de fichas
       $('#input-busca-fichas').on('keypress', function(e){ if(e.key === 'Enter'){ buscarFichasAtendimento(); }});
@@ -587,7 +893,7 @@
       console.log('Abrindo Home do enfermeiro');
       $('.main-content > div').hide();
       $('#home-section').show();
-      $('#home-section .quick-actions, #home-section .dashboard-cards').show();
+      $('#home-section .dashboard-header, #home-section .quick-actions, #home-section .dashboard-cards').show();
       $('#busca-fichas-atendimento').hide();
       carregarDashboardEnfermeiro();
     }
@@ -608,7 +914,7 @@
             const pad = n=> String(n).padStart(2,'0');
             const iniStr = `${pad(ini.getDate())}/${pad(ini.getMonth()+1)}/${ini.getFullYear()} ${pad(ini.getHours())}:${pad(ini.getMinutes())}`;
             const fimStr = `${pad(fim.getDate())}/${pad(fim.getMonth()+1)}/${fim.getFullYear()} ${pad(fim.getHours())}:${pad(fim.getMinutes())}`;
-            $('#plantao-range').text(`Plantão atual: ${iniStr} até ${fimStr}`);
+            $('#plantao-range').html(`<i class="fas fa-clock mr-2"></i>Plantão atual: ${iniStr} até ${fimStr}`);
           } catch(e) { console.warn('Falha ao formatar range do plantão'); }
         })
         .catch(err => console.error('Erro ao carregar dashboard:', err));

@@ -12,29 +12,49 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
 
   <style>
-    body {
-      background-color: #f8f9fa;
+    :root {
+      --azul-principal: #4A90E2;
+      --azul-claro: #E8F4FF;
+      --azul-medio: #7AB8F5;
+      --branco-gelo: #F8FCFF;
+      --cinza-texto: #4A5568;
+      --cinza-claro: #E2E8F0;
+      --sombra-suave: 0 2px 12px rgba(74, 144, 226, 0.08);
+      --sombra-media: 0 4px 20px rgba(74, 144, 226, 0.12);
     }
+    
+    body {
+      background: linear-gradient(135deg, var(--branco-gelo) 0%, var(--azul-claro) 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+    }
+    
     .sidebar {
       width: 80px;
       height: 100vh;
-      background-color: #2d2ddcec;
+      background: linear-gradient(180deg, #4A90E2 0%, #357ABD 100%);
       color: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
       padding-top: 20px;
       position: relative;
+      box-shadow: 4px 0 20px rgba(74, 144, 226, 0.15);
+      transition: width 0.3s ease;
     }
+    
     .sidebar ul {
       list-style: none;
       padding: 0;
       width: 100%;
     }
+    
     .sidebar li {
       position: relative;
       width: 100%;
+      margin: 8px 0;
     }
+    
     .sidebar a {
       color: #fff;
       text-align: center;
@@ -43,67 +63,91 @@
       justify-content: center;
       padding: 15px;
       width: 100%;
-      font-size: 18px;
+      font-size: 20px;
       white-space: nowrap;
       position: relative;
       text-decoration: none;
+      transition: all 0.3s ease;
+      border-radius: 10px;
     }
+    
     .menu-label {
       display: none;
       margin-left: 10px;
       font-size: 16px;
     }
+    
     .sidebar.expanded {
       width: 220px;
       align-items: flex-start;
       padding-left: 10px;
     }
+    
     .sidebar.expanded a {
       justify-content: flex-start;
     }
+    
     .sidebar.expanded .menu-label {
       display: inline-block;
     }
+    
     /* Expandir ao passar o mouse */
     .sidebar:hover {
       width: 220px;
       align-items: flex-start;
       padding-left: 10px;
     }
+    
     .sidebar:hover a {
       justify-content: flex-start;
     }
+    
     .sidebar:hover .menu-label {
       display: inline-block;
     }
+    
+    .sidebar a:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+      transform: translateX(5px);
+    }
+    
     .sidebar a:hover::after {
       content: attr(data-title);
       position: absolute;
       left: 100%;
-      background-color: rgba(0, 0, 0, 0.75);
+      background-color: rgba(0, 0, 0, 0.85);
       color: #fff;
-      padding: 5px 10px;
-      border-radius: 5px;
+      padding: 8px 14px;
+      border-radius: 8px;
       white-space: nowrap;
-      margin-left: 10px;
-      font-size: 14px;
+      margin-left: 15px;
+      font-size: 13px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
     }
+    
     .badge-notification {
       position: absolute;
       top: 8px;
       right: 12px;
-      background-color: red;
+      background-color: #F59E0B;
       color: #fff;
       border-radius: 50%;
       padding: 2px 6px;
       font-size: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
     }
+    
     .main-content {
-      padding: 20px;
+      padding: 30px 40px;
+      position: relative;
+      background-color: transparent;
     }
+    
     .hidden {
       display: none;
     }
+    
     /* Menu do Usuário na sidebar */
     .user-menu {
       position: absolute;
@@ -111,19 +155,28 @@
       width: 100%;
       text-align: center;
     }
+    
     .user-menu-button {
       width: 50px;
       height: 50px;
       border-radius: 50%;
       background-color: #fff;
-      color: #2d2ddcec;
+      color: var(--azul-principal);
       display: inline-flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 24px;
-      border: none;
+      font-size: 22px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
+    
+    .user-menu-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+    
     .user-dropdown {
       display: none;
       position: absolute;
@@ -131,26 +184,36 @@
       left: 50%;
       transform: translateX(20px);
       background-color: #fff;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      min-width: 150px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      border: 1px solid var(--cinza-claro);
+      border-radius: 12px;
+      min-width: 180px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
       z-index: 1000;
+      overflow: hidden;
     }
+    
     .user-dropdown a, .user-dropdown span {
       display: block;
-      padding: 10px;
-      color: #333;
+      padding: 12px 16px;
+      color: var(--cinza-texto);
       text-decoration: none;
+      transition: background 0.2s ease;
     }
+    
     .user-dropdown a:hover {
-      background-color: #f8f9fa;
+      background-color: var(--azul-claro);
+      color: var(--azul-principal);
+    }
+    
+    .user-dropdown span {
+      font-weight: 600;
+      border-bottom: 1px solid var(--cinza-claro);
     }
 
     /* Estilos para o Modal de Cadastro de Paciente */
     .form-control:focus {
-      border-color: #007bff;
-      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+      border-color: var(--azul-principal);
+      box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
     }
 
     .invalid-feedback {
@@ -174,9 +237,28 @@
       color: #856404 !important;
     }
 
+    /* Cards modernos */
+    .card {
+      border: 0;
+      border-radius: 16px;
+      box-shadow: var(--sombra-media);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      background: white;
+    }
+    
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 28px rgba(74, 144, 226, 0.18);
+    }
+    
+    .card-header {
+      border-radius: 16px 16px 0 0 !important;
+      font-weight: 600;
+    }
+
     /* Estilos para busca de pacientes */
     .bg-gradient-primary {
-      background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+      background: linear-gradient(135deg, var(--azul-principal), var(--azul-medio));
     }
 
     .input-group-lg .form-control {
@@ -188,10 +270,10 @@
     }
 
     .busca-avancada {
-      background-color: #f8f9fa;
+      background-color: var(--azul-claro);
       padding: 1.5rem;
-      border-radius: 0.375rem;
-      border: 1px solid #dee2e6;
+      border-radius: 12px;
+      border: 1px solid var(--cinza-claro);
     }
 
     .btn-toggle-avancada {
@@ -199,14 +281,17 @@
     }
 
     .btn-toggle-avancada:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
     /* Estilos para resultados da busca */
+    .paciente-item {
+      transition: background-color 0.2s ease;
+    }
+    
     .paciente-item:hover {
-      background-color: #f8f9fa;
-      transition: background-color 0.3s ease;
+      background-color: var(--azul-claro);
     }
 
     .avatar-circle {
@@ -222,16 +307,66 @@
 
     .sidebar .nav-link:hover {
       background-color: rgba(255, 255, 255, 0.1);
-      transform: translateX(5px);
     }
 
     .sidebar .nav-link:active {
       transform: translateX(2px);
     }
+    
     /* Fichas de Referência (agrupadas por atendimento) */
-    .attn-card + .attn-card { border-top: 1px solid #eee; }
+    .attn-card + .attn-card { border-top: 1px solid var(--cinza-claro); }
     .attn-group-header .btn-toggle { min-width: 36px; }
     .table-fichas td, .table-fichas th { vertical-align: middle; }
+    
+    /* Estilos dos Modais */
+    .modal-content {
+      border-radius: 16px;
+      border: none;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    }
+    
+    .modal-header {
+      background: linear-gradient(135deg, var(--azul-principal), var(--azul-medio));
+      color: white;
+      border-radius: 16px 16px 0 0;
+      border-bottom: none;
+      padding: 20px 24px;
+    }
+    
+    .modal-header .modal-title {
+      font-weight: 600;
+      font-size: 20px;
+    }
+    
+    .modal-header .close {
+      color: white;
+      opacity: 0.9;
+      text-shadow: none;
+    }
+    
+    .modal-header .close:hover {
+      opacity: 1;
+    }
+    
+    .modal-body {
+      padding: 24px;
+    }
+    
+    .btn {
+      transition: all 0.3s ease;
+      border-radius: 10px;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .alert {
+      border-radius: 12px;
+      border: none;
+    }
+    
     /* Cadastro: exibir campos de texto em MAIÚSCULAS */
     #form-paciente input[type="text"],
     #formCadastroPaciente input[type="text"] {
@@ -673,11 +808,11 @@
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <!-- Header do Modal -->
-        <div class="modal-header bg-primary text-white">
+        <div class="modal-header">
           <h5 class="modal-title" id="modalCadastroPacienteLabel">
             <i class="fas fa-user-plus mr-2"></i>Cadastrar Paciente
           </h5>
-          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Fechar">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
             <span>&times;</span>
           </button>
         </div>
@@ -1515,11 +1650,11 @@
         <div class="modal fade" id="modalDetalhesPaciente" tabindex="-1" role="dialog">
           <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
-              <div class="modal-header bg-primary text-white">
+              <div class="modal-header">
                 <h5 class="modal-title">
                   <i class="fas fa-user-circle mr-2"></i>Detalhes do Paciente
                 </h5>
-                <button type="button" class="close text-white" data-dismiss="modal">
+                <button type="button" class="close" data-dismiss="modal">
                   <span>&times;</span>
                 </button>
               </div>
@@ -2212,11 +2347,11 @@
   <div class="modal fade" id="modalFichaReferencia" tabindex="-1" role="dialog" aria-labelledby="modalFichaReferenciaLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
-        <div class="modal-header bg-info text-white">
+        <div class="modal-header">
           <h5 class="modal-title" id="modalFichaReferenciaLabel">
             <i class="fas fa-eye mr-2"></i>Ficha de Referência
           </h5>
-          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Fechar">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
