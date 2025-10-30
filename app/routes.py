@@ -2748,6 +2748,300 @@ def preview_relatorio_analitico():
         flash('Erro ao gerar preview.', 'danger')
         return redirect(url_for('main.relatorios_admin'))
 
+@bp.route('/administrador/relatorios/preview-produtividade')
+@login_required
+def preview_relatorio_produtividade():
+    """Preview do relatório de produtividade clínica com dados de exemplo"""
+    try:
+        user = get_current_user()
+        if not user or user.cargo.strip().lower() != 'administrador':
+            flash('Acesso restrito a administradores.', 'danger')
+            return redirect(url_for('main.index'))
+        
+        agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
+        
+        # Dados de exemplo
+        dados_internacoes_medico_exemplo = [
+            {'medico': 'Dr. Carlos Eduardo Silva', 'quantidade': 23, 'percentual': 28.8, 'media_dia': 3.3},
+            {'medico': 'Dra. Fernanda Lima Santos', 'quantidade': 19, 'percentual': 23.8, 'media_dia': 2.7},
+            {'medico': 'Dr. Roberto Alves Costa', 'quantidade': 16, 'percentual': 20.0, 'media_dia': 2.3},
+            {'medico': 'Dra. Ana Paula Ferreira', 'quantidade': 14, 'percentual': 17.5, 'media_dia': 2.0},
+            {'medico': 'Dr. José Carlos Mendes', 'quantidade': 8, 'percentual': 10.0, 'media_dia': 1.1},
+        ]
+        
+        dados_leitos_exemplo = [
+            {'nome': 'Leito 01 - Clínica', 'capacidade': 2, 'ocupados': 2, 'disponiveis': 0, 'taxa_ocupacao': 100.0, 'status': 'Ocupado', 'badge_status': 'danger'},
+            {'nome': 'Leito 02 - Clínica', 'capacidade': 2, 'ocupados': 1, 'disponiveis': 1, 'taxa_ocupacao': 50.0, 'status': 'Parcial', 'badge_status': 'warning'},
+            {'nome': 'Leito 03 - Clínica', 'capacidade': 2, 'ocupados': 2, 'disponiveis': 0, 'taxa_ocupacao': 100.0, 'status': 'Ocupado', 'badge_status': 'danger'},
+            {'nome': 'Leito 04 - Observação', 'capacidade': 1, 'ocupados': 0, 'disponiveis': 1, 'taxa_ocupacao': 0.0, 'status': 'Disponível', 'badge_status': 'success'},
+            {'nome': 'Leito 05 - Observação', 'capacidade': 1, 'ocupados': 1, 'disponiveis': 0, 'taxa_ocupacao': 100.0, 'status': 'Ocupado', 'badge_status': 'danger'},
+        ]
+        
+        dados_cid_exemplo = [
+            {'cid': 'A09.9', 'descricao': 'Diarreia e gastroenterite', 'quantidade': 12, 'percentual': 15.0},
+            {'cid': 'J18.9', 'descricao': 'Pneumonia não especificada', 'quantidade': 10, 'percentual': 12.5},
+            {'cid': 'I10', 'descricao': 'Hipertensão essencial', 'quantidade': 8, 'percentual': 10.0},
+            {'cid': 'K35.8', 'descricao': 'Apendicite aguda', 'quantidade': 7, 'percentual': 8.8},
+            {'cid': 'N39.0', 'descricao': 'Infecção do trato urinário', 'quantidade': 6, 'percentual': 7.5},
+            {'cid': 'E11.9', 'descricao': 'Diabetes mellitus', 'quantidade': 5, 'percentual': 6.3},
+            {'cid': 'J44.0', 'descricao': 'DPOC com infecção', 'quantidade': 4, 'percentual': 5.0},
+        ]
+        
+        dados_bairro_exemplo = [
+            {'bairro': 'Centro', 'municipio': 'Cedro', 'quantidade': 18, 'percentual': 22.5},
+            {'bairro': 'Bairro Novo', 'municipio': 'Cedro', 'quantidade': 12, 'percentual': 15.0},
+            {'bairro': 'Vila Rica', 'municipio': 'Cedro', 'quantidade': 10, 'percentual': 12.5},
+            {'bairro': 'Jardim América', 'municipio': 'Lavras da Mangabeira', 'quantidade': 8, 'percentual': 10.0},
+            {'bairro': 'Centro', 'municipio': 'Lavras da Mangabeira', 'quantidade': 7, 'percentual': 8.8},
+            {'bairro': 'Cohab', 'municipio': 'Cedro', 'quantidade': 6, 'percentual': 7.5},
+            {'bairro': 'Alto da Boa Vista', 'municipio': 'Cedro', 'quantidade': 5, 'percentual': 6.3},
+        ]
+        
+        dados_readmissao_exemplo = [
+            {'paciente': 'João da Silva Santos', 'cpf': '123.456.789-00', 
+             'data_primeira': '20/10/2025', 'data_alta': '23/10/2025', 
+             'data_segunda': '26/10/2025', 'dias_diferenca': 3},
+            {'paciente': 'Maria Oliveira Costa', 'cpf': '987.654.321-00', 
+             'data_primeira': '19/10/2025', 'data_alta': '22/10/2025', 
+             'data_segunda': '27/10/2025', 'dias_diferenca': 5},
+        ]
+        
+        contexto = {
+            'titulo_relatorio': 'Relatório de Produtividade Clínica (Analítico)',
+            'modelo_relatorio': 'Analítico',
+            'periodo_inicio': '24/10/2025',
+            'periodo_fim': '30/10/2025',
+            'tipo_relatorio_nome': 'Produtividade Clínica',
+            'icone_relatorio': 'fas fa-hospital',
+            'data_geracao': agora.strftime('%d/%m/%Y às %H:%M'),
+            'ano_atual': agora.year,
+            
+            # Métricas principais
+            'total_internacoes': 80,
+            'total_altas': 65,
+            'tempo_medio_alta': 4.2,
+            'taxa_mortalidade': '1.3%',
+            'taxa_readmissao': '3.1%',
+            'taxa_ocupacao': '75.0%',
+            'total_readmissoes': 2,
+            
+            # Dados das tabelas
+            'dados_internacoes_medico': dados_internacoes_medico_exemplo,
+            'dados_leitos': dados_leitos_exemplo,
+            'capacidade_total': 8,
+            'ocupados_total': 6,
+            'disponiveis_total': 2,
+            'taxa_ocupacao_geral': 75.0,
+            'dados_cid': dados_cid_exemplo,
+            'dados_bairro': dados_bairro_exemplo,
+            'dados_readmissao': dados_readmissao_exemplo,
+            
+            'mostrar_assinaturas': True,
+            'assinatura_1_nome': 'Dr. João Silva',
+            'assinatura_1_cargo': 'Diretor Técnico',
+        }
+        
+        return render_template('relatorio_produtividade.html', **contexto)
+        
+    except Exception as e:
+        logging.error(f"Erro ao gerar preview de produtividade: {str(e)}")
+        logging.error(traceback.format_exc())
+        flash('Erro ao gerar preview.', 'danger')
+        return redirect(url_for('main.relatorios_admin'))
+
+@bp.route('/administrador/relatorios/preview-produtividade-historica')
+@login_required
+def preview_relatorio_produtividade_historica():
+    """Preview do relatório de produtividade clínica (série histórica) com dados de exemplo"""
+    try:
+        user = get_current_user()
+        if not user or user.cargo.strip().lower() != 'administrador':
+            flash('Acesso restrito a administradores.', 'danger')
+            return redirect(url_for('main.index'))
+        
+        agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
+        
+        # Lista de exemplo de internações
+        internacoes_exemplo = [
+            {'numero': '25102401', 'cpf': '123.456.789-00', 'paciente': 'João da Silva Santos',
+             'cid': 'A09.9', 'diagnostico': 'Diarreia e gastroenterite de origem...', 
+             'leito': 'Leito 01', 'data_internacao': '24/10/2025', 'data_alta': '27/10/2025',
+             'dias_internacao': 3, 'status': 'Alta', 'badge_status': 'success'},
+            {'numero': '25102402', 'cpf': '987.654.321-00', 'paciente': 'Ana Paula Oliveira',
+             'cid': 'J18.9', 'diagnostico': 'Pneumonia não especificada',
+             'leito': 'Leito 02', 'data_internacao': '24/10/2025', 'data_alta': '30/10/2025',
+             'dias_internacao': 6, 'status': 'Alta', 'badge_status': 'success'},
+            {'numero': '25102501', 'cpf': '456.789.123-00', 'paciente': 'Pedro Henrique Costa',
+             'cid': 'K35.8', 'diagnostico': 'Apendicite aguda',
+             'leito': 'Leito 03', 'data_internacao': '25/10/2025', 'data_alta': '28/10/2025',
+             'dias_internacao': 3, 'status': 'Alta', 'badge_status': 'success'},
+            {'numero': '25102601', 'cpf': '321.654.987-00', 'paciente': 'Mariana Souza Lima',
+             'cid': 'I10', 'diagnostico': 'Hipertensão essencial primária',
+             'leito': 'Leito 01', 'data_internacao': '26/10/2025', 'data_alta': 'Internado',
+             'dias_internacao': '4*', 'status': 'Internado', 'badge_status': 'secondary'},
+            {'numero': '25102701', 'cpf': '789.123.456-00', 'paciente': 'Francisco José Pereira',
+             'cid': 'N39.0', 'diagnostico': 'Infecção do trato urinário',
+             'leito': 'Leito 02', 'data_internacao': '27/10/2025', 'data_alta': '29/10/2025',
+             'dias_internacao': 2, 'status': 'Alta', 'badge_status': 'success'},
+            {'numero': '25102801', 'cpf': '147.258.369-00', 'paciente': 'Juliana Rodrigues Silva',
+             'cid': 'E11.9', 'diagnostico': 'Diabetes mellitus tipo 2',
+             'leito': 'Leito 03', 'data_internacao': '28/10/2025', 'data_alta': 'Internado',
+             'dias_internacao': '2*', 'status': 'Internado', 'badge_status': 'secondary'},
+        ]
+        
+        dados_diarios_exemplo = [
+            {'data': '24/10/2025', 'internacoes': 2, 'altas': 0, 'transferencias': 0, 'obitos': 0, 'saldo': 2},
+            {'data': '25/10/2025', 'internacoes': 1, 'altas': 0, 'transferencias': 0, 'obitos': 0, 'saldo': 1},
+            {'data': '26/10/2025', 'internacoes': 1, 'altas': 0, 'transferencias': 0, 'obitos': 0, 'saldo': 1},
+            {'data': '27/10/2025', 'internacoes': 1, 'altas': 1, 'transferencias': 0, 'obitos': 0, 'saldo': 0},
+            {'data': '28/10/2025', 'internacoes': 1, 'altas': 1, 'transferencias': 0, 'obitos': 0, 'saldo': 0},
+            {'data': '29/10/2025', 'internacoes': 0, 'altas': 1, 'transferencias': 0, 'obitos': 0, 'saldo': -1},
+            {'data': '30/10/2025', 'internacoes': 0, 'altas': 1, 'transferencias': 0, 'obitos': 0, 'saldo': -1},
+        ]
+        
+        dados_status_exemplo = [
+            {'status': 'Alta', 'quantidade': 4, 'percentual': 66.7, 'badge_class': 'success'},
+            {'status': 'Internado', 'quantidade': 2, 'percentual': 33.3, 'badge_class': 'secondary'},
+        ]
+        
+        contexto = {
+            'titulo_relatorio': 'Relatório de Produtividade Clínica (Série Histórica)',
+            'modelo_relatorio': 'Série Histórica',
+            'periodo_inicio': '24/10/2025',
+            'periodo_fim': '30/10/2025',
+            'tipo_relatorio_nome': 'Produtividade Clínica',
+            'icone_relatorio': 'fas fa-hospital',
+            'data_geracao': agora.strftime('%d/%m/%Y às %H:%M'),
+            'ano_atual': agora.year,
+            
+            # Lista completa
+            'internacoes_lista': internacoes_exemplo,
+            
+            # Métricas
+            'total_internacoes': 6,
+            'media_diaria': 0.9,
+            'total_altas': 4,
+            'tempo_medio_permanencia': 3.5,
+            'taxa_mortalidade': '0%',
+            'taxa_ocupacao': '75.0%',
+            
+            # Dados para gráfico e tabelas
+            'dados_diarios': dados_diarios_exemplo,
+            'dados_status': dados_status_exemplo,
+            
+            'mostrar_assinaturas': True,
+            'assinatura_1_nome': 'Dr. João Silva',
+            'assinatura_1_cargo': 'Diretor Técnico',
+        }
+        
+        return render_template('relatorio_produtividade.html', **contexto)
+        
+    except Exception as e:
+        logging.error(f"Erro ao gerar preview de produtividade histórica: {str(e)}")
+        logging.error(traceback.format_exc())
+        flash('Erro ao gerar preview.', 'danger')
+        return redirect(url_for('main.relatorios_admin'))
+
+@bp.route('/administrador/relatorios/preview-observacao')
+@login_required
+def preview_relatorio_observacao():
+    """Preview do relatório de observação com dados de exemplo"""
+    try:
+        user = get_current_user()
+        if not user or user.cargo.strip().lower() != 'administrador':
+            flash('Acesso restrito a administradores.', 'danger')
+            return redirect(url_for('main.index'))
+        
+        agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
+        
+        # Dados de exemplo
+        dados_condutas_exemplo = [
+            {'conduta': 'Alta Melhorada', 'quantidade': 45, 'percentual': 56.3, 'tempo_medio': '8.5h', 'badge_class': 'success'},
+            {'conduta': 'Internação', 'quantidade': 22, 'percentual': 27.5, 'tempo_medio': '12.3h', 'badge_class': 'danger'},
+            {'conduta': 'Transferência', 'quantidade': 8, 'percentual': 10.0, 'tempo_medio': '10.2h', 'badge_class': 'warning'},
+            {'conduta': 'Evasão', 'quantidade': 5, 'percentual': 6.3, 'tempo_medio': '4.5h', 'badge_class': 'danger'},
+        ]
+        
+        pacientes_internados_exemplo = [
+            {'numero': '25102401', 'paciente': 'João da Silva Santos', 'cpf': '123.456.789-00',
+             'data_obs': '24/10/2025 08:30', 'data_internacao': '24/10/2025 18:45',
+             'tempo_obs': '10h15min', 'cid': 'J18.9'},
+            {'numero': '25102502', 'paciente': 'Ana Paula Oliveira', 'cpf': '987.654.321-00',
+             'data_obs': '25/10/2025 10:15', 'data_internacao': '25/10/2025 22:30',
+             'tempo_obs': '12h15min', 'cid': 'A09.9'},
+            {'numero': '25102603', 'paciente': 'Pedro Henrique Costa', 'cpf': '456.789.123-00',
+             'data_obs': '26/10/2025 14:00', 'data_internacao': '27/10/2025 02:00',
+             'tempo_obs': '12h00min', 'cid': 'K35.8'},
+        ]
+        
+        dados_genero_exemplo = [
+            {'genero': 'Feminino', 'quantidade': 42, 'percentual': 52.5, 'idade_media': 38.5},
+            {'genero': 'Masculino', 'quantidade': 38, 'percentual': 47.5, 'idade_media': 42.3},
+        ]
+        
+        dados_tempo_permanencia_exemplo = [
+            {'faixa': 'Menos de 6h', 'quantidade': 18, 'percentual': 22.5},
+            {'faixa': '6h a 12h', 'quantidade': 32, 'percentual': 40.0},
+            {'faixa': '12h a 24h', 'quantidade': 22, 'percentual': 27.5},
+            {'faixa': '24h a 48h', 'quantidade': 6, 'percentual': 7.5},
+            {'faixa': 'Mais de 48h', 'quantidade': 2, 'percentual': 2.5},
+        ]
+        
+        dados_cid_exemplo = [
+            {'cid': 'A09.9', 'descricao': 'Diarreia e gastroenterite', 'quantidade': 15, 'percentual': 18.8},
+            {'cid': 'R10.0', 'descricao': 'Abdome agudo', 'quantidade': 12, 'percentual': 15.0},
+            {'cid': 'J06.9', 'descricao': 'Infecção aguda vias aéreas', 'quantidade': 10, 'percentual': 12.5},
+            {'cid': 'R50.9', 'descricao': 'Febre não especificada', 'quantidade': 8, 'percentual': 10.0},
+            {'cid': 'K59.0', 'descricao': 'Constipação', 'quantidade': 6, 'percentual': 7.5},
+        ]
+        
+        dados_bairro_exemplo = [
+            {'bairro': 'Centro', 'municipio': 'Cedro', 'quantidade': 20, 'percentual': 25.0},
+            {'bairro': 'Bairro Novo', 'municipio': 'Cedro', 'quantidade': 14, 'percentual': 17.5},
+            {'bairro': 'Vila Rica', 'municipio': 'Cedro', 'quantidade': 11, 'percentual': 13.8},
+            {'bairro': 'Jardim América', 'municipio': 'Lavras da Mangabeira', 'quantidade': 9, 'percentual': 11.3},
+            {'bairro': 'Centro', 'municipio': 'Lavras da Mangabeira', 'quantidade': 8, 'percentual': 10.0},
+        ]
+        
+        contexto = {
+            'titulo_relatorio': 'Relatório de Observação (Analítico)',
+            'modelo_relatorio': 'Analítico',
+            'periodo_inicio': '24/10/2025',
+            'periodo_fim': '30/10/2025',
+            'tipo_relatorio_nome': 'Observação',
+            'icone_relatorio': 'fas fa-eye',
+            'data_geracao': agora.strftime('%d/%m/%Y às %H:%M'),
+            'ano_atual': agora.year,
+            
+            # Métricas
+            'total_observacao': 80,
+            'tempo_medio_observacao': 10.5,
+            'taxa_internacao': '27.5%',
+            'taxa_alta': '56.3%',
+            'idade_media': 40.4,
+            'media_diaria': 11.4,
+            
+            # Dados das tabelas
+            'dados_condutas': dados_condutas_exemplo,
+            'pacientes_internados': pacientes_internados_exemplo,
+            'dados_genero': dados_genero_exemplo,
+            'dados_tempo_permanencia': dados_tempo_permanencia_exemplo,
+            'dados_cid': dados_cid_exemplo,
+            'dados_bairro': dados_bairro_exemplo,
+            
+            'mostrar_assinaturas': True,
+            'assinatura_1_nome': 'Dr. João Silva',
+            'assinatura_1_cargo': 'Diretor Técnico',
+        }
+        
+        return render_template('relatorio_observacao.html', **contexto)
+        
+    except Exception as e:
+        logging.error(f"Erro ao gerar preview de observação: {str(e)}")
+        logging.error(traceback.format_exc())
+        flash('Erro ao gerar preview.', 'danger')
+        return redirect(url_for('main.relatorios_admin'))
+
 @bp.route('/administrador/profissionais')
 @login_required
 def gestao_profissionais():
@@ -3848,6 +4142,588 @@ def visualizar_relatorio():
                     'dados_status': dados_status,
                     'dados_diarios': dados_diarios if modelo == 'serie_historica' else None
                 })
+        
+        elif tipo_relatorio == 'produtividade' and modelo == 'analitico':
+            # RELATÓRIO DE PRODUTIVIDADE CLÍNICA - MODO ANALÍTICO
+            from datetime import date as date_class
+            from collections import defaultdict
+            
+            # Buscar internações do período
+            internacoes = db.session.query(
+                Internacao, Paciente, Atendimento, Funcionario.nome.label('medico_nome')
+            ).join(
+                Paciente, Internacao.paciente_id == Paciente.id
+            ).join(
+                Atendimento, Internacao.atendimento_id == Atendimento.id
+            ).outerjoin(
+                Funcionario, Atendimento.medico_id == Funcionario.id
+            ).filter(
+                Internacao.data_internacao >= data_inicio.date(),
+                Internacao.data_internacao <= data_fim.date()
+            ).all()
+            
+            total_internacoes = len(internacoes)
+            dias_periodo = (data_fim.date() - data_inicio.date()).days + 1
+            
+            # 1. Internamentos por Médico
+            medico_count = {}
+            for intern, pac, atend, medico_nome in internacoes:
+                medico = medico_nome or 'Não informado'
+                medico_count[medico] = medico_count.get(medico, 0) + 1
+            
+            dados_internacoes_medico = []
+            for medico, qtd in sorted(medico_count.items(), key=lambda x: x[1], reverse=True):
+                percentual = round((qtd / total_internacoes * 100), 1) if total_internacoes > 0 else 0
+                media_dia = round(qtd / dias_periodo, 1) if dias_periodo > 0 else 0
+                dados_internacoes_medico.append({
+                    'medico': medico,
+                    'quantidade': qtd,
+                    'percentual': percentual,
+                    'media_dia': media_dia
+                })
+            
+            # 2. Tempo Médio de Alta (permanência)
+            tempos_permanencia = []
+            total_altas = 0
+            total_obitos = 0
+            
+            for intern, pac, atend, medico_nome in internacoes:
+                if intern.data_alta and intern.data_internacao:
+                    diferenca_dias = (intern.data_alta.date() - intern.data_internacao.date()).days
+                    if diferenca_dias >= 0:
+                        tempos_permanencia.append(diferenca_dias)
+                        total_altas += 1
+                
+                # Contar óbitos (verificar se o status ou conduta indica óbito)
+                if atend.status and 'obito' in atend.status.lower():
+                    total_obitos += 1
+                elif intern.relatorio_alta and 'obito' in intern.relatorio_alta.lower():
+                    total_obitos += 1
+            
+            tempo_medio_alta = round(sum(tempos_permanencia) / len(tempos_permanencia), 1) if tempos_permanencia else 0
+            
+            # 3. Taxa de Mortalidade
+            taxa_mortalidade = f'{round((total_obitos / total_internacoes * 100), 1)}%' if total_internacoes > 0 else '0%'
+            
+            # 4. Taxa de Ocupação de Leitos
+            leitos = Leito.query.filter(Leito.status != 'Interditado').all()
+            dados_leitos = []
+            capacidade_total = 0
+            ocupados_total = 0
+            
+            for leito in leitos:
+                capacidade = leito.capacidade_maxima or 1
+                ocupados = leito.ocupacao_atual or 0
+                disponiveis = capacidade - ocupados
+                taxa_ocp = round((ocupados / capacidade * 100), 1) if capacidade > 0 else 0
+                
+                badge_status = 'success' if leito.status == 'Disponível' else 'danger' if leito.status == 'Ocupado' else 'secondary'
+                
+                dados_leitos.append({
+                    'nome': leito.nome,
+                    'capacidade': capacidade,
+                    'ocupados': ocupados,
+                    'disponiveis': disponiveis,
+                    'taxa_ocupacao': taxa_ocp,
+                    'status': leito.status,
+                    'badge_status': badge_status
+                })
+                
+                capacidade_total += capacidade
+                ocupados_total += ocupados
+            
+            disponiveis_total = capacidade_total - ocupados_total
+            taxa_ocupacao_geral = round((ocupados_total / capacidade_total * 100), 1) if capacidade_total > 0 else 0
+            
+            # 5. Taxa de Readmissão (pacientes com alta que retornaram em até 7 dias)
+            readmissoes = []
+            pacientes_com_alta = {}
+            
+            # Primeiro, mapear todas as altas
+            for intern, pac, atend, medico_nome in internacoes:
+                if intern.data_alta:
+                    paciente_id = pac.id
+                    if paciente_id not in pacientes_com_alta:
+                        pacientes_com_alta[paciente_id] = []
+                    pacientes_com_alta[paciente_id].append({
+                        'internacao': intern,
+                        'paciente': pac,
+                        'data_internacao': intern.data_internacao,
+                        'data_alta': intern.data_alta
+                    })
+            
+            # Verificar readmissões
+            for paciente_id, historico in pacientes_com_alta.items():
+                # Ordenar por data de internação
+                historico_ordenado = sorted(historico, key=lambda x: x['data_internacao'])
+                
+                for i in range(len(historico_ordenado) - 1):
+                    alta_atual = historico_ordenado[i]['data_alta']
+                    proxima_internacao = historico_ordenado[i + 1]['data_internacao']
+                    
+                    if alta_atual and proxima_internacao:
+                        diferenca = (proxima_internacao.date() - alta_atual.date()).days
+                        
+                        if 0 < diferenca <= 7:
+                            pac = historico_ordenado[i]['paciente']
+                            cpf_formatado = pac.cpf or 'Não informado'
+                            if cpf_formatado and cpf_formatado != 'Não informado' and len(cpf_formatado) == 11:
+                                cpf_formatado = f'{cpf_formatado[:3]}.{cpf_formatado[3:6]}.{cpf_formatado[6:9]}-{cpf_formatado[9:]}'
+                            
+                            readmissoes.append({
+                                'paciente': pac.nome,
+                                'cpf': cpf_formatado,
+                                'data_primeira': historico_ordenado[i]['data_internacao'].strftime('%d/%m/%Y'),
+                                'data_alta': alta_atual.strftime('%d/%m/%Y'),
+                                'data_segunda': proxima_internacao.strftime('%d/%m/%Y'),
+                                'dias_diferenca': diferenca
+                            })
+            
+            total_readmissoes = len(readmissoes)
+            taxa_readmissao = f'{round((total_readmissoes / total_altas * 100), 1)}%' if total_altas > 0 else '0%'
+            
+            # 6. CID Mais Comum
+            cid_count = {}
+            for intern, pac, atend, medico_nome in internacoes:
+                cid = intern.cid_principal or 'Não informado'
+                if cid and cid != 'Não informado':
+                    cid_count[cid] = cid_count.get(cid, 0) + 1
+            
+            dados_cid = []
+            for cid, qtd in sorted(cid_count.items(), key=lambda x: x[1], reverse=True)[:15]:  # Top 15
+                percentual = round((qtd / total_internacoes * 100), 1) if total_internacoes > 0 else 0
+                dados_cid.append({
+                    'cid': cid,
+                    'descricao': 'Descrição do CID',  # Pode adicionar lookup de descrição
+                    'quantidade': qtd,
+                    'percentual': percentual
+                })
+            
+            # 7. Taxa por Bairro
+            bairro_count = defaultdict(lambda: {'count': 0, 'municipio': ''})
+            for intern, pac, atend, medico_nome in internacoes:
+                bairro = pac.bairro or 'Não informado'
+                municipio = pac.municipio or 'Não informado'
+                bairro_count[bairro]['count'] += 1
+                bairro_count[bairro]['municipio'] = municipio
+            
+            dados_bairro = []
+            for bairro, data in sorted(bairro_count.items(), key=lambda x: x[1]['count'], reverse=True)[:20]:  # Top 20
+                qtd = data['count']
+                percentual = round((qtd / total_internacoes * 100), 1) if total_internacoes > 0 else 0
+                dados_bairro.append({
+                    'bairro': bairro,
+                    'municipio': data['municipio'],
+                    'quantidade': qtd,
+                    'percentual': percentual
+                })
+            
+            # Atualizar contexto com dados de produtividade clínica
+            contexto.update({
+                'total_internacoes': total_internacoes,
+                'total_altas': total_altas,
+                'tempo_medio_alta': tempo_medio_alta,
+                'taxa_mortalidade': taxa_mortalidade,
+                'taxa_readmissao': taxa_readmissao,
+                'total_readmissoes': total_readmissoes,
+                'taxa_ocupacao': f'{taxa_ocupacao_geral}%',
+                'dados_internacoes_medico': dados_internacoes_medico,
+                'dados_leitos': dados_leitos,
+                'capacidade_total': capacidade_total,
+                'ocupados_total': ocupados_total,
+                'disponiveis_total': disponiveis_total,
+                'taxa_ocupacao_geral': taxa_ocupacao_geral,
+                'dados_cid': dados_cid,
+                'dados_bairro': dados_bairro,
+                'dados_readmissao': readmissoes
+            })
+        
+        elif tipo_relatorio == 'produtividade' and modelo == 'serie_historica':
+            # RELATÓRIO DE PRODUTIVIDADE CLÍNICA - MODO SÉRIE HISTÓRICA
+            from datetime import date as date_class
+            from collections import defaultdict
+            
+            # Buscar internações do período
+            internacoes = db.session.query(
+                Internacao, Paciente, Atendimento
+            ).join(
+                Paciente, Internacao.paciente_id == Paciente.id
+            ).join(
+                Atendimento, Internacao.atendimento_id == Atendimento.id
+            ).filter(
+                Internacao.data_internacao >= data_inicio.date(),
+                Internacao.data_internacao <= data_fim.date()
+            ).order_by(Internacao.data_internacao.desc()).all()
+            
+            total_internacoes = len(internacoes)
+            dias_periodo = (data_fim.date() - data_inicio.date()).days + 1
+            
+            # Processar lista completa de internações
+            internacoes_lista = []
+            total_altas = 0
+            total_obitos = 0
+            tempo_permanencias = []
+            status_count = {}
+            
+            for intern, pac, atend in internacoes:
+                # Formatar CPF
+                cpf_formatado = pac.cpf or 'Não informado'
+                if cpf_formatado and cpf_formatado != 'Não informado' and len(cpf_formatado) == 11:
+                    cpf_formatado = f'{cpf_formatado[:3]}.{cpf_formatado[3:6]}.{cpf_formatado[6:9]}-{cpf_formatado[9:]}'
+                
+                # Calcular dias de internação
+                dias_internacao = '-'
+                if intern.data_alta and intern.data_internacao:
+                    diferenca = (intern.data_alta.date() - intern.data_internacao.date()).days
+                    dias_internacao = diferenca
+                    tempo_permanencias.append(diferenca)
+                    total_altas += 1
+                elif intern.data_internacao:
+                    # Se ainda está internado, calcular até hoje
+                    diferenca = (date_class.today() - intern.data_internacao.date()).days
+                    dias_internacao = f'{diferenca}*'  # Asterisco indica ainda internado
+                
+                # Determinar status
+                status = 'Internado'
+                badge_status = 'danger'
+                if intern.data_alta:
+                    if atend.status and 'obito' in atend.status.lower():
+                        status = 'Óbito'
+                        badge_status = 'danger'
+                        total_obitos += 1
+                    elif intern.relatorio_alta and 'obito' in intern.relatorio_alta.lower():
+                        status = 'Óbito'
+                        badge_status = 'danger'
+                        total_obitos += 1
+                    elif atend.status and 'transferencia' in atend.status.lower():
+                        status = 'Transferência'
+                        badge_status = 'warning'
+                    else:
+                        status = 'Alta'
+                        badge_status = 'success'
+                
+                # Contabilizar status
+                status_count[status] = status_count.get(status, 0) + 1
+                
+                # Dados da internação
+                internacoes_lista.append({
+                    'numero': intern.atendimento_id,
+                    'cpf': cpf_formatado,
+                    'paciente': pac.nome or 'Não informado',
+                    'cid': intern.cid_principal or '-',
+                    'diagnostico': (intern.diagnostico_inicial or intern.diagnostico or '-')[:50] + ('...' if (intern.diagnostico_inicial or intern.diagnostico or '') and len(intern.diagnostico_inicial or intern.diagnostico or '') > 50 else ''),
+                    'leito': intern.leito or '-',
+                    'data_internacao': intern.data_internacao.strftime('%d/%m/%Y') if intern.data_internacao else '-',
+                    'data_alta': intern.data_alta.strftime('%d/%m/%Y') if intern.data_alta else 'Internado',
+                    'dias_internacao': dias_internacao,
+                    'status': status,
+                    'badge_status': badge_status
+                })
+            
+            # Calcular métricas
+            media_diaria = round(total_internacoes / dias_periodo, 1) if dias_periodo > 0 else 0
+            tempo_medio_permanencia = round(sum(tempo_permanencias) / len(tempo_permanencias), 1) if tempo_permanencias else 0
+            taxa_mortalidade = f'{round((total_obitos / total_internacoes * 100), 1)}%' if total_internacoes > 0 else '0%'
+            
+            # Taxa de ocupação
+            leitos = Leito.query.filter(Leito.status != 'Interditado').all()
+            capacidade_total = sum(l.capacidade_maxima or 1 for l in leitos)
+            ocupados_total = sum(l.ocupacao_atual or 0 for l in leitos)
+            taxa_ocupacao_geral = round((ocupados_total / capacidade_total * 100), 1) if capacidade_total > 0 else 0
+            
+            # Dados de status
+            dados_status = []
+            for status, qtd in sorted(status_count.items(), key=lambda x: x[1], reverse=True):
+                percentual = round((qtd / total_internacoes * 100), 1) if total_internacoes > 0 else 0
+                badge_map = {'Alta': 'success', 'Óbito': 'danger', 'Transferência': 'warning', 'Internado': 'secondary'}
+                dados_status.append({
+                    'status': status,
+                    'quantidade': qtd,
+                    'percentual': percentual,
+                    'badge_class': badge_map.get(status, 'secondary')
+                })
+            
+            # Dados diários
+            dados_por_dia = defaultdict(lambda: {'internacoes': 0, 'altas': 0, 'transferencias': 0, 'obitos': 0})
+            
+            for intern, pac, atend in internacoes:
+                if intern.data_internacao:
+                    data_key = intern.data_internacao.strftime('%d/%m/%Y')
+                    dados_por_dia[data_key]['internacoes'] += 1
+                
+                if intern.data_alta:
+                    data_alta_key = intern.data_alta.strftime('%d/%m/%Y')
+                    if atend.status and 'obito' in atend.status.lower():
+                        dados_por_dia[data_alta_key]['obitos'] += 1
+                    elif atend.status and 'transferencia' in atend.status.lower():
+                        dados_por_dia[data_alta_key]['transferencias'] += 1
+                    else:
+                        dados_por_dia[data_alta_key]['altas'] += 1
+            
+            # Gerar lista para todos os dias do período
+            dados_diarios = []
+            current_date = data_inicio.date()
+            while current_date <= data_fim.date():
+                data_str = current_date.strftime('%d/%m/%Y')
+                dados_dia = dados_por_dia.get(data_str, {'internacoes': 0, 'altas': 0, 'transferencias': 0, 'obitos': 0})
+                saldo = dados_dia['internacoes'] - (dados_dia['altas'] + dados_dia['transferencias'] + dados_dia['obitos'])
+                
+                dados_diarios.append({
+                    'data': data_str,
+                    'internacoes': dados_dia['internacoes'],
+                    'altas': dados_dia['altas'],
+                    'transferencias': dados_dia['transferencias'],
+                    'obitos': dados_dia['obitos'],
+                    'saldo': saldo
+                })
+                
+                current_date += timedelta(days=1)
+            
+            # Atualizar contexto para série histórica de produtividade
+            contexto.update({
+                'internacoes_lista': internacoes_lista,
+                'total_internacoes': total_internacoes,
+                'media_diaria': media_diaria,
+                'total_altas': total_altas,
+                'tempo_medio_permanencia': tempo_medio_permanencia,
+                'taxa_mortalidade': taxa_mortalidade,
+                'taxa_ocupacao': f'{taxa_ocupacao_geral}%',
+                'dados_status': dados_status,
+                'dados_diarios': dados_diarios
+            })
+        
+        elif tipo_relatorio == 'observacao' and modelo == 'analitico':
+            # RELATÓRIO DE OBSERVAÇÃO - MODO ANALÍTICO
+            from datetime import date as date_class
+            from collections import defaultdict
+            
+            # Buscar atendimentos que passaram pela observação
+            atendimentos_obs = db.session.query(
+                Atendimento, Paciente
+            ).join(
+                Paciente, Atendimento.paciente_id == Paciente.id
+            ).filter(
+                Atendimento.horario_observacao.isnot(None),
+                Atendimento.data_atendimento >= data_inicio.date(),
+                Atendimento.data_atendimento <= data_fim.date()
+            ).all()
+            
+            total_observacao = len(atendimentos_obs)
+            dias_periodo = (data_fim.date() - data_inicio.date()).days + 1
+            
+            # Processar dados
+            tempos_observacao = []
+            condutas_count = {}
+            pacientes_internados_lista = []
+            total_internados = 0
+            total_altas = 0
+            genero_data = defaultdict(lambda: {'count': 0, 'idades': []})
+            idade_total = []
+            cid_count = {}
+            bairro_count = defaultdict(lambda: {'count': 0, 'municipio': ''})
+            
+            for atend, pac in atendimentos_obs:
+                # 1. Calcular tempo em observação
+                if atend.horario_observacao and atend.hora_atendimento and atend.data_atendimento:
+                    dt_entrada = datetime.combine(atend.data_atendimento, atend.hora_atendimento)
+                    dt_obs = atend.horario_observacao
+                    
+                    if isinstance(dt_obs, datetime):
+                        # Calcular tempo até alta ou internação
+                        dt_saida = None
+                        if atend.horario_alta:
+                            dt_saida = atend.horario_alta
+                        elif atend.horario_internacao:
+                            dt_saida = atend.horario_internacao
+                        
+                        if dt_saida and isinstance(dt_saida, datetime):
+                            tempo_horas = (dt_saida - dt_obs).total_seconds() / 3600
+                            if tempo_horas >= 0:
+                                tempos_observacao.append(tempo_horas)
+                
+                # 2. Analisar conduta final
+                conduta = atend.conduta_final or atend.status or 'Não informado'
+                condutas_count[conduta] = condutas_count.get(conduta, 0) + 1
+                
+                # Verificar se foi internado
+                if atend.horario_internacao or (atend.status and 'internado' in atend.status.lower()):
+                    total_internados += 1
+                    
+                    # Buscar dados da internação
+                    internacao = Internacao.query.filter_by(atendimento_id=atend.id).first()
+                    cid = internacao.cid_principal if internacao else '-'
+                    
+                    # Formatar CPF
+                    cpf_formatado = pac.cpf or 'Não informado'
+                    if cpf_formatado and cpf_formatado != 'Não informado' and len(cpf_formatado) == 11:
+                        cpf_formatado = f'{cpf_formatado[:3]}.{cpf_formatado[3:6]}.{cpf_formatado[6:9]}-{cpf_formatado[9:]}'
+                    
+                    # Calcular tempo em observação antes de internar
+                    tempo_obs_str = '-'
+                    if atend.horario_observacao and atend.horario_internacao:
+                        if isinstance(atend.horario_observacao, datetime) and isinstance(atend.horario_internacao, datetime):
+                            tempo_obs_horas = (atend.horario_internacao - atend.horario_observacao).total_seconds() / 3600
+                            if tempo_obs_horas >= 0:
+                                horas = int(tempo_obs_horas)
+                                minutos = int((tempo_obs_horas % 1) * 60)
+                                tempo_obs_str = f'{horas}h{minutos:02d}min'
+                    
+                    pacientes_internados_lista.append({
+                        'numero': atend.id,
+                        'paciente': pac.nome or 'Não informado',
+                        'cpf': cpf_formatado,
+                        'data_obs': atend.horario_observacao.strftime('%d/%m/%Y %H:%M') if isinstance(atend.horario_observacao, datetime) else '-',
+                        'data_internacao': atend.horario_internacao.strftime('%d/%m/%Y %H:%M') if isinstance(atend.horario_internacao, datetime) else '-',
+                        'tempo_obs': tempo_obs_str,
+                        'cid': cid
+                    })
+                
+                # Contar altas
+                if atend.horario_alta or (atend.status and 'alta' in atend.status.lower()):
+                    total_altas += 1
+                
+                # 3. Perfil - Gênero e Idade
+                if pac.data_nascimento:
+                    hoje = date_class.today()
+                    idade = hoje.year - pac.data_nascimento.year
+                    if (hoje.month, hoje.day) < (pac.data_nascimento.month, pac.data_nascimento.day):
+                        idade -= 1
+                    idade_total.append(idade)
+                    
+                    genero = 'Masculino' if pac.sexo and pac.sexo.upper() in ['M', 'MASCULINO'] else 'Feminino' if pac.sexo and pac.sexo.upper() in ['F', 'FEMININO'] else 'Não informado'
+                    genero_data[genero]['count'] += 1
+                    genero_data[genero]['idades'].append(idade)
+                
+                # 4. CID mais comum
+                if atend.dx:
+                    # Tentar extrair CID do campo dx
+                    cid_texto = atend.dx.split()[0] if atend.dx else 'Não informado'
+                    cid_count[cid_texto] = cid_count.get(cid_texto, 0) + 1
+                
+                # 5. Bairro
+                bairro = pac.bairro or 'Não informado'
+                municipio = pac.municipio or 'Não informado'
+                bairro_count[bairro]['count'] += 1
+                bairro_count[bairro]['municipio'] = municipio
+            
+            # Calcular métricas
+            tempo_medio_observacao = round(sum(tempos_observacao) / len(tempos_observacao), 1) if tempos_observacao else 0
+            taxa_internacao = f'{round((total_internados / total_observacao * 100), 1)}%' if total_observacao > 0 else '0%'
+            taxa_alta = f'{round((total_altas / total_observacao * 100), 1)}%' if total_observacao > 0 else '0%'
+            idade_media = round(sum(idade_total) / len(idade_total), 1) if idade_total else 0
+            media_diaria = round(total_observacao / dias_periodo, 1) if dias_periodo > 0 else 0
+            
+            # Processar condutas
+            dados_condutas = []
+            for conduta, qtd in sorted(condutas_count.items(), key=lambda x: x[1], reverse=True):
+                percentual = round((qtd / total_observacao * 100), 1) if total_observacao > 0 else 0
+                
+                # Calcular tempo médio para cada conduta
+                tempos_conduta = []
+                for atend, pac in atendimentos_obs:
+                    if (atend.conduta_final or atend.status or 'Não informado') == conduta:
+                        if atend.horario_observacao and atend.hora_atendimento and atend.data_atendimento:
+                            dt_obs = atend.horario_observacao
+                            dt_saida = atend.horario_alta or atend.horario_internacao
+                            if dt_saida and isinstance(dt_obs, datetime) and isinstance(dt_saida, datetime):
+                                tempo_h = (dt_saida - dt_obs).total_seconds() / 3600
+                                if tempo_h >= 0:
+                                    tempos_conduta.append(tempo_h)
+                
+                tempo_medio_conduta = round(sum(tempos_conduta) / len(tempos_conduta), 1) if tempos_conduta else 0
+                
+                badge_map = {
+                    'alta': 'success',
+                    'internado': 'danger',
+                    'internacao': 'danger',
+                    'transferencia': 'warning',
+                    'evasao': 'danger',
+                    'aguardando': 'secondary'
+                }
+                badge_class = 'secondary'
+                for key, value in badge_map.items():
+                    if key in conduta.lower():
+                        badge_class = value
+                        break
+                
+                dados_condutas.append({
+                    'conduta': conduta,
+                    'quantidade': qtd,
+                    'percentual': percentual,
+                    'tempo_medio': f'{tempo_medio_conduta}h' if tempo_medio_conduta > 0 else '-',
+                    'badge_class': badge_class
+                })
+            
+            # Processar dados de gênero
+            dados_genero = []
+            for genero, data in genero_data.items():
+                qtd = data['count']
+                percentual = round((qtd / total_observacao * 100), 1) if total_observacao > 0 else 0
+                idade_media_genero = round(sum(data['idades']) / len(data['idades']), 1) if data['idades'] else 0
+                dados_genero.append({
+                    'genero': genero,
+                    'quantidade': qtd,
+                    'percentual': percentual,
+                    'idade_media': idade_media_genero
+                })
+            dados_genero.sort(key=lambda x: x['quantidade'], reverse=True)
+            
+            # Processar faixas de tempo
+            faixas_tempo = {
+                'Menos de 6h': (0, 6),
+                '6h a 12h': (6, 12),
+                '12h a 24h': (12, 24),
+                '24h a 48h': (24, 48),
+                'Mais de 48h': (48, float('inf'))
+            }
+            dados_tempo_permanencia = []
+            for faixa_nome, (min_h, max_h) in faixas_tempo.items():
+                qtd = sum(1 for t in tempos_observacao if min_h <= t < max_h)
+                percentual = round((qtd / len(tempos_observacao) * 100), 1) if tempos_observacao else 0
+                dados_tempo_permanencia.append({
+                    'faixa': faixa_nome,
+                    'quantidade': qtd,
+                    'percentual': percentual
+                })
+            
+            # Processar CIDs
+            dados_cid = []
+            for cid, qtd in sorted(cid_count.items(), key=lambda x: x[1], reverse=True)[:15]:
+                percentual = round((qtd / total_observacao * 100), 1) if total_observacao > 0 else 0
+                dados_cid.append({
+                    'cid': cid,
+                    'descricao': 'Diagnóstico',
+                    'quantidade': qtd,
+                    'percentual': percentual
+                })
+            
+            # Processar bairros
+            dados_bairro = []
+            for bairro, data in sorted(bairro_count.items(), key=lambda x: x[1]['count'], reverse=True)[:20]:
+                qtd = data['count']
+                percentual = round((qtd / total_observacao * 100), 1) if total_observacao > 0 else 0
+                dados_bairro.append({
+                    'bairro': bairro,
+                    'municipio': data['municipio'],
+                    'quantidade': qtd,
+                    'percentual': percentual
+                })
+            
+            # Atualizar contexto
+            contexto.update({
+                'total_observacao': total_observacao,
+                'tempo_medio_observacao': tempo_medio_observacao,
+                'taxa_internacao': taxa_internacao,
+                'taxa_alta': taxa_alta,
+                'idade_media': idade_media,
+                'media_diaria': media_diaria,
+                'dados_condutas': dados_condutas,
+                'pacientes_internados': pacientes_internados_lista,
+                'dados_genero': dados_genero,
+                'dados_tempo_permanencia': dados_tempo_permanencia,
+                'dados_cid': dados_cid,
+                'dados_bairro': dados_bairro
+            })
         
         logging.info(f'Relatório gerado: {tipo_relatorio} ({modelo}) de {data_inicio_str} a {data_fim_str} por {user.nome}')
         

@@ -1,7 +1,11 @@
 {% extends 'relatorio_base_impressao.html' %}
 
 {% block conteudo_relatorio %}
-<!-- Métricas Resumidas -->
+
+{% if modelo_relatorio == 'Analítico' %}
+<!-- ===== MODO ANALÍTICO ===== -->
+
+<!-- Resumo Executivo -->
 <div class="relatorio-secao">
     <h2 class="secao-titulo">
         <i class="fas fa-chart-pie"></i>
@@ -16,112 +20,67 @@
         </div>
         
         <div class="metrica-card">
-            <div class="metrica-label">Altas</div>
-            <div class="metrica-valor">{{ total_altas or 0 }}</div>
-            <div class="metrica-complemento">pacientes</div>
-        </div>
-        
-        <div class="metrica-card">
             <div class="metrica-label">Taxa de Ocupação</div>
             <div class="metrica-valor">{{ taxa_ocupacao or '0%' }}</div>
             <div class="metrica-complemento">média do período</div>
         </div>
         
         <div class="metrica-card">
-            <div class="metrica-label">Tempo Médio</div>
-            <div class="metrica-valor">{{ tempo_medio_permanencia or '0' }}</div>
-            <div class="metrica-complemento">dias de internação</div>
+            <div class="metrica-label">Tempo Médio de Alta</div>
+            <div class="metrica-valor">{{ tempo_medio_alta or '0' }}</div>
+            <div class="metrica-complemento">dias</div>
+        </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Taxa de Mortalidade</div>
+            <div class="metrica-valor">{{ taxa_mortalidade or '0%' }}</div>
+            <div class="metrica-complemento">óbitos</div>
+        </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Taxa de Readmissão</div>
+            <div class="metrica-valor">{{ taxa_readmissao or '0%' }}</div>
+            <div class="metrica-complemento">em 7 dias</div>
+        </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Total de Altas</div>
+            <div class="metrica-valor">{{ total_altas or 0 }}</div>
+            <div class="metrica-complemento">pacientes</div>
         </div>
     </div>
 </div>
 
-<!-- Ocupação de Leitos -->
+<!-- Internamentos por Médico -->
 <div class="relatorio-secao">
     <h2 class="secao-titulo">
-        <i class="fas fa-bed"></i>
-        Ocupação de Leitos
+        <i class="fas fa-user-md"></i>
+        Internamentos por Médico
     </h2>
     
     <table class="tabela-relatorio">
         <thead>
             <tr>
-                <th>Setor/Leito</th>
-                <th style="text-align: center;">Capacidade</th>
-                <th style="text-align: center;">Ocupados</th>
-                <th style="text-align: center;">Disponíveis</th>
-                <th style="text-align: center;">Taxa de Ocupação</th>
+                <th>Médico</th>
+                <th style="text-align: center;">Internações</th>
+                <th style="text-align: center;">Percentual</th>
+                <th style="text-align: center;">Média/Dia</th>
             </tr>
         </thead>
         <tbody>
-            {% if dados_leitos %}
-                {% for item in dados_leitos %}
+            {% if dados_internacoes_medico %}
+                {% for item in dados_internacoes_medico %}
                 <tr>
-                    <td>{{ item.setor }}</td>
-                    <td style="text-align: center;">{{ item.capacidade }}</td>
-                    <td style="text-align: center;">{{ item.ocupados }}</td>
-                    <td style="text-align: center;">{{ item.disponiveis }}</td>
-                    <td style="text-align: center;">{{ item.taxa_ocupacao }}%</td>
+                    <td>{{ item.medico }}</td>
+                    <td style="text-align: center;">{{ item.quantidade }}</td>
+                    <td style="text-align: center;">{{ item.percentual }}%</td>
+                    <td style="text-align: center;">{{ item.media_dia }}</td>
                 </tr>
                 {% endfor %}
             {% else %}
                 <tr>
-                    <td>Clínica Médica</td>
-                    <td style="text-align: center;">-</td>
-                    <td style="text-align: center;">-</td>
-                    <td style="text-align: center;">-</td>
-                    <td style="text-align: center;">-</td>
-                </tr>
-                <tr>
-                    <td>Observação</td>
-                    <td style="text-align: center;">-</td>
-                    <td style="text-align: center;">-</td>
-                    <td style="text-align: center;">-</td>
-                    <td style="text-align: center;">-</td>
-                </tr>
-            {% endif %}
-            <tr class="total-row">
-                <td>TOTAL</td>
-                <td style="text-align: center;">{{ capacidade_total or '-' }}</td>
-                <td style="text-align: center;">{{ ocupados_total or '-' }}</td>
-                <td style="text-align: center;">{{ disponiveis_total or '-' }}</td>
-                <td style="text-align: center;">{{ taxa_ocupacao_geral or '-' }}%</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-
-<!-- Internações por Período -->
-<div class="relatorio-secao">
-    <h2 class="secao-titulo">
-        <i class="fas fa-procedures"></i>
-        Internações no Período
-    </h2>
-    
-    <table class="tabela-relatorio">
-        <thead>
-            <tr>
-                <th>Data</th>
-                <th style="text-align: center;">Novas Internações</th>
-                <th style="text-align: center;">Altas</th>
-                <th style="text-align: center;">Transferências</th>
-                <th style="text-align: center;">Óbitos</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% if dados_periodo %}
-                {% for item in dados_periodo %}
-                <tr>
-                    <td>{{ item.data }}</td>
-                    <td style="text-align: center;">{{ item.internacoes }}</td>
-                    <td style="text-align: center;">{{ item.altas }}</td>
-                    <td style="text-align: center;">{{ item.transferencias }}</td>
-                    <td style="text-align: center;">{{ item.obitos }}</td>
-                </tr>
-                {% endfor %}
-            {% else %}
-                <tr>
-                    <td colspan="5" style="text-align: center;" class="text-muted">
-                        Nenhum dado disponível para o período selecionado
+                    <td colspan="4" style="text-align: center;" class="text-muted">
+                        Dados não disponíveis
                     </td>
                 </tr>
             {% endif %}
@@ -129,7 +88,46 @@
     </table>
 </div>
 
-<!-- Diagnósticos Mais Frequentes -->
+<!-- Ocupação de Leitos -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-bed"></i>
+        Taxa de Ocupação de Leitos
+    </h2>
+    
+    <table class="tabela-relatorio">
+        <thead>
+            <tr>
+                <th>Leito</th>
+                <th style="text-align: center;">Capacidade</th>
+                <th style="text-align: center;">Ocupação Atual</th>
+                <th style="text-align: center;">Taxa de Ocupação</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if dados_leitos %}
+                {% for item in dados_leitos %}
+                <tr>
+                    <td>{{ item.nome }}</td>
+                    <td style="text-align: center;">{{ item.capacidade }}</td>
+                    <td style="text-align: center;">{{ item.ocupados }}</td>
+                    <td style="text-align: center;"><strong>{{ item.taxa_ocupacao }}%</strong></td>
+                    <td><span class="badge badge-{{ item.badge_status }}">{{ item.status }}</span></td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center;" class="text-muted">
+                        Dados não disponíveis
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<!-- CID Mais Comum -->
 <div class="relatorio-secao">
     <h2 class="secao-titulo">
         <i class="fas fa-stethoscope"></i>
@@ -139,17 +137,17 @@
     <table class="tabela-relatorio">
         <thead>
             <tr>
-                <th>CID-10</th>
+                <th style="width: 100px;">CID-10</th>
                 <th>Descrição</th>
                 <th style="text-align: center;">Quantidade</th>
                 <th style="text-align: center;">Percentual</th>
             </tr>
         </thead>
         <tbody>
-            {% if dados_diagnosticos %}
-                {% for item in dados_diagnosticos %}
+            {% if dados_cid %}
+                {% for item in dados_cid %}
                 <tr>
-                    <td><strong>{{ item.cid }}</strong></td>
+                    <td><strong class="text-primary">{{ item.cid }}</strong></td>
                     <td>{{ item.descricao }}</td>
                     <td style="text-align: center;">{{ item.quantidade }}</td>
                     <td style="text-align: center;">{{ item.percentual }}%</td>
@@ -166,35 +164,415 @@
     </table>
 </div>
 
-<!-- Gráfico de Série Histórica (apenas se for série histórica) -->
-{% if modelo_relatorio == 'Série Histórica' %}
+<!-- Distribuição por Bairro -->
 <div class="relatorio-secao">
     <h2 class="secao-titulo">
-        <i class="fas fa-chart-line"></i>
-        Evolução de Internações
+        <i class="fas fa-map-marker-alt"></i>
+        Taxa de Internação por Bairro
     </h2>
     
-    <div class="grafico-area" id="graficoInternacoes">
-        <div class="grafico-placeholder">
-            <i class="fas fa-chart-area"></i>
-            <p>Gráfico de evolução temporal das internações</p>
+    <table class="tabela-relatorio">
+        <thead>
+            <tr>
+                <th>Bairro</th>
+                <th>Município</th>
+                <th style="text-align: center;">Internações</th>
+                <th style="text-align: center;">Percentual</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if dados_bairro %}
+                {% for item in dados_bairro %}
+                <tr>
+                    <td>{{ item.bairro }}</td>
+                    <td>{{ item.municipio }}</td>
+                    <td style="text-align: center;">{{ item.quantidade }}</td>
+                    <td style="text-align: center;">{{ item.percentual }}%</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="4" style="text-align: center;" class="text-muted">
+                        Dados não disponíveis
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Readmissões Hospitalares -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-redo-alt"></i>
+        Readmissões Hospitalares (até 7 dias)
+    </h2>
+    
+    <table class="tabela-relatorio">
+        <thead>
+            <tr>
+                <th>Paciente</th>
+                <th>CPF</th>
+                <th style="text-align: center;">1ª Internação</th>
+                <th style="text-align: center;">Alta</th>
+                <th style="text-align: center;">2ª Internação</th>
+                <th style="text-align: center;">Dias</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if dados_readmissao %}
+                {% for item in dados_readmissao %}
+                <tr>
+                    <td>{{ item.paciente }}</td>
+                    <td>{{ item.cpf }}</td>
+                    <td style="text-align: center;">{{ item.data_primeira }}</td>
+                    <td style="text-align: center;">{{ item.data_alta }}</td>
+                    <td style="text-align: center;">{{ item.data_segunda }}</td>
+                    <td style="text-align: center;"><strong class="text-warning">{{ item.dias_diferenca }}</strong></td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center;" class="text-muted">
+                        Nenhuma readmissão em 7 dias identificada
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+    
+    {% if total_readmissoes > 0 %}
+    <div style="margin-top: 12px; padding: 10px; background: #FEF3C7; border-left: 4px solid #F59E0B; border-radius: 6px;">
+        <strong style="color: #92400E;">
+            <i class="fas fa-exclamation-triangle"></i>
+            Total de readmissões em 7 dias: {{ total_readmissoes }} ({{ taxa_readmissao }})
+        </strong>
+    </div>
+    {% endif %}
+</div>
+
+{% else %}
+<!-- ===== MODO SÉRIE HISTÓRICA ===== -->
+
+<!-- Listagem Completa de Internações -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-procedures"></i>
+        Histórico Completo de Internações
+    </h2>
+    
+    <table class="tabela-relatorio tabela-atendimentos">
+        <thead>
+            <tr>
+                <th style="width: 80px;">Nº Atendimento</th>
+                <th style="width: 110px;">CPF</th>
+                <th>Paciente</th>
+                <th style="width: 80px;">CID-10</th>
+                <th style="width: 140px;">Diagnóstico</th>
+                <th style="width: 100px;">Leito</th>
+                <th style="width: 90px;">Data Internação</th>
+                <th style="width: 90px;">Data Alta</th>
+                <th style="width: 60px;">Dias</th>
+                <th style="width: 100px;">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if internacoes_lista %}
+                {% for item in internacoes_lista %}
+                <tr>
+                    <td><strong class="text-primary">{{ item.numero }}</strong></td>
+                    <td><small>{{ item.cpf }}</small></td>
+                    <td>{{ item.paciente }}</td>
+                    <td><strong class="text-primary">{{ item.cid }}</strong></td>
+                    <td><small>{{ item.diagnostico }}</small></td>
+                    <td style="text-align: center;"><span class="badge badge-secondary">{{ item.leito }}</span></td>
+                    <td><small>{{ item.data_internacao }}</small></td>
+                    <td><small>{{ item.data_alta }}</small></td>
+                    <td style="text-align: center;"><strong>{{ item.dias_internacao }}</strong></td>
+                    <td>
+                        <span class="badge badge-{{ item.badge_status }}">{{ item.status }}</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="10" style="text-align: center; padding: 40px;" class="text-muted">
+                        <i class="fas fa-inbox fa-2x mb-2" style="display: block; opacity: 0.3;"></i>
+                        Nenhuma internação encontrada no período selecionado
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+        <tfoot>
+            <tr style="background: #F7FAFC;">
+                <td colspan="10" style="text-align: center; padding: 12px; font-weight: 600; color: var(--azul-principal);">
+                    <i class="fas fa-list-ol me-2"></i>
+                    Total de {{ total_internacoes or 0 }} internação(ões) no período
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+<!-- Resumo Estatístico -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-chart-pie"></i>
+        Resumo Estatístico
+    </h2>
+    
+    <div class="metricas-grid">
+        <div class="metrica-card destaque">
+            <div class="metrica-label">Total Internações</div>
+            <div class="metrica-valor">{{ total_internacoes or 0 }}</div>
+            <div class="metrica-complemento">no período</div>
+        </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Média Diária</div>
+            <div class="metrica-valor">{{ media_diaria or '0' }}</div>
+            <div class="metrica-complemento">internações/dia</div>
+        </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Tempo Médio</div>
+            <div class="metrica-valor">{{ tempo_medio_permanencia or '0' }}</div>
+            <div class="metrica-complemento">dias internado</div>
+        </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Total de Altas</div>
+            <div class="metrica-valor">{{ total_altas or 0 }}</div>
+            <div class="metrica-complemento">pacientes</div>
+        </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Taxa de Ocupação</div>
+            <div class="metrica-valor">{{ taxa_ocupacao or '0%' }}</div>
+            <div class="metrica-complemento">média</div>
+        </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Taxa de Mortalidade</div>
+            <div class="metrica-valor">{{ taxa_mortalidade or '0%' }}</div>
+            <div class="metrica-complemento">óbitos</div>
         </div>
     </div>
 </div>
-{% endif %}
 
-<!-- Observações -->
-<div class="observacoes-box">
-    <h4>
-        <i class="fas fa-info-circle"></i>
-        Observações
-    </h4>
-    <p>
-        • Taxa de ocupação calculada com base na capacidade total de leitos.<br>
-        • Tempo médio de permanência considera apenas internações com alta no período.<br>
-        • Diagnósticos baseados no CID-10 principal registrado na internação.
-    </p>
+<!-- Evolução Temporal (Gráfico) -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-chart-line"></i>
+        Evolução de Internações e Altas
+    </h2>
+    
+    <div class="grafico-area" id="graficoInternacoes">
+        <canvas id="chartInternacoes" width="800" height="300"></canvas>
+    </div>
 </div>
 
-{% endblock %}
+<!-- Tabela Diária -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-calendar-alt"></i>
+        Internações e Altas por Dia
+    </h2>
+    
+    <table class="tabela-relatorio">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th style="text-align: center;">Novas Internações</th>
+                <th style="text-align: center;">Altas</th>
+                <th style="text-align: center;">Transferências</th>
+                <th style="text-align: center;">Óbitos</th>
+                <th style="text-align: center;">Saldo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if dados_diarios %}
+                {% for item in dados_diarios %}
+                <tr>
+                    <td>{{ item.data }}</td>
+                    <td style="text-align: center;">{{ item.internacoes }}</td>
+                    <td style="text-align: center;">{{ item.altas }}</td>
+                    <td style="text-align: center;">{{ item.transferencias }}</td>
+                    <td style="text-align: center;">{{ item.obitos }}</td>
+                    <td style="text-align: center;"><strong class="{% if item.saldo > 0 %}text-success{% elif item.saldo < 0 %}text-danger{% else %}text-muted{% endif %}">{{ item.saldo }}</strong></td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center;" class="text-muted">
+                        Dados não disponíveis
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
 
+<!-- Distribuição por Status -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-tasks"></i>
+        Distribuição por Status
+    </h2>
+    
+    <table class="tabela-relatorio">
+        <thead>
+            <tr>
+                <th>Status</th>
+                <th style="text-align: center;">Quantidade</th>
+                <th style="text-align: center;">Percentual</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if dados_status %}
+                {% for item in dados_status %}
+                <tr>
+                    <td>
+                        <span class="badge badge-{{ item.badge_class }}">{{ item.status }}</span>
+                    </td>
+                    <td style="text-align: center;">{{ item.quantidade }}</td>
+                    <td style="text-align: center;">{{ item.percentual }}%</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="3" style="text-align: center;" class="text-muted">
+                        Dados não disponíveis
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Script para gráfico de internações -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('chartInternacoes');
+        if (ctx) {
+            const placeholder = document.querySelector('#graficoInternacoes .grafico-placeholder');
+            if (placeholder) {
+                placeholder.style.display = 'none';
+            }
+            
+            const dadosStr = '{{ dados_diarios | tojson | safe }}';
+            if (dadosStr && dadosStr !== 'null') {
+                const dados = JSON.parse(dadosStr);
+                
+                const labels = dados.map(d => d.data);
+                const internacoes = dados.map(d => d.internacoes);
+                const altas = dados.map(d => d.altas);
+                const saldos = dados.map(d => d.saldo);
+                
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Novas Internações',
+                                data: internacoes,
+                                borderColor: '#4A90E2',
+                                backgroundColor: 'rgba(74, 144, 226, 0.1)',
+                                borderWidth: 3,
+                                tension: 0.4,
+                                fill: true,
+                                pointRadius: 4,
+                                pointHoverRadius: 6
+                            },
+                            {
+                                label: 'Altas',
+                                data: altas,
+                                borderColor: '#10B981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                borderWidth: 2,
+                                tension: 0.4,
+                                fill: true,
+                                pointRadius: 3,
+                                pointHoverRadius: 5
+                            },
+                            {
+                                label: 'Saldo Diário',
+                                data: saldos,
+                                borderColor: '#F59E0B',
+                                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                                borderWidth: 2,
+                                tension: 0.4,
+                                fill: false,
+                                pointRadius: 3,
+                                pointHoverRadius: 5,
+                                borderDash: [5, 5]
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        aspectRatio: 2.5,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 15,
+                                    usePointStyle: true,
+                                    font: {
+                                        size: 12,
+                                        family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                                    }
+                                }
+                            },
+                            title: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                padding: 12,
+                                titleFont: {
+                                    size: 13
+                                },
+                                bodyFont: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1,
+                                    font: {
+                                        size: 11
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    font: {
+                                        size: 10
+                                    },
+                                    maxRotation: 45,
+                                    minRotation: 0
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    });
+</script>
+
+{% endif %}
+
+{% endblock %}

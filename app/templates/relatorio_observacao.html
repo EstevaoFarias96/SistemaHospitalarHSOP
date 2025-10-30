@@ -1,7 +1,11 @@
 {% extends 'relatorio_base_impressao.html' %}
 
 {% block conteudo_relatorio %}
-<!-- Métricas Resumidas -->
+
+{% if modelo_relatorio == 'Analítico' %}
+<!-- ===== MODO ANALÍTICO - OBSERVAÇÃO ===== -->
+
+<!-- Resumo Executivo -->
 <div class="relatorio-secao">
     <h2 class="secao-titulo">
         <i class="fas fa-chart-pie"></i>
@@ -16,15 +20,9 @@
         </div>
         
         <div class="metrica-card">
-            <div class="metrica-label">Média Diária</div>
-            <div class="metrica-valor">{{ media_diaria or 0 }}</div>
-            <div class="metrica-complemento">pacientes/dia</div>
-        </div>
-        
-        <div class="metrica-card">
             <div class="metrica-label">Tempo Médio</div>
-            <div class="metrica-valor">{{ tempo_medio or '0h' }}</div>
-            <div class="metrica-complemento">de permanência</div>
+            <div class="metrica-valor">{{ tempo_medio_observacao or '0' }}</div>
+            <div class="metrica-complemento">horas</div>
         </div>
         
         <div class="metrica-card">
@@ -32,30 +30,50 @@
             <div class="metrica-valor">{{ taxa_internacao or '0%' }}</div>
             <div class="metrica-complemento">após observação</div>
         </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Taxa de Alta</div>
+            <div class="metrica-valor">{{ taxa_alta or '0%' }}</div>
+            <div class="metrica-complemento">melhorados</div>
+        </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Idade Média</div>
+            <div class="metrica-valor">{{ idade_media or 0 }}</div>
+            <div class="metrica-complemento">anos</div>
+        </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Média Diária</div>
+            <div class="metrica-valor">{{ media_diaria or '0' }}</div>
+            <div class="metrica-complemento">pacientes/dia</div>
+        </div>
     </div>
 </div>
 
-<!-- Desfechos da Observação -->
+<!-- Condutas dos Pacientes em Observação -->
 <div class="relatorio-secao">
     <h2 class="secao-titulo">
         <i class="fas fa-clipboard-check"></i>
-        Desfechos da Observação
+        Distribuição por Conduta Final
     </h2>
     
     <table class="tabela-relatorio">
         <thead>
             <tr>
-                <th>Desfecho</th>
+                <th>Conduta</th>
                 <th style="text-align: center;">Quantidade</th>
                 <th style="text-align: center;">Percentual</th>
                 <th style="text-align: center;">Tempo Médio</th>
             </tr>
         </thead>
         <tbody>
-            {% if dados_desfechos %}
-                {% for item in dados_desfechos %}
+            {% if dados_condutas %}
+                {% for item in dados_condutas %}
                 <tr>
-                    <td>{{ item.desfecho }}</td>
+                    <td>
+                        <span class="badge badge-{{ item.badge_class }}">{{ item.conduta }}</span>
+                    </td>
                     <td style="text-align: center;">{{ item.quantidade }}</td>
                     <td style="text-align: center;">{{ item.percentual }}%</td>
                     <td style="text-align: center;">{{ item.tempo_medio }}</td>
@@ -63,25 +81,93 @@
                 {% endfor %}
             {% else %}
                 <tr>
-                    <td>Alta Melhorada</td>
+                    <td colspan="4" style="text-align: center;" class="text-muted">
+                        Dados não disponíveis
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pacientes que foram Internados -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-procedures"></i>
+        Pacientes da Observação que Foram Internados
+    </h2>
+    
+    <table class="tabela-relatorio">
+        <thead>
+            <tr>
+                <th style="width: 80px;">Nº Atendimento</th>
+                <th>Paciente</th>
+                <th style="width: 110px;">CPF</th>
+                <th style="width: 100px;">Entrada Observação</th>
+                <th style="width: 90px;">Internação</th>
+                <th style="width: 80px;">Tempo Obs.</th>
+                <th style="width: 120px;">CID</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if pacientes_internados %}
+                {% for item in pacientes_internados %}
+                <tr>
+                    <td><strong class="text-primary">{{ item.numero }}</strong></td>
+                    <td>{{ item.paciente }}</td>
+                    <td><small>{{ item.cpf }}</small></td>
+                    <td><small>{{ item.data_obs }}</small></td>
+                    <td><small>{{ item.data_internacao }}</small></td>
+                    <td style="text-align: center;"><strong>{{ item.tempo_obs }}</strong></td>
+                    <td><small class="text-primary"><strong>{{ item.cid }}</strong></small></td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="7" style="text-align: center;" class="text-muted">
+                        Nenhum paciente foi internado após observação
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Distribuição por Gênero -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-venus-mars"></i>
+        Perfil dos Pacientes - Distribuição por Gênero
+    </h2>
+    
+    <table class="tabela-relatorio">
+        <thead>
+            <tr>
+                <th>Gênero</th>
+                <th style="text-align: center;">Quantidade</th>
+                <th style="text-align: center;">Percentual</th>
+                <th style="text-align: center;">Idade Média</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if dados_genero %}
+                {% for item in dados_genero %}
+                <tr>
+                    <td>{{ item.genero }}</td>
+                    <td style="text-align: center;">{{ item.quantidade }}</td>
+                    <td style="text-align: center;">{{ item.percentual }}%</td>
+                    <td style="text-align: center;">{{ item.idade_media }} anos</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td>Masculino</td>
                     <td style="text-align: center;">-</td>
                     <td style="text-align: center;">-</td>
                     <td style="text-align: center;">-</td>
                 </tr>
                 <tr>
-                    <td>Internação</td>
-                    <td style="text-align: center;">-</td>
-                    <td style="text-align: center;">-</td>
-                    <td style="text-align: center;">-</td>
-                </tr>
-                <tr>
-                    <td>Transferência</td>
-                    <td style="text-align: center;">-</td>
-                    <td style="text-align: center;">-</td>
-                    <td style="text-align: center;">-</td>
-                </tr>
-                <tr>
-                    <td>Evasão</td>
+                    <td>Feminino</td>
                     <td style="text-align: center;">-</td>
                     <td style="text-align: center;">-</td>
                     <td style="text-align: center;">-</td>
@@ -91,84 +177,69 @@
                 <td>TOTAL</td>
                 <td style="text-align: center;">{{ total_observacao or 0 }}</td>
                 <td style="text-align: center;">100%</td>
-                <td style="text-align: center;">{{ tempo_medio_geral or '-' }}</td>
+                <td style="text-align: center;">{{ idade_media or 0 }} anos</td>
             </tr>
         </tbody>
     </table>
 </div>
 
-<!-- Distribuição por Turno -->
+<!-- Tempo de Permanência em Observação -->
 <div class="relatorio-secao">
     <h2 class="secao-titulo">
         <i class="fas fa-clock"></i>
-        Distribuição por Turno
+        Tempo de Permanência em Observação
     </h2>
     
     <table class="tabela-relatorio">
         <thead>
             <tr>
-                <th>Turno</th>
-                <th>Horário</th>
-                <th style="text-align: center;">Admissões</th>
+                <th>Faixa de Tempo</th>
+                <th style="text-align: center;">Quantidade</th>
                 <th style="text-align: center;">Percentual</th>
             </tr>
         </thead>
         <tbody>
-            {% if dados_turnos %}
-                {% for item in dados_turnos %}
+            {% if dados_tempo_permanencia %}
+                {% for item in dados_tempo_permanencia %}
                 <tr>
-                    <td>{{ item.turno }}</td>
-                    <td>{{ item.horario }}</td>
+                    <td>{{ item.faixa }}</td>
                     <td style="text-align: center;">{{ item.quantidade }}</td>
                     <td style="text-align: center;">{{ item.percentual }}%</td>
                 </tr>
                 {% endfor %}
             {% else %}
                 <tr>
-                    <td>Manhã</td>
-                    <td>07:00 - 12:59</td>
-                    <td style="text-align: center;">-</td>
-                    <td style="text-align: center;">-</td>
-                </tr>
-                <tr>
-                    <td>Tarde</td>
-                    <td>13:00 - 18:59</td>
-                    <td style="text-align: center;">-</td>
-                    <td style="text-align: center;">-</td>
-                </tr>
-                <tr>
-                    <td>Noite</td>
-                    <td>19:00 - 06:59</td>
-                    <td style="text-align: center;">-</td>
-                    <td style="text-align: center;">-</td>
+                    <td colspan="3" style="text-align: center;" class="text-muted">
+                        Dados não disponíveis
+                    </td>
                 </tr>
             {% endif %}
         </tbody>
     </table>
 </div>
 
-<!-- Motivos de Observação -->
+<!-- Diagnósticos Mais Frequentes -->
 <div class="relatorio-secao">
     <h2 class="secao-titulo">
-        <i class="fas fa-notes-medical"></i>
-        Principais Motivos de Observação
+        <i class="fas fa-stethoscope"></i>
+        Diagnósticos Mais Frequentes na Observação
     </h2>
     
     <table class="tabela-relatorio">
         <thead>
             <tr>
-                <th>CID-10</th>
-                <th>Diagnóstico/Motivo</th>
+                <th style="width: 100px;">CID-10</th>
+                <th>Descrição</th>
                 <th style="text-align: center;">Quantidade</th>
-                <th style="text-align: center;">% do Total</th>
+                <th style="text-align: center;">Percentual</th>
             </tr>
         </thead>
         <tbody>
-            {% if dados_motivos %}
-                {% for item in dados_motivos %}
+            {% if dados_cid %}
+                {% for item in dados_cid %}
                 <tr>
-                    <td><strong>{{ item.cid }}</strong></td>
-                    <td>{{ item.diagnostico }}</td>
+                    <td><strong class="text-primary">{{ item.cid }}</strong></td>
+                    <td>{{ item.descricao }}</td>
                     <td style="text-align: center;">{{ item.quantidade }}</td>
                     <td style="text-align: center;">{{ item.percentual }}%</td>
                 </tr>
@@ -184,35 +255,53 @@
     </table>
 </div>
 
-<!-- Gráfico de Série Histórica -->
-{% if modelo_relatorio == 'Série Histórica' %}
+<!-- Distribuição por Bairro -->
 <div class="relatorio-secao">
     <h2 class="secao-titulo">
-        <i class="fas fa-chart-line"></i>
-        Evolução Temporal
+        <i class="fas fa-map-marker-alt"></i>
+        Distribuição Geográfica - Observação por Bairro
     </h2>
     
-    <div class="grafico-area" id="graficoObservacao">
-        <div class="grafico-placeholder">
-            <i class="fas fa-chart-area"></i>
-            <p>Gráfico de evolução de pacientes em observação ao longo do tempo</p>
-        </div>
-    </div>
+    <table class="tabela-relatorio">
+        <thead>
+            <tr>
+                <th>Bairro</th>
+                <th>Município</th>
+                <th style="text-align: center;">Quantidade</th>
+                <th style="text-align: center;">Percentual</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if dados_bairro %}
+                {% for item in dados_bairro %}
+                <tr>
+                    <td>{{ item.bairro }}</td>
+                    <td>{{ item.municipio }}</td>
+                    <td style="text-align: center;">{{ item.quantidade }}</td>
+                    <td style="text-align: center;">{{ item.percentual }}%</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="4" style="text-align: center;" class="text-muted">
+                        Dados não disponíveis
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
 </div>
+
+{% else %}
+<!-- ===== MODO SÉRIE HISTÓRICA ===== -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-info-circle"></i>
+        Série Histórica de Observação
+    </h2>
+    <p class="text-muted">Modo de série histórica para observação será implementado em breve.</p>
+</div>
+
 {% endif %}
 
-<!-- Observações -->
-<div class="observacoes-box">
-    <h4>
-        <i class="fas fa-info-circle"></i>
-        Observações
-    </h4>
-    <p>
-        • Considera pacientes admitidos em observação no período selecionado.<br>
-        • Tempo médio calculado desde a admissão até o desfecho final.<br>
-        • Distribuição por turno baseada no horário de entrada do paciente.
-    </p>
-</div>
-
 {% endblock %}
-
