@@ -4,6 +4,28 @@
 
 {% block styles %}
 <style>
+    :root {
+        --azul-principal: #4A90E2;
+        --azul-claro: #E8F4FF;
+        --azul-medio: #7AB8F5;
+        --branco-gelo: #F8FCFF;
+        --cinza-texto: #4A5568;
+        --cinza-claro: #E2E8F0;
+        --sombra-suave: 0 2px 12px rgba(74, 144, 226, 0.08);
+        --sombra-media: 0 4px 20px rgba(74, 144, 226, 0.12);
+    }
+
+    body {
+        background: linear-gradient(135deg, var(--branco-gelo) 0%, var(--azul-claro) 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        min-height: 100vh;
+    }
+
+    .container-fluid {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
     .table-striped tbody tr:nth-of-type(odd) {
         background-color: rgba(0,0,0,.02);
     }
@@ -18,18 +40,214 @@
         font-weight: 500;
     }
     
-    .table-responsive {
-        border: 1px solid #dee2e6;
-        border-radius: 0.5rem;
-        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    /* Header moderno */
+    .page-header-modern {
+        background: white;
+        border-radius: 16px;
+        padding: 24px 32px;
+        margin-bottom: 24px;
+        box-shadow: var(--sombra-suave);
+        border-left: 5px solid var(--azul-principal);
+    }
+
+    .page-header-modern h2 {
+        color: var(--azul-principal);
+        font-size: 28px;
+        font-weight: 600;
+        margin: 0 0 8px 0;
+    }
+
+    .page-header-modern p {
+        color: var(--cinza-texto);
+        margin: 0;
+        font-size: 14px;
     }
     
+    /* Cards modernos */
     .card {
-        transition: transform 0.2s ease-in-out;
+        border: 0;
+        border-radius: 16px;
+        box-shadow: var(--sombra-media);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        overflow: hidden;
+        background: white;
+        position: relative;
     }
     
     .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 28px rgba(74, 144, 226, 0.18);
+    }
+
+    .card-search {
+        border-radius: 16px;
+        box-shadow: var(--sombra-suave);
+        border: none;
+        overflow: hidden;
+    }
+
+    .card-search .card-body {
+        padding: 20px;
+    }
+    
+    .table-responsive {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        background: white;
+        box-shadow: var(--sombra-suave);
+    }
+
+    .table thead {
+        background: linear-gradient(135deg, var(--azul-principal), var(--azul-medio));
+        color: white;
+    }
+
+    .table thead th {
+        border: none;
+        padding: 16px 20px;
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .table tbody td {
+        padding: 16px 20px;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--cinza-claro);
+    }
+
+    .table tbody tr:hover {
+        background-color: rgba(74, 144, 226, 0.05);
+        transition: background-color 0.2s ease;
+    }
+
+    .table-secondary {
+        background-color: rgba(233, 236, 239, 0.3) !important;
+    }
+
+    /* Botões modernos */
+    .btn {
+        border-radius: 10px;
+        padding: 10px 20px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        font-size: 14px;
+    }
+
+    .btn:hover {
         transform: translateY(-2px);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--azul-principal), var(--azul-medio));
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, var(--azul-medio), var(--azul-principal));
+        color: white;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #10B981, #059669);
+        color: white;
+    }
+
+    .btn-success:hover {
+        background: linear-gradient(135deg, #059669, #047857);
+        color: white;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #EF4444, #DC2626);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: linear-gradient(135deg, #DC2626, #B91C1C);
+        color: white;
+    }
+
+    .btn-outline-secondary {
+        background: white;
+        color: var(--cinza-texto);
+        border: 2px solid var(--cinza-claro);
+    }
+
+    .btn-outline-secondary:hover {
+        background: var(--cinza-claro);
+        color: var(--cinza-texto);
+        border-color: var(--cinza-claro);
+    }
+
+    .btn-sm {
+        padding: 8px 16px;
+        font-size: 13px;
+        border-radius: 8px;
+    }
+
+    /* Input de busca moderno */
+    .input-group-text {
+        background: var(--azul-claro);
+        border: none;
+        color: var(--azul-principal);
+        border-radius: 10px 0 0 10px;
+    }
+
+    .form-control {
+        border: 2px solid var(--cinza-claro);
+        border-radius: 10px;
+        padding: 12px 16px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: var(--azul-principal);
+        box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1);
+        outline: none;
+    }
+
+    .form-control-lg {
+        padding: 14px 18px;
+        font-size: 15px;
+    }
+
+    /* Badges modernos */
+    .badge {
+        padding: 6px 12px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 11px;
+    }
+
+    .bg-success {
+        background: linear-gradient(135deg, #10B981, #059669) !important;
+    }
+
+    .bg-warning {
+        background: linear-gradient(135deg, #F59E0B, #D97706) !important;
+    }
+
+    /* Cabeçalhos ordenáveis */
+    th.sortable { 
+        cursor: pointer; 
+        user-select: none;
+        transition: background-color 0.2s ease;
+    }
+
+    th.sortable:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    th.sortable i { 
+        margin-left: 6px; 
+        color: rgba(255, 255, 255, 0.9);
+        transition: transform 0.2s ease;
     }
 
     /* Estilos para o modal de alta */
@@ -39,6 +257,34 @@
     
     #modalRelatorioAlta .modal-body {
         padding: 2rem;
+    }
+
+    .modal-content {
+        border-radius: 16px;
+        border: none;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, var(--azul-principal), var(--azul-medio));
+        color: white;
+        border-radius: 16px 16px 0 0;
+        border-bottom: none;
+        padding: 20px 24px;
+    }
+
+    .modal-header.bg-light {
+        background: linear-gradient(135deg, var(--azul-principal), var(--azul-medio)) !important;
+        color: white !important;
+    }
+
+    .modal-title {
+        font-weight: 600;
+        font-size: 20px;
+    }
+
+    .btn-close-white {
+        filter: invert(1);
     }
     
     .editor-historico {
@@ -52,17 +298,86 @@
         resize: vertical;
         line-height: 1.6;
         font-size: 14px;
+        border: 2px solid var(--cinza-claro);
+        border-radius: 10px;
+        padding: 12px;
+        transition: all 0.3s ease;
+    }
+
+    #historico:focus {
+        border-color: var(--azul-principal);
+        box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1);
+        outline: none;
+    }
+
+    .form-select {
+        border: 2px solid var(--cinza-claro);
+        border-radius: 10px;
+        padding: 12px 16px;
+        transition: all 0.3s ease;
+    }
+
+    .form-select:focus {
+        border-color: var(--azul-principal);
+        box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1);
+        outline: none;
     }
     
     /* Estilos dos campos de alta */
     .form-label.fw-bold {
-        color: #495057;
+        color: var(--cinza-texto);
         font-size: 0.95rem;
+        font-weight: 600;
     }
-    
-    /* Cabeçalhos ordenáveis */
-    th.sortable { cursor: pointer; user-select: none; }
-    th.sortable i { margin-left: 6px; color: #6c757d; }
+
+    textarea.form-control {
+        border: 2px solid var(--cinza-claro);
+        border-radius: 10px;
+        padding: 12px;
+        transition: all 0.3s ease;
+    }
+
+    textarea.form-control:focus {
+        border-color: var(--azul-principal);
+        box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1);
+        outline: none;
+    }
+
+    .modal-footer {
+        border-top: 1px solid var(--cinza-claro);
+        padding: 20px 24px;
+    }
+
+    .modal-footer.bg-light {
+        background: white !important;
+    }
+
+    /* Gap entre botões */
+    .gap-2 {
+        gap: 0.5rem !important;
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .page-header-modern {
+            padding: 16px 20px;
+        }
+
+        .page-header-modern h2 {
+            font-size: 22px;
+        }
+
+        .table thead th,
+        .table tbody td {
+            padding: 12px 16px;
+            font-size: 13px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -70,25 +385,30 @@
 <!-- Container Principal -->
 <div class="container-fluid py-4" id="page-data" data-cargo="{{ session.get('cargo', '') }}">
     <!-- Cabeçalho da Página -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="mb-1">Pacientes Internados</h2>
-            <p class="text-muted mb-0">
-                <i class="fas fa-user-md me-1"></i>
-                Cargo: <strong>{{ session.get('cargo', 'Não definido') }}</strong>
-            </p>
+    <div class="page-header-modern">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2>
+                    <i class="fas fa-bed me-2"></i>
+                    Pacientes Internados
+                </h2>
+                <p>
+                    <i class="fas fa-user-md me-1"></i>
+                    Cargo: <strong>{{ session.get('cargo', 'Não definido') }}</strong>
+                </p>
+            </div>
+            <button id="btnVoltar" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Voltar
+            </button>
         </div>
-        <button id="btnVoltar" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-2"></i> Voltar
-        </button>
     </div>
 
     <!-- Barra de Pesquisa -->
-    <div class="card shadow-sm mb-4">
+    <div class="card card-search mb-4">
         <div class="card-body">
             <div class="input-group">
-                <span class="input-group-text bg-light">
-                    <i class="fas fa-search text-muted"></i>
+                <span class="input-group-text">
+                    <i class="fas fa-search"></i>
                 </span>
                 <input type="text" id="searchInput" class="form-control form-control-lg" 
                        placeholder="Buscar paciente por nome, CPF ou leito...">
@@ -97,11 +417,11 @@
     </div>
 
     <!-- Tabela de Pacientes -->
-    <div class="card shadow-sm">
-        <div class="card-body">
+    <div class="card">
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-light">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
                         <tr>
                             <th id="thNome" class="sortable">Nome do Paciente <i class="fas fa-sort"></i></th>
                             <th>CPF</th>
@@ -126,12 +446,12 @@
 <div class="modal fade" id="modalRelatorioAlta" tabindex="-1" aria-labelledby="modalRelatorioAltaLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-light">
+            <div class="modal-header">
                 <h5 class="modal-title" id="modalRelatorioAltaLabel">
                     <i class="fas fa-clipboard-check me-2"></i>
                     Relatório de Alta
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
                 <form id="formRelatorioAlta" class="needs-validation" novalidate>
@@ -186,7 +506,7 @@
                     </div>
                 </form>
             </div>
-            <div class="modal-footer bg-light">
+            <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     <i class="fas fa-times me-2"></i>Cancelar
                 </button>
@@ -456,14 +776,14 @@ class PacientesInternadosManager {
         let acoesHTML = `
             <div class="d-flex justify-content-center gap-2">
                 <a href="${evolucaoLink}" class="btn btn-sm btn-primary">
-                    <i class="fas fa-notes-medical"></i> Evoluir
+                    <i class="fas fa-folder-open me-1"></i> Abrir Prontuário
                 </a>`;
 
         // Só mostrar botão de definir conduta para médicos e pacientes SEM alta
         if (this.cargoUsuario === 'medico' && !paciente.tem_alta) {
             acoesHTML += `
                 <button class="btn btn-sm btn-success btn-conduta" data-internacao-id="${paciente.atendimento_id}">
-                    <i class="fas fa-clipboard-list"></i> Definir Conduta
+                    <i class="fas fa-clipboard-check me-1"></i> Definir Conduta
                 </button>`;
         }
 

@@ -36528,3 +36528,33 @@ sqlalchemy.exc.CompileError: (in table 'prescricoes_emergencia', column 'medicam
 2025-10-30 07:52:14,712 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
 2025-10-30 07:52:14,833 [INFO] __init__:114 - Blueprints registrados com sucesso
 2025-10-30 07:52:14,868 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-10-30 08:00:30,483 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-30 08:00:30,484 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-30 08:00:30,484 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-30 08:00:30,484 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-30 08:00:30,484 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-30 08:00:30,504 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-30 08:00:30,504 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-30 08:00:30,540 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-30 08:00:30,654 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-10-30 08:00:30,684 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-10-30 08:00:30,865 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-30 08:00:30,865 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-30 08:00:30,865 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-30 08:00:30,865 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-10-30 08:00:30,865 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-30 08:00:30,885 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-30 08:00:30,885 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-30 08:00:30,923 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-30 08:00:31,057 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-10-30 08:00:31,095 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-10-30 08:09:06,179 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-10-30 08:09:06,179 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-10-30 08:09:06,179 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-10-30 08:09:06,179 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-10-30 08:09:06,179 [INFO] __init__:63 - Configurações básicas definidas
+2025-10-30 08:09:06,189 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-10-30 08:09:06,189 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-10-30 08:09:06,228 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-10-30 08:09:06,355 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-10-30 08:09:06,364 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
