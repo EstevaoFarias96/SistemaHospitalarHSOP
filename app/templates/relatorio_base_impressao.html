@@ -555,6 +555,19 @@
                 print-color-adjust: exact;
             }
             
+            /* Distribuição por idade em colunas para impressão */
+            div[style*="column-count"] {
+                column-count: 4 !important;
+                column-gap: 15px !important;
+                font-size: 9px !important;
+            }
+            
+            div[style*="column-count"] > div {
+                font-size: 9px !important;
+                margin-bottom: 3px !important;
+                padding: 2px 4px !important;
+            }
+            
             @page {
                 margin: 1.5cm 1.5cm 2cm 1.5cm;
                 size: A4 portrait;

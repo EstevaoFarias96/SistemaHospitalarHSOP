@@ -2666,6 +2666,48 @@ def preview_relatorio_analitico():
             {'data': '30/10/2025', 'total': 21, 'altas': 15, 'internacoes': 4, 'outros': 2},
         ]
         
+        # Dados de exemplo de distribuição por idade (0-100 anos)
+        # Simulando uma distribuição realista
+        import random
+        random.seed(42)  # Para resultados consistentes
+        dados_idade_exemplo = []
+        for idade in range(0, 101):
+            # Distribuição mais realista - picos em idades comuns
+            if idade < 10:
+                qtd = random.choice([0, 0, 1, 2, 1, 0])
+            elif idade < 20:
+                qtd = random.choice([0, 1, 2, 3, 2, 1])
+            elif idade < 40:
+                qtd = random.choice([1, 2, 3, 4, 5, 6, 4, 3])
+            elif idade < 60:
+                qtd = random.choice([2, 3, 4, 5, 6, 5, 4])
+            elif idade < 80:
+                qtd = random.choice([1, 2, 3, 4, 3, 2])
+            else:
+                qtd = random.choice([0, 0, 1, 1, 2, 0])
+            
+            dados_idade_exemplo.append({
+                'idade': idade,
+                'quantidade': qtd
+            })
+        
+        # Dados de tempo por médico
+        dados_tempo_medico_exemplo = [
+            {'medico': 'Dr. Carlos Eduardo Silva', 'quantidade': 45, 'tempo_medio': '1h32min', 'tempo_minimo': '25min', 'tempo_maximo': '3h15min'},
+            {'medico': 'Dra. Fernanda Lima Santos', 'quantidade': 38, 'tempo_medio': '1h28min', 'tempo_minimo': '30min', 'tempo_maximo': '2h50min'},
+            {'medico': 'Dr. Roberto Alves Costa', 'quantidade': 32, 'tempo_medio': '1h45min', 'tempo_minimo': '35min', 'tempo_maximo': '3h30min'},
+            {'medico': 'Dra. Ana Paula Ferreira', 'quantidade': 25, 'tempo_medio': '1h22min', 'tempo_minimo': '28min', 'tempo_maximo': '2h45min'},
+            {'medico': 'Dr. José Carlos Mendes', 'quantidade': 16, 'tempo_medio': '1h38min', 'tempo_minimo': '32min', 'tempo_maximo': '3h00min'},
+        ]
+        
+        # Dados de tempo por enfermeiro
+        dados_tempo_enfermeiro_exemplo = [
+            {'enfermeiro': 'Maria José Silva', 'quantidade': 52, 'tempo_medio': '18min', 'tempo_minimo': '8min', 'tempo_maximo': '45min'},
+            {'enfermeiro': 'José Carlos Santos', 'quantidade': 48, 'tempo_medio': '22min', 'tempo_minimo': '10min', 'tempo_maximo': '38min'},
+            {'enfermeiro': 'Ana Paula Ferreira', 'quantidade': 34, 'tempo_medio': '20min', 'tempo_minimo': '12min', 'tempo_maximo': '42min'},
+            {'enfermeiro': 'Roberto Lima Costa', 'quantidade': 22, 'tempo_medio': '25min', 'tempo_minimo': '15min', 'tempo_maximo': '50min'},
+        ]
+        
         contexto = {
             'titulo_relatorio': 'Relatório de Atendimento Emergência (Analítico)',
             'modelo_relatorio': 'Analítico',
@@ -2687,6 +2729,9 @@ def preview_relatorio_analitico():
             'dados_medicos': dados_medicos_exemplo,
             'dados_genero': dados_genero_exemplo,
             'dados_tempo_diario': dados_tempo_diario_exemplo,
+            'dados_tempo_medico': dados_tempo_medico_exemplo,
+            'dados_tempo_enfermeiro': dados_tempo_enfermeiro_exemplo,
+            'dados_idade_detalhada': dados_idade_exemplo,
             'dados_status': dados_status_exemplo,
             'dados_diarios': dados_diarios_exemplo,  # Para o gráfico
             
@@ -3670,6 +3715,112 @@ def visualizar_relatorio():
                     
                     current_date += timedelta(days=1)
                 
+                # 4. Tempo Médio de Atendimento por Médico
+                tempo_por_medico = defaultdict(lambda: [])
+                
+                for atend, pac, medico_nome, enfermeiro_nome in atendimentos:
+                    if atend.hora_atendimento and atend.horario_consulta_medica:
+                        dt_entrada = datetime.combine(atend.data_atendimento, atend.hora_atendimento) if atend.data_atendimento else None
+                        dt_consulta = atend.horario_consulta_medica
+                        
+                        if dt_entrada and isinstance(dt_consulta, datetime):
+                            diferenca = (dt_consulta - dt_entrada).total_seconds() / 60
+                            if diferenca >= 0:
+                                medico = medico_nome or 'Não informado'
+                                tempo_por_medico[medico].append(diferenca)
+                
+                # Processar dados de tempo por médico
+                dados_tempo_medico = []
+                for medico, tempos in sorted(tempo_por_medico.items(), key=lambda x: len(x[1]), reverse=True):
+                    if tempos:
+                        tempo_medio_min = sum(tempos) / len(tempos)
+                        tempo_minimo_min = min(tempos)
+                        tempo_maximo_min = max(tempos)
+                        
+                        def formatar_tempo(minutos):
+                            horas = int(minutos // 60)
+                            mins = int(minutos % 60)
+                            if horas > 0:
+                                return f'{horas}h{mins:02d}min'
+                            else:
+                                return f'{mins}min'
+                        
+                        dados_tempo_medico.append({
+                            'medico': medico,
+                            'quantidade': len(tempos),
+                            'tempo_medio': formatar_tempo(tempo_medio_min),
+                            'tempo_minimo': formatar_tempo(tempo_minimo_min),
+                            'tempo_maximo': formatar_tempo(tempo_maximo_min)
+                        })
+                
+                # 5. Tempo Médio de Triagem por Enfermeiro
+                tempo_triagem_por_enfermeiro = defaultdict(lambda: [])
+                
+                for atend, pac, medico_nome, enfermeiro_nome in atendimentos:
+                    if atend.hora_atendimento and atend.horario_triagem:
+                        dt_entrada = datetime.combine(atend.data_atendimento, atend.hora_atendimento) if atend.data_atendimento else None
+                        dt_triagem = atend.horario_triagem
+                        
+                        if dt_entrada and isinstance(dt_triagem, datetime):
+                            diferenca = (dt_triagem - dt_entrada).total_seconds() / 60
+                            if diferenca >= 0:
+                                # Buscar enfermeiro
+                                enfermeiro = 'Não informado'
+                                if atend.enfermeiro_id:
+                                    enfermeiro_obj = Funcionario.query.get(atend.enfermeiro_id)
+                                    if enfermeiro_obj:
+                                        enfermeiro = enfermeiro_obj.nome
+                                tempo_triagem_por_enfermeiro[enfermeiro].append(diferenca)
+                
+                # Processar dados de tempo de triagem por enfermeiro
+                dados_tempo_enfermeiro = []
+                for enfermeiro, tempos in sorted(tempo_triagem_por_enfermeiro.items(), key=lambda x: len(x[1]), reverse=True):
+                    if tempos:
+                        tempo_medio_min = sum(tempos) / len(tempos)
+                        tempo_minimo_min = min(tempos)
+                        tempo_maximo_min = max(tempos)
+                        
+                        def formatar_tempo_triagem(minutos):
+                            horas = int(minutos // 60)
+                            mins = int(minutos % 60)
+                            if horas > 0:
+                                return f'{horas}h{mins:02d}min'
+                            else:
+                                return f'{mins}min'
+                        
+                        dados_tempo_enfermeiro.append({
+                            'enfermeiro': enfermeiro,
+                            'quantidade': len(tempos),
+                            'tempo_medio': formatar_tempo_triagem(tempo_medio_min),
+                            'tempo_minimo': formatar_tempo_triagem(tempo_minimo_min),
+                            'tempo_maximo': formatar_tempo_triagem(tempo_maximo_min)
+                        })
+                
+                # 6. Distribuição Detalhada por Idade (0-100 anos)
+                idade_count = {}
+                for idade in range(0, 101):
+                    idade_count[idade] = 0
+                
+                # Contar pacientes por idade
+                for atend, pac, medico_nome, enfermeiro_nome in atendimentos:
+                    if pac.data_nascimento:
+                        hoje = date_class.today()
+                        idade = hoje.year - pac.data_nascimento.year
+                        if (hoje.month, hoje.day) < (pac.data_nascimento.month, pac.data_nascimento.day):
+                            idade -= 1
+                        
+                        # Garantir que a idade está no range
+                        if 0 <= idade <= 100:
+                            idade_count[idade] += 1
+                
+                # Criar lista com todas as idades
+                dados_idade_detalhada = []
+                for idade in range(0, 101):
+                    dados_idade_detalhada.append({
+                        'idade': idade,
+                        'quantidade': idade_count[idade]
+                    })
+                
                 # Atualizar contexto com dados analíticos
                 contexto.update({
                     'total_atendimentos': total_atend,
@@ -3681,6 +3832,9 @@ def visualizar_relatorio():
                     'dados_medicos': dados_medicos,
                     'dados_genero': dados_genero,
                     'dados_tempo_diario': dados_tempo_diario,
+                    'dados_tempo_medico': dados_tempo_medico,
+                    'dados_tempo_enfermeiro': dados_tempo_enfermeiro,
+                    'dados_idade_detalhada': dados_idade_detalhada,
                     'dados_diarios': dados_diarios  # Para o gráfico
                 })
             else:

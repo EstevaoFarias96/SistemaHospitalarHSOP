@@ -165,6 +165,109 @@
     </table>
 </div>
 
+<!-- Tempo Médio de Atendimento por Médico -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-user-clock"></i>
+        Tempo Médio de Atendimento por Médico
+    </h2>
+    
+    <table class="tabela-relatorio">
+        <thead>
+            <tr>
+                <th>Médico</th>
+                <th style="text-align: center;">Atendimentos</th>
+                <th style="text-align: center;">Tempo Médio</th>
+                <th style="text-align: center;">Menor Tempo</th>
+                <th style="text-align: center;">Maior Tempo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if dados_tempo_medico %}
+                {% for item in dados_tempo_medico %}
+                <tr>
+                    <td>{{ item.medico }}</td>
+                    <td style="text-align: center;">{{ item.quantidade }}</td>
+                    <td style="text-align: center;"><strong class="text-primary">{{ item.tempo_medio }}</strong></td>
+                    <td style="text-align: center;">{{ item.tempo_minimo }}</td>
+                    <td style="text-align: center;">{{ item.tempo_maximo }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center;" class="text-muted">
+                        Dados não disponíveis
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Tempo Médio de Triagem por Enfermeiro -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-user-nurse"></i>
+        Tempo Médio de Triagem por Enfermeiro
+    </h2>
+    
+    <table class="tabela-relatorio">
+        <thead>
+            <tr>
+                <th>Enfermeiro</th>
+                <th style="text-align: center;">Triagens</th>
+                <th style="text-align: center;">Tempo Médio</th>
+                <th style="text-align: center;">Menor Tempo</th>
+                <th style="text-align: center;">Maior Tempo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if dados_tempo_enfermeiro %}
+                {% for item in dados_tempo_enfermeiro %}
+                <tr>
+                    <td>{{ item.enfermeiro }}</td>
+                    <td style="text-align: center;">{{ item.quantidade }}</td>
+                    <td style="text-align: center;"><strong class="text-success">{{ item.tempo_medio }}</strong></td>
+                    <td style="text-align: center;">{{ item.tempo_minimo }}</td>
+                    <td style="text-align: center;">{{ item.tempo_maximo }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center;" class="text-muted">
+                        Dados não disponíveis
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Distribuição Detalhada por Idade -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-birthday-cake"></i>
+        Distribuição por Idade (0-100 anos)
+    </h2>
+    
+    <div style="column-count: 4; column-gap: 20px; font-size: 11px;">
+        {% if dados_idade_detalhada %}
+            {% for item in dados_idade_detalhada %}
+                {% if item.quantidade > 0 %}
+                <div style="break-inside: avoid; margin-bottom: 4px; display: flex; justify-content: space-between; padding: 3px 6px; background: #F7FAFC; border-radius: 4px;">
+                    <span><strong>{{ item.idade }} ano{{ 's' if item.idade != 1 else '' }}:</strong></span>
+                    <span class="text-primary" style="font-weight: 600;">{{ item.quantidade }}</span>
+                </div>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; column-span: all;" class="text-muted">
+                Dados não disponíveis
+            </div>
+        {% endif %}
+    </div>
+</div>
+
 <!-- Distribuição por Status -->
 <div class="relatorio-secao">
     <h2 class="secao-titulo">
