@@ -1366,6 +1366,53 @@ def api_atendimento_anamnese_conduta(atendimento_id):
         return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
 
 
+# API para atualizar alergias do paciente no atendimento
+@bp.route('/api/atendimento/<string:atendimento_id>/alergias', methods=['PUT'])
+@login_required
+def api_atualizar_alergias(atendimento_id):
+    """
+    Atualiza as alergias do paciente no atendimento.
+    Permite que enfermeiros e médicos atualizem as alergias conhecidas.
+    """
+    try:
+        current_user = get_current_user()
+        if not current_user:
+            return jsonify({'success': False, 'message': 'Usuário não autenticado'}), 401
+        
+        # Permitir que enfermeiros, médicos e multi atualizem alergias
+        if current_user.cargo.lower() not in ['enfermeiro', 'medico', 'multi', 'admin']:
+            return jsonify({'success': False, 'message': 'Acesso não autorizado'}), 403
+
+        dados = request.get_json() or {}
+        novas_alergias = dados.get('alergias')
+        
+        # Converter string vazia em None
+        if isinstance(novas_alergias, str) and novas_alergias.strip() == '':
+            novas_alergias = None
+
+        atendimento = Atendimento.query.get(atendimento_id)
+        if not atendimento:
+            return jsonify({'success': False, 'message': 'Atendimento não encontrado'}), 404
+
+        # Atualizar alergias
+        atendimento.alergias = novas_alergias
+
+        db.session.commit()
+
+        logging.info(f'Alergias atualizadas para atendimento {atendimento_id} por {current_user.nome} (ID: {current_user.id})')
+
+        return jsonify({
+            'success': True,
+            'message': 'Alergias atualizadas com sucesso',
+            'alergias': novas_alergias
+        })
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Erro ao atualizar alergias do atendimento: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
+
+
 # Encerrar atendimento (alta/alta após medicação/evasão)
 @bp.route('/api/atendimento/<string:atendimento_id>/encerrar', methods=['PUT'])
 @login_required
@@ -4558,9 +4605,13 @@ def evolucao_paciente_enfermeiro(atendimento_id):
             flash('Paciente não encontrado.', 'danger')
             return redirect(url_for('main.pacientes_internados'))
         
+        # Buscar o atendimento para ter acesso às alergias
+        atendimento = Atendimento.query.get(atendimento_id)
+        
         return render_template('clinica_evolucao_paciente_enfermeiro.html', 
                             paciente=paciente, 
-                            internacao=internacao)
+                            internacao=internacao,
+                            atendimento=atendimento)
         
     except Exception as e:
         logging.error(f"Erro ao acessar evolução do paciente (enfermeiro): {str(e)}")
