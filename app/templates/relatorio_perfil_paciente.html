@@ -1,0 +1,323 @@
+{% extends 'relatorio_base_impressao.html' %}
+
+{% block conteudo_relatorio %}
+<!-- Métricas Resumidas -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-chart-pie"></i>
+        Resumo Executivo
+    </h2>
+    
+    <div class="metricas-grid">
+        <div class="metrica-card destaque">
+            <div class="metrica-label">Total de Pacientes</div>
+            <div class="metrica-valor">{{ total_pacientes or 0 }}</div>
+            <div class="metrica-complemento">atendidos</div>
+        </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Idade Média</div>
+            <div class="metrica-valor">{{ idade_media or 0 }}</div>
+            <div class="metrica-complemento">anos</div>
+        </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Novos Cadastros</div>
+            <div class="metrica-valor">{{ novos_cadastros or 0 }}</div>
+            <div class="metrica-complemento">no período</div>
+        </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Pacientes Únicos</div>
+            <div class="metrica-valor">{{ pacientes_unicos or 0 }}</div>
+            <div class="metrica-complemento">sem duplicatas</div>
+        </div>
+    </div>
+</div>
+
+<!-- Distribuição por Sexo -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-venus-mars"></i>
+        Distribuição por Sexo
+    </h2>
+    
+    <table class="tabela-relatorio">
+        <thead>
+            <tr>
+                <th>Sexo</th>
+                <th style="text-align: center;">Quantidade</th>
+                <th style="text-align: center;">Percentual</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if dados_sexo %}
+                {% for item in dados_sexo %}
+                <tr>
+                    <td>{{ item.sexo }}</td>
+                    <td style="text-align: center;">{{ item.quantidade }}</td>
+                    <td style="text-align: center;">{{ item.percentual }}%</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td>Masculino</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                </tr>
+                <tr>
+                    <td>Feminino</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                </tr>
+            {% endif %}
+            <tr class="total-row">
+                <td>TOTAL</td>
+                <td style="text-align: center;">{{ total_pacientes or 0 }}</td>
+                <td style="text-align: center;">100%</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Distribuição por Faixa Etária -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-birthday-cake"></i>
+        Distribuição por Faixa Etária
+    </h2>
+    
+    <table class="tabela-relatorio">
+        <thead>
+            <tr>
+                <th>Faixa Etária</th>
+                <th style="text-align: center;">Quantidade</th>
+                <th style="text-align: center;">Percentual</th>
+                <th style="text-align: center;">Masculino</th>
+                <th style="text-align: center;">Feminino</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if dados_faixa_etaria %}
+                {% for item in dados_faixa_etaria %}
+                <tr>
+                    <td>{{ item.faixa }}</td>
+                    <td style="text-align: center;">{{ item.quantidade }}</td>
+                    <td style="text-align: center;">{{ item.percentual }}%</td>
+                    <td style="text-align: center;">{{ item.masculino }}</td>
+                    <td style="text-align: center;">{{ item.feminino }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td>0-12 anos (Pediátrico)</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                </tr>
+                <tr>
+                    <td>13-17 anos (Adolescente)</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                </tr>
+                <tr>
+                    <td>18-39 anos (Adulto Jovem)</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                </tr>
+                <tr>
+                    <td>40-59 anos (Adulto)</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                </tr>
+                <tr>
+                    <td>60+ anos (Idoso)</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                </tr>
+            {% endif %}
+            <tr class="total-row">
+                <td>TOTAL</td>
+                <td style="text-align: center;">{{ total_pacientes or 0 }}</td>
+                <td style="text-align: center;">100%</td>
+                <td style="text-align: center;">{{ total_masculino or '-' }}</td>
+                <td style="text-align: center;">{{ total_feminino or '-' }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Distribuição por Raça/Cor -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-users"></i>
+        Distribuição por Raça/Cor
+    </h2>
+    
+    <table class="tabela-relatorio">
+        <thead>
+            <tr>
+                <th>Raça/Cor</th>
+                <th style="text-align: center;">Quantidade</th>
+                <th style="text-align: center;">Percentual</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if dados_raca %}
+                {% for item in dados_raca %}
+                <tr>
+                    <td>{{ item.raca }}</td>
+                    <td style="text-align: center;">{{ item.quantidade }}</td>
+                    <td style="text-align: center;">{{ item.percentual }}%</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td>Branca</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                </tr>
+                <tr>
+                    <td>Parda</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                </tr>
+                <tr>
+                    <td>Preta</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                </tr>
+                <tr>
+                    <td>Amarela</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                </tr>
+                <tr>
+                    <td>Indígena</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                </tr>
+                <tr>
+                    <td>Não informada</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Diagnósticos Mais Frequentes (CID-10) -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-stethoscope"></i>
+        Diagnósticos Mais Frequentes (Top 10)
+    </h2>
+    
+    <table class="tabela-relatorio">
+        <thead>
+            <tr>
+                <th style="width: 80px;">CID-10</th>
+                <th>Descrição</th>
+                <th style="text-align: center; width: 100px;">Quantidade</th>
+                <th style="text-align: center; width: 100px;">Percentual</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if dados_diagnosticos %}
+                {% for item in dados_diagnosticos %}
+                <tr>
+                    <td><strong class="text-primary">{{ item.cid }}</strong></td>
+                    <td>{{ item.descricao }}</td>
+                    <td style="text-align: center;">{{ item.quantidade }}</td>
+                    <td style="text-align: center;">{{ item.percentual }}%</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="4" style="text-align: center;" class="text-muted">
+                        Dados não disponíveis
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Distribuição Geográfica -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-map-marker-alt"></i>
+        Distribuição por Município
+    </h2>
+    
+    <table class="tabela-relatorio">
+        <thead>
+            <tr>
+                <th>Município</th>
+                <th style="text-align: center;">Quantidade</th>
+                <th style="text-align: center;">Percentual</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if dados_municipios %}
+                {% for item in dados_municipios %}
+                <tr>
+                    <td>{{ item.municipio }}</td>
+                    <td style="text-align: center;">{{ item.quantidade }}</td>
+                    <td style="text-align: center;">{{ item.percentual }}%</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="3" style="text-align: center;" class="text-muted">
+                        Dados não disponíveis
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Gráfico de Série Histórica -->
+{% if modelo_relatorio == 'Série Histórica' %}
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-chart-line"></i>
+        Evolução do Perfil Epidemiológico
+    </h2>
+    
+    <div class="grafico-area" id="graficoPerfil">
+        <div class="grafico-placeholder">
+            <i class="fas fa-chart-area"></i>
+            <p>Gráfico de evolução do perfil epidemiológico ao longo do período</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Observações -->
+<div class="observacoes-box">
+    <h4>
+        <i class="fas fa-info-circle"></i>
+        Observações
+    </h4>
+    <p>
+        • Perfil epidemiológico baseado em todos os atendimentos do período.<br>
+        • Faixas etárias definidas conforme classificação do Ministério da Saúde.<br>
+        • Diagnósticos baseados no CID-10 principal de cada atendimento.<br>
+        • Dados de raça/cor autodeclarados ou registrados no cadastro do paciente.
+    </p>
+</div>
+
+{% endblock %}
+

@@ -1,0 +1,200 @@
+{% extends 'relatorio_base_impressao.html' %}
+
+{% block conteudo_relatorio %}
+<!-- Métricas Resumidas -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-chart-pie"></i>
+        Resumo Executivo
+    </h2>
+    
+    <div class="metricas-grid">
+        <div class="metrica-card destaque">
+            <div class="metrica-label">Total Internações</div>
+            <div class="metrica-valor">{{ total_internacoes or 0 }}</div>
+            <div class="metrica-complemento">no período</div>
+        </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Altas</div>
+            <div class="metrica-valor">{{ total_altas or 0 }}</div>
+            <div class="metrica-complemento">pacientes</div>
+        </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Taxa de Ocupação</div>
+            <div class="metrica-valor">{{ taxa_ocupacao or '0%' }}</div>
+            <div class="metrica-complemento">média do período</div>
+        </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Tempo Médio</div>
+            <div class="metrica-valor">{{ tempo_medio_permanencia or '0' }}</div>
+            <div class="metrica-complemento">dias de internação</div>
+        </div>
+    </div>
+</div>
+
+<!-- Ocupação de Leitos -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-bed"></i>
+        Ocupação de Leitos
+    </h2>
+    
+    <table class="tabela-relatorio">
+        <thead>
+            <tr>
+                <th>Setor/Leito</th>
+                <th style="text-align: center;">Capacidade</th>
+                <th style="text-align: center;">Ocupados</th>
+                <th style="text-align: center;">Disponíveis</th>
+                <th style="text-align: center;">Taxa de Ocupação</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if dados_leitos %}
+                {% for item in dados_leitos %}
+                <tr>
+                    <td>{{ item.setor }}</td>
+                    <td style="text-align: center;">{{ item.capacidade }}</td>
+                    <td style="text-align: center;">{{ item.ocupados }}</td>
+                    <td style="text-align: center;">{{ item.disponiveis }}</td>
+                    <td style="text-align: center;">{{ item.taxa_ocupacao }}%</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td>Clínica Médica</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                </tr>
+                <tr>
+                    <td>Observação</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                </tr>
+            {% endif %}
+            <tr class="total-row">
+                <td>TOTAL</td>
+                <td style="text-align: center;">{{ capacidade_total or '-' }}</td>
+                <td style="text-align: center;">{{ ocupados_total or '-' }}</td>
+                <td style="text-align: center;">{{ disponiveis_total or '-' }}</td>
+                <td style="text-align: center;">{{ taxa_ocupacao_geral or '-' }}%</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Internações por Período -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-procedures"></i>
+        Internações no Período
+    </h2>
+    
+    <table class="tabela-relatorio">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th style="text-align: center;">Novas Internações</th>
+                <th style="text-align: center;">Altas</th>
+                <th style="text-align: center;">Transferências</th>
+                <th style="text-align: center;">Óbitos</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if dados_periodo %}
+                {% for item in dados_periodo %}
+                <tr>
+                    <td>{{ item.data }}</td>
+                    <td style="text-align: center;">{{ item.internacoes }}</td>
+                    <td style="text-align: center;">{{ item.altas }}</td>
+                    <td style="text-align: center;">{{ item.transferencias }}</td>
+                    <td style="text-align: center;">{{ item.obitos }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center;" class="text-muted">
+                        Nenhum dado disponível para o período selecionado
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Diagnósticos Mais Frequentes -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-stethoscope"></i>
+        Diagnósticos Mais Frequentes (CID-10)
+    </h2>
+    
+    <table class="tabela-relatorio">
+        <thead>
+            <tr>
+                <th>CID-10</th>
+                <th>Descrição</th>
+                <th style="text-align: center;">Quantidade</th>
+                <th style="text-align: center;">Percentual</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if dados_diagnosticos %}
+                {% for item in dados_diagnosticos %}
+                <tr>
+                    <td><strong>{{ item.cid }}</strong></td>
+                    <td>{{ item.descricao }}</td>
+                    <td style="text-align: center;">{{ item.quantidade }}</td>
+                    <td style="text-align: center;">{{ item.percentual }}%</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="4" style="text-align: center;" class="text-muted">
+                        Dados não disponíveis
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Gráfico de Série Histórica (apenas se for série histórica) -->
+{% if modelo_relatorio == 'Série Histórica' %}
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-chart-line"></i>
+        Evolução de Internações
+    </h2>
+    
+    <div class="grafico-area" id="graficoInternacoes">
+        <div class="grafico-placeholder">
+            <i class="fas fa-chart-area"></i>
+            <p>Gráfico de evolução temporal das internações</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Observações -->
+<div class="observacoes-box">
+    <h4>
+        <i class="fas fa-info-circle"></i>
+        Observações
+    </h4>
+    <p>
+        • Taxa de ocupação calculada com base na capacidade total de leitos.<br>
+        • Tempo médio de permanência considera apenas internações com alta no período.<br>
+        • Diagnósticos baseados no CID-10 principal registrado na internação.
+    </p>
+</div>
+
+{% endblock %}
+

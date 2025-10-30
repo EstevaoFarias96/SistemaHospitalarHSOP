@@ -1,0 +1,176 @@
+{% extends 'relatorio_base_impressao.html' %}
+
+{% block conteudo_relatorio %}
+
+<!-- Exemplo: Relatório Analítico de Atendimento Emergência -->
+
+<h3 class="secao-titulo">
+    <i class="fas fa-chart-pie"></i>
+    Resumo Executivo
+</h3>
+
+<div class="metricas-grid">
+    <div class="metrica-card">
+        <div class="icon">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="valor">{{ total_atendimentos|default('0') }}</div>
+        <div class="label">Total de Atendimentos</div>
+    </div>
+    
+    <div class="metrica-card">
+        <div class="icon">
+            <i class="fas fa-user-injured"></i>
+        </div>
+        <div class="valor">{{ atendimentos_vermelho|default('0') }}</div>
+        <div class="label">Classificação Vermelha</div>
+    </div>
+    
+    <div class="metrica-card">
+        <div class="icon">
+            <i class="fas fa-user-check"></i>
+        </div>
+        <div class="valor">{{ atendimentos_amarelo|default('0') }}</div>
+        <div class="label">Classificação Amarela</div>
+    </div>
+    
+    <div class="metrica-card">
+        <div class="icon">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="valor">{{ tempo_medio_atendimento|default('0') }}</div>
+        <div class="label">Tempo Médio (min)</div>
+    </div>
+</div>
+
+<!-- Tabela de Detalhamento -->
+<h3 class="secao-titulo">
+    <i class="fas fa-table"></i>
+    Atendimentos por Classificação de Risco
+</h3>
+
+<table class="table-relatorio">
+    <thead>
+        <tr>
+            <th>Classificação</th>
+            <th>Quantidade</th>
+            <th>Percentual</th>
+            <th>Tempo Médio</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if dados_classificacao %}
+            {% for item in dados_classificacao %}
+            <tr>
+                <td>
+                    <span class="badge-custom badge-{{ item.cor }}">
+                        {{ item.classificacao }}
+                    </span>
+                </td>
+                <td>{{ item.quantidade }}</td>
+                <td>{{ item.percentual }}%</td>
+                <td>{{ item.tempo_medio }} min</td>
+                <td>{{ item.status }}</td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <!-- Exemplo de dados -->
+            <tr>
+                <td><span class="badge-custom badge-danger">Vermelho</span></td>
+                <td>15</td>
+                <td>10%</td>
+                <td>8 min</td>
+                <td>Atendimento imediato</td>
+            </tr>
+            <tr>
+                <td><span class="badge-custom badge-warning">Amarelo</span></td>
+                <td>45</td>
+                <td>30%</td>
+                <td>25 min</td>
+                <td>Alta prioridade</td>
+            </tr>
+            <tr>
+                <td><span class="badge-custom badge-success">Verde</span></td>
+                <td>75</td>
+                <td>50%</td>
+                <td>60 min</td>
+                <td>Prioridade normal</td>
+            </tr>
+            <tr>
+                <td><span class="badge-custom badge-info">Azul</span></td>
+                <td>15</td>
+                <td>10%</td>
+                <td>90 min</td>
+                <td>Baixa prioridade</td>
+            </tr>
+        {% endif %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <td>TOTAL</td>
+            <td>{{ total_geral|default('150') }}</td>
+            <td>100%</td>
+            <td colspan="2">-</td>
+        </tr>
+    </tfoot>
+</table>
+
+<!-- Distribuição por Período -->
+<h3 class="secao-titulo">
+    <i class="fas fa-calendar-alt"></i>
+    Distribuição por Dia da Semana
+</h3>
+
+<table class="table-relatorio">
+    <thead>
+        <tr>
+            <th>Dia da Semana</th>
+            <th>Atendimentos</th>
+            <th>Média Diária</th>
+            <th>Pico de Horário</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if dados_semana %}
+            {% for dia in dados_semana %}
+            <tr>
+                <td>{{ dia.nome }}</td>
+                <td>{{ dia.quantidade }}</td>
+                <td>{{ dia.media }}</td>
+                <td>{{ dia.pico_horario }}</td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <!-- Dados exemplo -->
+            <tr>
+                <td>Segunda-feira</td>
+                <td>25</td>
+                <td>3.6</td>
+                <td>14h-16h</td>
+            </tr>
+            <tr>
+                <td>Terça-feira</td>
+                <td>22</td>
+                <td>3.1</td>
+                <td>10h-12h</td>
+            </tr>
+            <tr>
+                <td>Quarta-feira</td>
+                <td>28</td>
+                <td>4.0</td>
+                <td>15h-17h</td>
+            </tr>
+        {% endif %}
+    </tbody>
+</table>
+
+<!-- Observações -->
+<div class="highlight-box">
+    <p class="mb-0">
+        <strong>Observação:</strong> {{ observacao|default('Este relatório apresenta dados consolidados do período selecionado. Para análises mais detalhadas, consulte os relatórios específicos por setor.') }}
+    </p>
+</div>
+
+{% endblock %}
+

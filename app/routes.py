@@ -2503,6 +2503,206 @@ def relatorios_admin():
         flash('Erro ao acessar o gerador de relatórios.', 'danger')
         return redirect(url_for('main.index'))
 
+@bp.route('/administrador/relatorios/preview')
+@login_required
+def preview_relatorio():
+    """Rota de exemplo para visualizar o template de relatório com dados fictícios"""
+    try:
+        user = get_current_user()
+        if not user or user.cargo.strip().lower() != 'administrador':
+            flash('Acesso restrito a administradores.', 'danger')
+            return redirect(url_for('main.index'))
+        
+        # Dados de exemplo para demonstração
+        agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
+        
+        # Exemplo de lista de atendimentos
+        atendimentos_exemplo = [
+            {'numero': '25102401', 'cpf': '123.456.789-00', 'paciente': 'João da Silva Santos', 
+             'medico': 'Dr. Carlos Eduardo', 'enfermeiro': 'Maria José Silva', 
+             'status': 'Alta', 'badge_status': 'success', 'data_hora': '24/10/2025 08:30'},
+            {'numero': '25102402', 'cpf': '987.654.321-00', 'paciente': 'Ana Paula Oliveira', 
+             'medico': 'Dra. Fernanda Lima', 'enfermeiro': 'José Carlos Santos', 
+             'status': 'Internado', 'badge_status': 'danger', 'data_hora': '24/10/2025 09:15'},
+            {'numero': '25102403', 'cpf': '456.789.123-00', 'paciente': 'Pedro Henrique Costa', 
+             'medico': 'Dr. Roberto Alves', 'enfermeiro': 'Maria José Silva', 
+             'status': 'Alta após Medicação', 'badge_status': 'warning', 'data_hora': '24/10/2025 10:00'},
+            {'numero': '25102501', 'cpf': '321.654.987-00', 'paciente': 'Mariana Souza Lima', 
+             'medico': 'Dr. Carlos Eduardo', 'enfermeiro': 'Ana Paula Ferreira', 
+             'status': 'Alta', 'badge_status': 'success', 'data_hora': '25/10/2025 07:45'},
+            {'numero': '25102502', 'cpf': '789.123.456-00', 'paciente': 'Francisco José Pereira', 
+             'medico': 'Dra. Fernanda Lima', 'enfermeiro': 'José Carlos Santos', 
+             'status': 'Transferência', 'badge_status': 'warning', 'data_hora': '25/10/2025 11:20'},
+            {'numero': '25102503', 'cpf': '147.258.369-00', 'paciente': 'Juliana Rodrigues', 
+             'medico': 'Dr. Roberto Alves', 'enfermeiro': 'Maria José Silva', 
+             'status': 'Alta', 'badge_status': 'success', 'data_hora': '25/10/2025 14:30'},
+            {'numero': '25102601', 'cpf': '258.369.147-00', 'paciente': 'Carlos Alberto Mendes', 
+             'medico': 'Dr. Carlos Eduardo', 'enfermeiro': 'Ana Paula Ferreira', 
+             'status': 'Observação', 'badge_status': 'secondary', 'data_hora': '26/10/2025 08:15'},
+            {'numero': '25102602', 'cpf': '369.147.258-00', 'paciente': 'Beatriz Santos Costa', 
+             'medico': 'Dra. Fernanda Lima', 'enfermeiro': 'José Carlos Santos', 
+             'status': 'Alta', 'badge_status': 'success', 'data_hora': '26/10/2025 13:00'},
+            {'numero': '25102701', 'cpf': '741.852.963-00', 'paciente': 'Roberto Silva Oliveira', 
+             'medico': 'Dr. Roberto Alves', 'enfermeiro': 'Maria José Silva', 
+             'status': 'Alta após Medicação', 'badge_status': 'warning', 'data_hora': '27/10/2025 09:30'},
+            {'numero': '25102801', 'cpf': '852.963.741-00', 'paciente': 'Patrícia Lima Santos', 
+             'medico': 'Dr. Carlos Eduardo', 'enfermeiro': 'Ana Paula Ferreira', 
+             'status': 'Alta', 'badge_status': 'success', 'data_hora': '28/10/2025 10:45'},
+        ]
+        
+        # Exemplo de dados diários (para série histórica)
+        dados_diarios_exemplo = [
+            {'data': '24/10/2025', 'total': 18, 'altas': 12, 'internacoes': 3, 'outros': 3},
+            {'data': '25/10/2025', 'total': 22, 'altas': 15, 'internacoes': 4, 'outros': 3},
+            {'data': '26/10/2025', 'total': 20, 'altas': 13, 'internacoes': 5, 'outros': 2},
+            {'data': '27/10/2025', 'total': 25, 'altas': 16, 'internacoes': 6, 'outros': 3},
+            {'data': '28/10/2025', 'total': 19, 'altas': 14, 'internacoes': 2, 'outros': 3},
+            {'data': '29/10/2025', 'total': 23, 'altas': 17, 'internacoes': 3, 'outros': 3},
+            {'data': '30/10/2025', 'total': 21, 'altas': 15, 'internacoes': 4, 'outros': 2},
+        ]
+        
+        # Exemplo de distribuição por status
+        dados_status_exemplo = [
+            {'status': 'Alta', 'quantidade': 102, 'percentual': 65.4, 'badge_class': 'success'},
+            {'status': 'Alta após Medicação', 'quantidade': 25, 'percentual': 16.0, 'badge_class': 'warning'},
+            {'status': 'Internado', 'quantidade': 18, 'percentual': 11.5, 'badge_class': 'danger'},
+            {'status': 'Transferência', 'quantidade': 7, 'percentual': 4.5, 'badge_class': 'warning'},
+            {'status': 'Observação', 'quantidade': 4, 'percentual': 2.6, 'badge_class': 'secondary'},
+        ]
+        
+        # Calcular taxa de conclusão (sem evasão)
+        total_exemplo = len(atendimentos_exemplo)
+        sem_evasao = sum(1 for a in atendimentos_exemplo if 'evasao' not in a['status'].lower())
+        taxa_conclusao_exemplo = f"{round((sem_evasao / total_exemplo * 100), 1)}%" if total_exemplo > 0 else '0%'
+        
+        contexto = {
+            'titulo_relatorio': 'Relatório de Atendimento Emergência (Série Histórica)',
+            'modelo_relatorio': 'Série Histórica',
+            'periodo_inicio': '24/10/2025',
+            'periodo_fim': '30/10/2025',
+            'tipo_relatorio_nome': 'Atendimento Emergência',
+            'icone_relatorio': 'fas fa-ambulance',
+            'data_geracao': agora.strftime('%d/%m/%Y às %H:%M'),
+            'ano_atual': agora.year,
+            
+            # Lista de atendimentos
+            'atendimentos_lista': atendimentos_exemplo,
+            
+            # Métricas
+            'total_atendimentos': 156,
+            'media_diaria': 22.3,
+            'pacientes_unicos': 148,
+            'taxa_conclusao': taxa_conclusao_exemplo,
+            
+            # Dados para gráfico e tabela
+            'dados_diarios': dados_diarios_exemplo,
+            'dados_status': dados_status_exemplo,
+            
+            'mostrar_assinaturas': True,
+            'assinatura_1_nome': 'Dr. João Silva',
+            'assinatura_1_cargo': 'Diretor Técnico',
+        }
+        
+        return render_template('relatorio_emergencia.html', **contexto)
+        
+    except Exception as e:
+        logging.error(f"Erro ao gerar preview de relatório: {str(e)}")
+        logging.error(traceback.format_exc())
+        flash('Erro ao gerar preview.', 'danger')
+        return redirect(url_for('main.relatorios_admin'))
+
+@bp.route('/administrador/relatorios/preview-analitico')
+@login_required
+def preview_relatorio_analitico():
+    """Preview do relatório analítico com dados de exemplo"""
+    try:
+        user = get_current_user()
+        if not user or user.cargo.strip().lower() != 'administrador':
+            flash('Acesso restrito a administradores.', 'danger')
+            return redirect(url_for('main.index'))
+        
+        agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
+        
+        # Dados de exemplo para modo Analítico
+        dados_medicos_exemplo = [
+            {'medico': 'Dr. Carlos Eduardo Silva', 'quantidade': 45, 'percentual': 28.8, 'media_dia': 6.4},
+            {'medico': 'Dra. Fernanda Lima Santos', 'quantidade': 38, 'percentual': 24.4, 'media_dia': 5.4},
+            {'medico': 'Dr. Roberto Alves Costa', 'quantidade': 32, 'percentual': 20.5, 'media_dia': 4.6},
+            {'medico': 'Dra. Ana Paula Ferreira', 'quantidade': 25, 'percentual': 16.0, 'media_dia': 3.6},
+            {'medico': 'Dr. José Carlos Mendes', 'quantidade': 16, 'percentual': 10.3, 'media_dia': 2.3},
+        ]
+        
+        dados_genero_exemplo = [
+            {'genero': 'Feminino', 'quantidade': 82, 'percentual': 52.6, 'idade_media': 42.3},
+            {'genero': 'Masculino', 'quantidade': 74, 'percentual': 47.4, 'idade_media': 38.7},
+        ]
+        
+        dados_tempo_diario_exemplo = [
+            {'data': '24/10/2025', 'quantidade': 18, 'tempo_medio': '1h25min', 'tempo_minimo': '35min', 'tempo_maximo': '3h15min'},
+            {'data': '25/10/2025', 'quantidade': 22, 'tempo_medio': '1h32min', 'tempo_minimo': '28min', 'tempo_maximo': '2h50min'},
+            {'data': '26/10/2025', 'quantidade': 20, 'tempo_medio': '1h18min', 'tempo_minimo': '42min', 'tempo_maximo': '3h05min'},
+            {'data': '27/10/2025', 'quantidade': 25, 'tempo_medio': '1h45min', 'tempo_minimo': '50min', 'tempo_maximo': '3h30min'},
+            {'data': '28/10/2025', 'quantidade': 19, 'tempo_medio': '1h22min', 'tempo_minimo': '38min', 'tempo_maximo': '2h45min'},
+            {'data': '29/10/2025', 'quantidade': 23, 'tempo_medio': '1h28min', 'tempo_minimo': '45min', 'tempo_maximo': '3h00min'},
+            {'data': '30/10/2025', 'quantidade': 21, 'tempo_medio': '1h35min', 'tempo_minimo': '40min', 'tempo_maximo': '2h55min'},
+        ]
+        
+        dados_status_exemplo = [
+            {'status': 'Alta', 'quantidade': 102, 'percentual': 65.4, 'badge_class': 'success'},
+            {'status': 'Alta após Medicação', 'quantidade': 25, 'percentual': 16.0, 'badge_class': 'warning'},
+            {'status': 'Internado', 'quantidade': 18, 'percentual': 11.5, 'badge_class': 'danger'},
+            {'status': 'Transferência', 'quantidade': 7, 'percentual': 4.5, 'badge_class': 'warning'},
+            {'status': 'Observação', 'quantidade': 4, 'percentual': 2.6, 'badge_class': 'secondary'},
+        ]
+        
+        # Dados diários para o gráfico
+        dados_diarios_exemplo = [
+            {'data': '24/10/2025', 'total': 18, 'altas': 12, 'internacoes': 3, 'outros': 3},
+            {'data': '25/10/2025', 'total': 22, 'altas': 15, 'internacoes': 4, 'outros': 3},
+            {'data': '26/10/2025', 'total': 20, 'altas': 13, 'internacoes': 5, 'outros': 2},
+            {'data': '27/10/2025', 'total': 25, 'altas': 16, 'internacoes': 6, 'outros': 3},
+            {'data': '28/10/2025', 'total': 19, 'altas': 14, 'internacoes': 2, 'outros': 3},
+            {'data': '29/10/2025', 'total': 23, 'altas': 17, 'internacoes': 3, 'outros': 3},
+            {'data': '30/10/2025', 'total': 21, 'altas': 15, 'internacoes': 4, 'outros': 2},
+        ]
+        
+        contexto = {
+            'titulo_relatorio': 'Relatório de Atendimento Emergência (Analítico)',
+            'modelo_relatorio': 'Analítico',
+            'periodo_inicio': '24/10/2025',
+            'periodo_fim': '30/10/2025',
+            'tipo_relatorio_nome': 'Atendimento Emergência',
+            'icone_relatorio': 'fas fa-ambulance',
+            'data_geracao': agora.strftime('%d/%m/%Y às %H:%M'),
+            'ano_atual': agora.year,
+            
+            # Métricas
+            'total_atendimentos': 156,
+            'media_diaria': 22.3,
+            'pacientes_unicos': 148,
+            'taxa_conclusao': '97.4%',
+            'idade_media': 40.5,
+            
+            # Dados específicos do analítico
+            'dados_medicos': dados_medicos_exemplo,
+            'dados_genero': dados_genero_exemplo,
+            'dados_tempo_diario': dados_tempo_diario_exemplo,
+            'dados_status': dados_status_exemplo,
+            'dados_diarios': dados_diarios_exemplo,  # Para o gráfico
+            
+            'mostrar_assinaturas': True,
+            'assinatura_1_nome': 'Dr. João Silva',
+            'assinatura_1_cargo': 'Diretor Técnico',
+        }
+        
+        return render_template('relatorio_emergencia.html', **contexto)
+        
+    except Exception as e:
+        logging.error(f"Erro ao gerar preview analítico: {str(e)}")
+        logging.error(traceback.format_exc())
+        flash('Erro ao gerar preview.', 'danger')
+        return redirect(url_for('main.relatorios_admin'))
+
 @bp.route('/administrador/profissionais')
 @login_required
 def gestao_profissionais():
@@ -3157,164 +3357,348 @@ def visualizar_relatorio():
             flash('Acesso restrito a administradores.', 'danger')
             return redirect(url_for('main.index'))
 
-        tipo = (request.args.get('tipo') or 'internacoes').lower()
-        periodo = (request.args.get('periodo') or '7d').lower()
-        inicio_param = request.args.get('inicio')
-        fim_param = request.args.get('fim')
-
+        # Obter parâmetros do formulário
+        modelo = request.args.get('modelo', 'analitico')  # 'analitico' ou 'serie_historica'
+        tipo_relatorio = request.args.get('tipo_relatorio', 'emergencia')  # 'emergencia', 'produtividade', 'observacao', 'perfil'
+        data_inicio_str = request.args.get('data_inicio')
+        data_fim_str = request.args.get('data_fim')
+        
+        # Processar datas
         agora_br = datetime.now(ZoneInfo("America/Sao_Paulo"))
-        inicio = datetime(agora_br.year, agora_br.month, agora_br.day, tzinfo=ZoneInfo("America/Sao_Paulo"))
-        fim = inicio + timedelta(days=1)
-
-        if periodo == 'hoje':
-            pass
-        elif periodo == 'ontem':
-            inicio = inicio - timedelta(days=1)
-            fim = inicio + timedelta(days=1)
-        elif periodo == '7d':
-            inicio = inicio - timedelta(days=6)
-            fim = agora_br.replace(tzinfo=ZoneInfo("America/Sao_Paulo")) + timedelta(days=1)
-        elif periodo == '30d':
-            inicio = inicio - timedelta(days=29)
-            fim = agora_br.replace(tzinfo=ZoneInfo("America/Sao_Paulo")) + timedelta(days=1)
-        elif periodo == 'custom' and inicio_param and fim_param:
+        
+        if data_inicio_str and data_fim_str:
             try:
-                ini_date = datetime.strptime(inicio_param, '%Y-%m-%d').date()
-                fim_date = datetime.strptime(fim_param, '%Y-%m-%d').date()
-                inicio = datetime(ini_date.year, ini_date.month, ini_date.day, tzinfo=ZoneInfo("America/Sao_Paulo"))
-                fim = datetime(fim_date.year, fim_date.month, fim_date.day, tzinfo=ZoneInfo("America/Sao_Paulo")) + timedelta(days=1)
+                data_inicio = datetime.strptime(data_inicio_str, '%Y-%m-%d')
+                data_fim = datetime.strptime(data_fim_str, '%Y-%m-%d')
             except ValueError:
-                flash('Período personalizado inválido. Use YYYY-MM-DD.', 'warning')
+                flash('Formato de data inválido', 'danger')
+                return redirect(url_for('main.relatorios_admin'))
         else:
-            inicio = inicio - timedelta(days=6)
-            fim = agora_br.replace(tzinfo=ZoneInfo("America/Sao_Paulo")) + timedelta(days=1)
-
-        fim_exibicao = fim - timedelta(days=1)
-
-        contexto = {
-            'tipo': tipo,
-            'periodo': periodo,
-            'inicio': inicio,
-            'fim': fim,
-            'fim_exibicao': fim_exibicao,
+            # Padrão: últimos 7 dias
+            data_fim = agora_br
+            data_inicio = agora_br - timedelta(days=7)
+        
+        # Selecionar template apropriado
+        templates_map = {
+            'emergencia': 'relatorio_emergencia.html',
+            'produtividade': 'relatorio_produtividade.html',
+            'observacao': 'relatorio_observacao.html',
+            'perfil': 'relatorio_perfil_paciente.html'
         }
-
-        if tipo == 'internacoes':
-            # KPIs
-            soma_capacidade, soma_ocupacao = db.session.query(
-                func.coalesce(func.sum(Leito.capacidade_maxima), 0),
-                func.coalesce(func.sum(Leito.ocupacao_atual), 0)
-            ).filter(Leito.status != 'Interditado').first()
-            taxa_ocupacao = 0
-            if soma_capacidade and soma_capacidade > 0:
-                try:
-                    taxa_ocupacao = round((float(soma_ocupacao) / float(soma_capacidade)) * 100, 1)
-                except Exception:
-                    taxa_ocupacao = 0
-
-            total_altas = db.session.query(func.count(Internacao.id)).filter(
-                Internacao.data_alta >= inicio,
-                Internacao.data_alta < fim
-            ).scalar() or 0
-
-            total_internacoes_periodo = db.session.query(func.count(Internacao.id)).filter(
-                Internacao.data_internacao >= inicio,
-                Internacao.data_internacao < fim
-            ).scalar() or 0
-
-            tempo_medio_permanencia = 0
-            try:
-                media_segundos = db.session.query(
-                    func.avg(func.extract('epoch', Internacao.data_alta - Internacao.data_internacao))
-                ).filter(
-                    Internacao.data_internacao.isnot(None),
-                    Internacao.data_alta.isnot(None),
-                    Internacao.data_alta >= inicio,
-                    Internacao.data_alta < fim
-                ).scalar()
-                if media_segundos is not None:
-                    tempo_medio_permanencia = round(float(media_segundos) / 86400.0, 1)
-            except Exception:
-                tempo_medio_permanencia = 0
-
-            # Séries por dia
-            from sqlalchemy import cast, Date
-            serie_int = db.session.query(
-                cast(Internacao.data_internacao, Date).label('dia'),
-                func.count(Internacao.id)
-            ).filter(
-                Internacao.data_internacao >= inicio,
-                Internacao.data_internacao < fim
-            ).group_by('dia').order_by('dia').all()
-
-            serie_alt = db.session.query(
-                cast(Internacao.data_alta, Date).label('dia'),
-                func.count(Internacao.id)
-            ).filter(
-                Internacao.data_alta >= inicio,
-                Internacao.data_alta < fim
-            ).group_by('dia').order_by('dia').all()
-
-            labels = []
-            vals_int = []
-            vals_alt = []
-            dias_total = (fim.date() - inicio.date()).days
-            for i in range(dias_total):
-                d = (inicio.date() + timedelta(days=i))
-                labels.append(d.strftime('%d/%m'))
-                m_int = next((c for (dia, c) in serie_int if dia == d), 0)
-                m_alt = next((c for (dia, c) in serie_alt if dia == d), 0)
-                vals_int.append(int(m_int or 0))
-                vals_alt.append(int(m_alt or 0))
-
-            # Lista de internados atuais
-            internados_rows = db.session.query(Internacao, Paciente, Atendimento).join(
-                Paciente, Internacao.paciente_id == Paciente.id
+        
+        template_name = templates_map.get(tipo_relatorio, 'relatorio_exemplo.html')
+        
+        # Nomes dos relatórios
+        nomes_relatorios = {
+            'emergencia': 'Atendimento Emergência',
+            'produtividade': 'Produtividade Clínica',
+            'observacao': 'Observação',
+            'perfil': 'Perfil de Paciente'
+        }
+        
+        # Ícones dos relatórios
+        icones_relatorios = {
+            'emergencia': 'fas fa-ambulance',
+            'produtividade': 'fas fa-hospital',
+            'observacao': 'fas fa-eye',
+            'perfil': 'fas fa-user-md'
+        }
+        
+        # Preparar contexto base
+        contexto = {
+            'titulo_relatorio': f'Relatório de {nomes_relatorios.get(tipo_relatorio, "Dados")}',
+            'modelo_relatorio': 'Analítico' if modelo == 'analitico' else 'Série Histórica',
+            'periodo_inicio': data_inicio.strftime('%d/%m/%Y'),
+            'periodo_fim': data_fim.strftime('%d/%m/%Y'),
+            'tipo_relatorio_nome': nomes_relatorios.get(tipo_relatorio, 'Não definido'),
+            'icone_relatorio': icones_relatorios.get(tipo_relatorio, 'fas fa-chart-bar'),
+            'data_geracao': agora_br.strftime('%d/%m/%Y às %H:%M'),
+            'ano_atual': agora_br.year,
+            'mostrar_assinaturas': True,
+            'assinatura_1_nome': 'Responsável Técnico',
+            'assinatura_1_cargo': 'Diretor(a) Técnico(a)'
+        }
+        
+        # Processar dados conforme o tipo de relatório
+        if tipo_relatorio == 'emergencia':
+            # Buscar atendimentos do período
+            atendimentos = db.session.query(
+                Atendimento, Paciente, Funcionario.nome.label('medico_nome'), 
+                db.func.coalesce(Funcionario.nome, 'Não informado').label('enfermeiro_nome')
             ).join(
-                Atendimento, Internacao.atendimento_id == Atendimento.id
+                Paciente, Atendimento.paciente_id == Paciente.id
+            ).outerjoin(
+                Funcionario, Atendimento.medico_id == Funcionario.id
             ).filter(
-                Internacao.data_alta.is_(None)
-            ).order_by(Internacao.data_internacao.desc()).all()
-
-            def fmt_dt(dt):
-                try:
-                    return dt.strftime('%d/%m/%Y %H:%M') if dt else ''
-                except Exception:
-                    return ''
-
-            lista_internados = []
-            for it, pac, at in internados_rows:
-                dias = 0
-                try:
-                    base_fim = it.data_alta or agora_br
-                    if it.data_internacao:
-                        dias = max(0, int((base_fim - it.data_internacao).total_seconds() // 86400))
-                except Exception:
-                    dias = 0
-                lista_internados.append({
-                    'atendimento_id': it.atendimento_id,
-                    'paciente': pac.nome,
-                    'leito': it.leito,
-                    'data_internacao': fmt_dt(it.data_internacao),
-                    'data_alta': fmt_dt(it.data_alta),
-                    'dias': dias,
-                    'status_atendimento': at.status
+                Atendimento.data_atendimento >= data_inicio.date(),
+                Atendimento.data_atendimento <= data_fim.date()
+            ).order_by(Atendimento.data_atendimento.desc(), Atendimento.hora_atendimento.desc()).all()
+            
+            # Processar lista de atendimentos
+            atendimentos_lista = []
+            status_count = {}
+            pacientes_set = set()
+            
+            for atend, pac, medico_nome, enfermeiro_nome in atendimentos:
+                # Buscar enfermeiro
+                enfermeiro_obj = None
+                if atend.enfermeiro_id:
+                    enfermeiro_obj = Funcionario.query.get(atend.enfermeiro_id)
+                    enfermeiro_nome_final = enfermeiro_obj.nome if enfermeiro_obj else 'Não informado'
+                else:
+                    enfermeiro_nome_final = 'Não informado'
+                
+                # Formatar CPF
+                cpf_formatado = pac.cpf or 'Não informado'
+                if cpf_formatado and cpf_formatado != 'Não informado' and len(cpf_formatado) == 11:
+                    cpf_formatado = f'{cpf_formatado[:3]}.{cpf_formatado[3:6]}.{cpf_formatado[6:9]}-{cpf_formatado[9:]}'
+                
+                # Data e hora formatada
+                data_hora_str = ''
+                if atend.data_atendimento and atend.hora_atendimento:
+                    data_hora_str = f'{atend.data_atendimento.strftime("%d/%m/%Y")} {atend.hora_atendimento.strftime("%H:%M")}'
+                elif atend.data_atendimento:
+                    data_hora_str = atend.data_atendimento.strftime('%d/%m/%Y')
+                else:
+                    data_hora_str = 'Não informado'
+                
+                # Badge do status
+                status = atend.status or 'Indefinido'
+                badge_map = {
+                    'aguardando': 'warning',
+                    'triagem': 'primary',
+                    'medico': 'primary',
+                    'medicacao': 'warning',
+                    'observacao': 'secondary',
+                    'internado': 'danger',
+                    'alta': 'success',
+                    'evasao': 'danger',
+                    'transferencia': 'warning'
+                }
+                
+                badge_class = 'secondary'
+                for key, value in badge_map.items():
+                    if key in status.lower():
+                        badge_class = value
+                        break
+                
+                atendimentos_lista.append({
+                    'numero': atend.id,
+                    'cpf': cpf_formatado,
+                    'paciente': pac.nome or 'Não informado',
+                    'medico': medico_nome or 'Não informado',
+                    'enfermeiro': enfermeiro_nome_final,
+                    'status': status,
+                    'badge_status': badge_class,
+                    'data_hora': data_hora_str
                 })
-
-            contexto.update({
-                'kpis': {
-                    'taxa_ocupacao': taxa_ocupacao,
-                    'tempo_medio_permanencia': tempo_medio_permanencia,
-                    'total_internacoes_periodo': total_internacoes_periodo,
-                    'total_altas': total_altas,
-                },
-                'serie_labels': labels,
-                'serie_internacoes': vals_int,
-                'serie_altas': vals_alt,
-                'internados': lista_internados,
-            })
-
-        return render_template('relatorio_padrao.html', **contexto)
+                
+                # Contabilizar status
+                status_count[status] = status_count.get(status, 0) + 1
+                
+                # Contabilizar pacientes únicos
+                pacientes_set.add(pac.id)
+            
+            # Processar dados de status
+            total_atend = len(atendimentos_lista)
+            dados_status = []
+            for status, qtd in sorted(status_count.items(), key=lambda x: x[1], reverse=True):
+                percentual = round((qtd / total_atend * 100), 1) if total_atend > 0 else 0
+                
+                badge_class = 'secondary'
+                for key, value in badge_map.items():
+                    if key in status.lower():
+                        badge_class = value
+                        break
+                
+                dados_status.append({
+                    'status': status,
+                    'quantidade': qtd,
+                    'percentual': percentual,
+                    'badge_class': badge_class
+                })
+            
+            # Calcular média diária
+            dias_periodo = (data_fim.date() - data_inicio.date()).days + 1
+            media_diaria = round(total_atend / dias_periodo, 1) if dias_periodo > 0 else 0
+            
+            # Calcular taxa de conclusão (atendimentos sem evasão)
+            atendimentos_sem_evasao = sum(1 for item in atendimentos_lista if 'evasao' not in item['status'].lower() and 'evas' not in item['status'].lower())
+            taxa_conclusao = f"{round((atendimentos_sem_evasao / total_atend * 100), 1)}%" if total_atend > 0 else '0%'
+            
+            # Processar dados diários para série histórica
+            dados_diarios = []
+            if modelo == 'serie_historica':
+                from sqlalchemy import cast, Date, func
+                from collections import defaultdict
+                
+                # Agrupar atendimentos por dia
+                atendimentos_por_dia = defaultdict(lambda: {'total': 0, 'altas': 0, 'internacoes': 0, 'outros': 0})
+                
+                for atend, pac, medico_nome, enfermeiro_nome in atendimentos:
+                    if atend.data_atendimento:
+                        data_key = atend.data_atendimento.strftime('%d/%m/%Y')
+                        atendimentos_por_dia[data_key]['total'] += 1
+                        
+                        status_lower = (atend.status or '').lower()
+                        if 'alta' in status_lower:
+                            atendimentos_por_dia[data_key]['altas'] += 1
+                        elif 'internado' in status_lower or 'internacao' in status_lower or 'internamento' in status_lower:
+                            atendimentos_por_dia[data_key]['internacoes'] += 1
+                        else:
+                            atendimentos_por_dia[data_key]['outros'] += 1
+                
+                # Gerar lista para todos os dias do período
+                current_date = data_inicio.date()
+                while current_date <= data_fim.date():
+                    data_str = current_date.strftime('%d/%m/%Y')
+                    dados_dia = atendimentos_por_dia.get(data_str, {'total': 0, 'altas': 0, 'internacoes': 0, 'outros': 0})
+                    
+                    dados_diarios.append({
+                        'data': data_str,
+                        'total': dados_dia['total'],
+                        'altas': dados_dia['altas'],
+                        'internacoes': dados_dia['internacoes'],
+                        'outros': dados_dia['outros']
+                    })
+                    
+                    current_date += timedelta(days=1)
+            
+            # Processar dados específicos do modo Analítico
+            if modelo == 'analitico':
+                from datetime import date as date_class
+                from collections import defaultdict
+                
+                # 1. Produtividade Médica (médicos e quantidade de atendimentos)
+                medico_count = {}
+                for atend, pac, medico_nome, enfermeiro_nome in atendimentos:
+                    medico = medico_nome or 'Não informado'
+                    medico_count[medico] = medico_count.get(medico, 0) + 1
+                
+                dados_medicos = []
+                for medico, qtd in sorted(medico_count.items(), key=lambda x: x[1], reverse=True):
+                    percentual = round((qtd / total_atend * 100), 1) if total_atend > 0 else 0
+                    media_dia = round(qtd / dias_periodo, 1) if dias_periodo > 0 else 0
+                    dados_medicos.append({
+                        'medico': medico,
+                        'quantidade': qtd,
+                        'percentual': percentual,
+                        'media_dia': media_dia
+                    })
+                
+                # 2. Distribuição por Gênero e Idade Média
+                genero_data = defaultdict(lambda: {'count': 0, 'idades': []})
+                idade_total = []
+                
+                for atend, pac, medico_nome, enfermeiro_nome in atendimentos:
+                    # Calcular idade
+                    if pac.data_nascimento:
+                        hoje = date_class.today()
+                        idade = hoje.year - pac.data_nascimento.year
+                        if (hoje.month, hoje.day) < (pac.data_nascimento.month, pac.data_nascimento.day):
+                            idade -= 1
+                        idade_total.append(idade)
+                        
+                        # Agrupar por gênero
+                        genero = 'Masculino' if pac.sexo and pac.sexo.upper() in ['M', 'MASCULINO'] else 'Feminino' if pac.sexo and pac.sexo.upper() in ['F', 'FEMININO'] else 'Não informado'
+                        genero_data[genero]['count'] += 1
+                        genero_data[genero]['idades'].append(idade)
+                
+                # Calcular idade média geral
+                idade_media = round(sum(idade_total) / len(idade_total), 1) if idade_total else 0
+                
+                # Processar dados de gênero
+                dados_genero = []
+                for genero, data in genero_data.items():
+                    qtd = data['count']
+                    percentual = round((qtd / total_atend * 100), 1) if total_atend > 0 else 0
+                    idade_media_genero = round(sum(data['idades']) / len(data['idades']), 1) if data['idades'] else 0
+                    dados_genero.append({
+                        'genero': genero,
+                        'quantidade': qtd,
+                        'percentual': percentual,
+                        'idade_media': idade_media_genero
+                    })
+                
+                # Ordenar por quantidade
+                dados_genero.sort(key=lambda x: x['quantidade'], reverse=True)
+                
+                # 3. Tempo Médio de Consulta por Dia
+                tempo_por_dia = defaultdict(lambda: [])
+                
+                for atend, pac, medico_nome, enfermeiro_nome in atendimentos:
+                    if atend.data_atendimento and atend.hora_atendimento and atend.horario_consulta_medica:
+                        # Combinar data e hora de atendimento
+                        dt_entrada = datetime.combine(atend.data_atendimento, atend.hora_atendimento)
+                        dt_consulta = atend.horario_consulta_medica
+                        
+                        # Calcular diferença em minutos
+                        if isinstance(dt_consulta, datetime):
+                            diferenca = (dt_consulta - dt_entrada).total_seconds() / 60
+                            if diferenca >= 0:  # Apenas se a consulta foi após a entrada
+                                data_key = atend.data_atendimento.strftime('%d/%m/%Y')
+                                tempo_por_dia[data_key].append(diferenca)
+                
+                # Processar dados de tempo por dia
+                dados_tempo_diario = []
+                current_date = data_inicio.date()
+                while current_date <= data_fim.date():
+                    data_str = current_date.strftime('%d/%m/%Y')
+                    tempos = tempo_por_dia.get(data_str, [])
+                    
+                    if tempos:
+                        tempo_medio_min = sum(tempos) / len(tempos)
+                        tempo_minimo_min = min(tempos)
+                        tempo_maximo_min = max(tempos)
+                        
+                        # Converter para formato legível (horas e minutos)
+                        def formatar_tempo(minutos):
+                            horas = int(minutos // 60)
+                            mins = int(minutos % 60)
+                            if horas > 0:
+                                return f'{horas}h{mins:02d}min'
+                            else:
+                                return f'{mins}min'
+                        
+                        dados_tempo_diario.append({
+                            'data': data_str,
+                            'quantidade': len(tempos),
+                            'tempo_medio': formatar_tempo(tempo_medio_min),
+                            'tempo_minimo': formatar_tempo(tempo_minimo_min),
+                            'tempo_maximo': formatar_tempo(tempo_maximo_min)
+                        })
+                    
+                    current_date += timedelta(days=1)
+                
+                # Atualizar contexto com dados analíticos
+                contexto.update({
+                    'total_atendimentos': total_atend,
+                    'media_diaria': media_diaria,
+                    'pacientes_unicos': len(pacientes_set),
+                    'taxa_conclusao': taxa_conclusao,
+                    'dados_status': dados_status,
+                    'idade_media': idade_media,
+                    'dados_medicos': dados_medicos,
+                    'dados_genero': dados_genero,
+                    'dados_tempo_diario': dados_tempo_diario,
+                    'dados_diarios': dados_diarios  # Para o gráfico
+                })
+            else:
+                # Atualizar contexto para série histórica
+                contexto.update({
+                    'atendimentos_lista': atendimentos_lista,
+                    'total_atendimentos': total_atend,
+                    'media_diaria': media_diaria,
+                    'pacientes_unicos': len(pacientes_set),
+                    'taxa_conclusao': taxa_conclusao,  # Percentual sem evasão
+                    'dados_status': dados_status,
+                    'dados_diarios': dados_diarios if modelo == 'serie_historica' else None
+                })
+        
+        logging.info(f'Relatório gerado: {tipo_relatorio} ({modelo}) de {data_inicio_str} a {data_fim_str} por {user.nome}')
+        
+        return render_template(template_name, **contexto)
+        
     except Exception as e:
         logging.error(f"Erro ao visualizar relatório: {str(e)}")
         logging.error(traceback.format_exc())

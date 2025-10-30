@@ -1,0 +1,511 @@
+{% extends 'relatorio_base_impressao.html' %}
+
+{% block conteudo_relatorio %}
+
+{% if modelo_relatorio == 'Analítico' %}
+<!-- ===== MODO ANALÍTICO ===== -->
+
+<!-- Resumo Executivo -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-chart-pie"></i>
+        Resumo Executivo
+    </h2>
+    
+    <div class="metricas-grid">
+        <div class="metrica-card destaque">
+            <div class="metrica-label">Total de Atendimentos</div>
+            <div class="metrica-valor">{{ total_atendimentos or 0 }}</div>
+            <div class="metrica-complemento">no período</div>
+        </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Idade Média</div>
+            <div class="metrica-valor">{{ idade_media or 0 }}</div>
+            <div class="metrica-complemento">anos</div>
+        </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Pacientes Únicos</div>
+            <div class="metrica-valor">{{ pacientes_unicos or 0 }}</div>
+            <div class="metrica-complemento">diferentes</div>
+        </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Taxa de Conclusão</div>
+            <div class="metrica-valor">{{ taxa_conclusao or '0%' }}</div>
+            <div class="metrica-complemento">sem evasão</div>
+        </div>
+    </div>
+</div>
+
+<!-- Produtividade Médica -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-user-md"></i>
+        Produtividade Médica
+    </h2>
+    
+    <table class="tabela-relatorio">
+        <thead>
+            <tr>
+                <th>Médico</th>
+                <th style="text-align: center;">Atendimentos</th>
+                <th style="text-align: center;">Percentual</th>
+                <th style="text-align: center;">Média/Dia</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if dados_medicos %}
+                {% for item in dados_medicos %}
+                <tr>
+                    <td>{{ item.medico }}</td>
+                    <td style="text-align: center;">{{ item.quantidade }}</td>
+                    <td style="text-align: center;">{{ item.percentual }}%</td>
+                    <td style="text-align: center;">{{ item.media_dia }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="4" style="text-align: center;" class="text-muted">
+                        Dados não disponíveis
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Distribuição por Gênero -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-venus-mars"></i>
+        Distribuição por Gênero
+    </h2>
+    
+    <table class="tabela-relatorio">
+        <thead>
+            <tr>
+                <th>Gênero</th>
+                <th style="text-align: center;">Quantidade</th>
+                <th style="text-align: center;">Percentual</th>
+                <th style="text-align: center;">Idade Média</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if dados_genero %}
+                {% for item in dados_genero %}
+                <tr>
+                    <td>{{ item.genero }}</td>
+                    <td style="text-align: center;">{{ item.quantidade }}</td>
+                    <td style="text-align: center;">{{ item.percentual }}%</td>
+                    <td style="text-align: center;">{{ item.idade_media }} anos</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td>Masculino</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                </tr>
+                <tr>
+                    <td>Feminino</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                    <td style="text-align: center;">-</td>
+                </tr>
+            {% endif %}
+            <tr class="total-row">
+                <td>TOTAL</td>
+                <td style="text-align: center;">{{ total_atendimentos or 0 }}</td>
+                <td style="text-align: center;">100%</td>
+                <td style="text-align: center;">{{ idade_media or 0 }} anos</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Tempo Médio de Consulta por Dia -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-clock"></i>
+        Tempo Médio de Consulta por Dia
+    </h2>
+    
+    <table class="tabela-relatorio">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th style="text-align: center;">Atendimentos</th>
+                <th style="text-align: center;">Tempo Médio</th>
+                <th style="text-align: center;">Menor Tempo</th>
+                <th style="text-align: center;">Maior Tempo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if dados_tempo_diario %}
+                {% for item in dados_tempo_diario %}
+                <tr>
+                    <td>{{ item.data }}</td>
+                    <td style="text-align: center;">{{ item.quantidade }}</td>
+                    <td style="text-align: center;"><strong class="text-primary">{{ item.tempo_medio }}</strong></td>
+                    <td style="text-align: center;">{{ item.tempo_minimo }}</td>
+                    <td style="text-align: center;">{{ item.tempo_maximo }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center;" class="text-muted">
+                        Dados não disponíveis
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Distribuição por Status -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-tasks"></i>
+        Distribuição por Status Final
+    </h2>
+    
+    <table class="tabela-relatorio">
+        <thead>
+            <tr>
+                <th>Status</th>
+                <th style="text-align: center;">Quantidade</th>
+                <th style="text-align: center;">Percentual</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if dados_status %}
+                {% for item in dados_status %}
+                <tr>
+                    <td>
+                        <span class="badge badge-{{ item.badge_class }}">{{ item.status }}</span>
+                    </td>
+                    <td style="text-align: center;">{{ item.quantidade }}</td>
+                    <td style="text-align: center;">{{ item.percentual }}%</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="3" style="text-align: center;" class="text-muted">
+                        Dados não disponíveis
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+{% else %}
+<!-- ===== MODO SÉRIE HISTÓRICA ===== -->
+
+<!-- Listagem Completa de Atendimentos -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-list-alt"></i>
+        Listagem de Atendimentos de Emergência
+    </h2>
+    
+    <table class="tabela-relatorio tabela-atendimentos">
+        <thead>
+            <tr>
+                <th style="width: 90px;">Nº Atendimento</th>
+                <th style="width: 120px;">CPF</th>
+                <th>Nome do Paciente</th>
+                <th style="width: 140px;">Médico</th>
+                <th style="width: 140px;">Enfermeiro</th>
+                <th style="width: 120px;">Status</th>
+                <th style="width: 140px;">Data/Hora</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if atendimentos_lista %}
+                {% for atendimento in atendimentos_lista %}
+                <tr>
+                    <td><strong class="text-primary">{{ atendimento.numero }}</strong></td>
+                    <td>{{ atendimento.cpf }}</td>
+                    <td>{{ atendimento.paciente }}</td>
+                    <td><small>{{ atendimento.medico }}</small></td>
+                    <td><small>{{ atendimento.enfermeiro }}</small></td>
+                    <td>
+                        <span class="badge badge-{{ atendimento.badge_status }}">
+                            {{ atendimento.status }}
+                        </span>
+                    </td>
+                    <td><small>{{ atendimento.data_hora }}</small></td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px;" class="text-muted">
+                        <i class="fas fa-inbox fa-2x mb-2" style="display: block; opacity: 0.3;"></i>
+                        Nenhum atendimento encontrado no período selecionado
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+        <tfoot>
+            <tr style="background: #F7FAFC;">
+                <td colspan="7" style="text-align: center; padding: 12px; font-weight: 600; color: var(--azul-principal);">
+                    <i class="fas fa-list-ol me-2"></i>
+                    Total de {{ total_atendimentos or 0 }} atendimento(s) exibido(s)
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+<!-- Resumo Estatístico -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-chart-pie"></i>
+        Resumo Estatístico
+    </h2>
+    
+    <div class="metricas-grid">
+        <div class="metrica-card destaque">
+            <div class="metrica-label">Total de Atendimentos</div>
+            <div class="metrica-valor">{{ total_atendimentos or 0 }}</div>
+            <div class="metrica-complemento">no período</div>
+        </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Média Diária</div>
+            <div class="metrica-valor">{{ media_diaria or '0' }}</div>
+            <div class="metrica-complemento">atendimentos/dia</div>
+        </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Pacientes Únicos</div>
+            <div class="metrica-valor">{{ pacientes_unicos or 0 }}</div>
+            <div class="metrica-complemento">diferentes</div>
+        </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Taxa de Conclusão</div>
+            <div class="metrica-valor">{{ taxa_conclusao or '0%' }}</div>
+            <div class="metrica-complemento">sem evasão</div>
+        </div>
+    </div>
+</div>
+
+<!-- Distribuição por Status -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-tasks"></i>
+        Distribuição por Status Final
+    </h2>
+    
+    <table class="tabela-relatorio">
+        <thead>
+            <tr>
+                <th>Status</th>
+                <th style="text-align: center;">Quantidade</th>
+                <th style="text-align: center;">Percentual</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if dados_status %}
+                {% for item in dados_status %}
+                <tr>
+                    <td>
+                        <span class="badge badge-{{ item.badge_class }}">{{ item.status }}</span>
+                    </td>
+                    <td style="text-align: center;">{{ item.quantidade }}</td>
+                    <td style="text-align: center;">{{ item.percentual }}%</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="3" style="text-align: center;" class="text-muted">
+                        Dados não disponíveis
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Evolução Temporal (Gráfico de Linha) -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-chart-line"></i>
+        Evolução Diária de Atendimentos
+    </h2>
+    
+    <div class="grafico-area" id="graficoEvolucao">
+        <canvas id="chartEvolucao" width="800" height="300"></canvas>
+    </div>
+</div>
+
+<!-- Tabela Diária -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-calendar-alt"></i>
+        Atendimentos por Dia
+    </h2>
+    
+    <table class="tabela-relatorio">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th style="text-align: center;">Atendimentos</th>
+                <th style="text-align: center;">Altas</th>
+                <th style="text-align: center;">Internações</th>
+                <th style="text-align: center;">Outros</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if dados_diarios %}
+                {% for item in dados_diarios %}
+                <tr>
+                    <td>{{ item.data }}</td>
+                    <td style="text-align: center;">{{ item.total }}</td>
+                    <td style="text-align: center;">{{ item.altas }}</td>
+                    <td style="text-align: center;">{{ item.internacoes }}</td>
+                    <td style="text-align: center;">{{ item.outros }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center;" class="text-muted">
+                        Dados não disponíveis
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Script para gráfico de evolução (Série Histórica) -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('chartEvolucao');
+        if (ctx) {
+            // Ocultar placeholder se existir
+            const placeholder = document.querySelector('#graficoEvolucao .grafico-placeholder');
+            if (placeholder) {
+                placeholder.style.display = 'none';
+            }
+            
+            const dadosStr = '{{ dados_diarios | tojson | safe }}';
+            if (dadosStr && dadosStr !== 'null') {
+                const dados = JSON.parse(dadosStr);
+                
+                const labels = dados.map(d => d.data);
+                const totais = dados.map(d => d.total);
+                const altas = dados.map(d => d.altas);
+                const internacoes = dados.map(d => d.internacoes);
+                
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Total de Atendimentos',
+                                data: totais,
+                                borderColor: '#4A90E2',
+                                backgroundColor: 'rgba(74, 144, 226, 0.1)',
+                                borderWidth: 3,
+                                tension: 0.4,
+                                fill: true,
+                                pointRadius: 4,
+                                pointHoverRadius: 6
+                            },
+                            {
+                                label: 'Altas',
+                                data: altas,
+                                borderColor: '#10B981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                borderWidth: 2,
+                                tension: 0.4,
+                                fill: true,
+                                pointRadius: 3,
+                                pointHoverRadius: 5
+                            },
+                            {
+                                label: 'Internações',
+                                data: internacoes,
+                                borderColor: '#F59E0B',
+                                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                                borderWidth: 2,
+                                tension: 0.4,
+                                fill: true,
+                                pointRadius: 3,
+                                pointHoverRadius: 5
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        aspectRatio: 2.5,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 15,
+                                    usePointStyle: true,
+                                    font: {
+                                        size: 12,
+                                        family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+                                    }
+                                }
+                            },
+                            title: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                padding: 12,
+                                titleFont: {
+                                    size: 13
+                                },
+                                bodyFont: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1,
+                                    font: {
+                                        size: 11
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    font: {
+                                        size: 10
+                                    },
+                                    maxRotation: 45,
+                                    minRotation: 0
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    });
+</script>
+
+{% endif %}
+
+{% endblock %}

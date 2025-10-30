@@ -3,72 +3,547 @@
 {% block title %}Gerador de Relatórios - HSOP{% endblock %}
 
 {% block content %}
+<style>
+    :root {
+        --azul-principal: #4A90E2;
+        --azul-claro: #E8F4FF;
+        --azul-medio: #7AB8F5;
+        --branco-gelo: #F8FCFF;
+        --cinza-texto: #4A5568;
+        --cinza-claro: #E2E8F0;
+        --sombra-suave: 0 2px 12px rgba(74, 144, 226, 0.08);
+        --sombra-media: 0 4px 20px rgba(74, 144, 226, 0.12);
+    }
+    
+    .relatorio-header {
+        background: white;
+        border-radius: 16px;
+        padding: 24px 32px;
+        margin-bottom: 32px;
+        box-shadow: var(--sombra-suave);
+        border-left: 5px solid var(--azul-principal);
+    }
+    
+    .relatorio-header h2 {
+        color: var(--azul-principal);
+        font-size: 28px;
+        font-weight: 600;
+        margin: 0 0 8px 0;
+    }
+    
+    .relatorio-header p {
+        color: var(--cinza-texto);
+        margin: 0;
+        font-size: 14px;
+    }
+    
+    .step-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: var(--sombra-media);
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    
+    .step-card.active {
+        border-color: var(--azul-principal);
+        box-shadow: 0 6px 24px rgba(74, 144, 226, 0.15);
+    }
+    
+    .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--azul-principal), var(--azul-medio));
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 18px;
+        margin-right: 16px;
+        flex-shrink: 0;
+    }
+    
+    .step-title {
+        color: var(--azul-principal);
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0;
+    }
+    
+    .step-subtitle {
+        color: var(--cinza-texto);
+        font-size: 13px;
+        margin: 4px 0 0 0;
+    }
+    
+    .tipo-card {
+        background: white;
+        border: 2px solid var(--cinza-claro);
+        border-radius: 12px;
+        padding: 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        height: 100%;
+    }
+    
+    .tipo-card:hover {
+        border-color: var(--azul-medio);
+        box-shadow: 0 4px 16px rgba(74, 144, 226, 0.1);
+        transform: translateY(-4px);
+    }
+    
+    .tipo-card.selected {
+        border-color: var(--azul-principal);
+        background: linear-gradient(135deg, var(--azul-claro) 0%, white 100%);
+        box-shadow: 0 4px 16px rgba(74, 144, 226, 0.15);
+    }
+    
+    .tipo-card i {
+        font-size: 36px;
+        color: var(--azul-principal);
+        margin-bottom: 12px;
+        transition: transform 0.3s ease;
+    }
+    
+    .tipo-card:hover i {
+        transform: scale(1.1);
+    }
+    
+    .tipo-card .tipo-nome {
+        font-weight: 600;
+        font-size: 16px;
+        color: var(--cinza-texto);
+        margin-bottom: 8px;
+    }
+    
+    .tipo-card .tipo-desc {
+        font-size: 12px;
+        color: #6B7280;
+        line-height: 1.4;
+    }
+    
+    .relatorio-option {
+        background: white;
+        border: 2px solid var(--cinza-claro);
+        border-radius: 12px;
+        padding: 16px 20px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .relatorio-option:hover {
+        border-color: var(--azul-medio);
+        box-shadow: 0 2px 12px rgba(74, 144, 226, 0.1);
+        transform: translateX(4px);
+    }
+    
+    .relatorio-option.selected {
+        border-color: var(--azul-principal);
+        background: linear-gradient(135deg, var(--azul-claro) 0%, white 100%);
+    }
+    
+    .relatorio-option input[type="radio"] {
+        width: 20px;
+        height: 20px;
+        margin-right: 16px;
+        cursor: pointer;
+        accent-color: var(--azul-principal);
+    }
+    
+    .relatorio-option .relatorio-info {
+        flex: 1;
+    }
+    
+    .relatorio-option .relatorio-nome {
+        font-weight: 600;
+        font-size: 15px;
+        color: var(--cinza-texto);
+        margin-bottom: 4px;
+    }
+    
+    .relatorio-option .relatorio-desc {
+        font-size: 12px;
+        color: #6B7280;
+    }
+    
+    .relatorio-option i {
+        font-size: 24px;
+        color: var(--azul-principal);
+        margin-right: 16px;
+    }
+    
+    .date-input-group {
+        background: white;
+        border: 2px solid var(--cinza-claro);
+        border-radius: 10px;
+        padding: 12px 16px;
+        transition: all 0.3s ease;
+    }
+    
+    .date-input-group:focus-within {
+        border-color: var(--azul-principal);
+        box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.08);
+    }
+    
+    .date-input-group label {
+        font-size: 12px;
+        color: #6B7280;
+        margin-bottom: 4px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .date-input-group input[type="date"] {
+        border: none;
+        padding: 4px 0;
+        font-size: 14px;
+        color: var(--cinza-texto);
+        font-weight: 500;
+        width: 100%;
+    }
+    
+    .date-input-group input[type="date"]:focus {
+        outline: none;
+    }
+    
+    .btn-gerar-relatorio {
+        background: linear-gradient(135deg, var(--azul-principal), var(--azul-medio));
+        border: none;
+        border-radius: 12px;
+        padding: 16px 40px;
+        font-size: 16px;
+        font-weight: 600;
+        color: white;
+        box-shadow: 0 4px 16px rgba(74, 144, 226, 0.2);
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    
+    .btn-gerar-relatorio:hover {
+        background: linear-gradient(135deg, var(--azul-medio), var(--azul-principal));
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(74, 144, 226, 0.3);
+    }
+    
+    .btn-gerar-relatorio:active {
+        transform: translateY(0);
+    }
+    
+    .btn-gerar-relatorio i {
+        font-size: 20px;
+        margin-right: 12px;
+    }
+    
+    .info-box {
+        background: linear-gradient(135deg, var(--azul-claro) 0%, white 100%);
+        border-left: 4px solid var(--azul-principal);
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-top: 24px;
+    }
+    
+    .info-box i {
+        color: var(--azul-principal);
+        font-size: 20px;
+        margin-right: 12px;
+    }
+    
+    .info-box p {
+        margin: 0;
+        color: var(--cinza-texto);
+        font-size: 14px;
+    }
+    
+    @media (max-width: 768px) {
+        .relatorio-header {
+            padding: 20px 24px;
+        }
+        
+        .relatorio-header h2 {
+            font-size: 22px;
+        }
+        
+        .step-card {
+            padding: 20px;
+        }
+        
+        .tipo-card {
+            margin-bottom: 12px;
+        }
+        
+        .btn-gerar-relatorio {
+            padding: 14px 32px;
+            font-size: 15px;
+        }
+    }
+</style>
+
 <div class="py-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div>
-      <h2 class="mb-1">Gerador de Relatórios</h2>
-      <div class="text-muted">Selecione fontes, período e métricas para gerar relatórios</div>
+    <!-- Header -->
+    <div class="relatorio-header">
+        <h2>
+            <i class="fas fa-chart-bar me-3"></i>
+            Gerador de Relatórios
+        </h2>
+        <p>
+            <i class="fas fa-info-circle me-1"></i>
+            Configure e gere relatórios personalizados do sistema
+        </p>
     </div>
-  </div>
 
-  <div class="card mb-3">
-    <div class="card-body">
-      <form method="get" action="{{ url_for('main.visualizar_relatorio') }}">
-        <div class="row g-3">
-          <div class="col-md-3">
-            <label class="form-label">Período</label>
-            <select class="form-select" name="periodo">
-              <option value="hoje">Hoje</option>
-              <option value="ontem">Ontem</option>
-              <option value="7d" selected>Últimos 7 dias</option>
-              <option value="30d">Últimos 30 dias</option>
-              <option value="custom">Personalizado</option>
-            </select>
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">Fonte de dados</label>
-            <select class="form-select" name="tipo">
-              <option value="internacoes" selected>Internações</option>
-              <option value="porta">Porta/Atendimentos</option>
-              <option value="leitos">Leitos</option>
-              <option value="observacao">Observação</option>
-            </select>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Métricas</label>
-            <div class="d-flex flex-wrap gap-2">
-              <div class="form-check me-3">
-                <input class="form-check-input" type="checkbox" id="m1" checked>
-                <label class="form-check-label" for="m1">Total</label>
-              </div>
-              <div class="form-check me-3">
-                <input class="form-check-input" type="checkbox" id="m2">
-                <label class="form-check-label" for="m2">Por setor</label>
-              </div>
-              <div class="form-check me-3">
-                <input class="form-check-input" type="checkbox" id="m3">
-                <label class="form-check-label" for="m3">Classificação de risco</label>
-              </div>
-              <div class="form-check me-3">
-                <input class="form-check-input" type="checkbox" id="m4">
-                <label class="form-check-label" for="m4">Tempo médio</label>
-              </div>
+    <form id="formRelatorio" method="get" action="{{ url_for('main.visualizar_relatorio') }}">
+        <!-- Passo 1: Tipo de Modelo -->
+        <div class="step-card active">
+            <div class="d-flex align-items-center mb-3">
+                <div class="step-number">1</div>
+                <div>
+                    <h3 class="step-title">Modelo de Relatório</h3>
+                    <p class="step-subtitle">Escolha como deseja visualizar os dados</p>
+                </div>
             </div>
-          </div>
+            
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="tipo-card" id="tipoAnalitico" onclick="selecionarTipo('analitico')">
+                        <i class="fas fa-chart-pie"></i>
+                        <div class="tipo-nome">Analítico</div>
+                        <div class="tipo-desc">Análise detalhada com métricas, totais e estatísticas do período</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="tipo-card" id="tipoSerieHistorica" onclick="selecionarTipo('serie_historica')">
+                        <i class="fas fa-chart-line"></i>
+                        <div class="tipo-nome">Série Histórica</div>
+                        <div class="tipo-desc">Evolução temporal dos dados com gráficos e tendências</div>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" name="modelo" id="inputModelo" value="">
         </div>
-        <div class="d-flex justify-content-end mt-3">
-          <button type="submit" class="btn btn-primary">Gerar relatório</button>
-        </div>
-      </form>
-    </div>
-  </div>
 
-  <div class="card">
-    <div class="card-body text-center text-muted">
-      Selecione os filtros acima e clique em "Gerar relatório". Em breve adicionaremos exportação (PDF/CSV) e gráficos.
+        <!-- Passo 2: Período -->
+        <div class="step-card">
+            <div class="d-flex align-items-center mb-3">
+                <div class="step-number">2</div>
+                <div>
+                    <h3 class="step-title">Período de Análise</h3>
+                    <p class="step-subtitle">Defina o intervalo de datas para o relatório</p>
+                </div>
+            </div>
+            
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="date-input-group">
+                        <label for="dataInicio">Data Inicial</label>
+                        <input type="date" class="form-control-plaintext" id="dataInicio" name="data_inicio" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="date-input-group">
+                        <label for="dataFim">Data Final</label>
+                        <input type="date" class="form-control-plaintext" id="dataFim" name="data_fim" required>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Passo 3: Tipo de Relatório -->
+        <div class="step-card">
+            <div class="d-flex align-items-center mb-3">
+                <div class="step-number">3</div>
+                <div>
+                    <h3 class="step-title">Tipo de Relatório</h3>
+                    <p class="step-subtitle">Selecione qual relatório deseja gerar</p>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-12">
+                    <div class="relatorio-option" onclick="selecionarRelatorio('emergencia')">
+                        <input type="radio" name="tipo_relatorio" id="relEmergencia" value="emergencia">
+                        <i class="fas fa-ambulance"></i>
+                        <div class="relatorio-info">
+                            <div class="relatorio-nome">Atendimento Emergência</div>
+                            <div class="relatorio-desc">Relatório de atendimentos de emergência, classificação de risco e tempo de atendimento</div>
+                        </div>
+                    </div>
+                    
+                    <div class="relatorio-option" onclick="selecionarRelatorio('produtividade')">
+                        <input type="radio" name="tipo_relatorio" id="relProdutividade" value="produtividade">
+                        <i class="fas fa-hospital"></i>
+                        <div class="relatorio-info">
+                            <div class="relatorio-nome">Produtividade Clínica</div>
+                            <div class="relatorio-desc">Análise de produtividade: internações, altas, tempo de permanência e ocupação de leitos</div>
+                        </div>
+                    </div>
+                    
+                    <div class="relatorio-option" onclick="selecionarRelatorio('observacao')">
+                        <input type="radio" name="tipo_relatorio" id="relObservacao" value="observacao">
+                        <i class="fas fa-eye"></i>
+                        <div class="relatorio-info">
+                            <div class="relatorio-nome">Observação</div>
+                            <div class="relatorio-desc">Dados de pacientes em observação, tempo de permanência e desfechos</div>
+                        </div>
+                    </div>
+                    
+                    <div class="relatorio-option" onclick="selecionarRelatorio('perfil')">
+                        <input type="radio" name="tipo_relatorio" id="relPerfil" value="perfil">
+                        <i class="fas fa-user-md"></i>
+                        <div class="relatorio-info">
+                            <div class="relatorio-nome">Perfil de Paciente</div>
+                            <div class="relatorio-desc">Perfil epidemiológico: faixa etária, sexo, diagnósticos mais frequentes (CID-10)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botão Gerar -->
+        <div class="text-center">
+            <button type="submit" class="btn btn-gerar-relatorio" id="btnGerarRelatorio" disabled>
+                <i class="fas fa-chart-bar"></i>
+                Gerar Relatório
+            </button>
+        </div>
+    </form>
+
+    <!-- Info Box -->
+    <div class="info-box">
+        <div class="d-flex align-items-start">
+            <i class="fas fa-lightbulb"></i>
+            <div>
+                <p class="mb-1"><strong>Dica:</strong> Para melhores resultados, selecione um período adequado ao tipo de análise.</p>
+                <p class="mb-0"><small>• Análise analítica: períodos curtos (7-30 dias)</small></p>
+                <p class="mb-0"><small>• Série histórica: períodos mais longos (30-90 dias ou mais)</small></p>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
+
+<script>
+    // Definir datas padrão (últimos 7 dias)
+    const hoje = new Date();
+    const seteDiasAtras = new Date();
+    seteDiasAtras.setDate(hoje.getDate() - 7);
+    
+    document.getElementById('dataFim').valueAsDate = hoje;
+    document.getElementById('dataInicio').valueAsDate = seteDiasAtras;
+    
+    // Função para selecionar tipo de modelo
+    function selecionarTipo(tipo) {
+        // Remover seleção anterior
+        document.querySelectorAll('.tipo-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        
+        // Adicionar seleção ao card clicado
+        const cardId = tipo === 'analitico' ? 'tipoAnalitico' : 'tipoSerieHistorica';
+        document.getElementById(cardId).classList.add('selected');
+        
+        // Atualizar input hidden
+        document.getElementById('inputModelo').value = tipo;
+        
+        // Verificar se pode habilitar botão
+        verificarFormulario();
+    }
+    
+    // Função para selecionar tipo de relatório
+    function selecionarRelatorio(tipo) {
+        // Remover seleção anterior
+        document.querySelectorAll('.relatorio-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        
+        // Marcar radio e adicionar classe selected
+        const radioId = {
+            'emergencia': 'relEmergencia',
+            'produtividade': 'relProdutividade',
+            'observacao': 'relObservacao',
+            'perfil': 'relPerfil'
+        }[tipo];
+        
+        if (radioId) {
+            document.getElementById(radioId).checked = true;
+            document.getElementById(radioId).closest('.relatorio-option').classList.add('selected');
+        }
+        
+        // Verificar se pode habilitar botão
+        verificarFormulario();
+    }
+    
+    // Verificar se todos os campos estão preenchidos
+    function verificarFormulario() {
+        const modelo = document.getElementById('inputModelo').value;
+        const dataInicio = document.getElementById('dataInicio').value;
+        const dataFim = document.getElementById('dataFim').value;
+        const tipoRelatorio = document.querySelector('input[name="tipo_relatorio"]:checked');
+        
+        const btnGerar = document.getElementById('btnGerarRelatorio');
+        
+        if (modelo && dataInicio && dataFim && tipoRelatorio) {
+            btnGerar.disabled = false;
+            btnGerar.style.opacity = '1';
+        } else {
+            btnGerar.disabled = true;
+            btnGerar.style.opacity = '0.5';
+        }
+    }
+    
+    // Listeners para verificar formulário
+    document.getElementById('dataInicio').addEventListener('change', verificarFormulario);
+    document.getElementById('dataFim').addEventListener('change', verificarFormulario);
+    
+    // Click nos cards de relatório
+    document.querySelectorAll('.relatorio-option').forEach(option => {
+        option.addEventListener('click', function() {
+            const radio = this.querySelector('input[type="radio"]');
+            if (radio) {
+                radio.checked = true;
+                const tipo = radio.value;
+                selecionarRelatorio(tipo);
+            }
+        });
+    });
+    
+    // Validação de datas
+    document.getElementById('dataFim').addEventListener('change', function() {
+        const dataInicio = new Date(document.getElementById('dataInicio').value);
+        const dataFim = new Date(this.value);
+        
+        if (dataFim < dataInicio) {
+            alert('A data final não pode ser anterior à data inicial');
+            this.value = '';
+            verificarFormulario();
+        }
+    });
+    
+    document.getElementById('dataInicio').addEventListener('change', function() {
+        const dataInicio = new Date(this.value);
+        const dataFim = new Date(document.getElementById('dataFim').value);
+        
+        if (dataInicio > dataFim && document.getElementById('dataFim').value) {
+            alert('A data inicial não pode ser posterior à data final');
+            this.value = '';
+            verificarFormulario();
+        }
+    });
+    
+    // Animação de loading ao submeter
+    document.getElementById('formRelatorio').addEventListener('submit', function(e) {
+        const btnGerar = document.getElementById('btnGerarRelatorio');
+        btnGerar.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Gerando Relatório...';
+        btnGerar.disabled = true;
+    });
+</script>
 {% endblock %}
 
 

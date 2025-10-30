@@ -1,0 +1,170 @@
+{% extends 'relatorio_base_impressao.html' %}
+
+{# 
+    TEMPLATE DE EXEMPLO - Como usar os templates de relatório
+    
+    Variáveis necessárias para passar ao template:
+    
+    OBRIGATÓRIAS:
+    - titulo_relatorio: "Nome do Relatório"
+    - modelo_relatorio: "Analítico" ou "Série Histórica"
+    - periodo_inicio: "01/01/2025"
+    - periodo_fim: "31/01/2025"
+    - tipo_relatorio_nome: "Atendimento Emergência"
+    - icone_relatorio: "fas fa-ambulance" (classe Font Awesome)
+    
+    OPCIONAIS:
+    - data_geracao: "30/10/2025 às 14:30" (padrão: data/hora atual)
+    - filtros_adicionais: lista de {label: "...", valor: "..."}
+    - metricas: lista de cards de métricas
+    - tabela_dados: dados para tabelas
+    - mostrar_grafico: True/False
+    - observacoes: texto de observações
+    - mostrar_assinaturas: True/False
+    - conteudo_adicional: HTML adicional
+#}
+
+{% block conteudo_relatorio %}
+
+<!-- Exemplo de Métricas -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-chart-pie"></i>
+        Resumo Executivo - EXEMPLO
+    </h2>
+    
+    <div class="metricas-grid">
+        <div class="metrica-card destaque">
+            <div class="metrica-label">Métrica Principal</div>
+            <div class="metrica-valor">1.234</div>
+            <div class="metrica-complemento">descrição adicional</div>
+        </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Segunda Métrica</div>
+            <div class="metrica-valor">567</div>
+            <div class="metrica-complemento">outra informação</div>
+        </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Terceira Métrica</div>
+            <div class="metrica-valor">89%</div>
+            <div class="metrica-complemento">percentual</div>
+        </div>
+        
+        <div class="metrica-card">
+            <div class="metrica-label">Quarta Métrica</div>
+            <div class="metrica-valor">12h</div>
+            <div class="metrica-complemento">tempo médio</div>
+        </div>
+    </div>
+</div>
+
+<!-- Exemplo de Tabela -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-table"></i>
+        Tabela de Dados - EXEMPLO
+    </h2>
+    
+    <table class="tabela-relatorio">
+        <thead>
+            <tr>
+                <th>Categoria</th>
+                <th style="text-align: center;">Quantidade</th>
+                <th style="text-align: center;">Percentual</th>
+                <th style="text-align: right;">Valor</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Item A <span class="badge badge-success">ALTO</span></td>
+                <td style="text-align: center;">150</td>
+                <td style="text-align: center;">45%</td>
+                <td style="text-align: right;">R$ 1.500,00</td>
+            </tr>
+            <tr>
+                <td>Item B <span class="badge badge-warning">MÉDIO</span></td>
+                <td style="text-align: center;">100</td>
+                <td style="text-align: center;">30%</td>
+                <td style="text-align: right;">R$ 1.000,00</td>
+            </tr>
+            <tr>
+                <td>Item C <span class="badge badge-danger">BAIXO</span></td>
+                <td style="text-align: center;">50</td>
+                <td style="text-align: center;">15%</td>
+                <td style="text-align: right;">R$ 500,00</td>
+            </tr>
+            <tr>
+                <td>Item D <span class="badge badge-secondary">OUTROS</span></td>
+                <td style="text-align: center;">33</td>
+                <td style="text-align: center;">10%</td>
+                <td style="text-align: right;">R$ 330,00</td>
+            </tr>
+            <tr class="total-row">
+                <td>TOTAL</td>
+                <td style="text-align: center;">333</td>
+                <td style="text-align: center;">100%</td>
+                <td style="text-align: right;">R$ 3.330,00</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Exemplo de Gráfico -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-chart-line"></i>
+        Gráfico - EXEMPLO
+    </h2>
+    
+    <div class="grafico-area">
+        <div class="grafico-placeholder">
+            <i class="fas fa-chart-area"></i>
+            <p><strong>Área reservada para gráficos</strong></p>
+            <p style="font-size: 12px; margin-top: 8px;">
+                Pode usar Chart.js, D3.js ou outra biblioteca para renderizar gráficos aqui
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Exemplo de Lista com Destaques -->
+<div class="relatorio-secao">
+    <h2 class="secao-titulo">
+        <i class="fas fa-list-ul"></i>
+        Informações Adicionais
+    </h2>
+    
+    <div style="background: #F7FAFC; padding: 16px; border-radius: 8px;">
+        <ul style="margin: 0; padding-left: 20px;">
+            <li style="margin-bottom: 8px;">
+                <strong>Ponto 1:</strong> Exemplo de informação relevante do relatório
+            </li>
+            <li style="margin-bottom: 8px;">
+                <strong>Ponto 2:</strong> Outra informação importante a destacar
+            </li>
+            <li style="margin-bottom: 8px;">
+                <strong>Ponto 3:</strong> Considerações finais sobre os dados apresentados
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Observações do Exemplo -->
+<div class="observacoes-box">
+    <h4>
+        <i class="fas fa-lightbulb"></i>
+        Como Usar Este Template
+    </h4>
+    <p>
+        <strong>1. Crie um novo template que herda de 'relatorio_base_impressao.html'</strong><br>
+        <strong>2. Sobrescreva o block 'conteudo_relatorio'</strong><br>
+        <strong>3. Use as classes CSS disponíveis:</strong> .metrica-card, .tabela-relatorio, .grafico-area, etc.<br>
+        <strong>4. Passe as variáveis necessárias ao renderizar o template no backend</strong><br>
+        <strong>5. O template base cuida do cabeçalho, rodapé e estilos de impressão</strong>
+    </p>
+</div>
+
+{% endblock %}
+
