@@ -604,6 +604,13 @@
                             <div class="text-field-label">Conduta</div>
                             <div class="text-field-content" style="min-height: 25px;">{{ atendimento_conduta_final or '-' }}</div>
                         </div>
+                        {% if atendimento_status and 'REAVALIACAO' in atendimento_status|upper %}
+                        <div style="margin-top: 8px;">
+                            <button id="btnContinuarReavaliacao" class="btn btn-warning btn-sm no-print" style="font-size: 8pt; padding: 4px 8px;">
+                                <i class="fas fa-redo-alt mr-1"></i>Continuar em Reavaliação
+                            </button>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -776,6 +783,58 @@
         $(document).ready(function() {
             console.log('🎬 Página de ficha de atendimento carregada');
             console.log('📋 ID do Atendimento:', $('#atendimento_id').val());
+            
+            // Botão de continuar reavaliação
+            $('#btnContinuarReavaliacao').click(function(e) {
+                e.preventDefault();
+                
+                const atendimentoId = $('#atendimento_id').val();
+                const btn = $(this);
+                const textoOriginal = btn.html();
+                
+                if (!confirm('Deseja registrar o início de um novo ciclo de reavaliação para este paciente?\n\nIsso marcará que uma nova medicação foi administrada.')) {
+                    return;
+                }
+                
+                // Desabilitar botão e mostrar loading
+                btn.prop('disabled', true);
+                btn.html('<i class="fas fa-spinner fa-spin mr-1"></i>Registrando...');
+                
+                // Fazer chamada API
+                $.ajax({
+                    url: '/api/atendimento/' + atendimentoId + '/registrar-ciclo-reavaliacao',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    success: function(response) {
+                        if (response.success) {
+                            btn.removeClass('btn-warning').addClass('btn-success');
+                            btn.html('<i class="fas fa-check mr-1"></i>Ciclo Registrado!');
+                            
+                            setTimeout(function() {
+                                // Atualizar a página ou redirecionar
+                                alert('Ciclo de reavaliação registrado com sucesso!\n\n' + 
+                                      'Ciclo atual: ' + (response.ciclo_atual || '-') + '\n' +
+                                      'O paciente permanecerá em reavaliação.');
+                                location.reload();
+                            }, 1500);
+                        } else {
+                            alert('Erro ao registrar ciclo: ' + (response.message || 'Erro desconhecido'));
+                            btn.html(textoOriginal);
+                            btn.prop('disabled', false);
+                        }
+                    },
+                    error: function(xhr) {
+                        let msg = 'Erro ao registrar ciclo de reavaliação.';
+                        try {
+                            const resp = JSON.parse(xhr.responseText);
+                            msg = resp.message || msg;
+                        } catch (e) {}
+                        alert(msg);
+                        btn.html(textoOriginal);
+                        btn.prop('disabled', false);
+                    }
+                });
+            });
         });
 
         // Impressão automática ao carregar

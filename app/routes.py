@@ -772,6 +772,7 @@ def api_medico_atendimentos_alta_medicacao():
 def api_medico_atendimentos_reavaliacao_medicacao():
     """
     Retorna lista de atendimentos marcados para "Reavaliação após medicação".
+    Inclui informações sobre ciclos de reavaliação (até 3 ciclos de 2 horas cada).
     """
     try:
         current_user = get_current_user()
@@ -793,11 +794,47 @@ def api_medico_atendimentos_reavaliacao_medicacao():
             anos = hoje.year - data_nascimento.year - ((hoje.month, hoje.day) < (data_nascimento.month, data_nascimento.day))
             return anos
 
+        def contar_ciclos_reavaliacao(medicacao_utilizada_text):
+            """Conta quantas vezes o valor '1' aparece em medicacao_utilizada"""
+            if not medicacao_utilizada_text:
+                return 0
+            try:
+                # Tenta parsear como JSON primeiro
+                import json
+                medicacoes = json.loads(medicacao_utilizada_text)
+                if isinstance(medicacoes, list):
+                    # Conta quantos registros existem (cada dispensação é um ciclo)
+                    return len(medicacoes)
+            except:
+                pass
+            
+            # Se não for JSON válido, conta ocorrências de "1"
+            return medicacao_utilizada_text.count('1')
+
         resultado = []
+        agora = now_brasilia()
+        
         for a in atendimentos:
             paciente = Paciente.query.get(a.paciente_id)
             if not paciente:
                 continue
+            
+            # Contar ciclos baseado em medicacao_utilizada
+            ciclo_atual = contar_ciclos_reavaliacao(a.medicacao_utilizada) + 1  # +1 porque estamos no próximo ciclo
+            
+            # Calcular tempo desde a consulta médica ou última medicação
+            horario_referencia = a.horario_medicacao or a.horario_consulta_medica
+            horas_decorridas = None
+            minutos_para_reavaliacao = None
+            precisa_observacao = ciclo_atual > 3
+            
+            if horario_referencia:
+                # Garantir que horario_referencia tem timezone antes de subtrair
+                horario_referencia_tz = converter_para_brasilia(horario_referencia)
+                diferenca = agora - horario_referencia_tz
+                horas_decorridas = diferenca.total_seconds() / 3600
+                minutos_para_reavaliacao = (120 - (diferenca.total_seconds() / 60))  # 120 minutos = 2 horas
+            
             resultado.append({
                 'atendimento_id': a.id,
                 'paciente_id': paciente.id,
@@ -807,6 +844,13 @@ def api_medico_atendimentos_reavaliacao_medicacao():
                 'classificacao_risco': a.classificacao_risco,
                 'triagem': a.triagem,
                 'horario_triagem': a.horario_triagem.strftime('%Y-%m-%d %H:%M:%S') if a.horario_triagem else None,
+                'horario_consulta_medica': a.horario_consulta_medica.strftime('%Y-%m-%d %H:%M:%S') if a.horario_consulta_medica else None,
+                'horario_medicacao': a.horario_medicacao.strftime('%Y-%m-%d %H:%M:%S') if a.horario_medicacao else None,
+                'ciclo_atual': min(ciclo_atual, 3),  # Limita a 3 para exibição
+                'horas_decorridas': round(horas_decorridas, 1) if horas_decorridas is not None else None,
+                'minutos_para_reavaliacao': round(minutos_para_reavaliacao) if minutos_para_reavaliacao is not None else None,
+                'precisa_observacao': precisa_observacao,
+                'passou_2_horas': horas_decorridas >= 2 if horas_decorridas is not None else False,
             })
 
         return jsonify({'success': True, 'atendimentos': resultado, 'total': len(resultado)})
@@ -1071,6 +1115,7 @@ def api_dados_atendimento(atendimento_id):
                 'conduta_final': atendimento.conduta_final,
                 'reavaliacao': atendimento.reavaliacao,
                 'observacao': atendimento.observacao,
+                'medicacao_utilizada': atendimento.medicacao_utilizada,
                 'data_atendimento': atendimento.data_atendimento.isoformat() if atendimento.data_atendimento else None,
                 'hora_atendimento': atendimento.hora_atendimento.strftime('%H:%M') if atendimento.hora_atendimento else None,
                 'horario_triagem': atendimento.horario_triagem.strftime('%Y-%m-%d %H:%M:%S') if atendimento.horario_triagem else None
@@ -1095,6 +1140,87 @@ def api_dados_atendimento(atendimento_id):
         return jsonify({'success': True, 'data': data})
     except Exception as e:
         logging.error(f"Erro ao obter dados do atendimento: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
+
+
+# API para registrar ciclo de reavaliação
+@bp.route('/api/atendimento/<string:atendimento_id>/registrar-ciclo-reavaliacao', methods=['POST'])
+@login_required
+def registrar_ciclo_reavaliacao(atendimento_id):
+    """
+    Registra um novo ciclo de reavaliação, incrementando o contador de medicação utilizada.
+    """
+    try:
+        current_user = get_current_user()
+        if not current_user:
+            return jsonify({'success': False, 'message': 'Usuário não autenticado'}), 401
+        
+        if current_user.cargo.lower() not in ['medico', 'multi', 'admin']:
+            return jsonify({'success': False, 'message': 'Acesso não autorizado. Apenas médicos podem registrar ciclos de reavaliação.'}), 403
+
+        # Buscar atendimento
+        atendimento = Atendimento.query.get(atendimento_id)
+        if not atendimento:
+            return jsonify({'success': False, 'message': 'Atendimento não encontrado'}), 404
+
+        # Verificar se está em reavaliação
+        if not atendimento.status or 'REAVALIACAO' not in atendimento.status.upper():
+            return jsonify({'success': False, 'message': 'Atendimento não está em status de reavaliação'}), 400
+
+        # Contar ciclos atuais
+        ciclos_atuais = 0
+        if atendimento.medicacao_utilizada:
+            try:
+                medicacoes = json.loads(atendimento.medicacao_utilizada)
+                if isinstance(medicacoes, list):
+                    ciclos_atuais = len(medicacoes)
+            except:
+                ciclos_atuais = atendimento.medicacao_utilizada.count('1')
+        
+        # Registrar novo ciclo
+        novo_ciclo = {
+            'ciclo': ciclos_atuais + 1,
+            'horario': now_brasilia().strftime('%Y-%m-%d %H:%M:%S'),
+            'medico_id': current_user.id,
+            'medico_nome': current_user.nome
+        }
+        
+        # Atualizar medicacao_utilizada
+        if atendimento.medicacao_utilizada:
+            try:
+                medicacoes = json.loads(atendimento.medicacao_utilizada)
+                if isinstance(medicacoes, list):
+                    medicacoes.append(novo_ciclo)
+                else:
+                    medicacoes = [novo_ciclo]
+            except:
+                medicacoes = [novo_ciclo]
+        else:
+            medicacoes = [novo_ciclo]
+        
+        atendimento.medicacao_utilizada = json.dumps(medicacoes, ensure_ascii=False)
+        atendimento.horario_medicacao = now_brasilia()
+        
+        # Se completou 3 ciclos, alertar sobre necessidade de observação
+        ciclo_atual = len(medicacoes)
+        precisa_observacao = ciclo_atual > 3
+        
+        db.session.commit()
+        
+        logging.info(f"Ciclo de reavaliação registrado - Atendimento: {atendimento_id} - Ciclo: {ciclo_atual} - Médico: {current_user.nome}")
+        
+        return jsonify({
+            'success': True,
+            'message': 'Ciclo de reavaliação registrado com sucesso',
+            'ciclo_atual': ciclo_atual,
+            'precisa_observacao': precisa_observacao,
+            'horario_medicacao': atendimento.horario_medicacao.strftime('%Y-%m-%d %H:%M:%S') if atendimento.horario_medicacao else None
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Erro ao registrar ciclo de reavaliação: {str(e)}")
         logging.error(traceback.format_exc())
         return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
 
