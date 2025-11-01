@@ -878,9 +878,26 @@
         }
       });
 
-      // Inicia na Home com Dashboard
-      carregarDashboardEnfermeiro();
-      $('#home-section .dashboard-header, #home-section .quick-actions, #home-section .dashboard-cards').show();
+      // Verifica se há parâmetro view na URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const viewParam = urlParams.get('view');
+      
+      if (viewParam === 'triagem') {
+        // Abre a tela de triagem
+        console.log('Abrindo tela de triagem via parâmetro URL');
+        abrirTriagem();
+        
+        // Limpa a URL (remove o parâmetro) para não reabrir sempre
+        if (window.history && window.history.replaceState) {
+          const newUrl = window.location.pathname;
+          window.history.replaceState({}, document.title, newUrl);
+        }
+      } else {
+        // Inicia na Home com Dashboard
+        carregarDashboardEnfermeiro();
+        $('#home-section .dashboard-header, #home-section .quick-actions, #home-section .dashboard-cards').show();
+      }
+      
       // Mostrar plantão range (sempre visível)
       $('#plantao-range').show();
 

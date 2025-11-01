@@ -1,51 +1,330 @@
 {% extends "base.html" %}
 
+{% block title %}Histórico de Internações · HSOP{% endblock %}
+
+{% block styles %}
+<style>
+    :root {
+        --azul-principal: #4A90E2;
+        --azul-claro: #E8F4FF;
+        --azul-medio: #7AB8F5;
+        --branco-gelo: #F8FCFF;
+        --cinza-texto: #4A5568;
+        --cinza-claro: #E2E8F0;
+        --sombra-suave: 0 2px 12px rgba(74, 144, 226, 0.08);
+        --sombra-media: 0 4px 20px rgba(74, 144, 226, 0.12);
+    }
+
+    body {
+        background: linear-gradient(135deg, var(--branco-gelo) 0%, var(--azul-claro) 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        min-height: 100vh;
+    }
+
+    .page-header {
+        background: white;
+        border-radius: 16px;
+        padding: 24px 32px;
+        margin-bottom: 24px;
+        box-shadow: var(--sombra-suave);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        border-left: 5px solid var(--azul-principal);
+    }
+
+    .page-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: var(--azul-principal);
+        font-size: 24px;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .filters-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: var(--sombra-suave);
+    }
+
+    .filters-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--cinza-texto);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .form-control:focus {
+        border-color: var(--azul-principal);
+        box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+    }
+
+    .input-group-text {
+        background: var(--azul-claro);
+        border-color: var(--azul-principal);
+        color: var(--azul-principal);
+    }
+
+    .btn-custom {
+        border-radius: 10px;
+        padding: 10px 20px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .btn-primary-custom {
+        background: linear-gradient(135deg, var(--azul-principal), var(--azul-medio));
+        color: white;
+    }
+
+    .btn-primary-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 14px rgba(74, 144, 226, 0.35);
+    }
+
+    .btn-outline-custom {
+        background: white;
+        border: 2px solid var(--azul-principal);
+        color: var(--azul-principal);
+    }
+
+    .btn-outline-custom:hover {
+        background: var(--azul-principal);
+        color: white;
+    }
+
+    .table-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: var(--sombra-suave);
+        overflow: hidden;
+    }
+
+    .table {
+        margin: 0;
+    }
+
+    .table thead th {
+        background: linear-gradient(135deg, var(--azul-claro), #D6EEFF);
+        color: var(--azul-principal);
+        border: none;
+        font-weight: 600;
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    .table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+        background-color: var(--azul-claro);
+        transform: scale(1.01);
+    }
+
+    .table tbody td {
+        padding: 12px;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--cinza-claro);
+    }
+
+    .table th:nth-child(5),
+    .table td:nth-child(5) {
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .status-badge {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+    }
+
+    .status-alta { background: #D1FAE5; color: #065F46; }
+    .status-obito { background: #FEE2E2; color: #991B1B; }
+    .status-transferencia { background: #FEF3C7; color: #92400E; }
+    .status-evasao { background: #E0E7FF; color: #3730A3; }
+    .status-outros { background: var(--cinza-claro); color: var(--cinza-texto); }
+
+    .btn-action {
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .badge-info-custom {
+        background: var(--azul-claro);
+        color: var(--azul-principal);
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--cinza-texto);
+    }
+
+    .empty-state i {
+        font-size: 64px;
+        color: var(--azul-claro);
+        margin-bottom: 16px;
+    }
+
+    /* Modal Styles */
+    .modal-content {
+        border-radius: 16px;
+        border: none;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, var(--azul-principal), var(--azul-medio));
+        color: white;
+        border-radius: 16px 16px 0 0;
+        border-bottom: none;
+        padding: 20px 24px;
+    }
+
+    .modal-header .modal-title {
+        font-weight: 600;
+        font-size: 20px;
+    }
+
+    .modal-header .btn-close {
+        filter: brightness(0) invert(1);
+    }
+
+    .modal-body {
+        padding: 24px;
+    }
+
+    .info-section {
+        background: var(--azul-claro);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+
+    .info-section h6 {
+        color: var(--azul-principal);
+        font-weight: 600;
+        margin-bottom: 12px;
+        font-size: 15px;
+    }
+
+    .info-section .content {
+        background: white;
+        border-radius: 8px;
+        padding: 12px;
+        color: var(--cinza-texto);
+        line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .filters-card .row {
+            flex-direction: column;
+        }
+
+        .table-responsive {
+            border-radius: 12px;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4" id="page-data" data-cargo="{{ session.get('cargo', '') }}">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Histórico de Internações</h2>
-        <button id="btnVoltar" class="btn btn-secondary">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">
+                <i class="fas fa-history"></i>
+                Histórico de Internações
+            </h1>
+        </div>
+        <button id="btnVoltar" class="btn-custom btn-outline-custom">
             <i class="fas fa-arrow-left"></i> Voltar
         </button>
     </div>
 
-    <p class="text-muted">Cargo detectado: <strong>{{ session.get('cargo', 'Não definido') }}</strong></p>
-
-    <div class="row mb-3">
-        <div class="col-md-8">
-            <div class="input-group">
-                <span class="input-group-text"><i class="fas fa-search"></i></span>
-                <input type="text" id="searchInput" class="form-control" placeholder="Buscar paciente...">
-            </div>
+    <!-- Filtros -->
+    <div class="filters-card">
+        <div class="filters-title">
+            <i class="fas fa-filter"></i>
+            Filtros de Busca
         </div>
-        <div class="col-md-4">
-            <div class="input-group">
-                <span class="input-group-text"><i class="fas fa-calendar"></i></span>
-                <input type="month" id="filtroMes" class="form-control" placeholder="Filtrar por mês">
-                <button id="btnLimparFiltro" class="btn btn-outline-secondary">
-                    <i class="fas fa-times"></i> Limpar
-                </button>
+        <div class="row">
+            <div class="col-md-8 mb-3">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Buscar por nome do paciente ou CPF...">
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                    <input type="month" id="filtroMes" class="form-control" placeholder="Filtrar por mês">
+                    <button id="btnLimparFiltro" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="table-responsive">
-        <table class="table table-striped table-hover">
-            <thead>
-                <tr>
-                    <th>Nome do Paciente</th>
-                    <th>CPF</th>
-                    <th>Data de Internação</th>
-                    <th>Data de Alta</th>
-                    <th>Diagnóstico</th>
-                    <th>Leito</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody id="pacientesTable">
-                <!-- Dados serão preenchidos via JavaScript -->
-            </tbody>
-        </table>
+    <!-- Tabela -->
+    <div class="table-card">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-user mr-1"></i>Paciente</th>
+                        <th><i class="fas fa-id-card mr-1"></i>CPF</th>
+                        <th><i class="fas fa-sign-in-alt mr-1"></i>Internação</th>
+                        <th><i class="fas fa-sign-out-alt mr-1"></i>Alta</th>
+                        <th><i class="fas fa-stethoscope mr-1"></i>Diagnóstico</th>
+                        <th><i class="fas fa-clipboard-check mr-1"></i>Status Final</th>
+                        <th><i class="fas fa-bed mr-1"></i>Leito</th>
+                        <th><i class="fas fa-cogs mr-1"></i>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="pacientesTable">
+                    <tr>
+                        <td colspan="8" class="empty-state">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Carregando dados...</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -54,55 +333,62 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalVisualizarAltaLabel">Relatório de Alta</h5>
+                <h5 class="modal-title" id="modalVisualizarAltaLabel">
+                    <i class="fas fa-file-medical mr-2"></i>Relatório de Alta
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <p><strong>Paciente:</strong> <span id="pacienteNome"></span></p>
+                        <p><strong><i class="fas fa-user mr-1"></i>Paciente:</strong> <span id="pacienteNome"></span></p>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>CPF:</strong> <span id="pacienteCPF"></span></p>
+                        <p><strong><i class="fas fa-id-card mr-1"></i>CPF:</strong> <span id="pacienteCPF"></span></p>
                     </div>
                 </div>
-                <div class="row mb-3">
+                <div class="row mb-4">
                     <div class="col-md-6">
-                        <p><strong>Data de Internação:</strong> <span id="dataInternacao"></span></p>
+                        <p><strong><i class="fas fa-sign-in-alt mr-1"></i>Internação:</strong> <span id="dataInternacao"></span></p>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>Data de Alta:</strong> <span id="dataAlta"></span></p>
+                        <p><strong><i class="fas fa-sign-out-alt mr-1"></i>Alta:</strong> <span id="dataAlta"></span></p>
                     </div>
                 </div>
-                <hr>
-                <div class="mb-3">
-                    <h6>Diagnóstico Final</h6>
-                    <div class="border rounded p-3 bg-light" id="diagnosticoFinal"></div>
+                
+                <div class="info-section">
+                    <h6><i class="fas fa-stethoscope mr-1"></i>Diagnóstico Final</h6>
+                    <div class="content" id="diagnosticoFinal"></div>
                 </div>
-                <div class="mb-3">
-                    <h6>Histórico da Internação</h6>
-                    <div class="border rounded p-3 bg-light" id="historicoInternacao"></div>
+                
+                <div class="info-section">
+                    <h6><i class="fas fa-notes-medical mr-1"></i>Histórico da Internação</h6>
+                    <div class="content" id="historicoInternacao"></div>
                 </div>
-                <div class="mb-3">
-                    <h6>Relatório de Alta</h6>
-                    <div class="border rounded p-3 bg-light" id="relatorioAltaTexto"></div>
+                
+                <div class="info-section">
+                    <h6><i class="fas fa-file-alt mr-1"></i>Relatório de Alta</h6>
+                    <div class="content" id="relatorioAltaTexto"></div>
                 </div>
-                <div class="mb-3">
-                    <h6>Conduta Final</h6>
-                    <div class="border rounded p-3 bg-light" id="condutaFinalTexto"></div>
+                
+                <div class="info-section">
+                    <h6><i class="fas fa-clipboard-check mr-1"></i>Conduta Final</h6>
+                    <div class="content" id="condutaFinalTexto"></div>
                 </div>
-                <div class="mb-3">
-                    <h6>Medicação de Alta</h6>
-                    <div class="border rounded p-3 bg-light" id="medicacaoAltaTexto"></div>
+                
+                <div class="info-section">
+                    <h6><i class="fas fa-pills mr-1"></i>Medicação de Alta</h6>
+                    <div class="content" id="medicacaoAltaTexto"></div>
                 </div>
-                <div class="mb-3">
-                    <h6>Cuidados Gerais</h6>
-                    <div class="border rounded p-3 bg-light" id="cuidadosGeraisTexto"></div>
+                
+                <div class="info-section">
+                    <h6><i class="fas fa-hand-holding-medical mr-1"></i>Cuidados Gerais</h6>
+                    <div class="content" id="cuidadosGeraisTexto"></div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                <button type="button" class="btn btn-primary" id="btnImprimir">
+                <button type="button" class="btn-custom btn-primary-custom" id="btnImprimir">
                     <i class="fas fa-print"></i> Imprimir
                 </button>
             </div>
@@ -153,7 +439,10 @@ function fetchHistoricoInternacoes(filtroMes = null) {
                 if (data.internacoes.length === 0) {
                     tableBody.innerHTML = `
                         <tr>
-                            <td colspan="7" class="text-center">Nenhuma internação com alta encontrada</td>
+                            <td colspan="8" class="empty-state">
+                                <i class="fas fa-inbox"></i>
+                                <p>Nenhuma internação com alta encontrada</p>
+                            </td>
                         </tr>
                     `;
                     return;
@@ -165,16 +454,46 @@ function fetchHistoricoInternacoes(filtroMes = null) {
                     // Usar o ID do atendimento na URL
                     const btnRelatorioCompleto = document.createElement('a');
                     btnRelatorioCompleto.href = `/clinica/historico-internacao/${internacao.atendimento_id}`;
-                    btnRelatorioCompleto.className = 'btn btn-sm btn-primary';
-                    btnRelatorioCompleto.innerHTML = '<i class="fas fa-file-medical-alt"></i> Relatório Completo';
+                    btnRelatorioCompleto.className = 'btn btn-sm btn-primary btn-action';
+                    btnRelatorioCompleto.innerHTML = '<i class="fas fa-file-medical-alt mr-1"></i>Ver Relatório';
+
+                    const cpfFormatado = internacao.cpf ? 
+                        internacao.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : 
+                        '-';
+
+                    // Formatar status final com badge colorido
+                    const statusFinal = internacao.status_final || internacao.status || 'Alta';
+                    let statusClass = 'status-outros';
+                    let statusTexto = statusFinal;
+
+                    if (statusFinal.toLowerCase().includes('alta')) {
+                        statusClass = 'status-alta';
+                        statusTexto = 'Alta';
+                    } else if (statusFinal.toLowerCase().includes('óbito') || statusFinal.toLowerCase().includes('obito')) {
+                        statusClass = 'status-obito';
+                        statusTexto = 'Óbito';
+                    } else if (statusFinal.toLowerCase().includes('transfer')) {
+                        statusClass = 'status-transferencia';
+                        statusTexto = 'Transferência';
+                    } else if (statusFinal.toLowerCase().includes('evas')) {
+                        statusClass = 'status-evasao';
+                        statusTexto = 'Evasão';
+                    }
+
+                    // Truncar diagnóstico se for muito longo
+                    const diagnostico = internacao.diagnostico || '-';
+                    const diagnosticoFormatado = diagnostico.length > 50 ? 
+                        diagnostico.substring(0, 50) + '...' : 
+                        diagnostico;
 
                     row.innerHTML = `
-                        <td>${internacao.nome_paciente}</td>
-                        <td>${internacao.cpf}</td>
+                        <td><strong>${internacao.nome_paciente}</strong></td>
+                        <td>${cpfFormatado}</td>
                         <td>${formatarData(internacao.data_internacao)}</td>
                         <td>${formatarData(internacao.data_alta)}</td>
-                        <td>${internacao.diagnostico || '-'}</td>
-                        <td>${internacao.leito}</td>
+                        <td title="${diagnostico}">${diagnosticoFormatado}</td>
+                        <td><span class="status-badge ${statusClass}">${statusTexto}</span></td>
+                        <td><span class="badge-info-custom">${internacao.leito}</span></td>
                         <td></td>
                     `;
 
@@ -182,10 +501,29 @@ function fetchHistoricoInternacoes(filtroMes = null) {
                     tableBody.appendChild(row);
                 });
             } else {
-                alert('Erro ao carregar histórico de internações.');
+                const tableBody = document.getElementById('pacientesTable');
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="empty-state">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>Erro ao carregar histórico de internações</p>
+                        </td>
+                    </tr>
+                `;
             }
         })
-        .catch(error => console.error('Erro ao carregar histórico:', error));
+        .catch(error => {
+            console.error('Erro ao carregar histórico:', error);
+            const tableBody = document.getElementById('pacientesTable');
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="empty-state">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>Erro ao conectar ao servidor</p>
+                    </td>
+                </tr>
+            `;
+        });
 }
 
 
@@ -199,10 +537,42 @@ function formatarData(dataString) {
 function filtrarTabela(termo) {
     const linhas = document.getElementById('pacientesTable').getElementsByTagName('tr');
     termo = termo.toLowerCase();
+    let encontrados = 0;
 
     for (let linha of linhas) {
+        // Pular linha de estados vazios
+        if (linha.querySelector('.empty-state')) continue;
+        
         const texto = linha.textContent.toLowerCase();
-        linha.style.display = texto.includes(termo) ? '' : 'none';
+        if (texto.includes(termo)) {
+            linha.style.display = '';
+            encontrados++;
+        } else {
+            linha.style.display = 'none';
+        }
+    }
+    
+    // Se não encontrou nada, mostrar mensagem
+    if (encontrados === 0 && termo !== '') {
+        const tableBody = document.getElementById('pacientesTable');
+        const hasData = Array.from(linhas).some(l => !l.querySelector('.empty-state'));
+        if (hasData) {
+            const lastRow = tableBody.querySelector('tr:last-child');
+            if (lastRow && !lastRow.querySelector('.empty-state')) {
+                const emptyRow = document.createElement('tr');
+                emptyRow.innerHTML = `
+                    <td colspan="8" class="empty-state" style="padding: 30px;">
+                        <i class="fas fa-search"></i>
+                        <p>Nenhum resultado encontrado para "${termo}"</p>
+                    </td>
+                `;
+                emptyRow.id = 'no-results-row';
+                tableBody.appendChild(emptyRow);
+            }
+        }
+    } else {
+        const noResultsRow = document.getElementById('no-results-row');
+        if (noResultsRow) noResultsRow.remove();
     }
 }
 

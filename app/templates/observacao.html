@@ -7,18 +7,44 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <style>
     body {
-      background-color: #f5f8fc;
+      background: linear-gradient(135deg, #F8FCFF 0%, #E8F4FF 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-    h3, .section-title {
-      color: #004085;
-      font-weight: bold;
+    
+    h3 {
+      color: #212529;
+      font-weight: 700;
     }
+    
+    .section-title {
+      color: #212529;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #dee2e6;
+    }
+    
+    .table {
+      background-color: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
     .table thead th {
-      background-color: #cfe2ff;
+      background-color: #f8f9fa;
+      color: #212529;
+      font-weight: 600;
+      border-bottom: 2px solid #dee2e6;
+      padding: 1rem;
     }
-    .table-danger-custom {
-      background-color: #f8d7da !important;
+    
+    .table tbody td {
+      color: #212529;
+      padding: 0.875rem 1rem;
+      vertical-align: middle;
     }
+    
     
     /* Estilos para o modal de conduta */
     .modal-lg {
@@ -26,86 +52,177 @@
     }
     
     .modal-header.bg-primary {
-      background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
-      border-bottom: none;
+      background-color: white;
+      border-bottom: 2px solid #dee2e6;
+      color: #212529;
     }
     
     .modal-content {
       border: none;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      border-radius: 12px;
     }
     
     .card {
-      border: none;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      border-radius: 8px;
+      border: 1px solid #dee2e6;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border-radius: 12px;
+      background-color: white;
     }
     
     .card-header {
-      border-bottom: 1px solid #e9ecef;
-      border-radius: 8px 8px 0 0 !important;
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #dee2e6;
+      border-radius: 12px 12px 0 0 !important;
+      color: #212529;
+      font-weight: 600;
     }
     
     .form-select-lg {
       font-size: 1.1rem;
       padding: 0.75rem 1rem;
-      border-radius: 8px;
+      border-radius: 10px;
       border: 2px solid #dee2e6;
       transition: all 0.3s ease;
+      color: #212529;
     }
     
     .form-select-lg:focus {
-      border-color: #0d6efd;
-      box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+      border-color: #4A90E2;
+      box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
     }
     
     .form-control {
-      border-radius: 8px;
+      border-radius: 10px;
       border: 2px solid #dee2e6;
       transition: all 0.3s ease;
+      color: #212529;
     }
     
     .form-control:focus {
-      border-color: #0d6efd;
-      box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+      border-color: #4A90E2;
+      box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
     }
     
     .btn {
-      border-radius: 8px;
+      border-radius: 10px;
       font-weight: 500;
       transition: all 0.3s ease;
+      border-width: 2px;
     }
     
     .btn-primary {
-      background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
-      border: none;
+      background-color: #212529;
+      border-color: #212529;
+      color: white;
     }
     
     .btn-primary:hover {
-      background: linear-gradient(135deg, #0b5ed7 0%, #0a58ca 100%);
+      background-color: #000;
+      border-color: #000;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .btn-secondary {
+      background-color: white;
+      border-color: #6c757d;
+      color: #212529;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #6c757d;
+      border-color: #6c757d;
+      color: white;
+      transform: translateY(-2px);
+    }
+    
+    .btn-info, .btn-sm.btn-info {
+      background-color: white;
+      border-color: #6c757d;
+      color: #212529;
+    }
+    
+    .btn-info:hover, .btn-sm.btn-info:hover {
+      background-color: #212529;
+      border-color: #212529;
+      color: white;
+      transform: translateY(-2px);
+    }
+    
+    .btn-success {
+      background-color: white;
+      border-color: #28a745;
+      color: #28a745;
+    }
+    
+    .btn-success:hover {
+      background-color: #28a745;
+      border-color: #28a745;
+      color: white;
       transform: translateY(-2px);
     }
     
     .alert {
-      border-radius: 8px;
-      border: none;
+      border-radius: 10px;
+      border: 1px solid;
       font-weight: 500;
+    }
+    
+    .alert-info {
+      background-color: #e7f3ff;
+      border-color: #4A90E2;
+      color: #212529;
+    }
+    
+    .alert-success {
+      background-color: #d4edda;
+      border-color: #28a745;
+      color: #212529;
+    }
+    
+    .alert-warning {
+      background-color: #fff3cd;
+      border-color: #ffc107;
+      color: #212529;
+    }
+    
+    .alert-danger {
+      background-color: #f8d7da;
+      border-color: #dc3545;
+      color: #212529;
+    }
+    
+    .alert-primary {
+      background-color: #e7f3ff;
+      border-color: #4A90E2;
+      color: #212529;
+    }
+    
+    .alert-dark {
+      background-color: #e2e3e5;
+      border-color: #6c757d;
+      color: #212529;
     }
     
     .badge {
       font-size: 0.9rem;
       padding: 0.5rem 1rem;
-      border-radius: 20px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+    
+    .badge.bg-secondary {
+      background-color: #6c757d !important;
     }
     
     .fw-bold {
-      font-weight: 600 !important;
+      font-weight: 700 !important;
     }
     
     .text-primary {
-      color: #0d6efd !important;
-      font-weight: 500;
+      color: #212529 !important;
+      font-weight: 600;
     }
     
     /* Animações para o leito selection */
@@ -115,19 +232,22 @@
     
     /* Estilo para opções do select de leito */
     .form-select option.text-success {
-      background-color: #d4edda;
-      color: #155724;
+      font-weight: 600;
     }
     
     .form-select option.text-warning {
-      background-color: #fff3cd;
-      color: #856404;
+      font-weight: 500;
     }
     
     /* Hover effects */
     .card:hover {
-      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
       transition: box-shadow 0.3s ease;
+    }
+    
+    .table tbody tr:hover {
+      background-color: #f8f9fa;
+      transition: background-color 0.2s ease;
     }
     
     /* Loading spinner */
@@ -139,6 +259,98 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    
+    /* Container principal */
+    .container {
+      background-color: transparent;
+    }
+    
+    /* Título da modal */
+    .modal-title {
+      font-weight: 700;
+      color: #212529;
+    }
+    
+    /* Indicador de conduta */
+    #condutaIndicator {
+      margin-top: 1rem;
+      border-left: 4px solid;
+      animation: slideInRight 0.3s ease;
+    }
+    
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    /* Melhorias no modal */
+    .modal-dialog-centered {
+      display: flex;
+      align-items: center;
+      min-height: calc(100% - 1rem);
+    }
+    
+    .modal-content {
+      animation: modalFadeIn 0.3s ease;
+    }
+    
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    
+    /* Textarea com contador de caracteres visual */
+    #observacaoConduta {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+    }
+    
+    #observacaoConduta:focus {
+      box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+    }
+    
+    /* Separador visual */
+    .form-label span.text-danger {
+      font-size: 1.2rem;
+    }
+    
+    /* Card de informações do paciente */
+    .card-body small.text-muted {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+    
+    /* Validação visual dos campos */
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+      border-color: #dc3545 !important;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right calc(0.375em + 0.1875rem) center;
+      background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+      animation: shake 0.3s ease;
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+    
     
     /* Responsividade */
     @media (max-width: 768px) {
@@ -158,71 +370,112 @@
     }
   </style>
 </head>
-<body>  <div class="container mt-5 mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h3>Pacientes em Observação</h3>
-      {% if session.get('cargo', '').lower() == 'enfermeiro' %}
-        <a href="/enfermeiro" class="btn btn-secondary">Voltar ao Painel</a>
-      {% else %}
-        <a href="/medico" class="btn btn-secondary">Voltar ao Painel</a>
-      {% endif %}
+<body>  
+  <div class="container mt-5 mb-5">
+    <div class="card shadow-sm mb-4 border-0" style="border-left: 3px solid #4A90E2 !important;">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h3 class="mb-1 text-dark">
+              <i class="fas fa-clipboard-list me-3"></i>Pacientes em Observação
+            </h3>
+            <p class="text-muted mb-0">Gerenciamento e acompanhamento de pacientes</p>
+          </div>
+          {% if session.get('cargo', '').lower() == 'enfermeiro' %}
+            <a href="/enfermeiro" class="btn btn-secondary">
+              <i class="fas fa-arrow-left me-3"></i>Voltar ao Painel
+            </a>
+          {% else %}
+            <a href="/medico" class="btn btn-secondary">
+              <i class="fas fa-arrow-left me-3"></i>Voltar ao Painel
+            </a>
+          {% endif %}
+        </div>
+      </div>
     </div>
 
     <!-- Seção 1: Pacientes em Observação -->
-    <h4 class="section-title">Pacientes em Observação</h4>
-    <table class="table table-hover table-bordered bg-white">
-      <thead>
-        <tr>
-          <th>Nome</th>
-          <th>Horário de Observação</th>
-          <th>Médico Responsável</th>
-          <th>Atendimento ID</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody id="tabelaObservacao"></tbody>
-    </table>
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-white border-bottom">
+        <h5 class="mb-0 text-dark fw-bold">
+          <i class="fas fa-eye me-3"></i>Pacientes em Observação
+        </h5>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Horário de Observação</th>
+                <th>Médico Responsável</th>
+                <th>Atendimento ID</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaObservacao"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
     <!-- Seção 2: Pacientes que Necessitam Conduta -->
-    <h4 class="section-title">Pacientes Necessita Conduta</h4>
-    <table class="table table-hover table-bordered bg-white">
-      <thead>
-        <tr>
-          <th>Nome</th>
-          <th>Horário de Observação</th>
-          <th>Médico Responsável</th>
-          <th>Atendimento ID</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody id="tabelaConduta"></tbody>
-    </table>  </div>
+    <div class="card shadow-sm mb-4" style="border-left: 3px solid #ffc107 !important;">
+      <div class="card-header bg-white border-bottom">
+        <h5 class="mb-0 text-dark fw-bold">
+          <i class="fas fa-exclamation-triangle me-3 text-warning"></i>Pacientes que Necessitam Conduta
+        </h5>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Horário de Observação</th>
+                <th>Médico Responsável</th>
+                <th>Atendimento ID</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaConduta"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Modal Definir Conduta -->
   <div class="modal fade" id="modalDefinirConduta" tabindex="-1" aria-labelledby="modalDefinirCondutaLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title" id="modalDefinirCondutaLabel">
-            <i class="fas fa-user-md me-2"></i>Definir Conduta Médica
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content shadow-lg border-0">
+        <div class="modal-header bg-white border-bottom">
+          <h5 class="modal-title text-dark fw-bold" id="modalDefinirCondutaLabel">
+            <i class="fas fa-clipboard-check me-3"></i>Definir Conduta Médica
           </h5>
-          <button type="button" class="btn-close btn-close-white" data-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body p-4">
           <!-- Informações do Paciente -->
-          <div class="card mb-4">
-            <div class="card-header bg-light">
-              <h6 class="mb-0">
-                <i class="fas fa-user me-2"></i>Informações do Paciente
+          <div class="card border-0 shadow-sm mb-4" style="border-left: 3px solid #4A90E2 !important;">
+            <div class="card-header bg-white border-bottom">
+              <h6 class="mb-0 text-dark fw-bold">
+                <i class="fas fa-user me-3"></i>Informações do Paciente
               </h6>
             </div>
-            <div class="card-body">
+            <div class="card-body bg-white">
               <div class="row">
                 <div class="col-md-8">
-                  <strong>Paciente:</strong> <span id="nomePacienteConduta" class="text-primary"></span>
+                  <div class="mb-2">
+                    <small class="text-muted d-block">Nome do Paciente</small>
+                    <span id="nomePacienteConduta" class="text-dark fw-bold fs-6"></span>
+                  </div>
                 </div>
-                <div class="col-md-4">
-                  <strong>Atendimento:</strong> <span id="atendimentoIdConduta" class="badge bg-secondary"></span>
+                <div class="col-md-4 text-end">
+                  <div class="mb-2">
+                    <small class="text-muted d-block">ID do Atendimento</small>
+                    <span id="atendimentoIdConduta" class="badge bg-secondary fs-6"></span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -230,80 +483,78 @@
 
           <!-- Seleção de Conduta -->
           <div class="mb-4">
-            <label for="condutaSelect" class="form-label fw-bold">
-              <i class="fas fa-clipboard-list me-2"></i>Selecione a conduta:
+            <label for="condutaSelect" class="form-label fw-bold text-dark mb-3">
+              <i class="fas fa-stethoscope me-3"></i>Selecione a Conduta Médica <span class="text-danger">*</span>
             </label>
-            <select class="form-select form-select-lg" id="condutaSelect" required onchange="toggleLeitoSelection()">
-              <option value="">Selecione uma opção</option>
-              <option value="Alta" data-color="success">
-                <i class="fas fa-home"></i> Alta
-              </option>
-              <option value="Transferido" data-color="warning">
-                <i class="fas fa-exchange-alt"></i> Transferido
-              </option>
-              <option value="A pedido" data-color="info">
-                <i class="fas fa-hand-paper"></i> A pedido
-              </option>
-              <option value="Óbito" data-color="dark">
-                <i class="fas fa-cross"></i> Óbito
-              </option>
-              <option value="Evasão" data-color="dark">
-                <i class="fas fa-person-running"></i> Evasão
-              </option>
-              <option value="Internar" data-color="primary">
-                <i class="fas fa-bed"></i> Internar
-              </option>
+            <select class="form-select form-select-lg shadow-sm" id="condutaSelect" required onchange="toggleLeitoSelection()">
+              <option value="">Selecione uma opção...</option>
+              <option value="Alta">Alta Médica</option>
+              <option value="Transferido">Transferência para outra unidade</option>
+              <option value="A pedido">Alta a Pedido</option>
+              <option value="Óbito">Óbito</option>
+              <option value="Evasão">Evasão</option>
+              <option value="Internar">Internar no Hospital</option>
             </select>
           </div>
 
           <!-- Seleção de Leito (aparece apenas quando Internar é selecionado) -->
           <div id="leitoSelection" class="mb-4" style="display: none;">
-            <div class="alert alert-info">
-              <i class="fas fa-info-circle me-2"></i>
-              <strong>Internação:</strong> Selecione o leito onde o paciente será internado.
-            </div>
-            <label for="leitoSelect" class="form-label fw-bold">
-              <i class="fas fa-bed me-2"></i>Selecione o leito:
-            </label>
-            <select class="form-select" id="leitoSelect">
-              <option value="">Carregando leitos...</option>
-            </select>
-            <div class="mt-2">
-              <small class="text-muted">
-                <i class="fas fa-lightbulb me-1"></i>
-                Apenas leitos disponíveis são exibidos
-              </small>
+            <div class="card border-0 shadow-sm" style="border-left: 3px solid #4A90E2 !important;">
+              <div class="card-body bg-light">
+                <div class="d-flex align-items-start mb-3">
+                  <i class="fas fa-bed fa-2x text-primary me-3"></i>
+                  <div>
+                    <h6 class="text-dark fw-bold mb-1">Seleção de Leito para Internação</h6>
+                    <p class="text-dark mb-0 small">O paciente será transferido para o leito selecionado</p>
+                  </div>
+                </div>
+                <label for="leitoSelect" class="form-label fw-bold text-dark">
+                  <i class="fas fa-hospital me-3"></i>Leito <span class="text-danger">*</span>
+                </label>
+                <select class="form-select shadow-sm" id="leitoSelect">
+                  <option value="">Carregando leitos disponíveis...</option>
+                </select>
+                <div class="mt-2">
+                  <small class="text-dark">
+                    <i class="fas fa-info-circle me-3 text-primary"></i>
+                    Apenas leitos com vagas disponíveis são exibidos
+                  </small>
+                </div>
+              </div>
             </div>
           </div>
 
           <!-- Evolução Médica Final -->
-          <div class="mb-3">
-            <label for="observacaoConduta" class="form-label fw-bold">
-              <i class="fas fa-notes-medical me-2"></i>Evolução Médica Final:
+          <div class="mb-4">
+            <label for="observacaoConduta" class="form-label fw-bold text-dark mb-3">
+              <i class="fas fa-file-medical me-3"></i>Evolução Médica Final <span class="text-danger">*</span>
             </label>
-            <textarea class="form-control" id="observacaoConduta" rows="4" 
-                      placeholder="Descreva a evolução médica final do paciente..."></textarea>
-            <div class="form-text">
-              <i class="fas fa-info-circle me-1"></i>
-              Esta evolução será registrada automaticamente no prontuário do paciente.
+            <textarea class="form-control shadow-sm" id="observacaoConduta" rows="6" 
+                      placeholder="Descreva a evolução médica final do paciente, condições de saída, orientações fornecidas, etc."
+                      style="resize: vertical; min-height: 150px;"></textarea>
+            <div class="form-text mt-2">
+              <i class="fas fa-lightbulb me-3 text-warning"></i>
+              <strong class="text-dark">Importante:</strong> Esta evolução será registrada automaticamente no prontuário do paciente.
             </div>
           </div>
 
           <!-- Indicadores Visuais de Conduta -->
-          <div id="condutaIndicator" class="alert d-none" role="alert">
+          <div id="condutaIndicator" class="alert d-none shadow-sm" role="alert" style="border-left: 4px solid;">
             <div class="d-flex align-items-center">
-              <i id="condutaIcon" class="fas fa-info-circle me-2"></i>
-              <span id="condutaDescription"></span>
+              <i id="condutaIcon" class="fas fa-info-circle me-3 fa-2x"></i>
+              <div>
+                <strong id="condutaDescription" class="text-dark"></strong>
+              </div>
             </div>
           </div>
         </div>
         
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">
-            <i class="fas fa-times me-2"></i>Cancelar
+        <div class="modal-footer bg-light border-top p-3">
+          <button type="button" class="btn btn-outline-secondary px-4" data-dismiss="modal">
+            <i class="fas fa-times me-3"></i>Cancelar
           </button>
-          <button type="button" class="btn btn-primary" onclick="salvarConduta()">
-            <i class="fas fa-save me-2"></i>Salvar Conduta
+          <button type="button" class="btn btn-primary px-4" onclick="salvarConduta()">
+            <i class="fas fa-check-circle me-3"></i>Confirmar e Salvar
           </button>
         </div>
       </div>
@@ -336,28 +587,34 @@
 
           // Definir se deve mostrar o botão "Definir Conduta" (apenas para médicos e multi)
           const botaoConduta = (cargoUsuario === 'medico' || cargoUsuario === 'multi') ? 
-            `<button class="btn btn-sm btn-success ms-2" onclick="definirConduta('${p.atendimento_id}', '${p.nome}')">Definir Conduta</button>` : 
+            `<button class="btn btn-sm btn-success ms-2" onclick="definirConduta('${p.atendimento_id}', '${p.nome}')">
+              <i class="fas fa-clipboard-check me-2"></i>Definir Conduta
+            </button>` : 
             '';
 
           const linha = `
             <tr id="row-at-${p.atendimento_id}" data-atendimento-id="${p.atendimento_id}">
-              <td>${p.nome}</td>
-              <td>${horario ? horario.toLocaleString() : '---'}</td>
-              <td>${p.medico_nome || '---'}</td>
-              <td>${p.atendimento_id}</td>
+              <td class="text-dark fw-medium">${p.nome}</td>
+              <td class="text-dark">${horario ? horario.toLocaleString() : '---'}</td>
+              <td class="text-dark">${p.medico_nome || '---'}</td>
+              <td class="text-dark">${p.atendimento_id}</td>
               <td>
-                <a href="${urlFichaPaciente}" class="btn btn-sm btn-info">Ficha Paciente</a>
+                <a href="${urlFichaPaciente}" class="btn btn-sm btn-info">
+                  <i class="fas fa-folder-open me-2"></i>Ficha
+                </a>
                 ${botaoConduta}
               </td>
             </tr>
           `;          const linhaAlerta = `
-            <tr class="table-danger-custom" id="row-at-${p.atendimento_id}" data-atendimento-id="${p.atendimento_id}">
-              <td>${p.nome}</td>
-              <td>${horario ? horario.toLocaleString() : '---'}</td>
-              <td>${p.medico_nome || '---'}</td>
-              <td>${p.atendimento_id}</td>
+            <tr id="row-at-${p.atendimento_id}" data-atendimento-id="${p.atendimento_id}" style="background-color: #fff9e6;">
+              <td class="text-dark fw-bold">${p.nome}</td>
+              <td class="text-dark">${horario ? horario.toLocaleString() : '---'}</td>
+              <td class="text-dark">${p.medico_nome || '---'}</td>
+              <td class="text-dark">${p.atendimento_id}</td>
               <td>
-                <a href="${urlFichaPaciente}" class="btn btn-sm btn-info">Ficha Paciente</a>
+                <a href="${urlFichaPaciente}" class="btn btn-sm btn-info">
+                  <i class="fas fa-folder-open me-2"></i>Ficha
+                </a>
                 ${botaoConduta}
               </td>
             </tr>
@@ -371,50 +628,105 @@
         });        $('#tabelaObservacao').html(htmlObservacao.join('') || '<tr><td colspan="5" class="text-center text-muted">Nenhum paciente em observação.</td></tr>');
         $('#tabelaConduta').html(htmlConduta.join('') || '<tr><td colspan="5" class="text-center text-muted">Nenhum paciente aguardando conduta há mais de 24h.</td></tr>');
       });
-    });    // Função para abrir modal de definir conduta
+    });    // Função para abrir modal de definir conduta (MELHORADA)
     function definirConduta(atendimentoId, nomePaciente) {
+      console.log('🏥 Abrindo modal de conduta para:', nomePaciente, 'ID:', atendimentoId);
+      
+      // Preencher informações do paciente
       $('#nomePacienteConduta').text(nomePaciente);
       $('#atendimentoIdConduta').text(atendimentoId);
+      
+      // Resetar formulário
       $('#condutaSelect').val('');
       $('#observacaoConduta').val('');
       $('#leitoSelect').val('');
       $('#leitoSelection').hide();
       $('#condutaIndicator').addClass('d-none');
       
+      // Remover validações visuais anteriores
+      $('#condutaSelect').removeClass('is-invalid');
+      $('#observacaoConduta').removeClass('is-invalid');
+      $('#leitoSelect').removeClass('is-invalid');
+      
       // Carregar leitos disponíveis
       carregarLeitos();
       
+      // Abrir modal
       $('#modalDefinirConduta').modal('show');
+      
+      // Focar no select de conduta após abrir
+      setTimeout(function() {
+        $('#condutaSelect').focus();
+      }, 500);
     }
+    
+    // Remover validação visual ao digitar
+    $(document).on('input', '#observacaoConduta', function() {
+      $(this).removeClass('is-invalid');
+    });
+    
+    // Remover validação visual ao selecionar conduta
+    $(document).on('change', '#condutaSelect', function() {
+      $(this).removeClass('is-invalid');
+    });
+    
+    // Remover validação visual ao selecionar leito
+    $(document).on('change', '#leitoSelect', function() {
+      $(this).removeClass('is-invalid');
+    });
 
-    // Função para carregar leitos disponíveis
+    // Função para carregar leitos disponíveis (MELHORADA)
     function carregarLeitos() {
+      const leitoSelect = $('#leitoSelect');
+      
+      // Mostrar loading
+      leitoSelect.html('<option value="">Carregando leitos disponíveis...</option>');
+      
       $.getJSON('/api/leitos/opcoes')
         .done(function(data) {
-          const leitoSelect = $('#leitoSelect');
+          console.log('✅ Leitos carregados:', data.length);
+          
           leitoSelect.empty();
-          leitoSelect.append('<option value="">Selecione um leito</option>');
+          leitoSelect.append('<option value="">Selecione um leito...</option>');
+          
+          let leitosDisponiveis = 0;
           
           data.forEach(function(leito) {
-            const statusClass = leito.status === 'Disponível' ? 'text-success' : 'text-warning';
-            const statusIcon = leito.status === 'Disponível' ? '✓' : '⚠';
-            
             // Só adicionar leitos disponíveis
             if (leito.status === 'Disponível') {
-              leitoSelect.append(`
-                <option value="${leito.nome}" class="${statusClass}">
-                  ${statusIcon} ${leito.nome} - ${leito.status}
-                </option>
-              `);
+              const ocupacao = leito.ocupacao_atual || 0;
+              const capacidade = leito.capacidade_maxima || 1;
+              const vagasDisponiveis = capacidade - ocupacao;
+              
+              if (vagasDisponiveis > 0) {
+                const leitoInfo = `${leito.nome}`;
+                const setorInfo = leito.setor ? ` - ${leito.setor}` : '';
+                const vagasInfo = capacidade > 1 ? ` (${vagasDisponiveis}/${capacidade} vagas)` : '';
+                
+                leitoSelect.append(`
+                  <option value="${leito.nome}">
+                    ${leitoInfo}${setorInfo}${vagasInfo}
+                  </option>
+                `);
+                leitosDisponiveis++;
+              }
             }
           });
+          
+          if (leitosDisponiveis === 0) {
+            leitoSelect.html('<option value="">Nenhum leito disponível no momento</option>');
+            console.warn('⚠️ Nenhum leito disponível encontrado');
+          } else {
+            console.log(`✅ ${leitosDisponiveis} leitos disponíveis`);
+          }
         })
-        .fail(function() {
-          $('#leitoSelect').html('<option value="">Erro ao carregar leitos</option>');
+        .fail(function(xhr, status, error) {
+          console.error('❌ Erro ao carregar leitos:', error);
+          leitoSelect.html('<option value="">Erro ao carregar leitos</option>');
         });
     }
 
-    // Função para mostrar/ocultar seleção de leito
+    // Função para mostrar/ocultar seleção de leito (MELHORADA)
     function toggleLeitoSelection() {
       const conduta = $('#condutaSelect').val();
       const leitoDiv = $('#leitoSelection');
@@ -423,13 +735,14 @@
       const description = $('#condutaDescription');
       
       if (conduta === 'Internar') {
-        leitoDiv.slideDown();
+        leitoDiv.slideDown(300);
         indicator.removeClass('d-none alert-info alert-success alert-warning alert-danger alert-dark')
-                 .addClass('alert-primary');
-        icon.removeClass().addClass('fas fa-bed');
-        description.text('Paciente será internado. Selecione o leito apropriado.');
+                 .addClass('alert-primary')
+                 .css('border-left-color', '#4A90E2');
+        icon.removeClass().addClass('fas fa-bed fa-2x');
+        description.html('<strong>Internação Hospitalar</strong><br><small>Selecione o leito onde o paciente será alocado.</small>');
       } else {
-        leitoDiv.slideUp();
+        leitoDiv.slideUp(300);
         $('#leitoSelect').val('');
         
         // Mostrar indicador baseado na conduta
@@ -438,29 +751,29 @@
           
           switch(conduta) {
             case 'Alta':
-              indicator.addClass('alert-success');
-              icon.removeClass().addClass('fas fa-home');
-              description.text('Paciente receberá alta hospitalar.');
+              indicator.addClass('alert-success').css('border-left-color', '#28a745');
+              icon.removeClass().addClass('fas fa-home fa-2x');
+              description.html('<strong>Alta Médica</strong><br><small>Paciente receberá alta hospitalar.</small>');
               break;
             case 'Transferido':
-              indicator.addClass('alert-warning');
-              icon.removeClass().addClass('fas fa-exchange-alt');
-              description.text('Paciente será transferido para outra unidade.');
+              indicator.addClass('alert-warning').css('border-left-color', '#ffc107');
+              icon.removeClass().addClass('fas fa-exchange-alt fa-2x');
+              description.html('<strong>Transferência</strong><br><small>Paciente será transferido para outra unidade de saúde.</small>');
               break;
             case 'A pedido':
-              indicator.addClass('alert-info');
-              icon.removeClass().addClass('fas fa-hand-paper');
-              description.text('Alta a pedido do paciente ou responsável.');
+              indicator.addClass('alert-info').css('border-left-color', '#4A90E2');
+              icon.removeClass().addClass('fas fa-hand-paper fa-2x');
+              description.html('<strong>Alta a Pedido</strong><br><small>Alta solicitada pelo paciente ou responsável.</small>');
               break;
             case 'Óbito':
-              indicator.addClass('alert-danger');
-              icon.removeClass().addClass('fas fa-cross');
-              description.text('Registrar óbito do paciente.');
+              indicator.addClass('alert-danger').css('border-left-color', '#dc3545');
+              icon.removeClass().addClass('fas fa-heart-broken fa-2x');
+              description.html('<strong>Registro de Óbito</strong><br><small>Registrar óbito do paciente no sistema.</small>');
               break;
             case 'Evasão':
-              indicator.addClass('alert-dark');
-              icon.removeClass().addClass('fas fa-person-running');
-              description.text('Registrar evasão do paciente.');
+              indicator.addClass('alert-dark').css('border-left-color', '#6c757d');
+              icon.removeClass().addClass('fas fa-person-walking-arrow-right fa-2x');
+              description.html('<strong>Evasão</strong><br><small>Paciente deixou o hospital sem alta médica.</small>');
               break;
           }
         } else {
@@ -469,21 +782,49 @@
       }
     }
 
-    // Função para salvar conduta
+    // Função para salvar conduta (MELHORADA)
     function salvarConduta() {
       const atendimentoId = $('#atendimentoIdConduta').text();
       const conduta = $('#condutaSelect').val();
-      const observacao = $('#observacaoConduta').val();
+      const observacao = $('#observacaoConduta').val().trim();
       const leito = $('#leitoSelect').val();
 
+      console.log('🔍 Salvando conduta:', {
+        atendimentoId: atendimentoId,
+        conduta: conduta,
+        observacao: observacao,
+        leito: leito
+      });
+
+      // Limpar validações anteriores
+      $('#condutaSelect, #observacaoConduta, #leitoSelect').removeClass('is-invalid');
+      
+      // Validações no frontend com feedback visual
+      if (!atendimentoId) {
+        showAlert('Erro: ID do atendimento não encontrado. Recarregue a página.', 'error');
+        return;
+      }
+
       if (!conduta) {
+        $('#condutaSelect').addClass('is-invalid');
         showAlert('Por favor, selecione uma conduta.', 'warning');
+        $('#condutaSelect').focus();
         return;
       }
 
       // Validar leito se conduta for Internar
       if (conduta === 'Internar' && !leito) {
+        $('#leitoSelect').addClass('is-invalid');
         showAlert('Por favor, selecione um leito para internação.', 'warning');
+        $('#leitoSelect').focus();
+        return;
+      }
+      
+      // Validar evolução médica (campo obrigatório)
+      if (!observacao || observacao.trim() === '') {
+        $('#observacaoConduta').addClass('is-invalid');
+        showAlert('Por favor, preencha a evolução médica final.', 'warning');
+        $('#observacaoConduta').focus();
         return;
       }
 
@@ -491,6 +832,9 @@
       let confirmMessage = `Confirma a conduta "${conduta}" para este paciente?`;
       if (conduta === 'Internar' && leito) {
         confirmMessage += `\n\nLeito selecionado: ${leito}`;
+      }
+      if (observacao) {
+        confirmMessage += `\n\nEvolução médica registrada: ${observacao.substring(0, 100)}${observacao.length > 100 ? '...' : ''}`;
       }
 
       if (!confirm(confirmMessage)) {
@@ -509,32 +853,77 @@
         dados.leito = leito;
       }
 
+      console.log('📤 Enviando dados para API:', dados);
+
       // Desabilitar botão durante o envio
       const btnSalvar = $('.modal-footer .btn-primary');
+      const textoOriginal = btnSalvar.html();
       btnSalvar.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Salvando...');
 
-      // Enviar requisição
+      // Enviar requisição com timeout maior
       $.ajax({
         url: '/api/definir-conduta',
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(dados),
+        timeout: 15000, // 15 segundos de timeout
         success: function(response) {
-          showAlert('Conduta definida com sucesso!', 'success');
+          console.log('✅ Resposta da API:', response);
+          
+          showAlert(`Conduta "${conduta}" definida com sucesso!`, 'success');
           $('#modalDefinirConduta').modal('hide');
+          
+          // Limpar formulário
+          $('#condutaSelect').val('');
+          $('#observacaoConduta').val('');
+          $('#leitoSelect').val('');
+          $('#leitoSelection').hide();
+          
           // Remover paciente da lista em tempo real
           removePacienteDaLista(atendimentoId);
+          
+          // Recarregar a página após 2 segundos para garantir atualização
+          setTimeout(function() {
+            location.reload();
+          }, 2000);
         },
         error: function(xhr, status, error) {
+          console.error('❌ Erro na requisição:', {
+            status: status,
+            error: error,
+            response: xhr.responseText,
+            statusCode: xhr.status
+          });
+          
           let errorMessage = 'Erro ao definir conduta.';
-          if (xhr.responseJSON && xhr.responseJSON.message) {
-            errorMessage = xhr.responseJSON.message;
+          let details = '';
+          
+          if (xhr.responseJSON) {
+            errorMessage = xhr.responseJSON.message || errorMessage;
+            details = xhr.responseJSON.details || xhr.responseJSON.error || '';
+          } else if (xhr.responseText) {
+            try {
+              const errorObj = JSON.parse(xhr.responseText);
+              errorMessage = errorObj.message || errorMessage;
+              details = errorObj.details || errorObj.error || '';
+            } catch (e) {
+              // Se não conseguir fazer parse, mostrar mensagem padrão
+            }
           }
-          showAlert(errorMessage, 'error');
+          
+          // Mensagem mais detalhada para o usuário
+          const fullMessage = details ? 
+            `${errorMessage}\n\nDetalhes: ${details}` : 
+            errorMessage;
+          
+          showAlert(fullMessage, 'error');
+          
+          // Log para ajudar no debug
+          console.error('Dados que foram enviados:', dados);
         },
         complete: function() {
           // Reabilitar botão
-          btnSalvar.prop('disabled', false).html('<i class="fas fa-save me-2"></i>Salvar Conduta');
+          btnSalvar.prop('disabled', false).html(textoOriginal);
         }
       });
     }
@@ -560,7 +949,7 @@
       }
     }
 
-    // Função para mostrar alertas mais elegantes
+    // Função para mostrar alertas mais elegantes (MELHORADA)
     function showAlert(message, type) {
       const alertClass = type === 'success' ? 'alert-success' : 
                         type === 'warning' ? 'alert-warning' : 
@@ -571,10 +960,14 @@
                        'fa-times-circle';
       
       const alertHtml = `
-        <div class="alert ${alertClass} alert-dismissible fade show app-alert" role="alert">
+        <div class="alert ${alertClass} alert-dismissible fade show app-alert position-fixed" 
+             role="alert" 
+             style="top: 20px; right: 20px; z-index: 9999; min-width: 350px; max-width: 500px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
           <i class="fas ${alertIcon} me-2"></i>
-          ${message}
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <strong>${message}</strong>
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
         </div>
       `;
       
@@ -582,12 +975,15 @@
       $('.app-alert').remove();
       
       // Adicionar novo alerta no topo da página
-      $('body').prepend(alertHtml);
+      $('body').append(alertHtml);
       
-      // Remover automaticamente após 5 segundos
+      // Remover automaticamente após o tempo especificado
+      const timeout = type === 'error' ? 8000 : 5000; // Erros ficam mais tempo
       setTimeout(function() {
-        $('.alert').fadeOut();
-      }, 5000);
+        $('.app-alert').fadeOut(function() {
+          $(this).remove();
+        });
+      }, timeout);
     }
   </script>
 </body>

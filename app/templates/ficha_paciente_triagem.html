@@ -5,84 +5,542 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Ficha de Triagem - Enfermeiro</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <style>
-      body {
-        background-color: #f8f9fa;
+      :root {
+        --azul-principal: #4A90E2;
+        --azul-claro: #E8F4FF;
+        --azul-medio: #7AB8F5;
+        --branco-gelo: #F8FCFF;
+        --cinza-texto: #4A5568;
+        --cinza-claro: #E2E8F0;
+        --sombra-suave: 0 2px 12px rgba(74, 144, 226, 0.08);
+        --sombra-media: 0 4px 20px rgba(74, 144, 226, 0.12);
       }
+      
+      body {
+        background: linear-gradient(135deg, var(--branco-gelo) 0%, var(--azul-claro) 100%);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        min-height: 100vh;
+      }
+      
       .required-asterisk {
         color: #dc3545;
         margin-left: 2px;
       }
+      
       .required-hint {
         font-size: 0.9rem;
-        color: #6c757d;
+        color: var(--cinza-texto);
       }
+      
+      .card {
+        border: 0;
+        border-radius: 16px;
+        box-shadow: var(--sombra-media);
+        background: white;
+      }
+      
       .card-header {
-        font-weight: bold;
+        background: linear-gradient(135deg, var(--azul-principal), var(--azul-medio));
+        color: white;
+        border-radius: 16px 16px 0 0 !important;
+        border-bottom: none;
+        padding: 20px 24px;
+        font-weight: 600;
         font-size: 1.5rem;
       }
+      
       .section-header {
-        background-color: #e9ecef;
-        padding: 10px;
-        border-radius: 5px;
+        background: linear-gradient(135deg, var(--azul-claro), #D8ECFF);
+        color: var(--azul-principal);
+        padding: 12px 16px;
+        border-radius: 12px;
         margin-bottom: 15px;
-        font-weight: bold;
+        font-weight: 600;
+        border-left: 4px solid var(--azul-principal);
       }
+      
+      .section-header i {
+        margin-right: 10px;
+      }
+      
       .info-row {
         margin-bottom: 10px;
+        padding: 8px;
+        background: var(--branco-gelo);
+        border-radius: 8px;
       }
+      
       .nurse-signature {
-        border: 1px solid #ddd;
-        padding: 15px;
+        border: 2px solid var(--azul-claro);
+        padding: 20px;
         margin-top: 30px;
         text-align: center;
-        border-radius: 5px;
-        background-color: #fff;
+        border-radius: 12px;
+        background: white;
+        box-shadow: var(--sombra-suave);
       }
+      
       .nurse-signature h5 {
-        margin-bottom: 5px;
+        margin-bottom: 8px;
+        color: var(--azul-principal);
+        font-weight: 600;
       }
+      
       .nurse-signature p {
         margin: 0;
         font-size: 0.9rem;
-        color: #555;
+        color: var(--cinza-texto);
       }
-      /* As seções de informações de gestante e condições clínicas ficam ocultas por padrão */
+      
       .gestante-fields, .condicoes-clinicas {
         display: none;
-        border: 1px solid #ccc;
-        padding: 15px;
+        border: 2px solid var(--azul-claro);
+        padding: 20px;
         margin-top: 15px;
-        border-radius: 5px;
+        border-radius: 12px;
         background-color: #fff;
+        box-shadow: var(--sombra-suave);
       }
+      
       .back-btn {
         margin-bottom: 20px;
+        border-radius: 10px;
+        padding: 10px 20px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
       }
-      /* Campo de DST oculto por padrão */
+      
+      .back-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+      }
+      
       #dstTextContainer {
         display: none;
       }
+      
       .bg-orange {
         background-color: #fd7e14;
         color: #fff;
+      }
+      
+      .form-control {
+        transition: all 0.3s ease;
+        border-radius: 8px;
+      }
+      
+      .form-control:focus {
+        border-color: var(--azul-principal);
+        box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+        transform: translateY(-1px);
+      }
+      
+      .form-select {
+        transition: all 0.3s ease;
+        border-radius: 8px;
+      }
+      
+      .form-select:focus {
+        border-color: var(--azul-principal);
+        box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+      }
+      
+      .form-check-input {
+        transition: all 0.3s ease;
+      }
+      
+      .form-check-input:checked {
+        background-color: var(--azul-principal);
+        border-color: var(--azul-principal);
+      }
+      
+      textarea.form-control {
+        resize: vertical;
+        min-height: 80px;
+      }
+      
+      .form-label {
+        font-weight: 500;
+        color: var(--cinza-texto);
+        margin-bottom: 8px;
+      }
+      
+      .form-label i,
+      .btn i,
+      .card-header i {
+        margin-right: 8px;
+      }
+      
+      .btn-primary {
+        background: linear-gradient(135deg, var(--azul-principal), var(--azul-medio));
+        border: none;
+        border-radius: 10px;
+        padding: 12px 24px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(74, 144, 226, 0.3);
+      }
+      
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 14px rgba(74, 144, 226, 0.4);
+      }
+      
+      .btn-outline-secondary {
+        border-radius: 10px;
+        transition: all 0.3s ease;
+      }
+      
+      /* Botões de Classificação de Risco */
+      .risk-buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      
+      .risk-btn {
+        flex: 1;
+        min-width: 90px;
+        padding: 12px 10px;
+        border: 3px solid transparent;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        text-align: center;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+        position: relative;
+        user-select: none;
+        opacity: 0.85;
+      }
+      
+      .risk-btn:hover:not(.active) {
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+        opacity: 1;
+      }
+      
+      .risk-btn:active:not(.active) {
+        transform: translateY(-1px) scale(0.98);
+      }
+      
+      .risk-btn.active {
+        border-color: #fff;
+        border-width: 4px;
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 
+                    0 0 0 3px rgba(0, 0, 0, 0.3),
+                    inset 0 0 15px rgba(255, 255, 255, 0.2);
+        opacity: 1;
+        animation: pulse-active 0.4s ease-out;
+      }
+      
+      @keyframes pulse-active {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.08);
+        }
+        100% {
+          transform: scale(1.05);
+        }
+      }
+      
+      .risk-btn.active::before {
+        content: '✓';
+        position: absolute;
+        top: 3px;
+        right: 6px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #fff;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        animation: check-appear 0.3s ease-out;
+      }
+      
+      @keyframes check-appear {
+        0% {
+          opacity: 0;
+          transform: scale(0) rotate(-180deg);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1) rotate(0deg);
+        }
+      }
+      
+      .risk-btn.azul {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+      }
+      
+      .risk-btn.verde {
+        background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+        color: white;
+      }
+      
+      .risk-btn.amarelo {
+        background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+        color: #000;
+      }
+      
+      .risk-btn.amarelo.active::before {
+        color: #000;
+      }
+      
+      .risk-btn.laranja {
+        background: linear-gradient(135deg, #fd7e14 0%, #e35d00 100%);
+        color: white;
+      }
+      
+      .risk-btn.vermelho {
+        background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
+        color: white;
+      }
+      
+      .risk-btn small {
+        display: block;
+        margin-top: 4px;
+        font-size: 11px;
+        opacity: 0.9;
+      }
+      
+      /* Efeito de destaque quando precisa selecionar */
+      .risk-buttons.needs-selection {
+        animation: shake-horizontal 0.5s ease-in-out;
+        padding: 10px;
+        border: 3px dashed #dc3545;
+        border-radius: 16px;
+        background: rgba(220, 53, 69, 0.05);
+      }
+      
+      @keyframes shake-horizontal {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+      }
+      
+      /* Indicador de seleção obrigatória */
+      .risk-selection-required {
+        display: none;
+        color: #dc3545;
+        font-size: 14px;
+        font-weight: 600;
+        margin-top: 10px;
+        padding: 10px;
+        background: rgba(220, 53, 69, 0.1);
+        border-radius: 8px;
+        border-left: 4px solid #dc3545;
+      }
+      
+      .risk-selection-required.show {
+        display: block;
+        animation: fadeIn 0.3s ease-in;
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      .input-group-text {
+        background-color: var(--azul-claro);
+        border-color: var(--cinza-claro);
+        color: var(--azul-principal);
+        font-weight: 600;
+      }
+      
+      /* Toast de Feedback */
+      .toast-feedback {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        min-width: 350px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        padding: 20px;
+        z-index: 9999;
+        display: none;
+        animation: slideInRight 0.4s ease-out;
+        border-left: 5px solid;
+      }
+      
+      .toast-feedback.show {
+        display: block;
+      }
+      
+      .toast-feedback.success {
+        border-left-color: #28a745;
+      }
+      
+      .toast-feedback.error {
+        border-left-color: #dc3545;
+      }
+      
+      .toast-feedback.warning {
+        border-left-color: #ffc107;
+      }
+      
+      .toast-feedback .toast-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        font-weight: 600;
+        font-size: 16px;
+      }
+      
+      .toast-feedback .toast-header i {
+        font-size: 24px;
+        margin-right: 12px;
+      }
+      
+      .toast-feedback.success .toast-header {
+        color: #28a745;
+      }
+      
+      .toast-feedback.error .toast-header {
+        color: #dc3545;
+      }
+      
+      .toast-feedback.warning .toast-header {
+        color: #ffc107;
+      }
+      
+      .toast-feedback .toast-body {
+        color: var(--cinza-texto);
+        line-height: 1.5;
+      }
+      
+      @keyframes slideInRight {
+        from {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      
+      @keyframes slideOutRight {
+        from {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+      }
+      
+      .toast-feedback.hiding {
+        animation: slideOutRight 0.4s ease-in;
+      }
+      
+      /* Overlay de loading */
+      .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 9998;
+        display: none;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .loading-overlay.show {
+        display: flex;
+      }
+      
+      .loading-content {
+        background: white;
+        padding: 40px;
+        border-radius: 16px;
+        text-align: center;
+        box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+      }
+      
+      .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 5px solid var(--azul-claro);
+        border-top-color: var(--azul-principal);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      
+      .loading-text {
+        color: var(--cinza-texto);
+        font-size: 18px;
+        font-weight: 500;
+      }
+      
+      /* Responsividade */
+      @media (max-width: 768px) {
+        .risk-buttons {
+          flex-direction: column;
+        }
+        
+        .risk-btn {
+          width: 100%;
+          min-width: auto;
+        }
+        
+        .card-header {
+          flex-direction: column;
+          text-align: center;
+          gap: 10px;
+        }
+        
+        .info-row {
+          font-size: 0.9rem;
+        }
+        
+        .card-body {
+          padding: 20px !important;
+        }
+        
+        .toast-feedback {
+          right: 10px;
+          left: 10px;
+          min-width: auto;
+        }
       }
     </style>
   </head>
   <body>
     <div class="container my-5">
-      <!-- Botão de voltar ao menu principal -->
-      <button class="btn btn-secondary back-btn" onclick="window.location.href='/enfermeiro'">Voltar ao Menu Principal</button>
+      <!-- Botão de voltar para triagens -->
+      <button class="btn btn-secondary back-btn" onclick="window.location.href='/enfermeiro?view=triagem'">
+        <i class="fas fa-arrow-left mr-2"></i>Voltar para Triagens
+      </button>
       
       <div class="card shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center">
-          <div class="flex-grow-1 text-center">Ficha de Triagem</div>
-          <button id="btnEvasao" type="button" class="btn btn-outline-secondary btn-sm" title="Paciente Evadiu / Não Compareceu">Paciente Evadiu / Não Compareceu</button>
+          <div class="flex-grow-1 text-center"><i class="fas fa-notes-medical mr-2"></i>Ficha de Triagem</div>
+          <button id="btnEvasao" type="button" class="btn btn-outline-light btn-sm" title="Paciente Evadiu / Não Compareceu" style="border-radius: 8px; font-weight: 500;">
+            <i class="fas fa-user-times mr-1"></i>Paciente Evadiu
+          </button>
         </div>
-        <div class="card-body">
+        <div class="card-body" style="padding: 30px;">
           <!-- Dados do Paciente -->
           <div class="mb-4" id="dadosPaciente">
-            <div class="section-header">Dados do Paciente</div>
+            <div class="section-header"><i class="fas fa-user-injured mr-2"></i>Dados do Paciente</div>
             <div class="row info-row">
               <div class="col-md-4"><strong>Cartão SUS:</strong> <span id="pacienteCartaoSus"></span></div>
               <div class="col-md-4"><strong>Nome:</strong> <span id="pacienteNome"></span></div>
@@ -105,9 +563,11 @@
           
           <!-- Checkbox para informar se o paciente é gestante -->
           <div class="mb-3">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="isGestante" name="isGestante">
-              <label class="form-check-label" for="isGestante">Paciente é Gestante?</label>
+            <div class="form-check" style="background: var(--azul-claro); padding: 15px; border-radius: 10px; border-left: 4px solid var(--azul-principal);">
+              <input class="form-check-input" type="checkbox" id="isGestante" name="isGestante" style="width: 20px; height: 20px; cursor: pointer;">
+              <label class="form-check-label" for="isGestante" style="font-weight: 600; font-size: 1.1rem; color: var(--azul-principal); cursor: pointer; margin-left: 10px;">
+                <i class="fas fa-pregnant mr-2"></i>Paciente é Gestante?
+              </label>
             </div>
           </div>
           
@@ -122,7 +582,7 @@
               <div class="col-md-4">
                 <label for="pressao" class="form-label">Pressão <span class="required-asterisk">*</span></label>
                 <div class="input-group">
-                  <input type="text" class="form-control" id="pressao" name="pressao" required inputmode="numeric" maxlength="7" pattern="^\d{2,3}/\d{2,3}$" title="Formato: NN/NN ou NNN/NN (use /)" placeholder="120/80" oninput="let v=this.value.replace(/[^0-9]/g,'').slice(0,6); if(v.length<=2){ this.value=v; } else if(v.length<=4){ this.value=v.slice(0,2)+'/'+v.slice(2); } else { this.value=v.slice(0,3)+'/'+v.slice(3,5); }">
+                  <input type="text" class="form-control" id="pressao" name="pressao" required inputmode="numeric" maxlength="7" pattern="^\d{2,3}/\d{2,3}$" title="Formato: NN/NN ou NNN/NN (use /)" oninput="let v=this.value.replace(/[^0-9]/g,'').slice(0,6); if(v.length<=2){ this.value=v; } else if(v.length<=4){ this.value=v.slice(0,2)+'/'+v.slice(2); } else { this.value=v.slice(0,3)+'/'+v.slice(3,5); }">
                   <span class="input-group-text">mmHg</span>
                 </div>
                 <div class="invalid-feedback">Informe no formato NN/NN ou NNN/NN.</div>
@@ -130,7 +590,7 @@
               <div class="col-md-4">
                 <label for="pulso" class="form-label">Pulso <span class="required-asterisk">*</span></label>
                 <div class="input-group">
-                  <input type="text" class="form-control" id="pulso" name="pulso" required inputmode="numeric" maxlength="3" pattern="^\d{1,3}$" title="Somente números (até 3 dígitos)" placeholder="72" oninput="this.value=this.value.replace(/\D/g,'').slice(0,3)">
+                  <input type="text" class="form-control" id="pulso" name="pulso" required inputmode="numeric" maxlength="3" pattern="^\d{1,3}$" title="Somente números (até 3 dígitos)" oninput="this.value=this.value.replace(/\D/g,'').slice(0,3)">
                   <span class="input-group-text">bpm</span>
                 </div>
                 <div class="invalid-feedback">Campo obrigatório (até 3 dígitos).</div>
@@ -138,7 +598,7 @@
               <div class="col-md-4">
                 <label for="sp02" class="form-label">SpO₂ <span class="required-asterisk">*</span></label>
                 <div class="input-group">
-                  <input type="text" class="form-control" id="sp02" name="sp02" required inputmode="numeric" maxlength="3" pattern="^\d{1,3}$" title="Somente números (até 3 dígitos)" placeholder="98" oninput="this.value=this.value.replace(/\D/g,'').slice(0,3)">
+                  <input type="text" class="form-control" id="sp02" name="sp02" required inputmode="numeric" maxlength="3" pattern="^\d{1,3}$" title="Somente números (até 3 dígitos)" oninput="this.value=this.value.replace(/\D/g,'').slice(0,3)">
                   <span class="input-group-text">%</span>
                 </div>
                 <div class="invalid-feedback">Campo obrigatório (até 3 dígitos).</div>
@@ -148,7 +608,7 @@
               <div class="col-md-4">
                 <label for="temp" class="form-label">Temperatura <span class="required-asterisk">*</span></label>
                 <div class="input-group">
-                  <input type="text" class="form-control" id="temp" name="temp" required inputmode="numeric" maxlength="4" pattern="^\d{2},\d$" title="Formato: NN,N" placeholder="36,5" oninput="let d=this.value.replace(/\D/g,'').slice(0,3); this.value = d.length<=2 ? d : d.slice(0,2)+','+d.slice(2);">
+                  <input type="text" class="form-control" id="temp" name="temp" required inputmode="numeric" maxlength="4" pattern="^\d{2},\d$" title="Formato: NN,N" oninput="let d=this.value.replace(/\D/g,'').slice(0,3); this.value = d.length<=2 ? d : d.slice(0,2)+','+d.slice(2);">
                   <span class="input-group-text">°C</span>
                 </div>
                 <div class="invalid-feedback">Campo obrigatório.</div>
@@ -156,7 +616,7 @@
               <div class="col-md-4">
                 <label for="peso" class="form-label">Peso <span class="required-asterisk">*</span></label>
                 <div class="input-group">
-                  <input type="text" class="form-control" id="peso" name="peso" required inputmode="numeric" pattern="^\d{1,3}(,\d)?$" title="Formato: até 3 dígitos inteiros e 1 decimal (ex.: 52,3)" placeholder="52,3" oninput="formatPesoProgressive(this)">
+                  <input type="text" class="form-control" id="peso" name="peso" required inputmode="numeric" pattern="^\d{1,3}(,\d)?$" title="Formato: até 3 dígitos inteiros e 1 decimal (ex.: 52,3)" oninput="formatPesoProgressive(this)">
                   <span class="input-group-text">kg</span>
                 </div>
                 <div class="invalid-feedback">Informe no formato 5 | 52 | 52,3 | 523,4.</div>
@@ -164,7 +624,7 @@
               <div class="col-md-4">
                 <label for="altura" class="form-label">Altura (cm)</label>
                 <div class="input-group">
-                  <input type="text" class="form-control" id="altura" name="altura" inputmode="numeric" pattern="\d+" title="Informe apenas números (cm)" placeholder="170" oninput="this.value = this.value.replace(/\D/g, '')">
+                  <input type="text" class="form-control" id="altura" name="altura" inputmode="numeric" pattern="\d+" title="Informe apenas números (cm)" oninput="this.value = this.value.replace(/\D/g, '')">
                   <span class="input-group-text">cm</span>
                 </div>
                 <div class="invalid-feedback">Informe apenas números (cm).</div>
@@ -174,14 +634,14 @@
               <div class="col-md-6">
                 <label for="fr" class="form-label">Frequência Respiratória (FR)</label>
                 <div class="input-group">
-                  <input type="text" class="form-control" id="fr" name="fr" inputmode="numeric" maxlength="3" pattern="^\d{1,3}$" title="Somente números (até 3 dígitos)" placeholder="16" oninput="this.value=this.value.replace(/\D/g,'').slice(0,3)">
+                  <input type="text" class="form-control" id="fr" name="fr" inputmode="numeric" maxlength="3" pattern="^\d{1,3}$" title="Somente números (até 3 dígitos)" oninput="this.value=this.value.replace(/\D/g,'').slice(0,3)">
                   <span class="input-group-text">/min</span>
                 </div>
               </div>
               <div class="col-md-6">
                 <label for="dx" class="form-label">DX</label>
                 <div class="input-group">
-                  <input type="text" class="form-control" id="dx" name="dx" inputmode="numeric" maxlength="3" pattern="^\d{1,3}$" title="Somente números (até 3 dígitos)" placeholder="110" oninput="this.value=this.value.replace(/\D/g,'').slice(0,3)">
+                  <input type="text" class="form-control" id="dx" name="dx" inputmode="numeric" maxlength="3" pattern="^\d{1,3}$" title="Somente números (até 3 dígitos)" oninput="this.value=this.value.replace(/\D/g,'').slice(0,3)">
                   <span class="input-group-text">mg/dL</span>
                 </div>
               </div>
@@ -199,7 +659,7 @@
             
             <!-- Informações de Gestante (exibidas somente se marcado) -->
             <div id="gestanteFields" class="gestante-fields">
-              <div class="section-header">Informações de Gestante</div>
+              <div class="section-header"><i class="fas fa-baby-carriage mr-2"></i>Informações de Gestante</div>
               <div class="row mb-3">
                 <div class="col-md-2">
                   <label for="idade_gestacional_semanas" class="form-label">Semanas</label>
@@ -233,7 +693,7 @@
                 <div class="col-md-4">
                   <label for="bcf" class="form-label">BCF</label>
                   <div class="input-group">
-                  <input type="text" class="form-control" id="bcf" name="bcf" inputmode="numeric" maxlength="3" pattern="^\d{1,3}$" title="Somente números (até 3 dígitos)" placeholder="140" oninput="this.value=this.value.replace(/\D/g,'').slice(0,3)">
+                  <input type="text" class="form-control" id="bcf" name="bcf" inputmode="numeric" maxlength="3" pattern="^\d{1,3}$" title="Somente números (até 3 dígitos)" oninput="this.value=this.value.replace(/\D/g,'').slice(0,3)">
                     <span class="input-group-text">bpm</span>
                   </div>
                 </div>
@@ -250,14 +710,14 @@
               <div class="row mb-3">
                 <div class="col-md-4">
                   <label for="abo_rh" class="form-label">Abo/RH</label>
-                <input type="text" class="form-control" id="abo_rh" name="abo_rh" inputmode="numeric" maxlength="3" pattern="^\d{1,3}$" title="Somente números (até 3 dígitos)" placeholder="123" oninput="this.value=this.value.replace(/\D/g,'').slice(0,3)">
+                <input type="text" class="form-control" id="abo_rh" name="abo_rh" inputmode="numeric" maxlength="3" pattern="^\d{1,3}$" title="Somente números (até 3 dígitos)" oninput="this.value=this.value.replace(/\D/g,'').slice(0,3)">
                 </div>
               </div>
             </div>
             
             <!-- Condições Clínicas (apenas se gestante estiver marcada) -->
             <div id="condicoesClinicas" class="condicoes-clinicas">
-              <div class="section-header">Condições Clínicas</div>
+              <div class="section-header"><i class="fas fa-heartbeat mr-2"></i>Condições Clínicas</div>
               <div class="row mb-3">
                 <div class="col-md-2">
                   <div class="form-check">
@@ -330,51 +790,70 @@
                   </div>
                 </div>
                 <div class="col-md-4" id="dstTextContainer">
-                <input type="text" class="form-control" id="dst_text" name="dst_text" placeholder="Qual?">
+                <input type="text" class="form-control" id="dst_text" name="dst_text">
                 </div>
               </div>
             </div>
             
             <!-- Resto do formulário -->
             <div class="row mb-3">
-              <div class="col-md-6">
-                <label for="classificacao_risco" class="form-label">Classificação de Risco (Manchester) <span class="required-asterisk">*</span></label>
-                <select class="form-select" id="classificacao_risco" name="classificacao_risco" required>
-                  <option value="">Selecione</option>
-                  <option value="Azul">Azul</option>
-                  <option value="Verde">Verde</option>
-                  <option value="Amarelo">Amarelo</option>
-                  <option value="Laranja">Laranja</option>
-                  <option value="Vermelho">Vermelho</option>
-                </select>
-                <div class="invalid-feedback">Campo obrigatório.</div>
-                <div class="form-text mt-1">
-                  <span class="badge bg-primary me-1">Azul</span>
-                  <span class="badge bg-success me-1">Verde</span>
-                  <span class="badge bg-warning text-dark me-1">Amarelo</span>
-                  <span class="badge bg-orange me-1">Laranja</span>
-                  <span class="badge bg-danger">Vermelho</span>
+              <div class="col-md-12">
+                <label class="form-label" style="font-size: 1.1rem; font-weight: 600;">
+                  <i class="fas fa-hand-pointer mr-2" style="color: var(--azul-principal);"></i>
+                  Classificação de Risco (Manchester) <span class="required-asterisk">*</span>
+                  <small style="display: block; font-weight: 400; color: var(--cinza-texto); margin-top: 5px;">
+                    Clique em um dos botões abaixo para selecionar
+                  </small>
+                </label>
+                <input type="hidden" id="classificacao_risco" name="classificacao_risco" required>
+                <div class="risk-buttons">
+                  <div class="risk-btn azul" data-value="Azul" onclick="selecionarRisco('Azul', this)">
+                    AZUL
+                    <small>Não Urgente</small>
+                  </div>
+                  <div class="risk-btn verde" data-value="Verde" onclick="selecionarRisco('Verde', this)">
+                    VERDE
+                    <small>Pouco Urgente</small>
+                  </div>
+                  <div class="risk-btn amarelo" data-value="Amarelo" onclick="selecionarRisco('Amarelo', this)">
+                    AMARELO
+                    <small>Urgente</small>
+                  </div>
+                  <div class="risk-btn laranja" data-value="Laranja" onclick="selecionarRisco('Laranja', this)">
+                    LARANJA
+                    <small>Muito Urgente</small>
+                  </div>
+                  <div class="risk-btn vermelho" data-value="Vermelho" onclick="selecionarRisco('Vermelho', this)">
+                    VERMELHO
+                    <small>Emergência</small>
+                  </div>
                 </div>
-                <div class="mt-2">
-                  <span id="riscoBadge" class="badge"></span>
+                <div class="risk-selection-required" id="risco-selection-warning">
+                  <i class="fas fa-exclamation-triangle mr-2"></i>Por favor, selecione uma classificação de risco clicando em um dos botões acima.
                 </div>
               </div>
-              <div class="col-md-6">
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-12">
                 <label for="anamnese_exame_fisico" class="form-label">Anamnese/Exame Físico</label>
-                <textarea class="form-control" id="anamnese_exame_fisico" name="anamnese_exame_fisico" rows="2" placeholder="Queixa principal, HMA, exame físico..."></textarea>
+                <textarea class="form-control" id="anamnese_exame_fisico" name="anamnese_exame_fisico" rows="3"></textarea>
               </div>
             </div>
             <div class="mb-3">
               <label for="observacao" class="form-label">Observações Adicionais</label>
-              <textarea class="form-control" id="observacao" name="observacao" rows="3" placeholder="Observações relevantes"></textarea>
+              <textarea class="form-control" id="observacao" name="observacao" rows="3"></textarea>
             </div>
-            <button type="submit" class="btn btn-primary">Salvar Triagem</button>
+            <div class="text-center mt-4">
+              <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-save mr-2"></i>Salvar Triagem
+              </button>
+            </div>
           </form>
           
           <!-- Quadro de assinatura do enfermeiro -->
           <div class="nurse-signature mt-4" id="nurseSignature">
-            <h5>Enfermeiro</h5>
-            <p id="nurseNome"></p>
+            <h5><i class="fas fa-user-nurse mr-2"></i>Enfermeiro Responsável</h5>
+            <p id="nurseNome" style="font-weight: 600; font-size: 1.1rem;"></p>
             <p id="nurseNumero" class="text-muted"></p>
           </div>
         </div>
@@ -383,8 +862,86 @@
 
     <!-- Modal de Assinatura removido: assinatura automática após salvar -->
 
+    <!-- Toast de Feedback -->
+    <div class="toast-feedback" id="toastFeedback">
+      <div class="toast-header">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastTitle">Sucesso</span>
+      </div>
+      <div class="toast-body" id="toastMessage">
+        Operação realizada com sucesso!
+      </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <div class="loading-text" id="loadingText">Salvando triagem...</div>
+      </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+      // ========== FUNÇÕES DE FEEDBACK VISUAL ==========
+      
+      function showToast(type, title, message, duration = 5000) {
+        const toast = document.getElementById('toastFeedback');
+        const toastTitle = document.getElementById('toastTitle');
+        const toastMessage = document.getElementById('toastMessage');
+        const toastIcon = toast.querySelector('.toast-header i');
+        
+        // Remove classes anteriores
+        toast.classList.remove('success', 'error', 'warning', 'show', 'hiding');
+        
+        // Define o tipo
+        toast.classList.add(type);
+        
+        // Define ícone baseado no tipo
+        toastIcon.className = 'fas';
+        if (type === 'success') {
+          toastIcon.classList.add('fa-check-circle');
+        } else if (type === 'error') {
+          toastIcon.classList.add('fa-exclamation-circle');
+        } else if (type === 'warning') {
+          toastIcon.classList.add('fa-exclamation-triangle');
+        }
+        
+        // Define título e mensagem
+        toastTitle.textContent = title;
+        toastMessage.textContent = message;
+        
+        // Mostra o toast
+        toast.classList.add('show');
+        
+        // Auto-esconde após o duration
+        setTimeout(() => {
+          hideToast();
+        }, duration);
+      }
+      
+      function hideToast() {
+        const toast = document.getElementById('toastFeedback');
+        toast.classList.add('hiding');
+        setTimeout(() => {
+          toast.classList.remove('show', 'hiding');
+        }, 400);
+      }
+      
+      function showLoading(message = 'Salvando triagem...') {
+        const overlay = document.getElementById('loadingOverlay');
+        const loadingText = document.getElementById('loadingText');
+        loadingText.textContent = message;
+        overlay.classList.add('show');
+      }
+      
+      function hideLoading() {
+        const overlay = document.getElementById('loadingOverlay');
+        overlay.classList.remove('show');
+      }
+      
+      // ========== FIM DAS FUNÇÕES DE FEEDBACK ==========
+      
       // Botão: Paciente Evadiu / Não Compareceu
       document.addEventListener('DOMContentLoaded', function(){
         const btnEvasao = document.getElementById('btnEvasao');
@@ -398,22 +955,29 @@
             if (!confirm('Confirmar: marcar como Evasão e retirar da fila?')){
               return;
             }
+            
+            showLoading('Marcando como evasão...');
+            
             fetch('/api/enfermeiro/atendimentos/' + atendimentoId + '/evasao', {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' }
             })
             .then(r => r.json())
             .then(d => {
+              hideLoading();
               if (d && d.success){
-                alert('Marcado como Evasão com sucesso.');
-                window.location.href = '/enfermeiro';
+                showToast('success', 'Sucesso!', 'Marcado como Evasão com sucesso.');
+                setTimeout(() => {
+                  window.location.href = '/enfermeiro?view=triagem';
+                }, 1500);
               } else {
-                alert('Falha ao marcar evasão: ' + (d && d.message ? d.message : 'erro desconhecido'));
+                showToast('error', 'Erro!', 'Falha ao marcar evasão: ' + (d && d.message ? d.message : 'erro desconhecido'));
               }
             })
             .catch(err => {
+              hideLoading();
               console.error('Erro ao marcar evasão:', err);
-              alert('Erro ao marcar evasão.');
+              showToast('error', 'Erro!', 'Erro ao marcar evasão.');
             });
           });
         }
@@ -596,16 +1160,49 @@
       document.getElementById('triagemForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const formEl = document.getElementById('triagemForm');
+        
+        // Validar classificação de risco
+        const classificacaoRisco = document.getElementById('classificacao_risco').value;
+        if (!classificacaoRisco) {
+          console.log('⚠️ Tentou submeter sem selecionar risco');
+          
+          // Adiciona efeito visual de shake
+          const containerRisk = document.querySelector('.risk-buttons');
+          const warningElement = document.getElementById('risco-selection-warning');
+          
+          if (containerRisk) {
+            containerRisk.classList.add('needs-selection');
+            // Remove a classe após a animação
+            setTimeout(() => {
+              containerRisk.classList.remove('needs-selection');
+            }, 500);
+          }
+          
+          if (warningElement) {
+            warningElement.classList.add('show');
+          }
+          
+          // Scroll suave até a seção de risco
+          containerRisk.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          
+          // Toast de aviso
+          showToast('warning', 'Atenção!', 'Por favor, selecione a classificação de risco clicando em um dos botões coloridos.');
+          return;
+        }
+        
         if (!formEl.checkValidity()) {
           formEl.classList.add('was-validated');
           const firstInvalid = formEl.querySelector(':invalid');
-          if (firstInvalid) { firstInvalid.focus(); }
-          alert('Preencha os campos obrigatórios.');
+          if (firstInvalid) { 
+            firstInvalid.focus();
+            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          showToast('warning', 'Atenção!', 'Preencha os campos obrigatórios marcados com *');
           return;
         }
         const atendimentoId = document.getElementById('atendimento_id').value;
         if (!atendimentoId) {
-          alert("Atendimento não identificado.");
+          showToast('error', 'Erro!', 'Atendimento não identificado.');
           return;
         }
 
@@ -617,6 +1214,9 @@
             return;
           }
         }
+        
+        // Mostra loading
+        showLoading('Salvando triagem...');
 
         const isGestante = document.getElementById('isGestante').checked;
         // Se for gestante, usamos o endpoint de transformação; senão, o endpoint de atualização da triagem
@@ -697,13 +1297,19 @@
         .then(response => response.json())
         .then(data => {
           if(!data.success) {
-            alert("Erro ao salvar triagem: " + data.message);
+            hideLoading();
+            showToast('error', 'Erro ao Salvar!', data.message || 'Erro desconhecido ao salvar triagem.');
             return;
           }
+          
           // Se for gestante, atualiza o campo de atendimento com o novo ID retornado
           if(isGestante && data.novo_id) {
             document.getElementById('atendimento_id').value = data.novo_id;
           }
+          
+          // Atualiza mensagem do loading
+          showLoading('Assinando triagem...');
+          
           // Assinatura automática
           const assinaturaEndpoint = isGestante ?
             ('/api/atendimentos_gestantes/' + (data.novo_id || atendimentoId) + '/assinatura') :
@@ -711,45 +1317,102 @@
           return fetch(assinaturaEndpoint, { method: 'PUT', headers: { 'Content-Type': 'application/json' }})
             .then(resp => resp.json())
             .then(r => {
+              hideLoading();
               if(r && r.success){
-                alert('Triagem concluída e assinada com sucesso.');
-                window.location.href = '/enfermeiro';
+                showToast('success', 'Sucesso!', 'Triagem concluída e assinada com sucesso.');
+                setTimeout(() => {
+                  window.location.href = '/enfermeiro?view=triagem';
+                }, 2000);
               } else {
-                alert('Triagem salva, mas falhou ao assinar: ' + (r && r.message ? r.message : 'desconhecido'));
+                showToast('warning', 'Atenção!', 'Triagem salva, mas falhou ao assinar: ' + (r && r.message ? r.message : 'desconhecido'));
+                setTimeout(() => {
+                  window.location.href = '/enfermeiro?view=triagem';
+                }, 3000);
               }
             });
         })
         .catch(error => {
+          hideLoading();
           console.error("Erro:", error);
-          alert("Erro ao salvar triagem.");
+          showToast('error', 'Erro!', 'Erro ao salvar triagem. Tente novamente.');
         });
       });
 
       // Removido: fluxo de assinatura manual (agora automático após salvar)
 
+      // Função para selecionar classificação de risco
+      function selecionarRisco(valor, elemento) {
+        console.log('🎯 Classificação selecionada:', valor);
+        
+        // Remove 'active' de todos os botões
+        document.querySelectorAll('.risk-btn').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        
+        // Adiciona 'active' ao botão clicado
+        elemento.classList.add('active');
+        
+        // Atualiza o campo hidden
+        const campoRisco = document.getElementById('classificacao_risco');
+        campoRisco.value = valor;
+        
+        // Remove avisos de erro
+        const containerRisk = document.querySelector('.risk-buttons');
+        const warningElement = document.getElementById('risco-selection-warning');
+        
+        if (containerRisk) {
+          containerRisk.classList.remove('needs-selection');
+        }
+        
+        if (warningElement) {
+          warningElement.classList.remove('show');
+        }
+        
+        // Feedback visual de confirmação com mini-pulso
+        elemento.style.transition = 'none';
+        elemento.style.transform = 'scale(1.08)';
+        setTimeout(() => {
+          elemento.style.transition = '';
+          elemento.style.transform = '';
+        }, 150);
+        
+        // Log de confirmação com ícone
+        console.log('✅ Risco definido como:', valor);
+        
+        // Pequeno feedback sonoro visual (vibração visual)
+        if (navigator.vibrate) {
+          navigator.vibrate(50); // Vibração em dispositivos móveis
+        }
+      }
+
       window.onload = function() {
         carregarDadosPaciente();
         carregarDadosEnfermeiro();
-        const select = document.getElementById('classificacao_risco');
-        const badge = document.getElementById('riscoBadge');
-        function updateBadge() {
-          const val = select.value;
-          badge.className = 'badge';
-          badge.textContent = '';
-          if (!val) return;
-          const map = {
-            'Azul': 'bg-primary',
-            'Verde': 'bg-success',
-            'Amarelo': 'bg-warning text-dark',
-            'Laranja': 'bg-orange',
-            'Vermelho': 'bg-danger'
-          };
-          badge.className = 'badge ' + (map[val] || 'bg-secondary');
-          badge.textContent = val;
-        }
-        select.addEventListener('change', updateBadge);
-        updateBadge();
+        
+        // Adiciona evento de click em toda a área do botão para melhor responsividade
+        document.querySelectorAll('.risk-btn').forEach(btn => {
+          // Adiciona um pulso sutil inicial para chamar atenção
+          btn.style.animation = 'pulse-subtle 2s ease-in-out 3';
+          
+          // Melhora a área clicável
+          btn.style.cursor = 'pointer';
+          
+          // Remove a animação após alguns segundos
+          setTimeout(() => {
+            btn.style.animation = '';
+          }, 6000);
+        });
       };
+      
+      // Animação sutil de pulso
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes pulse-subtle {
+          0%, 100% { opacity: 0.85; }
+          50% { opacity: 1; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
+        }
+      `;
+      document.head.appendChild(style);
     </script>
   <script>
     // Máscara RTL para Peso: digitação da direita para esquerda (NNN,N)

@@ -262,10 +262,11 @@ def observacao_paciente():
                 # Tentar usar atendimento existente, se fornecido
                 atendimento_id = (dados.get('atendimento_id') or '').strip()
                 atendimento = Atendimento.query.get(atendimento_id) if atendimento_id else None
+                agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
 
                 if atendimento is not None:
+                    logging.info(f"📋 Usando atendimento existente: {atendimento_id}")
                     paciente = Paciente.query.get(atendimento.paciente_id)
-                    agora = datetime.now(ZoneInfo("America/Sao_Paulo"))
                     atendimento.status = 'Em Observação'
                     atendimento.horario_observacao = agora
                     db.session.add(atendimento)
@@ -352,79 +353,135 @@ def observacao_paciente():
                     db.session.add(atendimento)
                     db.session.flush()
         
-                # Evitar duplicidade de "internacao" para observação
-                existente = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
-                if existente:
-                    # Persistir atualização de status/horário no atendimento
-                    db.session.commit()
-                    return jsonify({
-                        'success': True,
-                        'message': 'Observação já existente para este atendimento',
-                        'paciente_id': existente.paciente_id,
-                        'observacao_id': existente.id,
-                        'atendimento_id': atendimento_id
-                    }), 200
-
-                # Criar entrada na tabela Internacao (registro de observação)
-                internacao = Internacao(
-                    atendimento_id=atendimento_id,
-                    paciente_id=paciente.id,
-                    medico_id=current_user.id,
-                    enfermeiro_id=None,
-                    hda=dados.get('hda', ''),
-                    diagnostico_inicial=dados.get('diagnostico_inicial', ''),
-                    folha_anamnese=dados.get('exame_fisico', ''),
-                    cid_principal=dados.get('cid_principal', ''),
-                    cid_10_secundario=dados.get('cid_secundario', ''),
-                    data_internacao=agora,
-                    leito='Observação',
-                    carater_internacao='Observação',
-                    dieta=None  # Dieta NULL durante a internação/observação
-                )
-                db.session.add(internacao)
-                db.session.flush()
-
-                # Criar primeira evolução na tabela EvolucaoAtendimentoClinica
-                if dados.get('primeira_evolucao'):
-                    primeira_evolucao = EvolucaoAtendimentoClinica(
-                        atendimentos_clinica_id=internacao.id,
-                        funcionario_id=current_user.id,
-                        data_evolucao=agora,
+                # CRÍTICO: SEMPRE garantir que existe um registro de Internacao
+                # Verificar se já existe uma internação para este atendimento
+                internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
+                
+                if internacao:
+                    # Já existe - atualizar dados se necessário
+                    logging.info(f"✅ Internação já existe (ID: {internacao.id}) - Atualizando dados")
+                    
+                    # Atualizar campos importantes se foram fornecidos
+                    if dados.get('hda'):
+                        internacao.hda = dados.get('hda')
+                    if dados.get('diagnostico_inicial'):
+                        internacao.diagnostico_inicial = dados.get('diagnostico_inicial')
+                    if dados.get('exame_fisico'):
+                        internacao.folha_anamnese = dados.get('exame_fisico')
+                    if dados.get('cid_principal'):
+                        internacao.cid_principal = dados.get('cid_principal')
+                    
+                    # Garantir que está marcado como observação
+                    if not internacao.leito or internacao.leito == '':
+                        internacao.leito = 'Observação'
+                    if not internacao.carater_internacao:
+                        internacao.carater_internacao = 'Observação'
+                    
+                    db.session.add(internacao)
+                else:
+                    # Não existe - CRIAR OBRIGATORIAMENTE
+                    logging.info(f"🆕 Criando novo registro de Internacao para atendimento: {atendimento_id}")
+                    
+                    internacao = Internacao(
+                        atendimento_id=atendimento_id,
+                        paciente_id=paciente.id,
+                        medico_id=current_user.id,
+                        enfermeiro_id=None,
                         hda=dados.get('hda', ''),
-                        evolucao=dados.get('primeira_evolucao', ''),
-                        conduta='Primeira evolução médica - Observação'
+                        diagnostico_inicial=dados.get('diagnostico_inicial', ''),
+                        folha_anamnese=dados.get('exame_fisico', ''),
+                        cid_principal=dados.get('cid_principal', ''),
+                        cid_10_secundario=dados.get('cid_secundario', ''),
+                        data_internacao=agora,
+                        leito='Observação',
+                        carater_internacao='Observação',
+                        dieta=None  # Dieta NULL durante a internação/observação
                     )
-                    db.session.add(primeira_evolucao)
+                    db.session.add(internacao)
+                    db.session.flush()
+                    
+                    logging.info(f"✅ Internacao criada com sucesso (ID: {internacao.id})")
+
+                # Criar primeira evolução na tabela EvolucaoAtendimentoClinica (se fornecida)
+                if dados.get('primeira_evolucao'):
+                    try:
+                        primeira_evolucao = EvolucaoAtendimentoClinica(
+                            atendimentos_clinica_id=internacao.id,
+                            funcionario_id=current_user.id,
+                            data_evolucao=agora,
+                            hda=dados.get('hda', ''),
+                            evolucao=dados.get('primeira_evolucao', ''),
+                            conduta='Primeira evolução médica - Observação'
+                        )
+                        db.session.add(primeira_evolucao)
+                        db.session.flush()
+                        logging.info(f"✅ Primeira evolução criada")
+                    except Exception as e:
+                        logging.error(f"⚠️ Erro ao criar primeira evolução (não crítico): {str(e)}")
         
-                # Criar registro na ListaObservacao
-                observacao = ListaObservacao(
-                    id_atendimento=atendimento_id,
-                    id_paciente=paciente.id,
-                    medico_entrada=current_user.nome,
-                    data_entrada=agora,
-                    medico_conduta=None,
-                    data_saida=None,
-                    conduta_final=None
-                )
-                db.session.add(observacao)
+                # CRÍTICO: SEMPRE garantir que existe um registro em ListaObservacao
+                observacao = ListaObservacao.query.filter_by(id_atendimento=atendimento_id).first()
+                
+                if observacao:
+                    # Já existe - atualizar se necessário
+                    logging.info(f"✅ Registro em ListaObservacao já existe - Atualizando")
+                    observacao.medico_entrada = current_user.nome
+                    observacao.data_entrada = agora
+                    # Resetar campos de saída caso esteja reabrindo observação
+                    observacao.medico_conduta = None
+                    observacao.data_saida = None
+                    observacao.conduta_final = None
+                    db.session.add(observacao)
+                else:
+                    # Não existe - CRIAR OBRIGATORIAMENTE
+                    logging.info(f"🆕 Criando novo registro em ListaObservacao")
+                    observacao = ListaObservacao(
+                        id_atendimento=atendimento_id,
+                        id_paciente=paciente.id,
+                        medico_entrada=current_user.nome,
+                        data_entrada=agora,
+                        medico_conduta=None,
+                        data_saida=None,
+                        conduta_final=None
+                    )
+                    db.session.add(observacao)
+                    db.session.flush()
+                    logging.info(f"✅ ListaObservacao criada com sucesso")
         
+                # Commit final
                 db.session.commit()
+                
+                logging.info(f"💾 ✅ Observação registrada com sucesso - Atendimento: {atendimento_id}, Internacao ID: {internacao.id}")
         
                 return jsonify({
                     'success': True,
                     'message': 'Paciente adicionado à observação com sucesso',
                     'paciente_id': paciente.id,
+                    'internacao_id': internacao.id,
                     'observacao_id': observacao.id,
                     'atendimento_id': atendimento_id
                 }), 201
         
             except Exception as e:
                 db.session.rollback()
-                logging.error(f'Erro ao adicionar paciente em observação: {str(e)}')
+                logging.error(f'❌ ERRO ao adicionar paciente em observação: {str(e)}')
                 logging.error(traceback.format_exc())
+                
+                # Tentar identificar o tipo de erro para dar uma mensagem mais específica
+                erro_msg = str(e)
+                if 'IntegrityError' in str(type(e)):
+                    erro_msg = 'Erro de integridade no banco de dados. Verifique se os dados não estão duplicados.'
+                elif 'OperationalError' in str(type(e)):
+                    erro_msg = 'Erro de conexão com o banco de dados. Tente novamente em alguns instantes.'
+                elif 'DataError' in str(type(e)):
+                    erro_msg = 'Dados inválidos fornecidos. Verifique os campos e tente novamente.'
+                else:
+                    erro_msg = f'Erro ao processar observação: {str(e)}'
+                
                 return jsonify({
                     'success': False,
-                    'message': f'Erro interno do servidor: {str(e)}'
+                    'message': erro_msg,
+                    'details': 'Verifique os logs do servidor para mais informações'
                 }), 500
 
 
@@ -5310,7 +5367,7 @@ def clinica():
     try:
         current_user = get_current_user()
         if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
-            flash('Acesso restrito a médicos e enfermeiros.', 'danger')
+            flash('Acesso restrito a médicos, enfermeiros e profissionais multi.', 'danger')
             return redirect(url_for('main.index'))
         
         return render_template('clinica.html')
@@ -5328,7 +5385,7 @@ def pacientes_internados():
     try:
         current_user = get_current_user()
         if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
-            flash('Acesso restrito a médicos e enfermeiros.', 'danger')
+            flash('Acesso restrito a médicos, enfermeiros e profissionais multi.', 'danger')
             return redirect(url_for('main.index'))
         
         return render_template('pacientes_internados.html')
@@ -7279,8 +7336,8 @@ def historico_internacoes():
     """
     try:
         current_user = get_current_user()
-        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
-            flash('Acesso restrito a médicos e enfermeiros.', 'danger')
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
+            flash('Acesso restrito a médicos, enfermeiros e profissionais multi.', 'danger')
             return redirect(url_for('main.index'))
         
         return render_template('historico_internacoes.html')
@@ -7300,7 +7357,7 @@ def listar_historico_internacoes():
     """
     try:
         current_user = get_current_user()
-        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
             return jsonify({'error': 'Acesso não autorizado'}), 403
         
         # Verificar se há filtro por mês
@@ -7552,7 +7609,7 @@ def registrar_aprazamento():
     """
     try:
         current_user = get_current_user()
-        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
             return jsonify({
                 'success': False,
                 'message': 'Acesso permitido apenas para médicos e enfermeiros'
@@ -7626,7 +7683,7 @@ def listar_aprazamentos(prescricao_id):
     """
     try:
         current_user = get_current_user()
-        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
             return jsonify({
                 'success': False,
                 'message': 'Acesso permitido apenas para médicos e enfermeiros'
@@ -7681,7 +7738,7 @@ def atualizar_aprazamento(aprazamento_id):
     """
     try:
         current_user = get_current_user()
-        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
             return jsonify({
                 'success': False,
                 'message': 'Acesso permitido apenas para médicos e enfermeiros'
@@ -7763,7 +7820,7 @@ def excluir_aprazamento(aprazamento_id):
     """
     try:
         current_user = get_current_user()
-        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
             return jsonify({
                 'success': False,
                 'message': 'Acesso permitido apenas para médicos e enfermeiros'
@@ -7803,8 +7860,8 @@ def registrar_aprazamento_prescricao():
     """
     try:
         current_user = get_current_user()
-        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
-            return jsonify({'success': False, 'message': 'Acesso permitido apenas para médicos e enfermeiros'}), 403
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
+            return jsonify({'success': False, 'message': 'Acesso permitido apenas para médicos, enfermeiros e profissionais multi'}), 403
 
         dados = request.get_json()
 
@@ -7921,8 +7978,8 @@ def listar_aprazamento_prescricao(prescricao_id):
     """
     try:
         current_user = get_current_user()
-        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'admin']:
-            return jsonify({'success': False, 'message': 'Acesso permitido apenas para médicos e enfermeiros'}), 403
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
+            return jsonify({'success': False, 'message': 'Acesso permitido apenas para médicos, enfermeiros e profissionais multi'}), 403
 
         prescricao = PrescricaoClinica.query.get(prescricao_id)
         if not prescricao:
@@ -7974,8 +8031,8 @@ def marcar_aprazamento_realizado(aprazamento_id):
     """
     try:
         current_user = get_current_user()
-        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
-            return jsonify({'success': False, 'message': 'Acesso permitido apenas para médicos e enfermeiros'}), 403
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
+            return jsonify({'success': False, 'message': 'Acesso permitido apenas para médicos, enfermeiros e profissionais multi'}), 403
 
         aprazamento = Aprazamento.query.get(aprazamento_id)
         if not aprazamento:
@@ -8387,7 +8444,7 @@ def buscar_horarios_aprazamento(prescricao_id, medicamento_index):
     try:
         # Verificar se o usuário é médico ou enfermeiro
         current_user = get_current_user()
-        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
             return jsonify({
                 'success': False,
                 'message': 'Acesso permitido apenas para médicos e enfermeiros'
@@ -8459,7 +8516,7 @@ def buscar_aprazamentos_por_medicamento(atendimento_id, nome_medicamento):
     try:
         # Verificar se o usuário é médico ou enfermeiro
         current_user = get_current_user()
-        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
             return jsonify({
                 'success': False,
                 'message': 'Acesso permitido apenas para médicos e enfermeiros'
@@ -9221,23 +9278,36 @@ def editar_internacao(internacao_id):
 @bp.route('/clinica/historico-internacao/<string:atendimento_id>', methods=['GET'])
 @login_required
 def historico_internacao(atendimento_id):
-    atendimento = Atendimento.query.get_or_404(atendimento_id)
-    paciente = Paciente.query.get_or_404(atendimento.paciente_id)
-    medico = Funcionario.query.get(atendimento.medico_id)
+    try:
+        # Verificar permissão de acesso
+        current_user = get_current_user()
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
+            flash('Acesso restrito a médicos, enfermeiros e profissionais multi.', 'danger')
+            return redirect(url_for('main.index'))
+        
+        atendimento = Atendimento.query.get_or_404(atendimento_id)
+        paciente = Paciente.query.get_or_404(atendimento.paciente_id)
+        medico = Funcionario.query.get(atendimento.medico_id)
 
-    # Buscar a internação vinculada ao atendimento
-    internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
+        # Buscar a internação vinculada ao atendimento
+        internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
 
-    if not internacao:
-        return f"Nenhuma internação encontrada para o atendimento {atendimento_id}", 404
+        if not internacao:
+            flash('Nenhuma internação encontrada para este atendimento.', 'warning')
+            return redirect(url_for('main.historico_internacoes'))
 
-    return render_template(
-        'clinica_evolucao_historico.html',
-        internacao=internacao,
-        atendimento=atendimento,
-        paciente=paciente,
-        medico=medico
-    )
+        return render_template(
+            'clinica_evolucao_historico.html',
+            internacao=internacao,
+            atendimento=atendimento,
+            paciente=paciente,
+            medico=medico
+        )
+    except Exception as e:
+        logging.error(f"Erro ao acessar histórico da internação {atendimento_id}: {str(e)}")
+        logging.error(traceback.format_exc())
+        flash('Erro ao carregar histórico da internação.', 'danger')
+        return redirect(url_for('main.historico_internacoes'))
 
 @bp.route('/api/internacao/<string:atendimento_id>', methods=['GET'])
 @login_required
@@ -9303,7 +9373,7 @@ def imprimir_aih(atendimento_id):
 
         # Verifica permissão: permitir médico e enfermeiro imprimir (enfermeiro não assina)
         current_user = get_current_user()
-        if not current_user or current_user.cargo.lower() not in ['medico', 'enfermeiro']:
+        if not current_user or current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
             return abort(403, description="Acesso não autorizado para imprimir AIH.")
         
         medico = current_user if current_user.cargo.lower() == 'medico' else None
@@ -9417,14 +9487,18 @@ def listar_internacoes_por_leito(leito_nome):
     """
     try:
         current_user = get_current_user()
-        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
             return jsonify({'error': 'Acesso não autorizado'}), 403
+        
+        logging.info(f"Buscando pacientes do leito: {leito_nome}")
         
         # Buscar internações ativas no leito especificado
         internacoes = Internacao.query.filter_by(
             leito=leito_nome,
             data_alta=None
         ).all()
+        
+        logging.info(f"Encontradas {len(internacoes)} internações ativas no leito {leito_nome}")
         
         pacientes_list = []
         
@@ -9442,6 +9516,7 @@ def listar_internacoes_por_leito(leito_nome):
                     'atendimento_id': internacao.atendimento_id
                 })
         
+        logging.info(f"Retornando {len(pacientes_list)} pacientes do leito {leito_nome}")
         return jsonify(pacientes_list)
         
     except Exception as e:
@@ -9458,7 +9533,7 @@ def realocar_paciente():
     try:
         # Verificar se o usuário é médico ou enfermeiro
         current_user = get_current_user()
-        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
             return jsonify({
                 'success': False,
                 'message': 'Apenas médicos e enfermeiros podem realocar pacientes'
@@ -10910,7 +10985,7 @@ def verificar_duplicatas_pacientes():
     """
     try:
         current_user = get_current_user()
-        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
             return jsonify({
                 'success': False,
                 'message': 'Acesso não autorizado'
@@ -11921,7 +11996,7 @@ def buscar_informacoes_alta_para_impressao(atendimento_id):
     try:
         # Verificar se o usuário é médico ou enfermeiro
         current_user = get_current_user()
-        if current_user.cargo.lower() not in ['medico', 'enfermeiro']:
+        if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
             return jsonify({
                 'success': False,
                 'message': 'Acesso permitido apenas para médicos e enfermeiros'
@@ -14382,7 +14457,7 @@ def observacao_lobby():
     try:
         current_user = get_current_user()
         if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
-            flash('Acesso restrito a médicos e enfermeiros.', 'danger')
+            flash('Acesso restrito a médicos, enfermeiros e profissionais multi.', 'danger')
             return redirect(url_for('main.index'))
         
         return render_template('observacao.html')
@@ -14875,7 +14950,7 @@ def clinica_observacao():
     try:
         current_user = get_current_user()
         if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
-            flash('Acesso restrito a médicos e enfermeiros.', 'danger')
+            flash('Acesso restrito a médicos, enfermeiros e profissionais multi.', 'danger')
             return redirect(url_for('main.index'))
         
         # Obter o atendimento_id da URL
@@ -14920,7 +14995,7 @@ def get_lista_observacao():
     try:
         current_user = get_current_user()
         if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
-            return jsonify({'error': 'Acesso restrito a médicos e enfermeiros.'}), 403
+            return jsonify({'error': 'Acesso restrito a médicos, enfermeiros e profissionais multi.'}), 403
         
         # Buscar apenas observações SEM conduta_final (pacientes que ainda estão em observação)
         observacoes = db.session.query(ListaObservacao, Paciente, Atendimento).join(
@@ -15007,7 +15082,7 @@ def get_observacao_por_atendimento(id_atendimento):
     try:
         current_user = get_current_user()
         if current_user.cargo.lower() not in ['medico', 'enfermeiro', 'multi']:
-            return jsonify({'error': 'Acesso restrito a médicos e enfermeiros.'}), 403
+            return jsonify({'error': 'Acesso restrito a médicos, enfermeiros e profissionais multi.'}), 403
         
         # Buscar observações por ID do atendimento
         observacoes = ListaObservacao.query.filter_by(id_atendimento=id_atendimento).all()
@@ -15158,18 +15233,33 @@ def definir_conduta():
     Define a conduta final para um paciente em observação.
     Se for Alta, Transferido, A pedido ou Óbito: atualiza status e registra conduta_final
     Se for Internar: muda status para Internado e segue protocolo de internação
+    
+    IMPORTANTE: Esta rota depende que exista um registro de Internacao (atendimento_clinica).
+    A rota /api/observacao-paciente foi corrigida para SEMPRE criar esse registro.
+    
+    MELHORIAS: Processo mais robusto com melhor tratamento de erros e logs detalhados
     """
     try:
         # Verificar se o usuário é médico
         current_user = get_current_user()
+        if not current_user:
+            logging.error("Usuário não autenticado tentou definir conduta")
+            return jsonify({
+                'success': False,
+                'message': 'Usuário não autenticado'
+            }), 401
+            
         if current_user.cargo.lower() != 'medico':
+            logging.warning(f"Usuário {current_user.nome} (cargo: {current_user.cargo}) tentou definir conduta sem permissão")
             return jsonify({
                 'success': False,
                 'message': 'Apenas médicos podem definir conduta'
             }), 403
         
+        # Validar dados recebidos
         dados = request.get_json()
         if not dados:
+            logging.error("Requisição sem dados JSON")
             return jsonify({
                 'success': False,
                 'message': 'Dados não fornecidos'
@@ -15177,6 +15267,10 @@ def definir_conduta():
         
         atendimento_id = dados.get('atendimento_id')
         conduta_raw = dados.get('conduta', '')
+        
+        # Log dos dados recebidos
+        logging.info(f"🔍 Definir conduta - Dados recebidos: {dados}")
+        
         # Normalizar conduta (aceitar variações sem acento/minúsculas)
         conduta_map = {
             'alta': 'Alta',
@@ -15195,14 +15289,24 @@ def definir_conduta():
         evolucao_medica_final = dados.get('observacao', '')  # Campo renomeado para evolução médica final
         leito_selecionado = dados.get('leito', '')  # Leito selecionado para internação
         
-        if not atendimento_id or not conduta:
+        # Validações básicas
+        if not atendimento_id:
+            logging.error("Atendimento ID não fornecido")
             return jsonify({
                 'success': False,
-                'message': 'Atendimento ID e conduta são obrigatórios'
+                'message': 'ID do atendimento é obrigatório'
+            }), 400
+            
+        if not conduta:
+            logging.error("Conduta não fornecida")
+            return jsonify({
+                'success': False,
+                'message': 'Conduta é obrigatória'
             }), 400
         
         # Validar leito se conduta for Internar
         if conduta == 'Internar' and not leito_selecionado:
+            logging.error(f"Tentativa de internar sem leito - Atendimento: {atendimento_id}")
             return jsonify({
                 'success': False,
                 'message': 'Leito é obrigatório para internação'
@@ -15211,145 +15315,258 @@ def definir_conduta():
         # Validar conduta
         condutas_validas = ['Alta', 'Transferido', 'A pedido', 'Óbito', 'Internar', 'Evasão']
         if conduta not in condutas_validas:
+            logging.error(f"Conduta inválida recebida: {conduta}")
             return jsonify({
                 'success': False,
                 'message': f'Conduta inválida. Valores aceitos: {", ".join(condutas_validas)}'
             }), 400
         
+        logging.info(f"✅ Validações iniciais OK - Atendimento: {atendimento_id}, Conduta: {conduta}")
+        
         # Buscar atendimento
         atendimento = Atendimento.query.get(atendimento_id)
         if not atendimento:
+            logging.error(f"Atendimento {atendimento_id} não encontrado no banco")
             return jsonify({
                 'success': False,
-                'message': 'Atendimento não encontrado'
+                'message': f'Atendimento {atendimento_id} não encontrado'
             }), 404
+        
+        logging.info(f"✅ Atendimento encontrado: {atendimento.paciente.nome if atendimento.paciente else 'Sem paciente'}")
         
         # Buscar observação
         observacao = ListaObservacao.query.filter_by(id_atendimento=atendimento_id).first()
         if not observacao:
+            logging.error(f"Observação não encontrada para atendimento {atendimento_id}")
             return jsonify({
                 'success': False,
-                'message': 'Observação não encontrada'
+                'message': 'Registro de observação não encontrado. Verifique se o paciente está em observação.'
             }), 404
         
-        # Buscar internação
+        logging.info(f"✅ Observação encontrada")
+        
+        # Buscar internação (CRÍTICO: deve existir para observações)
         internacao = Internacao.query.filter_by(atendimento_id=atendimento_id).first()
         if not internacao:
-            return jsonify({
-                'success': False,
-                'message': 'Internação não encontrada'
-            }), 404
+            logging.error(f"❌ CRÍTICO: Internação não encontrada para atendimento {atendimento_id}")
+            logging.error(f"   Isso indica que a observação não foi criada corretamente")
+            logging.error(f"   Tentando criar registro de emergência...")
+            
+            # Tentar criar um registro de internação de emergência
+            try:
+                internacao = Internacao(
+                    atendimento_id=atendimento_id,
+                    paciente_id=atendimento.paciente_id,
+                    medico_id=current_user.id,
+                    enfermeiro_id=None,
+                    hda=observacao.medico_entrada if observacao else 'Registro criado automaticamente',
+                    diagnostico_inicial='Observação sem registro de internação - criado automaticamente',
+                    data_internacao=now_brasilia(),
+                    leito='Observação',
+                    carater_internacao='Observação',
+                    dieta=None
+                )
+                db.session.add(internacao)
+                db.session.flush()
+                logging.info(f"✅ Registro de internação de emergência criado (ID: {internacao.id})")
+            except Exception as emergency_error:
+                logging.error(f"❌ Falha ao criar registro de emergência: {str(emergency_error)}")
+                return jsonify({
+                    'success': False,
+                    'message': 'Registro de internação não encontrado e não foi possível criar automaticamente. Entre em contato com o suporte.',
+                    'details': f'Atendimento {atendimento_id} sem registro de Internacao'
+                }), 404
+        
+        logging.info(f"✅ Internação encontrada (ID: {internacao.id})")
         
         # Data/hora atual
         agora = now_brasilia()
         
         # Criar evolução médica final se houver observação
         if evolucao_medica_final and evolucao_medica_final.strip():
-            nova_evolucao = EvolucaoAtendimentoClinica(
-                atendimentos_clinica_id=internacao.id,
-                funcionario_id=current_user.id,
-                data_evolucao=agora,
-                evolucao=f"{conduta}\n\n{evolucao_medica_final.strip()}"
-            )
-            db.session.add(nova_evolucao)
+            try:
+                nova_evolucao = EvolucaoAtendimentoClinica(
+                    atendimentos_clinica_id=internacao.id,
+                    funcionario_id=current_user.id,
+                    data_evolucao=agora,
+                    evolucao=f"{conduta}\n\n{evolucao_medica_final.strip()}"
+                )
+                db.session.add(nova_evolucao)
+                db.session.flush()  # Flush para detectar erros antes do commit final
+                logging.info(f"✅ Evolução médica final criada")
+            except Exception as e:
+                logging.error(f"❌ Erro ao criar evolução médica: {str(e)}")
+                logging.error(traceback.format_exc())
+                db.session.rollback()
+                return jsonify({
+                    'success': False,
+                    'message': f'Erro ao registrar evolução médica: {str(e)}'
+                }), 500
         
         if conduta == 'Internar':
+            logging.info(f"🏥 Processando internação no leito: {leito_selecionado}")
+            
             # Validar se o leito selecionado existe e está disponível
-            leito = Leito.query.filter_by(nome=leito_selecionado).first()
-            if not leito:
+            try:
+                leito = Leito.query.filter_by(nome=leito_selecionado).first()
+                if not leito:
+                    logging.error(f"Leito {leito_selecionado} não encontrado no banco")
+                    return jsonify({
+                        'success': False,
+                        'message': f'Leito "{leito_selecionado}" não existe no sistema'
+                    }), 404
+                
+                logging.info(f"✅ Leito encontrado: {leito.nome} (Status: {leito.status}, Ocupação: {leito.ocupacao_atual}/{leito.capacidade_maxima})")
+                
+                # Verificar se o leito está disponível
+                if leito.status != 'Disponível':
+                    logging.warning(f"Tentativa de usar leito indisponível: {leito_selecionado} (Status: {leito.status})")
+                    return jsonify({
+                        'success': False,
+                        'message': f'Leito "{leito_selecionado}" não está disponível no momento'
+                    }), 400
+                
+                # Verificar capacidade do leito
+                internacoes_no_leito = Internacao.query.filter_by(
+                    leito=leito_selecionado,
+                    data_alta=None
+                ).count()
+                
+                logging.info(f"📊 Internações ativas no leito: {internacoes_no_leito}/{leito.capacidade_maxima}")
+                
+                if internacoes_no_leito >= leito.capacidade_maxima:
+                    logging.warning(f"Leito {leito_selecionado} com capacidade máxima atingida")
+                    return jsonify({
+                        'success': False,
+                        'message': f'Leito "{leito_selecionado}" está com capacidade máxima ({leito.capacidade_maxima} pacientes)'
+                    }), 400
+                
+            except Exception as e:
+                logging.error(f"❌ Erro ao validar leito: {str(e)}")
+                db.session.rollback()
                 return jsonify({
                     'success': False,
-                    'message': f'Leito {leito_selecionado} não encontrado'
-                }), 404
-            
-            # Verificar se o leito está disponível
-            if leito.status != 'Disponível':
-                return jsonify({
-                    'success': False,
-                    'message': f'Leito {leito_selecionado} não está disponível'
-                }), 400
-            
-            # Verificar capacidade do leito
-            internacoes_no_leito = Internacao.query.filter_by(
-                leito=leito_selecionado,
-                data_alta=None
-            ).count()
-            
-            if internacoes_no_leito >= leito.capacidade_maxima:
-                return jsonify({
-                    'success': False,
-                    'message': f'Leito {leito_selecionado} está com capacidade máxima'
-                }), 400
+                    'message': f'Erro ao validar leito: {str(e)}'
+                }), 500
             
             # Conduta: Internar - muda status para Internado e aloca leito
-            atendimento.status = 'Internado'
-            atendimento.conduta_final = f"INTERNADO NO LEITO {leito_selecionado} - {evolucao_medica_final}" if evolucao_medica_final else f"INTERNADO NO LEITO {leito_selecionado}"
-            
-            # Registrar data de internação se ainda não foi registrada
-            if not internacao.data_internacao:
-                internacao.data_internacao = agora
-            
-            # Atualizar leito da internação
-            internacao.leito = leito_selecionado
-            
-            # NÃO definir dieta aqui - ela deve ser NULL durante a internação
-            # A dieta só será definida como '1' quando o prontuário for fechado
-            
-            # Atualizar ocupação do leito
-            leito.ocupacao_atual += 1
-            if leito.ocupacao_atual >= leito.capacidade_maxima:
-                leito.status = 'Ocupado'
-            db.session.add(leito)
+            try:
+                atendimento.status = 'Internado'
+                atendimento.conduta_final = f"INTERNADO NO LEITO {leito_selecionado} - {evolucao_medica_final}" if evolucao_medica_final else f"INTERNADO NO LEITO {leito_selecionado}"
+                
+                # Registrar data de internação se ainda não foi registrada
+                if not internacao.data_internacao:
+                    internacao.data_internacao = agora
+                    logging.info(f"📅 Data de internação registrada: {agora}")
+                
+                # Atualizar leito da internação
+                internacao.leito = leito_selecionado
+                
+                # NÃO definir dieta aqui - ela deve ser NULL durante a internação
+                # A dieta só será definida como '1' quando o prontuário for fechado
+                
+                # Atualizar ocupação do leito
+                leito.ocupacao_atual += 1
+                if leito.ocupacao_atual >= leito.capacidade_maxima:
+                    leito.status = 'Ocupado'
+                    logging.info(f"🔒 Leito {leito_selecionado} marcado como Ocupado")
+                db.session.add(leito)
+                
+                logging.info(f"✅ Ocupação do leito atualizada: {leito.ocupacao_atual}/{leito.capacidade_maxima}")
+                
+            except Exception as e:
+                logging.error(f"❌ Erro ao atualizar status de internação: {str(e)}")
+                db.session.rollback()
+                return jsonify({
+                    'success': False,
+                    'message': f'Erro ao processar internação: {str(e)}'
+                }), 500
             
             # NOVO: Criar registro na ListaInternacao
-            lista_internacao = ListaInternacao(
-                id_atendimento=atendimento_id,
-                id_paciente=atendimento.paciente_id,
-                medico_entrada=current_user.nome,
-                data_entrada=agora,
-                medico_conduta=None,  # Será preenchido quando der alta
-                data_saida=None,      # Será preenchido quando der alta
-                conduta_final=None    # Será preenchido quando der alta
-            )
-            db.session.add(lista_internacao)
+            try:
+                lista_internacao = ListaInternacao(
+                    id_atendimento=atendimento_id,
+                    id_paciente=atendimento.paciente_id,
+                    medico_entrada=current_user.nome,
+                    data_entrada=agora,
+                    medico_conduta=None,  # Será preenchido quando der alta
+                    data_saida=None,      # Será preenchido quando der alta
+                    conduta_final=None    # Será preenchido quando der alta
+                )
+                db.session.add(lista_internacao)
+                db.session.flush()
+                logging.info(f"✅ Registro em ListaInternacao criado")
+            except Exception as e:
+                logging.error(f"❌ Erro ao criar registro em ListaInternacao: {str(e)}")
+                # Não falhar por causa disso - apenas logar o erro
+                logging.error(traceback.format_exc())
             
             # Atualizar observação com conduta final (mantém o registro ativo)
-            observacao.medico_conduta = current_user.nome
-            observacao.data_saida = agora
-            observacao.conduta_final = f"INTERNADO NO LEITO {leito_selecionado} - {evolucao_medica_final}" if evolucao_medica_final else f"INTERNADO NO LEITO {leito_selecionado}"
+            try:
+                observacao.medico_conduta = current_user.nome
+                observacao.data_saida = agora
+                observacao.conduta_final = f"INTERNADO NO LEITO {leito_selecionado} - {evolucao_medica_final}" if evolucao_medica_final else f"INTERNADO NO LEITO {leito_selecionado}"
+                logging.info(f"✅ Observação atualizada")
+            except Exception as e:
+                logging.error(f"❌ Erro ao atualizar observação: {str(e)}")
+                db.session.rollback()
+                return jsonify({
+                    'success': False,
+                    'message': f'Erro ao atualizar registro de observação: {str(e)}'
+                }), 500
             
             # Log da ação
-            logging.info(f"Paciente {atendimento.paciente.nome} (Atendimento: {atendimento_id}) teve conduta definida como INTERNADO no leito {leito_selecionado} pelo médico {current_user.nome}")
+            logging.info(f"✅ Paciente {atendimento.paciente.nome} (Atendimento: {atendimento_id}) teve conduta definida como INTERNADO no leito {leito_selecionado} pelo médico {current_user.nome}")
             
         else:
-            # Conduta: Alta, Transferido, A pedido ou Óbito
-            # Atualizar status do atendimento para refletir a conduta e remover da lista de "Em Observação"
-            # Armazenar conduta pendente no campo dieta
-            atendimento.status = conduta
-            internacao.dieta = f'PENDENTE:{conduta}'
-            atendimento.conduta_final = f"{conduta.upper()} - {evolucao_medica_final}" if evolucao_medica_final else conduta.upper()
-            logging.info(f"Conduta pendente armazenada: {conduta} (será aplicada ao fechar prontuário)")
+            # Conduta: Alta, Transferido, A pedido, Óbito ou Evasão
+            logging.info(f"📋 Processando conduta: {conduta}")
             
-            # Atualizar observação com conduta final
-            observacao.medico_conduta = current_user.nome
-            observacao.data_saida = agora
-            observacao.conduta_final = f"{conduta.upper()} - {evolucao_medica_final}" if evolucao_medica_final else conduta.upper()
-            
-            # Registrar data de alta na internação
-            internacao.data_alta = agora
+            try:
+                # Atualizar status do atendimento para refletir a conduta e remover da lista de "Em Observação"
+                # Armazenar conduta pendente no campo dieta
+                atendimento.status = conduta
+                internacao.dieta = f'PENDENTE:{conduta}'
+                atendimento.conduta_final = f"{conduta.upper()} - {evolucao_medica_final}" if evolucao_medica_final else conduta.upper()
+                logging.info(f"✅ Conduta pendente armazenada: {conduta} (será aplicada ao fechar prontuário)")
+                
+                # Atualizar observação com conduta final
+                observacao.medico_conduta = current_user.nome
+                observacao.data_saida = agora
+                observacao.conduta_final = f"{conduta.upper()} - {evolucao_medica_final}" if evolucao_medica_final else conduta.upper()
+                logging.info(f"✅ Observação atualizada")
+                
+                # Registrar data de alta na internação
+                internacao.data_alta = agora
+                logging.info(f"📅 Data de alta registrada: {agora}")
+                
+            except Exception as e:
+                logging.error(f"❌ Erro ao atualizar registros de conduta: {str(e)}")
+                db.session.rollback()
+                return jsonify({
+                    'success': False,
+                    'message': f'Erro ao processar conduta: {str(e)}'
+                }), 500
             
             # Atualizar ocupação do leito se houver
             if internacao.leito:
-                leito = Leito.query.filter_by(nome=internacao.leito).first()
-                if leito:
-                    if leito.ocupacao_atual > 0:
-                        leito.ocupacao_atual -= 1
-                    if leito.status == 'Ocupado' and leito.ocupacao_atual < leito.capacidade_maxima:
-                        leito.status = 'Disponível'
-                    db.session.add(leito)
+                try:
+                    leito = Leito.query.filter_by(nome=internacao.leito).first()
+                    if leito:
+                        leito_anterior = leito.nome
+                        if leito.ocupacao_atual > 0:
+                            leito.ocupacao_atual -= 1
+                        if leito.status == 'Ocupado' and leito.ocupacao_atual < leito.capacidade_maxima:
+                            leito.status = 'Disponível'
+                        db.session.add(leito)
+                        logging.info(f"✅ Leito {leito_anterior} liberado (Nova ocupação: {leito.ocupacao_atual}/{leito.capacidade_maxima})")
+                except Exception as e:
+                    logging.error(f"❌ Erro ao atualizar ocupação do leito: {str(e)}")
+                    # Não falhar por causa disso - apenas logar
+                    logging.error(traceback.format_exc())
             
-            # Log da ação
-            logging.info(f"Paciente {atendimento.paciente.nome} (Atendimento: {atendimento_id}) teve conduta definida como {conduta.upper()} pelo médico {current_user.nome}")
+            # Log da ação principal
+            logging.info(f"✅ Paciente {atendimento.paciente.nome} (Atendimento: {atendimento_id}) teve conduta definida como {conduta.upper()} pelo médico {current_user.nome}")
 
             # Registrar fluxo do paciente com status exatamente igual à Conduta Final
             try:
@@ -15362,25 +15579,44 @@ def definir_conduta():
                     mudanca_hora=agora
                 )
                 db.session.add(fluxo)
+                db.session.flush()
+                logging.info(f"✅ FluxoPaciente registrado")
             except Exception as e:
-                logging.error(f"Falha ao registrar FluxoPaciente em definir_conduta: {str(e)}")
+                logging.error(f"❌ Falha ao registrar FluxoPaciente: {str(e)}")
+                logging.error(traceback.format_exc())
+                # Não falhar por causa disso - apenas logar
         
-        # Salvar todas as alterações
-        db.session.commit()
-        
-        return jsonify({
-            'success': True,
-            'message': f'Conduta "{conduta}" definida com sucesso'
-        })
+        # Salvar todas as alterações com tratamento robusto
+        try:
+            db.session.commit()
+            logging.info(f"💾 ✅ COMMIT REALIZADO COM SUCESSO - Conduta: {conduta}")
+            
+            return jsonify({
+                'success': True,
+                'message': f'Conduta "{conduta}" definida com sucesso',
+                'conduta': conduta,
+                'atendimento_id': atendimento_id
+            })
+            
+        except Exception as commit_error:
+            db.session.rollback()
+            logging.error(f"❌ ERRO CRÍTICO no commit final: {str(commit_error)}")
+            logging.error(traceback.format_exc())
+            return jsonify({
+                'success': False,
+                'message': f'Erro ao salvar alterações no banco de dados: {str(commit_error)}',
+                'details': 'Todas as alterações foram revertidas. Tente novamente.'
+            }), 500
         
     except Exception as e:
         db.session.rollback()
-        logging.error(f"Erro ao definir conduta: {str(e)}")
+        logging.error(f"❌ ERRO GERAL ao definir conduta: {str(e)}")
         logging.error(traceback.format_exc())
         return jsonify({
             'success': False,
-            'message': 'Erro interno do servidor',
-            'error': str(e)
+            'message': 'Erro interno do servidor ao processar conduta',
+            'error': str(e),
+            'details': 'Verifique os logs do servidor para mais informações'
         }), 500
 
 @bp.route('/api/internar-paciente', methods=['POST'])
