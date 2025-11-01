@@ -328,6 +328,13 @@
               <input type="text" id="inputPesquisaAtendimento" class="form-control" placeholder="Buscar por nº atendimento..." autocomplete="off">
               <div id="resultadosPesquisa" class="list-group position-absolute w-100" style="z-index: 1000; max-height: 300px; overflow-y: auto; display: none;"></div>
             </div>
+            <select id="setorMedico" class="form-control" style="width: 200px;">
+              <option value="">Selecione o setor</option>
+              <option value="Consultório 1">Consultório 1</option>
+              <option value="Consultório 2">Consultório 2</option>
+              <option value="Maternidade">Maternidade</option>
+              <option value="Centro Cirúrgico">Centro Cirúrgico</option>
+            </select>
             <button id="btnAtualizar" class="btn btn-primary"><i class="fas fa-sync-alt mr-1"></i>Atualizar</button>
             <a href="/medico" class="btn btn-outline-secondary"><i class="fas fa-arrow-left mr-1"></i>Voltar</a>
           </div>
@@ -414,6 +421,8 @@
       if (!itens || itens.length === 0) { $(containerSel).html(vazioHtml); return; }
       let html = '';
       itens.forEach(item => {
+        // Pega o ID do paciente - pode estar em paciente_id ou id
+        const pacienteId = item.paciente_id || item.id_paciente || item.id;
         html += `
           <div class="card card-item mb-2">
             <div class="card-body" style="padding: 16px;">
@@ -426,6 +435,7 @@
               </div>
               <div class="triagem-text" style="padding: 10px; background: var(--azul-claro); border-radius: 0.5rem; font-size: 13px;">${(item.triagem || 'Sem texto de triagem').replace(/\n/g,'<br>')}</div>
               <div class="mt-2 text-right">
+                <button class="btn btn-success btn-sm mr-2" onclick="chamarPaciente(${pacienteId}, '${(item.nome || 'Paciente').replace(/'/g, "\\'")}', '${item.atendimento_id}')"><i class="fas fa-bell mr-1"></i>Chamar Paciente</button>
                 <a class="btn btn-outline-primary btn-sm" href="/medico/atendimento/${item.atendimento_id}"><i class="fas fa-notes-medical mr-1"></i>Abrir atendimento</a>
               </div>
             </div>
@@ -433,6 +443,93 @@
         `;
       });
       $(containerSel).html(html);
+    }
+
+    // Função para chamar paciente no chamador
+    function chamarPaciente(pacienteId, pacienteNome, atendimentoId) {
+      console.log('Chamando paciente:', pacienteId, pacienteNome, atendimentoId);
+      
+      // Verifica se o setor foi selecionado
+      const setor = $('#setorMedico').val();
+      if (!setor) {
+        mostrarErro('Por favor, selecione o setor antes de chamar o paciente.');
+        $('#setorMedico').focus();
+        return;
+      }
+      
+      // Define os dados para o modal
+      window.chamadoTemp = {
+        id_paciente: pacienteId,
+        nome: pacienteNome,
+        id_atendimento: atendimentoId,
+        local: setor
+      };
+      
+      // Atualiza o modal com os dados do paciente
+      $('#modalChamarPacienteNome').text(pacienteNome);
+      $('#modalChamarPacienteLocal').text(setor);
+      
+      // Abre o modal de confirmação
+      $('#modalChamarPaciente').modal('show');
+    }
+
+    // Função para confirmar o chamado
+    function confirmarChamado() {
+      if (!window.chamadoTemp) return;
+      
+      const dados = {
+        id_paciente: window.chamadoTemp.id_paciente,
+        id_atendimento: window.chamadoTemp.id_atendimento,
+        local: window.chamadoTemp.local
+      };
+      
+      // Mostra loading no botão
+      const btnConfirmar = $('#btnConfirmarChamado');
+      const textoOriginal = btnConfirmar.html();
+      btnConfirmar.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Chamando...');
+      
+      // Enviar chamado para o servidor
+      fetch('/api/chamados/criar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dados)
+      })
+      .then(response => response.json())
+      .then(data => {
+        btnConfirmar.prop('disabled', false).html(textoOriginal);
+        
+        if (data.success) {
+          // Fecha modal de confirmação
+          $('#modalChamarPaciente').modal('hide');
+          
+          // Mostra modal de sucesso
+          $('#modalSucessoNome').text(window.chamadoTemp.nome);
+          $('#modalSucessoLocal').text(window.chamadoTemp.local);
+          $('#modalSucesso').modal('show');
+          
+          // Fecha automaticamente após 3 segundos
+          setTimeout(() => {
+            $('#modalSucesso').modal('hide');
+          }, 3000);
+        } else {
+          $('#modalChamarPaciente').modal('hide');
+          mostrarErro(data.message || 'Erro ao chamar paciente');
+        }
+      })
+      .catch(error => {
+        btnConfirmar.prop('disabled', false).html(textoOriginal);
+        console.error('Erro:', error);
+        $('#modalChamarPaciente').modal('hide');
+        mostrarErro('Erro ao chamar paciente. Verifique sua conexão.');
+      });
+    }
+
+    // Função para mostrar erro
+    function mostrarErro(mensagem) {
+      $('#modalErroMensagem').text(mensagem);
+      $('#modalErro').modal('show');
     }
 
     function renderListaReavaliacao(containerSel, itens, vazioHtml) {
@@ -485,6 +582,9 @@
           minute: '2-digit'
         }) : 'N/A';
         
+        // Pega o ID do paciente
+        const pacienteId = item.paciente_id || item.id_paciente || item.id;
+        
         html += `
           <div class="card card-item mb-2">
             <div class="card-body" style="padding: 16px;">
@@ -520,6 +620,7 @@
               </div>
               
               <div class="mt-2 text-right">
+                <button class="btn btn-success btn-sm mr-2" onclick="chamarPaciente(${pacienteId}, '${(item.nome || 'Paciente').replace(/'/g, "\\'")}', '${item.atendimento_id}')"><i class="fas fa-bell mr-1"></i>Chamar Paciente</button>
                 <a class="btn btn-outline-primary btn-sm" href="/medico/atendimento/${item.atendimento_id}">
                   <i class="fas fa-notes-medical mr-1"></i>${precisaObs ? 'Definir Conduta' : 'Reavaliar'}
                 </a>
@@ -591,6 +692,21 @@
     }
 
     $(function(){
+      // Carrega o setor salvo do localStorage
+      const setorSalvo = localStorage.getItem('setorMedico');
+      if (setorSalvo) {
+        $('#setorMedico').val(setorSalvo);
+      }
+      
+      // Salva o setor quando alterado
+      $('#setorMedico').on('change', function() {
+        const setor = $(this).val();
+        if (setor) {
+          localStorage.setItem('setorMedico', setor);
+          console.log('Setor selecionado:', setor);
+        }
+      });
+      
       carregarAba('aguardando');
       carregarContadores();
       $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
@@ -679,6 +795,72 @@
       });
     });
   </script>
+
+  <!-- Modal Confirmar Chamado -->
+  <div class="modal fade" id="modalChamarPaciente" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);">
+        <div class="modal-header" style="background: linear-gradient(135deg, var(--azul-principal), var(--azul-medio)); color: white; border-radius: 16px 16px 0 0; border: none;">
+          <h5 class="modal-title"><i class="fas fa-bell mr-2"></i>Confirmar Chamado</h5>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Fechar" style="opacity: 1;">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body text-center" style="padding: 30px;">
+          <i class="fas fa-user-md fa-3x mb-3" style="color: var(--azul-principal);"></i>
+          <h5 class="mb-3">Deseja chamar o paciente?</h5>
+          <p class="mb-2"><strong id="modalChamarPacienteNome" style="font-size: 1.2rem; color: var(--azul-principal);"></strong></p>
+          <p class="text-muted mb-0">Para: <strong id="modalChamarPacienteLocal"></strong></p>
+          <small class="text-muted d-block mt-2">O chamado aparecerá no painel em instantes</small>
+        </div>
+        <div class="modal-footer" style="border-top: 1px solid var(--cinza-claro); padding: 16px 24px;">
+          <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" style="border-radius: 10px;">
+            <i class="fas fa-times mr-1"></i>Cancelar
+          </button>
+          <button type="button" class="btn btn-primary" id="btnConfirmarChamado" onclick="confirmarChamado()" style="border-radius: 10px; background: linear-gradient(135deg, var(--azul-principal), var(--azul-medio)); border: none;">
+            <i class="fas fa-bell mr-1"></i>Confirmar Chamado
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Sucesso -->
+  <div class="modal fade" id="modalSucesso" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+      <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);">
+        <div class="modal-body text-center" style="padding: 40px 20px;">
+          <div class="mb-3" style="color: #10B981;">
+            <i class="fas fa-check-circle fa-4x"></i>
+          </div>
+          <h5 class="mb-2" style="color: #10B981; font-weight: 600;">Paciente Chamado!</h5>
+          <p class="mb-0"><strong id="modalSucessoNome" style="color: var(--cinza-texto);"></strong></p>
+          <small class="text-muted d-block mt-2">Chamado para: <strong id="modalSucessoLocal"></strong></small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Erro -->
+  <div class="modal fade" id="modalErro" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);">
+        <div class="modal-header" style="background: linear-gradient(135deg, #EF4444, #DC2626); color: white; border-radius: 16px 16px 0 0; border: none;">
+          <h5 class="modal-title"><i class="fas fa-exclamation-triangle mr-2"></i>Erro</h5>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Fechar" style="opacity: 1;">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body text-center" style="padding: 30px;">
+          <i class="fas fa-times-circle fa-3x mb-3" style="color: #EF4444;"></i>
+          <p id="modalErroMensagem" class="mb-0"></p>
+        </div>
+        <div class="modal-footer" style="border-top: 1px solid var(--cinza-claro);">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" style="border-radius: 10px;">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
 

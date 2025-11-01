@@ -19,7 +19,7 @@ from docxtpl import DocxTemplate
 from docx import Document
 from io import BytesIO
 from app import db
-from app.models import Funcionario,PrescricaoEnfermagemTemplate,Leito,PrescricaoEmergencia,MedicacoesPadrao,AdmissaoEnfermagem, AtendimentosGestante ,ListaInternacao, ListaObservacao, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN, now_brasilia, FichaReferencia, EvolucaoFisioterapia,EvolucaoAssistenteSocial, EvolucaoNutricao, AtendimentosGestante, FluxoDisp, FluxoPaciente
+from app.models import Funcionario,Chamado,PrescricaoEnfermagemTemplate,Leito,PrescricaoEmergencia,MedicacoesPadrao,AdmissaoEnfermagem, AtendimentosGestante ,ListaInternacao, ListaObservacao, Paciente, Atendimento, InternacaoSae, Internacao, EvolucaoAtendimentoClinica, PrescricaoClinica, EvolucaoEnfermagem, PrescricaoEnfermagem, InternacaoEspecial, Aprazamento, ReceituarioClinica, AtestadoClinica, PacienteRN, now_brasilia, FichaReferencia, EvolucaoFisioterapia,EvolucaoAssistenteSocial, EvolucaoNutricao, AtendimentosGestante, FluxoDisp, FluxoPaciente
 from app.timezone_helper import formatar_datetime_br_completo, formatar_datetime_br, converter_para_brasilia, formatar_data_br
 from zoneinfo import ZoneInfo
 
@@ -16338,4 +16338,168 @@ def assinar_triagem_gestante(atendimento_id):
         return jsonify({
             'success': False,
             'message': 'Erro interno do servidor'
+        }), 500
+
+
+# ============================================
+# ROTAS DO CHAMADOR (DISPLAY PARA TVS)
+# ============================================
+
+@bp.route('/chamador')
+@login_required
+def chamador():
+    """
+    Interface full-screen do chamador para exibição em TVs.
+    Mostra o último chamado e lista dos chamados recentes.
+    Requer login com cargo 'chamador'.
+    """
+    try:
+        # Verifica se o usuário tem cargo de chamador
+        user_id = session.get('user_id')
+        funcionario = Funcionario.query.get(user_id)
+        
+        if not funcionario or funcionario.cargo.lower() != 'chamador':
+            flash('Acesso negado. Esta página é exclusiva para o perfil Chamador.', 'danger')
+            return redirect(url_for('main.index'))
+        
+        return render_template('chamador.html')
+    except Exception as e:
+        logging.error(f'Erro ao carregar página do chamador: {str(e)}')
+        return "Erro ao carregar o chamador", 500
+
+
+@bp.route('/api/chamados/criar', methods=['POST'])
+@login_required
+def api_criar_chamado():
+    """
+    API para criar um novo chamado.
+    Recebe: id_paciente, local, id_atendimento (opcional)
+    """
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({
+                'success': False,
+                'message': 'Dados não fornecidos'
+            }), 400
+        
+        id_paciente = data.get('id_paciente')
+        local = data.get('local', 'Não especificado')
+        id_atendimento = data.get('id_atendimento')
+        
+        if not id_paciente:
+            return jsonify({
+                'success': False,
+                'message': 'ID do paciente é obrigatório'
+            }), 400
+        
+        # Verifica se o paciente existe
+        paciente = Paciente.query.get(id_paciente)
+        if not paciente:
+            return jsonify({
+                'success': False,
+                'message': 'Paciente não encontrado'
+            }), 404
+        
+        # Obtém o usuário atual (funcionário que está chamando)
+        user_id = session.get('user_id')
+        funcionario = Funcionario.query.get(user_id)
+        
+        # Cria o novo chamado
+        novo_chamado = Chamado(
+            id_paciente=id_paciente,
+            id_atendimento=id_atendimento,
+            local=local,
+            hora=datetime.now(ZoneInfo('America/Sao_Paulo')).time(),
+            data=datetime.now(ZoneInfo('America/Sao_Paulo')).date(),
+            status='ativo'
+        )
+        
+        # Atribui o profissional responsável baseado no cargo
+        if funcionario:
+            if funcionario.cargo.lower() == 'enfermeiro':
+                novo_chamado.id_enfermeiro = user_id
+            elif funcionario.cargo.lower() == 'medico':
+                novo_chamado.id_medico = user_id
+        
+        db.session.add(novo_chamado)
+        db.session.commit()
+        
+        logging.info(f'Chamado criado: ID={novo_chamado.id}, Paciente={paciente.nome}, Local={local}')
+        
+        return jsonify({
+            'success': True,
+            'message': 'Chamado criado com sucesso',
+            'chamado_id': novo_chamado.id,
+            'paciente_nome': paciente.nome
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f'Erro ao criar chamado: {str(e)}')
+        logging.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'message': 'Erro ao criar chamado'
+        }), 500
+
+
+@bp.route('/api/chamados/recentes')
+def api_chamados_recentes():
+    """
+    API que retorna os chamados mais recentes para atualização em tempo real.
+    Retorna os últimos 10 chamados ordenados por data e hora (mais recente primeiro).
+    """
+    try:
+        # Busca os últimos 10 chamados, ordenados por data e hora (mais recente primeiro)
+        chamados = Chamado.query.options(
+            joinedload(Chamado.paciente),
+            joinedload(Chamado.medico),
+            joinedload(Chamado.enfermeiro)
+        ).order_by(
+            Chamado.data.desc(),
+            Chamado.hora.desc()
+        ).limit(10).all()
+        
+        # Formata os dados para JSON
+        chamados_data = []
+        for chamado in chamados:
+            # Formata hora e data
+            hora_str = chamado.hora.strftime('%H:%M') if chamado.hora else '--:--'
+            data_str = chamado.data.strftime('%d/%m/%Y') if chamado.data else '--/--/----'
+            
+            # Pega o nome do paciente
+            nome_paciente = chamado.paciente.nome if chamado.paciente else 'Paciente não identificado'
+            
+            # Pega o profissional responsável (médico ou enfermeiro)
+            profissional = None
+            if chamado.medico:
+                profissional = f"Dr(a). {chamado.medico.nome}"
+            elif chamado.enfermeiro:
+                profissional = f"Enf. {chamado.enfermeiro.nome}"
+            
+            chamados_data.append({
+                'id': chamado.id,
+                'paciente': nome_paciente,
+                'local': chamado.local,
+                'hora': hora_str,
+                'data': data_str,
+                'status': chamado.status,
+                'profissional': profissional
+            })
+        
+        return jsonify({
+            'success': True,
+            'chamados': chamados_data,
+            'total': len(chamados_data)
+        })
+        
+    except Exception as e:
+        logging.error(f'Erro ao buscar chamados recentes: {str(e)}')
+        logging.error(traceback.format_exc())
+        return jsonify({
+            'success': False,
+            'message': 'Erro ao buscar chamados',
+            'chamados': []
         }), 500

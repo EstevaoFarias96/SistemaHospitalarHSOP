@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chamador - HSOP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f8fafc 100%);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Cabeçalho */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header .logo-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .header .logo-container img {
+            max-height: 70px;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .header .clock {
+            font-size: 2rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* Container principal */
+        .main-container {
+            display: flex;
+            flex: 1;
+            padding: 20px;
+            gap: 20px;
+            overflow: hidden;
+        }
+
+        /* Área principal - Último chamado */
+        .main-chamado {
+            flex: 2;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-chamado::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, #0ea5e9 0%, #38bdf8 100%);
+        }
+
+        .main-chamado .titulo {
+            font-size: 2rem;
+            color: #666;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .main-chamado .paciente-nome {
+            font-size: 5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            line-height: 1.2;
+            animation: fadeInScale 0.5s ease-out;
+        }
+
+        .main-chamado .local {
+            font-size: 3rem;
+            color: #0ea5e9;
+            font-weight: 600;
+            padding: 20px 40px;
+            background: rgba(14, 165, 233, 0.1);
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .main-chamado .hora-info {
+            font-size: 1.8rem;
+            color: #999;
+            margin-top: 10px;
+        }
+
+        .main-chamado .profissional-info {
+            font-size: 1.5rem;
+            color: #0284c7;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+
+        .main-chamado .no-data {
+            font-size: 2.5rem;
+            color: #999;
+            text-align: center;
+        }
+
+        /* Sidebar - Últimos chamados */
+        .sidebar {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100vh - 140px);
+        }
+
+        .sidebar h2 {
+            font-size: 1.8rem;
+            color: #0ea5e9;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 3px solid #0ea5e9;
+            padding-bottom: 10px;
+        }
+
+        .sidebar-list {
+            overflow-y: auto;
+            flex: 1;
+            padding-right: 10px;
+        }
+
+        .sidebar-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .sidebar-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .sidebar-list::-webkit-scrollbar-thumb {
+            background: #0ea5e9;
+            border-radius: 10px;
+        }
+
+        .chamado-item {
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.05) 0%, rgba(56, 189, 248, 0.05) 100%);
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            border-left: 5px solid #0ea5e9;
+            transition: all 0.3s ease;
+            animation: slideIn 0.4s ease-out;
+        }
+
+        .chamado-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .chamado-item.primeiro {
+            border-left-color: #0284c7;
+            background: linear-gradient(135deg, rgba(2, 132, 199, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%);
+        }
+
+        .chamado-item .paciente {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .chamado-item .detalhes {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .chamado-item .local-sidebar {
+            font-size: 1.2rem;
+            color: #0ea5e9;
+            font-weight: 600;
+        }
+
+        .chamado-item .hora-sidebar {
+            font-size: 1rem;
+            color: #999;
+        }
+
+        .chamado-item .profissional-sidebar {
+            font-size: 1rem;
+            color: #0284c7;
+            font-style: italic;
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        /* Animações */
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Indicador de atualização */
+        .update-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+            color: #0ea5e9;
+        }
+
+        .update-indicator .dot {
+            width: 12px;
+            height: 12px;
+            background: #4caf50;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(1.2);
+            }
+        }
+
+        /* Botão de controle de som */
+        .sound-control {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 50%;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #0ea5e9;
+            border: 3px solid #0ea5e9;
+        }
+
+        .sound-control:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .sound-control.muted {
+            color: #ef4444;
+            border-color: #ef4444;
+        }
+
+        /* Responsividade para telas menores */
+        @media (max-width: 1200px) {
+            .main-chamado .paciente-nome {
+                font-size: 3.5rem;
+            }
+            .main-chamado .local {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .main-container {
+                flex-direction: column;
+            }
+            .main-chamado {
+                flex: 1;
+            }
+            .sidebar {
+                max-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Cabeçalho -->
+    <div class="header">
+        <div class="logo-container">
+            <img src="/static/Imagens/logohssop_1.png" alt="Logo do Hospital">
+        </div>
+        <div class="clock" id="clock">--:--:--</div>
+    </div>
+
+    <!-- Container Principal -->
+    <div class="main-container">
+        <!-- Área Principal - Último Chamado -->
+        <div class="main-chamado">
+            <div class="titulo">CHAMADA ATUAL</div>
+            <div id="main-content">
+                <div class="no-data">Aguardando chamadas...</div>
+            </div>
+        </div>
+
+        <!-- Sidebar - Últimos Chamados -->
+        <div class="sidebar">
+            <h2>📋 Últimas Chamadas</h2>
+            <div class="sidebar-list" id="sidebar-list">
+                <div class="no-data" style="font-size: 1.2rem; text-align: center; padding: 20px;">
+                    Nenhuma chamada recente
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Indicador de atualização -->
+    <div class="update-indicator">
+        <div class="dot"></div>
+        <span>Atualização automática ativa</span>
+    </div>
+
+    <!-- Controle de som -->
+    <div class="sound-control" id="soundControl" onclick="toggleSound()" title="Ativar/Desativar som">
+        <span id="soundIcon">🔊</span>
+    </div>
+
+    <script>
+        // Variável para armazenar o ID do último chamado anunciado
+        let ultimoChamadoId = null;
+        let somAtivo = true; // Controle de som
+        let anunciandoAtualmente = false; // Flag para controlar se está anunciando
+        let filaChamados = []; // Fila de chamados para anunciar
+
+        // Função para alternar som
+        function toggleSound() {
+            somAtivo = !somAtivo;
+            const icon = document.getElementById('soundIcon');
+            const control = document.getElementById('soundControl');
+            
+            if (somAtivo) {
+                icon.textContent = '🔊';
+                control.classList.remove('muted');
+                control.title = 'Desativar som';
+            } else {
+                icon.textContent = '🔇';
+                control.classList.add('muted');
+                control.title = 'Ativar som';
+                // Cancela qualquer anúncio em andamento
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                }
+            }
+        }
+
+        // Função para tocar o som de alerta profissional tipo hospital
+        function tocarAlerta() {
+            return new Promise((resolve) => {
+                // Cria um contexto de áudio
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Função auxiliar para criar um tom suave
+                function criarTom(frequencia, inicio, duracao, volume = 0.2) {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = frequencia;
+                    oscillator.type = 'sine'; // Tom puro e suave
+                    
+                    // Envelope ADSR suave para som profissional
+                    const now = audioContext.currentTime + inicio;
+                    gainNode.gain.setValueAtTime(0, now);
+                    gainNode.gain.linearRampToValueAtTime(volume, now + 0.05); // Attack
+                    gainNode.gain.linearRampToValueAtTime(volume * 0.8, now + 0.15); // Decay
+                    gainNode.gain.linearRampToValueAtTime(volume * 0.8, now + duracao - 0.1); // Sustain
+                    gainNode.gain.linearRampToValueAtTime(0, now + duracao); // Release
+                    
+                    oscillator.start(now);
+                    oscillator.stop(now + duracao);
+                }
+                
+                // Som tipo "Ding Dong" hospitalar
+                // Primeiro "Ding" (nota E - Mi) - agudo e suave
+                criarTom(659.25, 0, 0.4, 0.25); // E5
+                
+                // Segundo "Dong" (nota C - Dó) - grave e acolhedor
+                criarTom(523.25, 0.25, 0.5, 0.25); // C5
+                
+                // Harmônico sutil para profissionalismo
+                criarTom(523.25 * 2, 0.25, 0.3, 0.08); // Oitava superior do C5
+                
+                // Resolve após o som completo
+                setTimeout(resolve, 800);
+            });
+        }
+
+        // Função para adicionar chamado à fila
+        function adicionarChamadoFila(nomePaciente, local, chamadoId) {
+            // Verifica se o chamado já está na fila
+            const jaExiste = filaChamados.some(c => c.id === chamadoId);
+            if (!jaExiste) {
+                filaChamados.push({ nomePaciente, local, id: chamadoId });
+                console.log(`Chamado adicionado à fila: ${nomePaciente} - Fila atual: ${filaChamados.length}`);
+                
+                // Se não está anunciando atualmente, processa a fila
+                if (!anunciandoAtualmente) {
+                    processarFilaChamados();
+                }
+            }
+        }
+
+        // Função para processar a fila de chamados
+        async function processarFilaChamados() {
+            // Se já está anunciando ou fila vazia, não faz nada
+            if (anunciandoAtualmente || filaChamados.length === 0) {
+                return;
+            }
+
+            // Marca que está anunciando
+            anunciandoAtualmente = true;
+
+            // Pega o próximo chamado da fila
+            const chamado = filaChamados.shift();
+            
+            console.log(`Processando chamado: ${chamado.nomePaciente} - Restam ${filaChamados.length} na fila`);
+
+            // Anuncia o chamado
+            await anunciarChamado(chamado.nomePaciente, chamado.local);
+
+            // Aguarda um tempo adicional antes do próximo anúncio (para garantir que terminou)
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            // Marca que terminou de anunciar
+            anunciandoAtualmente = false;
+
+            // Processa o próximo da fila, se houver
+            if (filaChamados.length > 0) {
+                processarFilaChamados();
+            }
+        }
+
+        // Função para falar o chamado usando síntese de voz
+        async function anunciarChamado(nomePaciente, local) {
+            // Verifica se o som está ativo e se o navegador suporta síntese de voz
+            if (!somAtivo) {
+                console.log('Som desativado - não anunciando');
+                return;
+            }
+            
+            if ('speechSynthesis' in window) {
+                // Cancela qualquer fala anterior (precaução)
+                window.speechSynthesis.cancel();
+
+                // Toca o alerta "tundum" primeiro
+                await tocarAlerta();
+                
+                // Pequena pausa após o alerta
+                await new Promise(resolve => setTimeout(resolve, 300));
+
+                // Cria a mensagem
+                const mensagem = `${nomePaciente}, dirija-se à ${local}.`;
+                const utterance = new SpeechSynthesisUtterance(mensagem);
+
+                // Configurações da voz
+                utterance.lang = 'pt-BR'; // Português brasileiro
+                utterance.rate = 0.9; // Velocidade levemente mais lenta para clareza
+                utterance.pitch = 1.1; // Tom levemente mais alto, feminino
+                utterance.volume = 1.0; // Volume máximo
+
+                // Tenta selecionar uma voz feminina em português
+                const vozes = window.speechSynthesis.getVoices();
+                const vozFeminina = vozes.find(voz => 
+                    voz.lang.includes('pt') && 
+                    (voz.name.toLowerCase().includes('female') || 
+                     voz.name.toLowerCase().includes('feminina') ||
+                     voz.name.toLowerCase().includes('luciana') ||
+                     voz.name.toLowerCase().includes('maria') ||
+                     voz.name.toLowerCase().includes('google'))
+                );
+
+                if (vozFeminina) {
+                    utterance.voice = vozFeminina;
+                } else {
+                    // Se não encontrar feminina, usa qualquer voz em português
+                    const vozPortugues = vozes.find(voz => voz.lang.includes('pt'));
+                    if (vozPortugues) {
+                        utterance.voice = vozPortugues;
+                    }
+                }
+
+                // Retorna uma Promise que resolve quando a fala termina
+                return new Promise((resolve) => {
+                    utterance.onend = () => {
+                        console.log('Anúncio concluído:', mensagem);
+                        resolve();
+                    };
+                    
+                    utterance.onerror = (error) => {
+                        console.error('Erro no anúncio:', error);
+                        resolve(); // Resolve mesmo com erro para não travar a fila
+                    };
+
+                    // Fala a mensagem
+                    window.speechSynthesis.speak(utterance);
+                    console.log('Anunciando:', mensagem);
+                });
+            } else {
+                console.warn('Síntese de voz não suportada neste navegador');
+            }
+        }
+
+        // Carrega as vozes quando disponíveis
+        if ('speechSynthesis' in window) {
+            // Chrome precisa deste evento para carregar as vozes
+            window.speechSynthesis.onvoiceschanged = () => {
+                const vozes = window.speechSynthesis.getVoices();
+                console.log('Vozes disponíveis:', vozes.length);
+            };
+        }
+
+        // Atualiza o relógio
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+
+        // Busca e atualiza os chamados
+        async function atualizarChamados() {
+            try {
+                const response = await fetch('/api/chamados/recentes');
+                const data = await response.json();
+
+                if (data.success && data.chamados && data.chamados.length > 0) {
+                    // Atualiza o chamado principal (mais recente)
+                    const ultimoChamado = data.chamados[0];
+                    
+                    // Verifica se é um novo chamado e adiciona à fila
+                    if (ultimoChamadoId !== ultimoChamado.id) {
+                        ultimoChamadoId = ultimoChamado.id;
+                        
+                        // Adiciona o novo chamado à fila
+                        setTimeout(() => {
+                            adicionarChamadoFila(ultimoChamado.paciente, ultimoChamado.local, ultimoChamado.id);
+                        }, 500); // Pequeno delay para suavizar
+                    }
+                    
+                    const mainContent = document.getElementById('main-content');
+                    
+                    mainContent.innerHTML = `
+                        <div class="paciente-nome">${ultimoChamado.paciente}</div>
+                        <div class="local">${ultimoChamado.local}</div>
+                        <div class="hora-info">${ultimoChamado.hora} - ${ultimoChamado.data}</div>
+                    `;
+
+                    // Atualiza a lista lateral
+                    const sidebarList = document.getElementById('sidebar-list');
+                    
+                    if (data.chamados.length > 1) {
+                        sidebarList.innerHTML = data.chamados.slice(1).map((chamado, index) => {
+                            return `
+                                <div class="chamado-item ${index === 0 ? 'primeiro' : ''}">
+                                    <div class="paciente">${chamado.paciente}</div>
+                                    <div class="detalhes">
+                                        <div class="local-sidebar">${chamado.local}</div>
+                                        <div class="hora-sidebar">${chamado.hora}</div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    } else {
+                        sidebarList.innerHTML = `
+                            <div class="no-data" style="font-size: 1.2rem; text-align: center; padding: 20px;">
+                                Nenhuma chamada anterior
+                            </div>
+                        `;
+                    }
+                } else {
+                    // Sem dados
+                    document.getElementById('main-content').innerHTML = `
+                        <div class="no-data">Aguardando chamadas...</div>
+                    `;
+                    document.getElementById('sidebar-list').innerHTML = `
+                        <div class="no-data" style="font-size: 1.2rem; text-align: center; padding: 20px;">
+                            Nenhuma chamada recente
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Erro ao buscar chamados:', error);
+            }
+        }
+
+        // Inicializa
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // Atualiza chamados a cada 3 segundos
+        atualizarChamados();
+        setInterval(atualizarChamados, 3000);
+
+        // Força full-screen ao clicar em qualquer lugar
+        document.body.addEventListener('dblclick', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log('Erro ao entrar em fullscreen:', err);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        });
+    </script>
+</body>
+</html>
+

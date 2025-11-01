@@ -658,3 +658,24 @@ class PrescricaoEmergencia(db.Model):
         return f"<PrescricaoEmergencia id={self.id} atendimento={self.atendimento_id}>"
 
  
+class Chamado(db.Model):
+    __tablename__ = "chamado"
+
+    id = db.Column(db.Integer, primary_key=True)
+    id_paciente = db.Column(db.Integer, db.ForeignKey("pacientes.id"), nullable=False)
+    id_atendimento = db.Column(db.String(10), db.ForeignKey("atendimentos.id"))
+    id_medico = db.Column(db.Integer, db.ForeignKey("funcionarios.id"))
+    id_enfermeiro = db.Column(db.Integer, db.ForeignKey("funcionarios.id"))
+    local = db.Column(db.String(100), nullable=False)
+    hora = db.Column(db.Time, default=datetime.now().time)
+    data = db.Column(db.Date, default=datetime.now().date)
+    status = db.Column(db.String(20), default="pendente")
+
+    # Relacionamentos
+    paciente = db.relationship("Paciente", backref="chamados_paciente", lazy=True)
+    atendimento = db.relationship("Atendimento", backref="chamados_atendimento", lazy=True)
+    medico = db.relationship("Funcionario", foreign_keys=[id_medico], backref="chamados_medico", lazy=True)
+    enfermeiro = db.relationship("Funcionario", foreign_keys=[id_enfermeiro], backref="chamados_enfermeiro", lazy=True)
+
+    def __repr__(self):
+        return f"<Chamado {self.id} - Paciente {self.id_paciente} - Local {self.local} - Status {self.status}>" 
