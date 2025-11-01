@@ -37604,3 +37604,33 @@ SyntaxError: ':' expected after dictionary key
 2025-11-01 09:16:08,578 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
 2025-11-01 09:16:08,748 [INFO] __init__:114 - Blueprints registrados com sucesso
 2025-11-01 09:16:08,759 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-11-01 14:05:33,880 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-11-01 14:05:33,881 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-11-01 14:05:33,881 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-11-01 14:05:33,881 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-11-01 14:05:33,881 [INFO] __init__:63 - Configurações básicas definidas
+2025-11-01 14:05:33,922 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-11-01 14:05:33,922 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-11-01 14:05:33,958 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-11-01 14:05:34,234 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-11-01 14:05:34,255 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-11-01 14:05:34,450 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-11-01 14:05:34,450 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-11-01 14:05:34,450 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-11-01 14:05:34,450 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-11-01 14:05:34,451 [INFO] __init__:63 - Configurações básicas definidas
+2025-11-01 14:05:34,471 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-11-01 14:05:34,471 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-11-01 14:05:34,509 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-11-01 14:05:34,648 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-11-01 14:05:34,662 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-11-01 14:12:52,511 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-11-01 14:12:52,511 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-11-01 14:12:52,511 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-11-01 14:12:52,511 [INFO] __init__:59 - Banco de dados: sqlite:////home/estevaofilho/HSOP/HSOP/app/app.db
+2025-11-01 14:12:52,511 [INFO] __init__:63 - Configurações básicas definidas
+2025-11-01 14:12:52,518 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-11-01 14:12:52,518 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-11-01 14:12:52,555 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-11-01 14:12:52,685 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-11-01 14:12:52,695 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas

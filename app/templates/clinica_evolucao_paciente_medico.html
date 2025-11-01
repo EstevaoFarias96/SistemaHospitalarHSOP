@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evolução do Paciente</title>
+    <title>Prontuário Eletrônico de {{ paciente.nome }}</title>
     <!-- CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
@@ -2168,43 +2168,22 @@
     <div class="container-fluid py-4">
         <!-- Header do Dashboard -->
         <div class="dashboard-header mb-4">
-            <h2 class="d-flex align-items-center gap-2">
-                <i class="fas fa-user-md me-2"></i>
-                Evolução do Paciente
-                {% if rn_ativo_info %}
-                <a href="/clinica/evolucao-paciente-medico/{{ rn_ativo_info.atendimento_id }}" class="badge bg-success text-decoration-none" title="Ir para a ficha do RN ativo">
-                    <i class="fas fa-baby me-1"></i> RN ATIVO: {{ rn_ativo_info.nome }}
+            <div class="d-flex align-items-center justify-content-between">
+                <h2 class="d-flex align-items-center gap-2 mb-0">
+                    <i class="fas fa-user-md me-2"></i>
+                    Prontuário Eletrônico de "{{ paciente.nome }}"
+                </h2>
+                <a href="/clinica/pacientes-internados" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i> Voltar
                 </a>
-                {% endif %}
-            </h2>
+            </div>
             <p class="mb-0">
                 <i class="fas fa-stethoscope me-2"></i>
                 Acompanhamento médico e registros clínicos
             </p>
         </div>
         
-        <!-- Botões de ação -->
-        <div class="d-flex justify-content-end align-items-center mb-4 gap-2">
-            <button type="button" class="btn btn-outline-info btn-sm" id="btnHistoricoInternamentos">
-                <i class="fas fa-history me-1"></i> Histórico
-            </button>
-            <button type="button" class="btn btn-outline-success btn-sm" id="btnAdicionarRN">
-                <i class="fas fa-plus me-1"></i> Adicionar RN
-            </button>
-            {% if rn_ativo_info %}
-            <a href="/clinica/evolucao-paciente-medico/{{ rn_ativo_info.atendimento_id }}" class="btn btn-success btn-sm">
-                <i class="fas fa-baby me-1"></i> Ficha do RN
-            </a>
-            {% endif %}
-            {% if internacao.data_alta %}
-            <button type="button" class="btn btn-success btn-sm" onclick="verInformacoesAlta('{{ internacao.atendimento_id }}')">
-                <i class="fas fa-user-check me-1"></i> Alta
-            </button>
-            {% endif %}
-            <a href="/clinica/pacientes-internados" class="btn btn-outline-primary btn-sm">
-                <i class="fas fa-arrow-left me-1"></i> Voltar
-            </a>
-        </div>
+        
 
     <!-- Informações do Paciente -->
     <div class="paciente-info row">
@@ -2902,7 +2881,7 @@
 
     <!-- Modal Evolução -->
     <div class="modal fade" id="modalEvolucao" tabindex="-1" aria-labelledby="modalEvolucaoLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title" id="modalEvolucaoLabel">Registrar Nova Evolução</h5>
@@ -2916,22 +2895,103 @@
                             limparObservadores(editor);
                         }
                     });
+                    
+                    // Carregar informações de referência quando o modal for aberto
+                    document.getElementById('modalEvolucao').addEventListener('show.bs.modal', function () {
+                        const atendimentoId = $('#atendimento_id').val();
+                        if (!atendimentoId) return;
+                        
+                        // Carregar dados da internação
+                        $.ajax({
+                            url: `/api/internacao/${atendimentoId}`,
+                            method: 'GET',
+                            success: function(response) {
+                                const dados = response.success ? response.internacao : response;
+                                
+                                // Atualizar Anamnese e Exame Físico
+                                const anamneseHtml = dados.anamnese_exame_fisico ? 
+                                    dados.anamnese_exame_fisico.replace(/\n/g, '<br>') : 
+                                    '<div class="text-muted fst-italic">Não informado</div>';
+                                $('#anamnese-exame-fisico-ref').html(anamneseHtml);
+                                
+                                // Atualizar Conduta Médica
+                                const condutaHtml = dados.conduta ? 
+                                    dados.conduta.replace(/\n/g, '<br>') : 
+                                    '<div class="text-muted fst-italic">Não informada</div>';
+                                $('#conduta-medica-ref').html(condutaHtml);
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Erro ao carregar informações de referência:', error);
+                                $('#anamnese-exame-fisico-ref').html('<div class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i>Erro ao carregar</div>');
+                                $('#conduta-medica-ref').html('<div class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i>Erro ao carregar</div>');
+                            }
+                        });
+                    });
                 </script>
                 <div class="modal-body">
-                    <form id="formEvolucao">
-                        <div class="mb-3">
-                            <label class="form-label">Texto da Evolução</label>
-                            <!-- Editor container -->
-                            <div id="editor-container"></div>
-                            <!-- Hidden textarea to store the content -->
-                            <textarea id="texto_evolucao" name="texto_evolucao" style="display:none"></textarea>
-                            <small class="text-muted">Descreva a evolução do paciente, sinais, sintomas, exames, condutas realizadas, etc.</small>
+                    <div class="row">
+                        <!-- Coluna de Referência (Lado Esquerdo) -->
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm mb-3" style="position: sticky; top: 20px;">
+                                <div class="card-header bg-info text-white">
+                                    <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informações de Referência</h6>
+                                </div>
+                                <div class="card-body p-0" style="max-height: 500px; overflow-y: auto;">
+                                    <!-- Anamnese e Exame Físico -->
+                                    <div class="border-bottom">
+                                        <div class="p-3 bg-light border-bottom">
+                                            <h6 class="mb-0 text-primary fw-bold">
+                                                <i class="fas fa-stethoscope me-1"></i>Anamnese e Exame Físico
+                                            </h6>
+                                        </div>
+                                        <div class="p-3">
+                                            <div id="anamnese-exame-fisico-ref" class="text-dark" style="font-size: 0.9rem; line-height: 1.5; white-space: pre-wrap;">
+                                                <div class="text-center text-muted py-3">
+                                                    <i class="fas fa-spinner fa-spin"></i>
+                                                    <p class="mb-0 mt-2">Carregando...</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Conduta Médica -->
+                                    <div>
+                                        <div class="p-3 bg-light border-bottom">
+                                            <h6 class="mb-0 text-warning fw-bold">
+                                                <i class="fas fa-prescription me-1"></i>Conduta Médica
+                                            </h6>
+                                        </div>
+                                        <div class="p-3">
+                                            <div id="conduta-medica-ref" class="text-dark" style="font-size: 0.9rem; line-height: 1.5; white-space: pre-wrap;">
+                                                <div class="text-center text-muted py-3">
+                                                    <i class="fas fa-spinner fa-spin"></i>
+                                                    <p class="mb-0 mt-2">Carregando...</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="text-end">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary">Registrar Evolução</button>
+                        
+                        <!-- Coluna do Editor (Lado Direito) -->
+                        <div class="col-md-8">
+                            <form id="formEvolucao">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Texto da Evolução</label>
+                                    <!-- Editor container -->
+                                    <div id="editor-container"></div>
+                                    <!-- Hidden textarea to store the content -->
+                                    <textarea id="texto_evolucao" name="texto_evolucao" style="display:none"></textarea>
+                                    <small class="text-muted">Descreva a evolução do paciente, sinais, sintomas, exames, condutas realizadas, etc.</small>
+                                </div>
+                                <div class="text-end">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary">Registrar Evolução</button>
+                                </div>
+                            </form>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -3354,6 +3414,59 @@
 
 #modalAdicionarRN .form-group {
     margin-bottom: 1rem;
+}
+</style>
+
+<style>
+/* Overrides de cabeçalhos dos cards e tipografia mais escura (escopo desta página) */
+.main-content .card-header {
+    background: linear-gradient(135deg, var(--azul-principal), var(--azul-medio)) !important;
+    color: #fff !important;
+    border-bottom: none !important;
+}
+
+.main-content #horarios_multiplos_dias .card-header,
+.main-content .card-header.bg-light,
+.main-content .card-header.bg-white,
+.main-content .card-header.bg-primary,
+.main-content .card-header.bg-info,
+.main-content .card-header.bg-warning,
+.main-content .card-header.bg-success {
+    background: linear-gradient(135deg, var(--azul-principal), var(--azul-medio)) !important;
+    color: #fff !important;
+}
+
+.main-content .card-header h1,
+.main-content .card-header h2,
+.main-content .card-header h3,
+.main-content .card-header h4,
+.main-content .card-header h5,
+.main-content .card-header h6,
+.main-content .card-header .text-dark,
+.main-content .card-header .text-secondary {
+    color: #fff !important;
+}
+
+/* Tipografia da página mais escura e legível */
+.main-content,
+.main-content .text-body,
+.main-content .text-muted,
+.main-content .text-secondary,
+.main-content .form-text,
+.main-content .list-group-item,
+.main-content .card-body,
+.main-content .table {
+    color: #111 !important;
+}
+
+/* Descrição do header mais escura; manter badge do RN com texto branco */
+.dashboard-header p { color: #111 !important; }
+.dashboard-header h2 .badge { color: #fff !important; }
+
+/* Médico e tempo ao lado em preto escuro */
+.main-content .medico-nome,
+.main-content .timestamp {
+    color: #111 !important;
 }
 </style>
 
