@@ -15382,18 +15382,23 @@ def definir_conduta():
         # Data/hora atual
         agora = now_brasilia()
         
-        # Criar evolução médica final se houver observação
+        # Criar evolução médica final SEMPRE que houver observação (campo obrigatório no frontend)
         if evolucao_medica_final and evolucao_medica_final.strip():
             try:
+                # Salvar a evolução médica completa na tabela EvolucaoAtendimentoClinica
+                # Formato: "CONDUTA FINAL: [conduta]\n\n[texto da evolução]"
+                texto_evolucao = f"CONDUTA FINAL: {conduta}\n\n{evolucao_medica_final.strip()}"
+                
                 nova_evolucao = EvolucaoAtendimentoClinica(
                     atendimentos_clinica_id=internacao.id,
                     funcionario_id=current_user.id,
                     data_evolucao=agora,
-                    evolucao=f"{conduta}\n\n{evolucao_medica_final.strip()}"
+                    evolucao=texto_evolucao
                 )
                 db.session.add(nova_evolucao)
                 db.session.flush()  # Flush para detectar erros antes do commit final
-                logging.info(f"✅ Evolução médica final criada")
+                logging.info(f"✅ Evolução médica final criada na tabela EvolucaoAtendimentoClinica")
+                logging.info(f"   Conteúdo: {texto_evolucao[:100]}...")
             except Exception as e:
                 logging.error(f"❌ Erro ao criar evolução médica: {str(e)}")
                 logging.error(traceback.format_exc())
@@ -15452,7 +15457,9 @@ def definir_conduta():
             # Conduta: Internar - muda status para Internado e aloca leito
             try:
                 atendimento.status = 'Internado'
-                atendimento.conduta_final = f"INTERNADO NO LEITO {leito_selecionado} - {evolucao_medica_final}" if evolucao_medica_final else f"INTERNADO NO LEITO {leito_selecionado}"
+                # Salvar apenas o tipo de conduta (sem o texto da evolução médica)
+                # A evolução médica completa está na tabela EvolucaoAtendimentoClinica
+                atendimento.conduta_final = f"INTERNADO NO LEITO {leito_selecionado}"
                 
                 # Registrar data de internação se ainda não foi registrada
                 if not internacao.data_internacao:
@@ -15505,7 +15512,9 @@ def definir_conduta():
             try:
                 observacao.medico_conduta = current_user.nome
                 observacao.data_saida = agora
-                observacao.conduta_final = f"INTERNADO NO LEITO {leito_selecionado} - {evolucao_medica_final}" if evolucao_medica_final else f"INTERNADO NO LEITO {leito_selecionado}"
+                # Salvar apenas o tipo de conduta (sem o texto da evolução médica)
+                # A evolução médica completa está na tabela EvolucaoAtendimentoClinica
+                observacao.conduta_final = f"INTERNADO NO LEITO {leito_selecionado}"
                 logging.info(f"✅ Observação atualizada")
             except Exception as e:
                 logging.error(f"❌ Erro ao atualizar observação: {str(e)}")
@@ -15527,13 +15536,17 @@ def definir_conduta():
                 # Armazenar conduta pendente no campo dieta
                 atendimento.status = conduta
                 internacao.dieta = f'PENDENTE:{conduta}'
-                atendimento.conduta_final = f"{conduta.upper()} - {evolucao_medica_final}" if evolucao_medica_final else conduta.upper()
+                # Salvar apenas o tipo de conduta (sem o texto da evolução médica)
+                # A evolução médica completa está na tabela EvolucaoAtendimentoClinica
+                atendimento.conduta_final = conduta.upper()
                 logging.info(f"✅ Conduta pendente armazenada: {conduta} (será aplicada ao fechar prontuário)")
                 
                 # Atualizar observação com conduta final
                 observacao.medico_conduta = current_user.nome
                 observacao.data_saida = agora
-                observacao.conduta_final = f"{conduta.upper()} - {evolucao_medica_final}" if evolucao_medica_final else conduta.upper()
+                # Salvar apenas o tipo de conduta (sem o texto da evolução médica)
+                # A evolução médica completa está na tabela EvolucaoAtendimentoClinica
+                observacao.conduta_final = conduta.upper()
                 logging.info(f"✅ Observação atualizada")
                 
                 # Registrar data de alta na internação
