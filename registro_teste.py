@@ -53,15 +53,15 @@ app = create_app()
 
 def registrar_medico_teste():
     medico_teste = {
-        "nome": "Carlos Wendel Costa Menezes",
+        "nome": "chamador",
         "data_nascimento": datetime.strptime("28/08/1986", "%d/%m/%Y").date(),
-        "cpf": "068.269.183-66",
-        "email": "wendell_beta13@hotmail.com",
-        "telefone": "8898833-6181",
+        "cpf": "000.000.000-99",
+        "email": "wendell_beta11233@hotmail.com",
+        "telefone": "8181",
         "senha": "123",
-        "cargo": "Medico",
+        "cargo": "chamador",
         "tipo_contrato": "Contratado",
-        "numero_profissional": "28728"
+        "numero_profissional": "287231238"
     }
 
     if Funcionario.query.filter_by(cpf=medico_teste["cpf"]).first():

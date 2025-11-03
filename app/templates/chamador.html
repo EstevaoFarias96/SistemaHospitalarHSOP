@@ -378,11 +378,83 @@
     </div>
 
     <script>
-        // Variável para armazenar o ID do último chamado anunciado
-        let ultimoChamadoId = null;
+        // Set para armazenar os IDs de todos os chamados já anunciados
+        let chamadosAnunciados = new Set();
         let somAtivo = true; // Controle de som
         let anunciandoAtualmente = false; // Flag para controlar se está anunciando
         let filaChamados = []; // Fila de chamados para anunciar
+        let primeiraCaraga = true; // Flag para identificar primeira carga
+        let audioDesbloqueado = false; // Desbloqueio por gesto
+        let audioContextGlobal = null; // Reuso do AudioContext
+        let vozesCarregadas = false; // Flag de vozes carregadas
+        let vozPreferida = null; // Cache da voz escolhida
+
+        function getAudioContext() {
+            if (!audioContextGlobal) {
+                audioContextGlobal = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioContextGlobal.state === 'suspended') {
+                audioContextGlobal.resume().catch(() => {});
+            }
+            return audioContextGlobal;
+        }
+
+        function desbloquearAudio() {
+            if (audioDesbloqueado) return;
+            audioDesbloqueado = true;
+            try {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.resume();
+                }
+            } catch (e) {}
+            try {
+                getAudioContext();
+            } catch (e) {}
+            console.log('🔓 Áudio/voz desbloqueados por interação do usuário');
+        }
+
+        function escolherVozMasculinaPt(vozes) {
+            return vozes.find(voz => {
+                const lang = (voz.lang || '').toLowerCase();
+                const name = (voz.name || '').toLowerCase();
+                return lang.includes('pt') && (
+                    name.includes('male') ||
+                    name.includes('masculino') ||
+                    name.includes('masculina') ||
+                    name.includes('filipe') ||
+                    name.includes('felipe') ||
+                    name.includes('daniel') ||
+                    name.includes('google')
+                );
+            });
+        }
+
+        function carregarVozesPreferidas() {
+            if (!('speechSynthesis' in window)) return;
+            const vozes = window.speechSynthesis.getVoices();
+            if (vozes && vozes.length) {
+                vozPreferida = escolherVozMasculinaPt(vozes) || vozes.find(v => (v.lang || '').toLowerCase().includes('pt')) || null;
+                vozesCarregadas = true;
+                console.log('🎚️ Voz preferida definida:', vozPreferida ? vozPreferida.name : 'nenhuma');
+            }
+        }
+
+        function aguardarVozes(timeoutMs = 1500) {
+            return new Promise(resolve => {
+                const start = Date.now();
+                if (!vozesCarregadas) {
+                    carregarVozesPreferidas();
+                }
+                const timer = setInterval(() => {
+                    if (vozesCarregadas || Date.now() - start > timeoutMs) {
+                        clearInterval(timer);
+                        resolve();
+                    } else {
+                        carregarVozesPreferidas();
+                    }
+                }, 100);
+            });
+        }
 
         // Função para alternar som
         function toggleSound() {
@@ -394,6 +466,7 @@
                 icon.textContent = '🔊';
                 control.classList.remove('muted');
                 control.title = 'Desativar som';
+                desbloquearAudio();
             } else {
                 icon.textContent = '🔇';
                 control.classList.add('muted');
@@ -408,8 +481,8 @@
         // Função para tocar o som de alerta profissional tipo hospital
         function tocarAlerta() {
             return new Promise((resolve) => {
-                // Cria um contexto de áudio
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                // Usa um contexto de áudio global (evita bloqueios/limite de contextos)
+                const audioContext = getAudioContext();
                 
                 // Função auxiliar para criar um tom suave
                 function criarTom(frequencia, inicio, duracao, volume = 0.2) {
@@ -455,19 +528,30 @@
             const jaExiste = filaChamados.some(c => c.id === chamadoId);
             if (!jaExiste) {
                 filaChamados.push({ nomePaciente, local, id: chamadoId });
-                console.log(`Chamado adicionado à fila: ${nomePaciente} - Fila atual: ${filaChamados.length}`);
+                console.log(`➕ Adicionado à fila: ${nomePaciente} | Fila: ${filaChamados.length} chamado(s) | Anunciando: ${anunciandoAtualmente ? 'SIM' : 'NÃO'}`);
                 
                 // Se não está anunciando atualmente, processa a fila
                 if (!anunciandoAtualmente) {
+                    console.log('   🚀 Disparando processamento da fila...');
                     processarFilaChamados();
+                } else {
+                    console.log('   ⏳ Aguardando - já há um anúncio em andamento');
                 }
+            } else {
+                console.log(`⚠️ Chamado ${nomePaciente} (ID: ${chamadoId}) já está na fila - ignorando duplicata`);
             }
         }
 
         // Função para processar a fila de chamados
         async function processarFilaChamados() {
             // Se já está anunciando ou fila vazia, não faz nada
-            if (anunciandoAtualmente || filaChamados.length === 0) {
+            if (anunciandoAtualmente) {
+                console.log('⏸️ processarFilaChamados: Já está anunciando - abortando');
+                return;
+            }
+            
+            if (filaChamados.length === 0) {
+                console.log('⏸️ processarFilaChamados: Fila vazia - nada a fazer');
                 return;
             }
 
@@ -477,32 +561,41 @@
             // Pega o próximo chamado da fila
             const chamado = filaChamados.shift();
             
-            console.log(`Processando chamado: ${chamado.nomePaciente} - Restam ${filaChamados.length} na fila`);
+            console.log(`🎙️ PROCESSANDO CHAMADO: ${chamado.nomePaciente} -> ${chamado.local}`);
+            console.log(`   📊 Restam ${filaChamados.length} chamado(s) na fila`);
 
             // Anuncia o chamado
             await anunciarChamado(chamado.nomePaciente, chamado.local);
 
             // Aguarda um tempo adicional antes do próximo anúncio (para garantir que terminou)
+            console.log('   ⏳ Aguardando 2 segundos antes do próximo...');
             await new Promise(resolve => setTimeout(resolve, 2000));
 
             // Marca que terminou de anunciar
             anunciandoAtualmente = false;
+            console.log('   ✅ Anúncio concluído!');
 
             // Processa o próximo da fila, se houver
             if (filaChamados.length > 0) {
+                console.log(`   🔄 Há ${filaChamados.length} chamado(s) na fila - processando próximo...`);
                 processarFilaChamados();
+            } else {
+                console.log('   🏁 Fila processada completamente!');
             }
         }
 
         // Função para falar o chamado usando síntese de voz
         async function anunciarChamado(nomePaciente, local) {
+            console.log(`🔊 anunciarChamado chamada: ${nomePaciente} -> ${local} | Som ativo: ${somAtivo}`);
+            
             // Verifica se o som está ativo e se o navegador suporta síntese de voz
             if (!somAtivo) {
-                console.log('Som desativado - não anunciando');
+                console.log('   🔇 Som desativado - pulando anúncio');
                 return;
             }
             
             if ('speechSynthesis' in window) {
+                console.log('   🎵 Tocando alerta sonoro...');
                 // Cancela qualquer fala anterior (precaução)
                 window.speechSynthesis.cancel();
 
@@ -510,57 +603,55 @@
                 await tocarAlerta();
                 
                 // Pequena pausa após o alerta
+                console.log('   ⏱️ Pausa de 300ms após alerta...');
                 await new Promise(resolve => setTimeout(resolve, 300));
 
                 // Cria a mensagem
                 const mensagem = `${nomePaciente}, dirija-se à ${local}.`;
+                console.log(`   💬 Preparando mensagem: "${mensagem}"`);
                 const utterance = new SpeechSynthesisUtterance(mensagem);
 
                 // Configurações da voz
                 utterance.lang = 'pt-BR'; // Português brasileiro
                 utterance.rate = 0.9; // Velocidade levemente mais lenta para clareza
-                utterance.pitch = 1.1; // Tom levemente mais alto, feminino
+                utterance.pitch = 0.9; // Tom levemente mais grave, masculino
                 utterance.volume = 1.0; // Volume máximo
-
-                // Tenta selecionar uma voz feminina em português
-                const vozes = window.speechSynthesis.getVoices();
-                const vozFeminina = vozes.find(voz => 
-                    voz.lang.includes('pt') && 
-                    (voz.name.toLowerCase().includes('female') || 
-                     voz.name.toLowerCase().includes('feminina') ||
-                     voz.name.toLowerCase().includes('luciana') ||
-                     voz.name.toLowerCase().includes('maria') ||
-                     voz.name.toLowerCase().includes('google'))
-                );
-
-                if (vozFeminina) {
-                    utterance.voice = vozFeminina;
+                // Garante vozes carregadas e define voz preferida masculina
+                await aguardarVozes();
+                if (vozPreferida) {
+                    utterance.voice = vozPreferida;
                 } else {
-                    // Se não encontrar feminina, usa qualquer voz em português
-                    const vozPortugues = vozes.find(voz => voz.lang.includes('pt'));
-                    if (vozPortugues) {
-                        utterance.voice = vozPortugues;
+                    const vozes = window.speechSynthesis.getVoices();
+                    const fallbackPt = vozes.find(v => (v.lang || '').toLowerCase().includes('pt'));
+                    if (fallbackPt) {
+                        utterance.voice = fallbackPt;
                     }
                 }
 
                 // Retorna uma Promise que resolve quando a fala termina
                 return new Promise((resolve) => {
                     utterance.onend = () => {
-                        console.log('Anúncio concluído:', mensagem);
+                        console.log('   ✅ Síntese de voz concluída:', mensagem);
                         resolve();
                     };
                     
                     utterance.onerror = (error) => {
-                        console.error('Erro no anúncio:', error);
+                        console.error('   ❌ Erro na síntese de voz:', error);
                         resolve(); // Resolve mesmo com erro para não travar a fila
                     };
 
+                    utterance.onstart = () => {
+                        console.log('   🗣️ Falando agora:', mensagem);
+                    };
+
+                    // Garante que o mecanismo não está pausado
+                    try { window.speechSynthesis.resume(); } catch (e) {}
                     // Fala a mensagem
                     window.speechSynthesis.speak(utterance);
-                    console.log('Anunciando:', mensagem);
+                    console.log('   📢 Síntese de voz iniciada');
                 });
             } else {
-                console.warn('Síntese de voz não suportada neste navegador');
+                console.warn('   ⚠️ Síntese de voz não suportada neste navegador');
             }
         }
 
@@ -568,9 +659,12 @@
         if ('speechSynthesis' in window) {
             // Chrome precisa deste evento para carregar as vozes
             window.speechSynthesis.onvoiceschanged = () => {
+                carregarVozesPreferidas();
                 const vozes = window.speechSynthesis.getVoices();
                 console.log('Vozes disponíveis:', vozes.length);
             };
+            // Tenta carregar imediatamente
+            carregarVozesPreferidas();
         }
 
         // Atualiza o relógio
@@ -588,20 +682,60 @@
                 const response = await fetch('/api/chamados/recentes');
                 const data = await response.json();
 
+                console.log('📡 Atualização recebida:', {
+                    success: data.success,
+                    totalChamados: data.chamados ? data.chamados.length : 0,
+                    primeiraCaraga: primeiraCaraga,
+                    chamadosConhecidos: chamadosAnunciados.size,
+                    filaAtual: filaChamados.length,
+                    anunciando: anunciandoAtualmente
+                });
+
                 if (data.success && data.chamados && data.chamados.length > 0) {
-                    // Atualiza o chamado principal (mais recente)
-                    const ultimoChamado = data.chamados[0];
-                    
-                    // Verifica se é um novo chamado e adiciona à fila
-                    if (ultimoChamadoId !== ultimoChamado.id) {
-                        ultimoChamadoId = ultimoChamado.id;
+                    // === PRIMEIRA CARGA: Apenas marca chamados existentes como conhecidos ===
+                    if (primeiraCaraga) {
+                        console.log('🔵 PRIMEIRA CARGA - marcando chamados existentes sem anunciar');
+                        data.chamados.forEach(chamado => {
+                            chamadosAnunciados.add(chamado.id);
+                            console.log(`  ✓ Marcado (sem anunciar): ${chamado.paciente} (ID: ${chamado.id})`);
+                        });
+                        primeiraCaraga = false; // Marca que a primeira carga foi feita
+                        console.log('✅ Primeira carga concluída. Sistema pronto para detectar novos chamados.');
+                    } else {
+                        // === CARGAS SUBSEQUENTES: Detecta e anuncia apenas NOVOS chamados ===
+                        console.log('🔍 Verificando novos chamados...');
+                        let novosDetectados = 0;
                         
-                        // Adiciona o novo chamado à fila
-                        setTimeout(() => {
-                            adicionarChamadoFila(ultimoChamado.paciente, ultimoChamado.local, ultimoChamado.id);
-                        }, 500); // Pequeno delay para suavizar
+                        data.chamados.forEach(chamado => {
+                            // Se o chamado NÃO foi anunciado ainda, é NOVO
+                            if (!chamadosAnunciados.has(chamado.id)) {
+                                novosDetectados++;
+                                console.log(`✨ NOVO CHAMADO #${novosDetectados}: ${chamado.paciente} (ID: ${chamado.id}) -> ${chamado.local}`);
+                                
+                                // Marca como anunciado
+                                chamadosAnunciados.add(chamado.id);
+                                
+                                // Adiciona à fila de anúncios (será anunciado quando chegar sua vez)
+                                adicionarChamadoFila(chamado.paciente, chamado.local, chamado.id);
+                            }
+                        });
+                        
+                        if (novosDetectados === 0) {
+                            console.log('  ℹ️ Nenhum chamado novo detectado');
+                        } else {
+                            console.log(`  🎯 Total de novos chamados detectados: ${novosDetectados}`);
+                        }
                     }
                     
+                    // Limita o tamanho do Set para evitar crescimento infinito
+                    // Mantém apenas os últimos 100 IDs
+                    if (chamadosAnunciados.size > 100) {
+                        const array = Array.from(chamadosAnunciados);
+                        chamadosAnunciados = new Set(array.slice(-100));
+                    }
+                    
+                    // Atualiza o chamado principal (mais recente) na tela
+                    const ultimoChamado = data.chamados[0];
                     const mainContent = document.getElementById('main-content');
                     
                     mainContent.innerHTML = `
@@ -642,6 +776,11 @@
                             Nenhuma chamada recente
                         </div>
                     `;
+                    
+                    // Se não há dados, marca primeira carga como concluída
+                    if (primeiraCaraga) {
+                        primeiraCaraga = false;
+                    }
                 }
             } catch (error) {
                 console.error('Erro ao buscar chamados:', error);
@@ -666,6 +805,8 @@
                 document.exitFullscreen();
             }
         });
+        document.addEventListener('click', desbloquearAudio, { once: true });
+        document.addEventListener('touchstart', desbloquearAudio, { once: true });
     </script>
 </body>
 </html>
