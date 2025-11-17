@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Painel do Recepcionista</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='Imagens/favicon hsop.svgz') }}">
 
   <!-- Bootstrap CSS -->
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
@@ -351,7 +352,17 @@
     .modal-body {
       padding: 24px;
     }
-    
+
+    /* Modal scrollável - altura máxima de 70vh */
+    .modal-dialog-scrollable .modal-body {
+      max-height: calc(70vh - 120px);
+      overflow-y: auto;
+    }
+
+    .modal-dialog-scrollable .modal-content {
+      max-height: 85vh;
+    }
+
     .btn {
       transition: all 0.3s ease;
       border-radius: 10px;
@@ -805,7 +816,7 @@
 
   <!-- Modal para Cadastro de Paciente -->
   <div class="modal fade" id="modalCadastroPaciente" tabindex="-1" role="dialog" aria-labelledby="modalCadastroPacienteLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered" role="document">
       <div class="modal-content">
         <!-- Header do Modal -->
         <div class="modal-header">
@@ -930,6 +941,39 @@
                   <i class="fas fa-city mr-1"></i>Município
                 </label>
                 <input type="text" class="form-control" id="modalMunicipio" name="municipio" placeholder="Nome da cidade">
+              </div>
+            </div>
+
+            <!-- Prioridade Administrativa -->
+            <div class="form-row">
+              <div class="col-md-12">
+                <div class="custom-control custom-checkbox mb-3">
+                  <input type="checkbox" class="custom-control-input" id="modalPrioridade" name="prioridade">
+                  <label class="custom-control-label" for="modalPrioridade">
+                    <i class="fas fa-star text-warning mr-1"></i>
+                    <strong>Paciente com Prioridade Administrativa</strong>
+                    <small class="text-muted d-block">Idoso (60+), gestante, lactante, pessoa com deficiência</small>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tipo de Prioridade (oculto inicialmente) -->
+            <div class="form-row" id="rowTipoPrioridade" style="display: none;">
+              <div class="col-md-12 mb-3">
+                <label for="modalDescPrioridade">
+                  <i class="fas fa-info-circle mr-1"></i>Tipo de Prioridade
+                </label>
+                <select class="form-control" id="modalDescPrioridade" name="desc_prioridade">
+                  <option value="">Selecione o tipo...</option>
+                  <option value="Idoso">Idoso (60 anos ou mais)</option>
+                  <option value="Gestante">Gestante</option>
+                  <option value="Lactante">Lactante (mãe amamentando)</option>
+                  <option value="Pessoa com deficiência">Pessoa com deficiência</option>
+                  <option value="Autismo">Autismo (TEA)</option>
+                  <option value="Pessoa com criança de colo">Pessoa com criança de colo</option>
+                  <option value="Outro">Outro</option>
+                </select>
               </div>
             </div>
 
@@ -2504,6 +2548,17 @@
       $('#modalCadastroPaciente').on('hidden.bs.modal', function () {
         $('#formCadastroPaciente')[0].reset();
         $('#btnSalvarPaciente').html('<i class="fas fa-save mr-1"></i>Cadastrar Paciente').prop('disabled', false);
+        $('#rowTipoPrioridade').hide(); // Ocultar campo de tipo de prioridade ao fechar
+      });
+
+      // Toggle para mostrar/ocultar tipo de prioridade
+      $('#modalPrioridade').on('change', function() {
+        if ($(this).is(':checked')) {
+          $('#rowTipoPrioridade').slideDown();
+        } else {
+          $('#rowTipoPrioridade').slideUp();
+          $('#modalDescPrioridade').val(''); // Limpar seleção
+        }
       });
     });    // Função para salvar paciente
     $('#btnSalvarPaciente').click(function() {
@@ -2534,6 +2589,14 @@
           }
           dados[key] = value;
         }
+      }
+
+      // Adicionar prioridade (checkbox não entra em FormData se não marcado)
+      dados.prioridade = $('#modalPrioridade').is(':checked');
+
+      // Se não tem prioridade, limpar desc_prioridade
+      if (!dados.prioridade) {
+        delete dados.desc_prioridade;
       }
 
       // Validações básicas - mais amigáveis

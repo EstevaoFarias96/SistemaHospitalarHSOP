@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Painel do Enfermeiro</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='Imagens/favicon hsop.svgz') }}">
 
   <!-- Bootstrap CSS -->
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
@@ -462,7 +463,17 @@
     .modal-body {
       padding: 24px;
     }
-    
+
+    /* Modal scrollável - altura máxima de 70vh */
+    .modal-dialog-scrollable .modal-body {
+      max-height: calc(70vh - 120px);
+      overflow-y: auto;
+    }
+
+    .modal-dialog-scrollable .modal-content {
+      max-height: 85vh;
+    }
+
     .form-control:focus {
       border-color: var(--azul-principal);
       box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
@@ -608,7 +619,12 @@
 
         <!-- Seção de Triagem -->
         <div id="triagem-section">
-          <h2>Pacientes Aguardando Triagem</h2>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="mb-0">Pacientes Aguardando Triagem</h2>
+            <button class="btn btn-primary" onclick="atualizarTriagem()">
+              <i class="fas fa-sync-alt mr-1"></i> Atualizar
+            </button>
+          </div>
           <div class="form-group">
             <input type="text" class="form-control" id="triagemSearch" placeholder="Buscar paciente..." onkeyup="filtrarPacientes()">
           </div>
@@ -711,7 +727,7 @@
 
   <!-- Modal para Cadastro de Paciente -->
   <div class="modal fade" id="modalCadastroPaciente" tabindex="-1" role="dialog" aria-labelledby="modalCadastroPacienteLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered" role="document">
       <div class="modal-content">
         <!-- Header do Modal -->
         <div class="modal-header">
@@ -835,6 +851,39 @@
                   <i class="fas fa-city mr-1"></i>Município
                 </label>
                 <input type="text" class="form-control" id="modalMunicipio" name="municipio" placeholder="Nome da cidade">
+              </div>
+            </div>
+
+            <!-- Prioridade Administrativa -->
+            <div class="row mb-3">
+              <div class="col-12">
+                <div class="custom-control custom-checkbox">
+                  <input type="checkbox" class="custom-control-input" id="modalPrioridade" name="prioridade">
+                  <label class="custom-control-label" for="modalPrioridade">
+                    <i class="fas fa-star text-warning mr-1"></i>
+                    <strong>Paciente com Prioridade Administrativa</strong>
+                    <small class="text-muted d-block">Idoso (60+), gestante, lactante, pessoa com deficiência</small>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tipo de Prioridade (oculto inicialmente) -->
+            <div class="row mb-3" id="rowTipoPrioridade" style="display: none;">
+              <div class="col-12">
+                <label for="modalDescPrioridade" class="form-label">
+                  <i class="fas fa-info-circle mr-1"></i>Tipo de Prioridade
+                </label>
+                <select class="form-control" id="modalDescPrioridade" name="desc_prioridade">
+                  <option value="">Selecione o tipo...</option>
+                  <option value="Idoso">Idoso (60 anos ou mais)</option>
+                  <option value="Gestante">Gestante</option>
+                  <option value="Lactante">Lactante (mãe amamentando)</option>
+                  <option value="Pessoa com deficiência">Pessoa com deficiência</option>
+                  <option value="Autismo">Autismo (TEA)</option>
+                  <option value="Pessoa com criança de colo">Pessoa com criança de colo</option>
+                  <option value="Outro">Outro</option>
+                </select>
               </div>
             </div>
 
@@ -1028,6 +1077,11 @@
       $('.main-content > div').hide();
       $('#triagem-section').show();
       $('#busca-fichas-atendimento').hide();
+      carregarPacientesTriagem();
+    }
+
+    // Função para carregar pacientes da triagem
+    function carregarPacientesTriagem() {
       $.ajax({
         url: '/api/enfermeiro/pacientes-triagem',
         method: 'GET',
@@ -1047,12 +1101,46 @@
       });
     }
 
+    // Função para atualizar a lista de triagem
+    function atualizarTriagem() {
+      console.log("Atualizando lista de triagem...");
+      const btn = event.target.closest('button');
+      const originalHTML = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Atualizando...';
+
+      carregarPacientesTriagem();
+
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+      }, 1000);
+    }
+
     // Renderiza a lista de triagem
     function renderTriageList(patients) {
       let html = '';
       if(!patients || patients.length === 0) {
         html = '<p>Nenhum paciente aguardando triagem.</p>';
       } else {
+        // Ordenar pacientes:
+        // 1. Prioridade administrativa primeiro
+        // 2. Depois por ordem de chegada (criado_em crescente - mais antigo primeiro)
+        patients.sort(function(a, b) {
+          // Prioridade vem primeiro
+          const prioridadeA = a.prioridade ? 1 : 0;
+          const prioridadeB = b.prioridade ? 1 : 0;
+
+          if (prioridadeB !== prioridadeA) {
+            return prioridadeB - prioridadeA; // Prioridade primeiro (true > false)
+          }
+
+          // Se mesma prioridade, ordenar por data de chegada
+          const dateA = a.criado_em ? new Date(a.criado_em) : new Date(0);
+          const dateB = b.criado_em ? new Date(b.criado_em) : new Date(0);
+          return dateA - dateB;
+        });
+
         patients.forEach(function(p) {
           const sexo = p.sexo ? p.sexo : '—';
           const idade = (p.idade !== null && p.idade !== undefined) ? p.idade + ' anos' : '—';
@@ -1067,9 +1155,20 @@
             criado = p.hora_entrada;
           }
 
-          html += '\n<div class="patient-card">\n'
+          // Badge de prioridade
+          let prioridadeBadge = '';
+          if (p.prioridade) {
+            const descPrioridade = p.desc_prioridade || 'Prioridade';
+            prioridadeBadge = '<div class="mb-2"><span class="badge badge-warning" style="font-size: 0.9rem; padding: 6px 12px;"><i class="fas fa-star mr-1"></i>' + descPrioridade + '</span></div>';
+          }
+
+          // Estilo especial para pacientes com prioridade
+          const cardStyle = p.prioridade ? ' style="border-left: 4px solid #F59E0B; background-color: #FFFBEB;"' : '';
+
+          html += '\n<div class="patient-card"' + cardStyle + '>\n'
             + '  <div class="d-flex justify-content-between align-items-start">\n'
             + '    <div>\n'
+            + prioridadeBadge
             + '      <div class="title">' + (p.nome || 'Paciente') + '</div>\n'
             + '      <div class="meta">Idade: ' + idade + ' • Sexo: ' + sexo + '</div>\n'
             + '      <div class="meta">Ficha criada: <span class="badge-info">' + criado + '</span></div>\n'
@@ -1540,6 +1639,17 @@
       $('#modalCadastroPaciente').on('hidden.bs.modal', function () {
         $('#formCadastroPaciente')[0].reset();
         $('#btnSalvarPaciente').html('<i class="fas fa-save mr-1"></i>Cadastrar').prop('disabled', false);
+        $('#rowTipoPrioridade').hide(); // Ocultar campo de tipo de prioridade ao fechar
+      });
+
+      // Toggle para mostrar/ocultar tipo de prioridade
+      $('#modalPrioridade').on('change', function() {
+        if ($(this).is(':checked')) {
+          $('#rowTipoPrioridade').slideDown();
+        } else {
+          $('#rowTipoPrioridade').slideUp();
+          $('#modalDescPrioridade').val(''); // Limpar seleção
+        }
       });
     });
 
@@ -1568,6 +1678,14 @@
         if (value.trim() !== '') {
           dados[key] = value.trim();
         }
+      }
+
+      // Adicionar prioridade (checkbox não entra em FormData se não marcado)
+      dados.prioridade = $('#modalPrioridade').is(':checked');
+
+      // Se não tem prioridade, limpar desc_prioridade
+      if (!dados.prioridade) {
+        delete dados.desc_prioridade;
       }
 
       // Validações básicas - mais amigáveis

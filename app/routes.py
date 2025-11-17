@@ -339,6 +339,10 @@ def observacao_paciente():
                         numero_unico = str(paciente.id)[-2:].zfill(2)
                         atendimento_id = f"{prefixo_data}{numero_unico}"
 
+                    # Atualizar alergias do paciente se fornecidas
+                    if dados.get('alergias'):
+                        paciente.alergias = dados.get('alergias')
+
                     atendimento = Atendimento(
                         id=atendimento_id,
                         paciente_id=paciente.id,
@@ -347,8 +351,7 @@ def observacao_paciente():
                         data_atendimento=date.today(),
                         hora_atendimento=time(agora.hour, agora.minute, agora.second),
                         status='Em Observação',
-                        horario_observacao=agora,
-                        alergias=dados.get('alergias', '')
+                        horario_observacao=agora
                     )
                     db.session.add(atendimento)
                     db.session.flush()
@@ -575,7 +578,7 @@ def api_ficha_geral_paciente():
                 'fr': ultimo_atendimento.fr,
                 'dx': ultimo_atendimento.dx,
                 'triagem': ultimo_atendimento.triagem,
-                'alergias': ultimo_atendimento.alergias,
+                'alergias': ultimo_atendimento.paciente.alergias if ultimo_atendimento.paciente else '',
                 'classificacao_risco': ultimo_atendimento.classificacao_risco,
                 'anamnese_exame_fisico': ultimo_atendimento.anamnese_exame_fisico,
                 'observacao': ultimo_atendimento.observacao,
@@ -1167,7 +1170,7 @@ def api_dados_atendimento(atendimento_id):
                 'peso': atendimento.peso,
                 'altura': atendimento.altura,
                 'dx': atendimento.dx,
-                'alergias': atendimento.alergias,
+                'alergias': atendimento.paciente.alergias if atendimento.paciente else '',
                 'anamnese_exame_fisico': atendimento.anamnese_exame_fisico,
                 'conduta_final': atendimento.conduta_final,
                 'reavaliacao': atendimento.reavaliacao,
@@ -1466,7 +1469,7 @@ def api_dados_atendimento_completo(atendimento_id):
                 'peso': atendimento.peso,
                 'altura': atendimento.altura,
                 'dx': atendimento.dx,
-                'alergias': atendimento.alergias,
+                'alergias': atendimento.paciente.alergias if atendimento.paciente else '',
                 'anamnese_exame_fisico': atendimento.anamnese_exame_fisico,
                 'conduta_final': atendimento.conduta_final,
                 'reavaliacao': atendimento.reavaliacao,
@@ -1549,40 +1552,40 @@ def api_atendimento_anamnese_conduta(atendimento_id):
         return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
 
 
-# API para atualizar alergias do paciente no atendimento
-@bp.route('/api/atendimento/<string:atendimento_id>/alergias', methods=['PUT'])
+# API para atualizar alergias do paciente
+@bp.route('/api/paciente/<int:paciente_id>/alergias', methods=['PUT'])
 @login_required
-def api_atualizar_alergias(atendimento_id):
+def api_atualizar_alergias_paciente(paciente_id):
     """
-    Atualiza as alergias do paciente no atendimento.
+    Atualiza as alergias do paciente.
     Permite que enfermeiros e médicos atualizem as alergias conhecidas.
     """
     try:
         current_user = get_current_user()
         if not current_user:
             return jsonify({'success': False, 'message': 'Usuário não autenticado'}), 401
-        
+
         # Permitir que enfermeiros, médicos e multi atualizem alergias
         if current_user.cargo.lower() not in ['enfermeiro', 'medico', 'multi', 'admin']:
             return jsonify({'success': False, 'message': 'Acesso não autorizado'}), 403
 
         dados = request.get_json() or {}
         novas_alergias = dados.get('alergias')
-        
+
         # Converter string vazia em None
         if isinstance(novas_alergias, str) and novas_alergias.strip() == '':
             novas_alergias = None
 
-        atendimento = Atendimento.query.get(atendimento_id)
-        if not atendimento:
-            return jsonify({'success': False, 'message': 'Atendimento não encontrado'}), 404
+        paciente = Paciente.query.get(paciente_id)
+        if not paciente:
+            return jsonify({'success': False, 'message': 'Paciente não encontrado'}), 404
 
-        # Atualizar alergias
-        atendimento.alergias = novas_alergias
+        # Atualizar alergias do paciente
+        paciente.alergias = novas_alergias
 
         db.session.commit()
 
-        logging.info(f'Alergias atualizadas para atendimento {atendimento_id} por {current_user.nome} (ID: {current_user.id})')
+        logging.info(f'Alergias atualizadas para paciente {paciente_id} por {current_user.nome} (ID: {current_user.id})')
 
         return jsonify({
             'success': True,
@@ -1591,8 +1594,26 @@ def api_atualizar_alergias(atendimento_id):
         })
     except Exception as e:
         db.session.rollback()
-        logging.error(f"Erro ao atualizar alergias do atendimento: {str(e)}")
+        logging.error(f"Erro ao atualizar alergias do paciente: {str(e)}")
         logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
+
+# API LEGADA - Mantida para compatibilidade, redireciona para atualizar alergias do paciente
+@bp.route('/api/atendimento/<string:atendimento_id>/alergias', methods=['PUT'])
+@login_required
+def api_atualizar_alergias(atendimento_id):
+    """
+    [LEGADO] Endpoint mantido para compatibilidade. Atualiza alergias do paciente vinculado ao atendimento.
+    """
+    try:
+        atendimento = Atendimento.query.get(atendimento_id)
+        if not atendimento:
+            return jsonify({'success': False, 'message': 'Atendimento não encontrado'}), 404
+
+        # Redireciona para o novo endpoint que atualiza o paciente
+        return api_atualizar_alergias_paciente(atendimento.paciente_id)
+    except Exception as e:
+        logging.error(f"Erro ao processar atualização de alergias (legado): {str(e)}")
         return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
 
 
@@ -9025,7 +9046,24 @@ def criar_paciente():
             paciente.municipio = dados.get('municipio', '').strip() or None
             paciente.bairro = dados.get('bairro', '').strip() or None
             paciente.cor = dados.get('cor', '').strip() or 'Não informada'
-            
+
+            # Prioridade administrativa
+            paciente.prioridade = dados.get('prioridade', False)
+            if paciente.prioridade:
+                paciente.desc_prioridade = dados.get('desc_prioridade', '').strip() or None
+            else:
+                paciente.desc_prioridade = None
+
+            # Auto-detectar idosos (60+) e marcar como prioridade
+            from datetime import date
+            idade = (date.today() - data_nascimento).days // 365
+            if idade >= 60 and not paciente.prioridade:
+                paciente.prioridade = True
+                paciente.desc_prioridade = f'Idoso - {idade} anos'
+
+            # Alergias
+            paciente.alergias = dados.get('alergias', '').strip() or None
+
             # Cartão SUS
             if cartao_sus:
                 paciente.cartao_sus = re.sub(r'\D', '', cartao_sus)
@@ -10298,7 +10336,7 @@ def imprimir_prescricao(prescricao_id):
         '{{ paciente_nome_filiacao}}': paciente.filiacao or '',
         '{{ paciente_endereço }}': paciente.endereco or '',
         '{{ municipio_residencia }}': paciente.municipio or '',
-        '{{atendimentos_alergia}}': atendimento.alergias or '',
+        '{{atendimentos_alergia}}': paciente.alergias or '',
         '{{ prescricao_dieta }}': prescricao.texto_dieta or '',
     }
 
@@ -10402,7 +10440,7 @@ def imprimir_prescricao_por_atendimento(atendimento_id):
             '{{ paciente_nome_filiacao}}': paciente.filiacao or '',
             '{{ paciente_endereço }}': paciente.endereco or '',
             '{{ municipio_residencia }}': paciente.municipio or '',
-            '{{atendimentos_alergia}}': atendimento.alergias or '',
+            '{{atendimentos_alergia}}': paciente.alergias or '',
             '{{ prescricao_dieta }}': prescricao.texto_dieta or '',
         }
 
@@ -10887,7 +10925,7 @@ def imprimir_ficha_atendimento(atendimento_id):
                              atendimento_altura=atendimento.altura or '',
                              atendimento_dx=atendimento.dx or '',
                              atendimento_fr=atendimento.fr or '',
-                             atendimento_alergias=atendimento.alergias or '',
+                             atendimento_alergias=paciente.alergias or '',
                              atendimento_horario_triagem=fmt_datetime(atendimento.horario_triagem) or 'Não realizado',
                              atendimento_triagem=atendimento.triagem or '',
                              atendimento_horario_consulta_medica=fmt_datetime(atendimento.horario_consulta_medica) or 'Não realizado',
@@ -14722,7 +14760,9 @@ def api_enfermeiro_pacientes_triagem():
                     'hora_entrada': atendimento.hora_atendimento.strftime('%H:%M') if atendimento.hora_atendimento else None,
                     'criado_em': criado_em,
                     'recepcionista_nome': recepcionista.nome if recepcionista else None,
-                    'atendimento_id': atendimento.id
+                    'atendimento_id': atendimento.id,
+                    'prioridade': paciente.prioridade,
+                    'desc_prioridade': paciente.desc_prioridade
                 })
 
         return jsonify({
@@ -14774,7 +14814,10 @@ def api_enfermeiro_paciente_detalhado():
             'bairro': paciente.bairro,
             'municipio': paciente.municipio,
             'telefone': paciente.telefone,
-            'filiacao': paciente.filiacao
+            'filiacao': paciente.filiacao,
+            'alergias': paciente.alergias,
+            'prioridade': paciente.prioridade,
+            'desc_prioridade': paciente.desc_prioridade
         }
 
         return jsonify({
@@ -16072,10 +16115,13 @@ def salvar_triagem_normal(atendimento_id):
         atendimento.fr = _to_none_if_empty(dados.get('fr'))
         atendimento.dx = _to_none_if_empty(dados.get('dx'))
         atendimento.triagem = _to_none_if_empty(dados.get('triagem'))
-        atendimento.alergias = _to_none_if_empty(dados.get('alergias'))
         atendimento.classificacao_risco = _to_none_if_empty(dados.get('classificacao_risco'))
         atendimento.anamnese_exame_fisico = _to_none_if_empty(dados.get('anamnese_exame_fisico'))
         atendimento.observacao = _to_none_if_empty(dados.get('observacao'))
+
+        # Atualizar alergias do paciente (não do atendimento)
+        if atendimento.paciente:
+            atendimento.paciente.alergias = _to_none_if_empty(dados.get('alergias'))
 
         # Definir enfermeiro responsável e horário da triagem
         atendimento.enfermeiro_id = current_user.id
@@ -16146,10 +16192,13 @@ def salvar_triagem_gestante(atendimento_id):
         atendimento.fr = _to_none_if_empty(dados.get('fr'))
         atendimento.dx = _to_none_if_empty(dados.get('dx'))
         atendimento.triagem = _to_none_if_empty(dados.get('triagem'))
-        atendimento.alergias = _to_none_if_empty(dados.get('alergias'))
         atendimento.classificacao_risco = _to_none_if_empty(dados.get('classificacao_risco'))
         atendimento.anamnese_exame_fisico = _to_none_if_empty(dados.get('anamnese_exame_fisico'))
         atendimento.observacao = _to_none_if_empty(dados.get('observacao'))
+
+        # Atualizar alergias do paciente (não do atendimento)
+        if atendimento.paciente:
+            atendimento.paciente.alergias = _to_none_if_empty(dados.get('alergias'))
 
         # Definir enfermeiro responsável e horário da triagem
         atendimento.enfermeiro_id = current_user.id

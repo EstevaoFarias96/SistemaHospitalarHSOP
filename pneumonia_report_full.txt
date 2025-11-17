@@ -1,0 +1,765 @@
+WARNING:root:DATABASE_URL não encontrada, usando SQLite como fallback
+🔌 Connecting to PRODUCTION database...
+================================================================================
+SCOUTING FOR PNEUMONIA PATIENTS - PRODUCTION DATABASE
+================================================================================
+Period: 01/07/2025 to 30/11/2025
+CID Codes: J18.9, J18, J189, J180
+================================================================================
+
+📊 Total internacoes in database: 841
+📅 Database date range: 27/05/2025 to 10/11/2025
+
+✅ Total pneumonia patients found: 58
+
+✓ Data exported to: pneumonia_patients_prod_20251110_150449.csv
+
+================================================================================
+PATIENT SUMMARY
+================================================================================
+
+[1] Patient: ALBERTINA RIBEIRO LIRA
+    ID: 2287 | Internação: 821 | Atendimento: 25115702
+    Age: 76 anos | Sex: FEMININO
+    Admission: 06/11/2025 18:50
+    Discharge: Em internação
+    CID Principal: J18.9
+    Diagnosis: N/A
+    Doctor: Tallys de Souza Furtado
+    Bed: Alojamento Conjunto
+--------------------------------------------------------------------------------
+
+[2] Patient: FRANCISCA LUIZ DE SOUZA SILVA
+    ID: 2285 | Internação: 819 | Atendimento: 25114172
+    Age: 83 anos | Sex: FEMININO
+    Admission: 06/11/2025 17:49
+    Discharge: 10/11/2025 13:46
+    CID Principal: J180
+    Diagnosis: PNEUMONIA
+    Doctor: Francisco Anderson Vasconcelos de Sales
+    Bed: Alojamento Feminino 1
+--------------------------------------------------------------------------------
+
+[3] Patient: FRANCISCO CHAGAS DO NASCIMENTO
+    ID: 1351 | Internação: 816 | Atendimento: 25113800
+    Age: 90 anos | Sex: MASCULINO
+    Admission: 06/11/2025 01:37
+    Discharge: 09/11/2025 13:48
+    CID Principal: J18.9
+    Diagnosis: PNEUMONIA/ITU
+    Doctor: Isabely Azevedo Frota Mont Alverne
+    Bed: Alojamento Masculino 1
+--------------------------------------------------------------------------------
+
+[4] Patient: ANTONY MESQUITA DE SOUZA
+    ID: 2048 | Internação: 805 | Atendimento: 25117080
+    Age: 0 anos | Sex: MASCULINO
+    Admission: 04/11/2025 06:23
+    Discharge: 04/11/2025 13:46
+    CID Principal: J189
+    Diagnosis: PAC
+    Doctor: Isabely Azevedo Frota Mont Alverne
+    Bed: Pediatria
+--------------------------------------------------------------------------------
+
+[5] Patient: AYSLLA EMANUELLY JUVINIANO DELFINO
+    ID: 2004 | Internação: 802 | Atendimento: 25117094
+    Age: 0 anos | Sex: FEMININO
+    Admission: 03/11/2025 22:44
+    Discharge: 04/11/2025 15:28
+    CID Principal: J18.9
+    Diagnosis: PNEUMONIA BACTERIANA
+    Doctor: Isabely Azevedo Frota Mont Alverne
+    Bed: Alojamento Conjunto
+--------------------------------------------------------------------------------
+
+[6] Patient: MARIA VILANI ALVES MONTEIRO
+    ID: 1452 | Internação: 773 | Atendimento: 25103916
+    Age: 87 anos | Sex: FEMININO
+    Admission: 29/10/2025 18:44
+    Discharge: 04/11/2025 15:30
+    CID Principal: J18
+    Diagnosis: PNEUMONIA 
+    Doctor: Francisco Neuton Costa de Paulo
+    Bed: Alojamento Conjunto
+--------------------------------------------------------------------------------
+
+[7] Patient: FRANCISCO SAMUEL CARDOSO FERREIRA
+    ID: 1201 | Internação: 759 | Atendimento: 25108302
+    Age: 4 anos | Sex: MASCULINO
+    Admission: 27/10/2025 18:57
+    Discharge: 29/10/2025 16:52
+    CID Principal: J18
+    Diagnosis: PNEUMONIA
+    Doctor: Tamizi Sampaio Teles
+    Bed: Alojamento Conjunto
+--------------------------------------------------------------------------------
+
+[8] Patient: JOATAN PONTES GOMES
+    ID: 1003 | Internação: 741 | Atendimento: 25106552
+    Age: 0 anos | Sex: MASCULINO
+    Admission: 25/10/2025 19:03
+    Discharge: 27/10/2025 12:55
+    CID Principal: J180
+    Diagnosis: PNEUMONIA
+    Doctor: Francisco Anderson Vasconcelos de Sales
+    Bed: Pediatria
+--------------------------------------------------------------------------------
+
+[9] Patient: MARIA ESTHER SOUSA RICARDO
+    ID: 950 | Internação: 736 | Atendimento: 25102541
+    Age: 1 anos | Sex: MASCULINO
+    Admission: 25/10/2025 03:39
+    Discharge: 27/10/2025 14:59
+    CID Principal: J18
+    Diagnosis: PNEUMONIA 
+    Doctor: Caio César Carneiro
+    Bed: Alojamento Conjunto
+--------------------------------------------------------------------------------
+
+[10] Patient: JOSE EDMAR ARAUJO
+    ID: 570 | Internação: 532 | Atendimento: 25102276
+    Age: 52 anos | Sex: M
+    Admission: 22/10/2025 13:43
+    Discharge: 22/10/2025 13:44
+    CID Principal: J18
+    Diagnosis: EAP / PAC
+    Doctor: Francisco Neuton Costa de Paulo
+    Bed: Alojamento Conjunto
+--------------------------------------------------------------------------------
+
+[11] Patient: JOSE EDMAR ARAUJO
+    ID: 570 | Internação: 531 | Atendimento: 25102268
+    Age: 52 anos | Sex: M
+    Admission: 22/10/2025 13:43
+    Discharge: 28/10/2025 14:24
+    CID Principal: J18
+    Diagnosis: EAP / PAC
+    Doctor: Francisco Neuton Costa de Paulo
+    Bed: Alojamento Conjunto
+--------------------------------------------------------------------------------
+
+[12] Patient: JOSE EDMAR ARAUJO
+    ID: 570 | Internação: 524 | Atendimento: 25102223
+    Age: 52 anos | Sex: M
+    Admission: 22/10/2025 05:22
+    Discharge: 25/10/2025 08:21
+    CID Principal: J18
+    Diagnosis: N/A
+    Doctor: Yarla Santos de Figueiredo Lima Cavalcante
+    Bed: Observação
+--------------------------------------------------------------------------------
+
+[13] Patient: MARIA FERREIRA RODRIGUES
+    ID: 569 | Internação: 523 | Atendimento: 25102175
+    Age: 72 anos | Sex: F
+    Admission: 21/10/2025 21:34
+    Discharge: Em internação
+    CID Principal: J18.9
+    Diagnosis: N/A
+    Doctor: Lidia Maria da Cunha Machado
+    Bed: Alojamento Feminino 1
+--------------------------------------------------------------------------------
+
+[14] Patient: LUCIVALDO MENEZES DO NASCIMENTO
+    ID: 559 | Internação: 511 | Atendimento: 25102033
+    Age: 4 anos | Sex: M
+    Admission: 20/10/2025 23:53
+    Discharge: 24/10/2025 16:19
+    CID Principal: J18.9
+    Diagnosis: PNEUMONIA
+    Doctor: Isabely Azevedo Frota Mont Alverne
+    Bed: Alojamento Conjunto
+--------------------------------------------------------------------------------
+
+[15] Patient: TEREZINHA PINTO ARRUDA FERRO
+    ID: 556 | Internação: 507 | Atendimento: 25102059
+    Age: 86 anos | Sex: F
+    Admission: 20/10/2025 15:43
+    Discharge: 26/10/2025 16:01
+    CID Principal: J18.9
+    Diagnosis: PNEUMONIA- 
+    Doctor: Isabely Azevedo Frota Mont Alverne
+    Bed: Alojamento Feminino 1
+--------------------------------------------------------------------------------
+
+[16] Patient: MARIA CLEONICE RICARDO DA SILVA
+    ID: 523 | Internação: 485 | Atendimento: 25101630
+    Age: 75 anos | Sex: F
+    Admission: 16/10/2025 15:23
+    Discharge: 20/10/2025 12:54
+    CID Principal: J189
+    Diagnosis: PNEUMONIA
+    Doctor: Francisco Anderson Vasconcelos de Sales
+    Bed: Alojamento Feminino 1
+--------------------------------------------------------------------------------
+
+[17] Patient: RAQUELE REGINO FELIZ
+    ID: 499 | Internação: 468 | Atendimento: 25101340
+    Age: 16 anos | Sex: F
+    Admission: 14/10/2025 00:19
+    Discharge: 17/10/2025 09:16
+    CID Principal: J18.9 
+    Diagnosis: PNEUMONIA
+    Doctor: Isabely Azevedo Frota Mont Alverne
+    Bed: Alojamento Conjunto
+--------------------------------------------------------------------------------
+
+[18] Patient: MARIA LUZANIRA MARQUES COSTA 
+    ID: 492 | Internação: 465 | Atendimento: 25101291
+    Age: 67 anos | Sex: F
+    Admission: 12/10/2025 20:54
+    Discharge: 17/10/2025 09:17
+    CID Principal: J18
+    Diagnosis: PNEUMONIA
+    Doctor: Cleiton
+    Bed: Alojamento Feminino 1
+--------------------------------------------------------------------------------
+
+[19] Patient: FRANCISCO RODRIGUES
+    ID: 493 | Internação: 461 | Atendimento: 25101264
+    Age: 64 anos | Sex: M
+    Admission: 12/10/2025 14:44
+    Discharge: 18/10/2025 13:00
+    CID Principal: J18
+    Diagnosis: PNEUMONIA
+    Doctor: Cleiton
+    Bed: Alojamento Masculino 1
+--------------------------------------------------------------------------------
+
+[20] Patient: MARIA LUZANIRA MARQUES COSTA 
+    ID: 492 | Internação: 460 | Atendimento: 25101266
+    Age: 67 anos | Sex: F
+    Admission: 12/10/2025 14:02
+    Discharge: 15/10/2025 19:25
+    CID Principal: J18
+    Diagnosis: N/A
+    Doctor: Cleiton
+    Bed: Observação
+--------------------------------------------------------------------------------
+
+[21] Patient: ANA LAURA FERREIRA DE MARIA
+    ID: 491 | Internação: 459 | Atendimento: 25101194
+    Age: 0 anos | Sex: F
+    Admission: 11/10/2025 22:15
+    Discharge: 14/10/2025 14:13
+    CID Principal: J189
+    Diagnosis: PNEUMONIA
+    Doctor: Francisco Anderson Vasconcelos de Sales
+    Bed: Pediatria
+--------------------------------------------------------------------------------
+
+[22] Patient: MARIA AGTHATA RIBEIRO FERREIRA
+    ID: 484 | Internação: 452 | Atendimento: 25101080
+    Age: 0 anos | Sex: M
+    Admission: 11/10/2025 02:44
+    Discharge: 14/10/2025 13:48
+    CID Principal: J18,9
+    Diagnosis: PNEUMONIA
+    Doctor: Isabely Azevedo Frota Mont Alverne
+    Bed: Pediatria
+--------------------------------------------------------------------------------
+
+[23] Patient: SEBASTIÃO LUCA
+    ID: 53 | Internação: 450 | Atendimento: 25101070
+    Age: 52 anos | Sex: M
+    Admission: 10/10/2025 14:01
+    Discharge: 18/10/2025 12:50
+    CID Principal: J189
+    Diagnosis: PNEUMONIA BACTERIANA
+    Doctor: Tallys de Souza Furtado
+    Bed: Alojamento Masculino 1
+--------------------------------------------------------------------------------
+
+[24] Patient: MARIA AMARO DE SOUZA
+    ID: 481 | Internação: 448 | Atendimento: 25100924
+    Age: 74 anos | Sex: F
+    Admission: 09/10/2025 19:08
+    Discharge: 14/10/2025 14:30
+    CID Principal: J18.9
+    Diagnosis: PNEUMONIA + DPOC EXARCEBADO
+    Doctor: Francisco Anderson Vasconcelos de Sales
+    Bed: Alojamento Feminino 1
+--------------------------------------------------------------------------------
+
+[25] Patient: JOSE AIRTON MARCAL
+    ID: 475 | Internação: 443 | Atendimento: 25100854
+    Age: 81 anos | Sex: M
+    Admission: 08/10/2025 19:00
+    Discharge: 21/10/2025 15:34
+    CID Principal: J18.9
+    Diagnosis: PNEUMONIA E TORÇÃO DE PÉ ESQUERDO.
+    Doctor: Isabely Azevedo Frota Mont Alverne
+    Bed: Alojamento Masculino 1
+--------------------------------------------------------------------------------
+
+[26] Patient: MARIA PEREIRA DOS SANTOS
+    ID: 45 | Internação: 439 | Atendimento: 25100795
+    Age: 78 anos | Sex: F
+    Admission: 07/10/2025 19:05
+    Discharge: 09/10/2025 13:56
+    CID Principal: J18.9 
+    Diagnosis: DPOC EXACERBADA
+    Doctor: Lidia Maria da Cunha Machado
+    Bed: Alojamento Feminino 1
+--------------------------------------------------------------------------------
+
+[27] Patient: MARIA DO LIVRAMENTO PAIVA LIMA 
+    ID: 470 | Internação: 437 | Atendimento: 25100642
+    Age: 75 anos | Sex: F
+    Admission: 06/10/2025 16:08
+    Discharge: 14/10/2025 14:15
+    CID Principal: J189
+    Diagnosis: PNEUMONIA
+    Doctor: Tamizi Sampaio Teles
+    Bed: Alojamento Feminino 1
+--------------------------------------------------------------------------------
+
+[28] Patient: MARIA CREUZA SERAFIM
+    ID: 462 | Internação: 428 | Atendimento: 25100333
+    Age: 75 anos | Sex: F
+    Admission: 03/10/2025 17:00
+    Discharge: 05/10/2025 12:26
+    CID Principal: J18
+    Diagnosis: N/A
+    Doctor: Luana Cristina Farias Castro
+    Bed: Observação
+--------------------------------------------------------------------------------
+
+[29] Patient: PEDRO JORGE PELEGRINO XAVIER
+    ID: 455 | Internação: 422 | Atendimento: 25100274
+    Age: 42 anos | Sex: M
+    Admission: 02/10/2025 20:03
+    Discharge: 07/10/2025 14:52
+    CID Principal: J180
+    Diagnosis: PNEUMONIA
+    Doctor: Francisco Anderson Vasconcelos de Sales
+    Bed: Alojamento Masculino 1
+--------------------------------------------------------------------------------
+
+[30] Patient: ANTONIO BENEDITO DA SILVA
+    ID: 448 | Internação: 413 | Atendimento: 25100167
+    Age: 54 anos | Sex: M
+    Admission: 02/10/2025 02:57
+    Discharge: 05/10/2025 14:36
+    CID Principal: J180
+    Diagnosis: PNEUMONIA
+    Doctor: Cleiton
+    Bed: Alojamento Masculino 1
+--------------------------------------------------------------------------------
+
+[31] Patient: JANDER ARRUDA ROSA 
+    ID: 441 | Internação: 405 | Atendimento: 25092960
+    Age: 35 anos | Sex: M
+    Admission: 30/09/2025 02:43
+    Discharge: 14/10/2025 03:04
+    CID Principal: J189
+    Diagnosis: PNEUMONIA GRAVE COM DERRAME PLEURAL
+
+    Doctor: Diego Lopes e Silva
+    Bed: Alojamento Conjunto
+--------------------------------------------------------------------------------
+
+[32] Patient: MARIA KEVYNNA TOMÉ FLORÊNCIO
+    ID: 429 | Internação: 391 | Atendimento: 25092628
+    Age: 4 anos | Sex: F
+    Admission: 26/09/2025 07:07
+    Discharge: 30/09/2025 13:54
+    CID Principal: J18
+    Diagnosis: PNM
+    Doctor: Paulo  Firmino
+    Bed: Pediatria
+--------------------------------------------------------------------------------
+
+[33] Patient: RAIMUNDO NONATO ARRUDA
+    ID: 426 | Internação: 388 | Atendimento: 25092563
+    Age: 86 anos | Sex: M
+    Admission: 25/09/2025 05:46
+    Discharge: 10/10/2025 16:28
+    CID Principal: J180
+    Diagnosis: BRONCOPNEUMONIA
+    Doctor: Cleiton
+    Bed: Alojamento Masculino 1
+--------------------------------------------------------------------------------
+
+[34] Patient: FRANCISCO JOSE DOS SANTOS ELIAS
+    ID: 415 | Internação: 380 | Atendimento: 25092361
+    Age: 6 anos | Sex: M
+    Admission: 24/09/2025 00:41
+    Discharge: 30/09/2025 14:17
+    CID Principal: J18.1
+    Diagnosis: PNEUMONIA
+    Doctor: Cleiton
+    Bed: Pediatria
+--------------------------------------------------------------------------------
+
+[35] Patient: Paulo Edinardo Serido de Sousa
+    ID: 310 | Internação: 377 | Atendimento: 25092397
+    Age: 53 anos | Sex: M
+    Admission: 23/09/2025 12:46
+    Discharge: 09/10/2025 14:35
+    CID Principal: J18.9 
+    Diagnosis: NODULO CERVICAL A/E
+    Doctor: Lidia Maria da Cunha Machado
+    Bed: Alojamento Masculino 1
+--------------------------------------------------------------------------------
+
+[36] Patient: FRANCISCA DA SILVA
+    ID: 383 | Internação: 347 | Atendimento: 25091888
+    Age: 83 anos | Sex: F
+    Admission: 18/09/2025 19:41
+    Discharge: 26/09/2025 20:35
+    CID Principal: J180
+    Diagnosis: Não informado
+    Doctor: Francisco Anderson Vasconcelos de Sales
+    Bed: Alojamento Feminino 1
+--------------------------------------------------------------------------------
+
+[37] Patient: FRANCISCA DA SILVA
+    ID: 383 | Internação: 346 | Atendimento: 25091841
+    Age: 83 anos | Sex: F
+    Admission: 18/09/2025 19:41
+    Discharge: 26/09/2025 20:35
+    CID Principal: J180
+    Diagnosis: Não informado
+    Doctor: Francisco Anderson Vasconcelos de Sales
+    Bed: Alojamento Feminino 1
+--------------------------------------------------------------------------------
+
+[38] Patient: francisco alexandre 
+    ID: 374 | Internação: 336 | Atendimento: 25091724
+    Age: 56 anos | Sex: M
+    Admission: 17/09/2025 05:21
+    Discharge: 26/09/2025 20:33
+    CID Principal: J18.9
+    Diagnosis: Não informado
+    Doctor: Caio César Carneiro
+    Bed: Alojamento Conjunto
+--------------------------------------------------------------------------------
+
+[39] Patient: RAIMUNDO NONATO ARRUDA
+    ID: 359 | Internação: 320 | Atendimento: 25091484
+    Age: 86 anos | Sex: M
+    Admission: 14/09/2025 03:40
+    Discharge: 24/09/2025 15:21
+    CID Principal: J18
+    Diagnosis: PNEUMONIA BRONCOASPIRATIVA
+    Doctor: Cleiton
+    Bed: Alojamento Masculino 1
+--------------------------------------------------------------------------------
+
+[40] Patient: Paulo Edinardo Serido de Sousa
+    ID: 310 | Internação: 270 | Atendimento: 25090318
+    Age: 53 anos | Sex: M
+    Admission: 03/09/2025 18:58
+    Discharge: 23/09/2025 13:02
+    CID Principal: J18.9
+    Diagnosis: Não informado
+    Doctor: Cleiton
+    Bed: Observação 1
+--------------------------------------------------------------------------------
+
+[41] Patient: ANA LUCIA REINALDO
+    ID: 305 | Internação: 264 | Atendimento: 25090175
+    Age: 52 anos | Sex: F
+    Admission: 01/09/2025 14:10
+    Discharge: 05/09/2025 16:50
+    CID Principal: J18.9 
+    Diagnosis: PNEUMONIA
+    Doctor: Lidia Maria da Cunha Machado
+    Bed: Alojamento Feminino 1
+--------------------------------------------------------------------------------
+
+[42] Patient: ENZO GABRIEL ARAÚJO SANTOS 
+    ID: 304 | Internação: 263 | Atendimento: 25090177
+    Age: 7 anos | Sex: M
+    Admission: 01/09/2025 12:57
+    Discharge: 05/09/2025 14:57
+    CID Principal: J18.9 
+    Diagnosis: PNEUMONIA
+    Doctor: Lidia Maria da Cunha Machado
+    Bed: Pediatria
+--------------------------------------------------------------------------------
+
+[43] Patient: MARIA DA SOLIDADE FERREIRA
+    ID: 297 | Internação: 256 | Atendimento: 25083159
+    Age: 89 anos | Sex: F
+    Admission: 31/08/2025 12:36
+    Discharge: 03/09/2025 15:27
+    CID Principal: J18.9
+    Diagnosis: PNEUMONIA
+    Doctor: Yarla Santos de Figueiredo Lima Cavalcante
+    Bed: Alojamento Feminino 1
+--------------------------------------------------------------------------------
+
+[44] Patient: LUIS DE ARAUJO
+    ID: 173 | Internação: 253 | Atendimento: 25083063
+    Age: 77 anos | Sex: M
+    Admission: 30/08/2025 17:24
+    Discharge: 06/09/2025 12:08
+    CID Principal: J189
+    Diagnosis: PNEUMONIA
+    Doctor: Francisco Anderson Vasconcelos de Sales
+    Bed: Alojamento Masculino 1
+--------------------------------------------------------------------------------
+
+[45] Patient: MARIA DAS GRAÇAS DE SOUZA
+    ID: 278 | Internação: 249 | Atendimento: 25082988
+    Age: 71 anos | Sex: F
+    Admission: 29/08/2025 13:36
+    Discharge: 03/09/2025 15:25
+    CID Principal: J18.9
+    Diagnosis: PNEUMONIA
+    Doctor: Tallys de Souza Furtado
+    Bed: Alojamento Feminino 1
+--------------------------------------------------------------------------------
+
+[46] Patient: ALLANA DAVYLLA FERREIRA DE ANDRADE
+    ID: 264 | Internação: 231 | Atendimento: 25082672
+    Age: 2 anos | Sex: F
+    Admission: 26/08/2025 19:19
+    Discharge: 29/08/2025 16:47
+    CID Principal: J18
+    Diagnosis: PAC GRAVE
+    Doctor: Yarla Santos de Figueiredo Lima Cavalcante
+    Bed: Alojamento Conjunto
+--------------------------------------------------------------------------------
+
+[47] Patient: RODRIGO CAIO NASCIMENTO FERREIRA 
+    ID: 256 | Internação: 223 | Atendimento: 25082425
+    Age: 7 anos | Sex: M
+    Admission: 25/08/2025 01:04
+    Discharge: 30/08/2025 14:53
+    CID Principal: J18.9
+    Diagnosis: PNEUMONIA
+    Doctor: Caio César Carneiro
+    Bed: Pediatria
+--------------------------------------------------------------------------------
+
+[48] Patient: CLAUDIO DO NASCIMENTO MARCIANO
+    ID: 39 | Internação: 183 | Atendimento: 25081469
+    Age: 39 anos | Sex: M
+    Admission: 14/08/2025 23:49
+    Discharge: 23/08/2025 12:42
+    CID Principal: J189
+    Diagnosis: PAC + COVID
+    Doctor: Diego Lopes e Silva
+    Bed: Alojamento Conjunto
+--------------------------------------------------------------------------------
+
+[49] Patient: COSMA ROSA LUCA 
+    ID: 187 | Internação: 160 | Atendimento: 25081121
+    Age: 79 anos | Sex: F
+    Admission: 11/08/2025 13:59
+    Discharge: 14/08/2025 13:18
+    CID Principal: J18.9
+    Diagnosis: PAC
+    Doctor: Lidia Maria da Cunha Machado
+    Bed: Alojamento Feminino 1
+--------------------------------------------------------------------------------
+
+[50] Patient: COSMA ROSA LUCA 
+    ID: 187 | Internação: 159 | Atendimento: 25081177
+    Age: 79 anos | Sex: F
+    Admission: 11/08/2025 13:59
+    Discharge: 17/08/2025 13:38
+    CID Principal: J18.9
+    Diagnosis: PNEUMONIA- RESOLVIDO
+DPOC - RESOLVIDO
+    Doctor: Lidia Maria da Cunha Machado
+    Bed: Alojamento Feminino 1
+--------------------------------------------------------------------------------
+
+[51] Patient: LUIS ABERLADO MENDES 
+    ID: 150 | Internação: 121 | Atendimento: 25072516
+    Age: 85 anos | Sex: M
+    Admission: 26/07/2025 01:29
+    Discharge: 27/07/2025 14:24
+    CID Principal: J18.9 
+    Diagnosis: PNEUMONIA
+    Doctor: Cleiton
+    Bed: Alojamento Masculino 1
+--------------------------------------------------------------------------------
+
+[52] Patient: MARIA RITA MOTA DA SILVA 
+    ID: 143 | Internação: 115 | Atendimento: 25072581
+    Age: 73 anos | Sex: F
+    Admission: 25/07/2025 14:20
+    Discharge: 07/08/2025 12:28
+    CID Principal: J189
+    Diagnosis: N/A
+    Doctor: Diego Lopes e Silva
+    Bed: Observação
+--------------------------------------------------------------------------------
+
+[53] Patient: FRANCISCO DEVISON RODRIGUES DE OLIVEIRA
+    ID: 58 | Internação: 114 | Atendimento: 25072547
+    Age: 3 anos | Sex: M
+    Admission: 25/07/2025 13:56
+    Discharge: 31/07/2025 13:15
+    CID Principal: J189
+    Diagnosis: Não informado
+    Doctor: Diego Lopes e Silva
+    Bed: Alojamento Conjunto
+--------------------------------------------------------------------------------
+
+[54] Patient: ANTONIA FERREIRA MARTINS 
+    ID: 136 | Internação: 106 | Atendimento: 25072265
+    Age: 86 anos | Sex: F
+    Admission: 22/07/2025 19:14
+    Discharge: 29/07/2025 15:36
+    CID Principal: J189
+    Diagnosis: DPOC + PNM
+    Doctor: Lidia Maria da Cunha Machado
+    Bed: Alojamento Feminino 1
+--------------------------------------------------------------------------------
+
+[55] Patient: CECILIA RODRIGUES SOBRINHO
+    ID: 134 | Internação: 104 | Atendimento: 25072066
+    Age: 86 anos | Sex: F
+    Admission: 20/07/2025 20:15
+    Discharge: 23/07/2025 14:56
+    CID Principal: J18.9
+    Diagnosis: PNEUMONIA
+OBITO NO DIA 22/07
+    Doctor: Karen Maria Ferreira Tavares
+    Bed: Alojamento Feminino 1
+--------------------------------------------------------------------------------
+
+[56] Patient: FRANCISCO LENILTON CAVALCANTE
+    ID: 132 | Internação: 102 | Atendimento: 25071816
+    Age: 49 anos | Sex: M
+    Admission: 18/07/2025 19:04
+    Discharge: 27/07/2025 12:48
+    CID Principal: J18.9
+    Diagnosis: Não informado
+    Doctor: Tallys de Souza Furtado
+    Bed: Alojamento Masculino 1
+--------------------------------------------------------------------------------
+
+[57] Patient: FRANCISCA PEDRO DA SILVA 
+    ID: 126 | Internação: 96 | Atendimento: 25071663
+    Age: 89 anos | Sex: F
+    Admission: 16/07/2025 14:13
+    Discharge: 20/07/2025 12:32
+    CID Principal: J18.9
+    Diagnosis: PNEUMONIA ADQUIRIDA NA COMINIDADE
+    Doctor: Francisco Neuton Costa de Paulo
+    Bed: Observação 2
+--------------------------------------------------------------------------------
+
+[58] Patient: davi luiz justino de jesus
+    ID: 82 | Internação: 73 | Atendimento: 25070741
+    Age: 7 anos | Sex: M
+    Admission: 07/07/2025 15:07
+    Discharge: 08/07/2025 18:30
+    CID Principal: J18.9
+    Diagnosis: PACIENTE TRANSFERIDO PARA HRN, DEVIDO PIORA CLINICA
+    Doctor: Lidia Maria da Cunha Machado
+    Bed: Pediatria
+--------------------------------------------------------------------------------
+
+================================================================================
+PATIENT PROFILE STUDY - PNEUMONIA (CID J18.x)
+================================================================================
+
+📊 TOTAL PATIENTS: 58
+
+============================================================
+1. GENDER DISTRIBUTION
+============================================================
+   FEMININO: 4 (6.9%)
+   MASCULINO: 5 (8.6%)
+   M: 25 (43.1%)
+   F: 24 (41.4%)
+
+============================================================
+2. AGE DISTRIBUTION
+============================================================
+   Average age: 51.8 years
+   Min age: 0 years
+   Max age: 90 years
+
+   Age Group Distribution:
+   - 0-17 (Pediatric): 16 (27.6%)
+   - 18-39 (Young Adult): 2 (3.4%)
+   - 40-59 (Adult): 11 (19.0%)
+   - 60+ (Elderly): 29 (50.0%)
+
+============================================================
+3. CID-10 CODE DISTRIBUTION
+============================================================
+   J18.9: 19 cases (32.8%)
+   J180: 7 cases (12.1%)
+   J189: 11 cases (19.0%)
+   J18: 13 cases (22.4%)
+   J18.9 : 6 cases (10.3%)
+   J18,9: 1 cases (1.7%)
+   J18.1: 1 cases (1.7%)
+
+============================================================
+4. GEOGRAPHIC DISTRIBUTION (by Municipality)
+============================================================
+   Massapê: 30 (51.7%)
+   MASSAPÊ: 14 (24.1%)
+   MASSAPE: 6 (10.3%)
+   MASSAPÊ : 3 (5.2%)
+   MASSAPE : 2 (3.4%)
+   MASSAPÊ CE: 1 (1.7%)
+
+============================================================
+5. HOSPITALIZATION STATUS
+============================================================
+   Still hospitalized: 2 (3.4%)
+   Discharged: 56 (96.6%)
+
+============================================================
+6. LENGTH OF STAY (Discharged Patients)
+============================================================
+   Average stay: 5.1 days
+   Min stay: 0 days
+   Max stay: 19 days
+
+   Stay Duration Distribution:
+   - 1-3 days: 25 (44.6%)
+   - 4-7 days: 19 (33.9%)
+   - 8-14 days: 9 (16.1%)
+   - 15+ days: 3 (5.4%)
+
+============================================================
+7. MONTHLY ADMISSION DISTRIBUTION
+============================================================
+   July/2025: 8 admissions (13.8%)
+   August/2025: 8 admissions (13.8%)
+   September/2025: 12 admissions (20.7%)
+   October/2025: 25 admissions (43.1%)
+   November/2025: 5 admissions (8.6%)
+
+============================================================
+8. BED/WARD DISTRIBUTION
+============================================================
+   Alojamento Feminino 1: 17 (29.3%)
+   Alojamento Conjunto: 14 (24.1%)
+   Alojamento Masculino 1: 12 (20.7%)
+   Pediatria: 9 (15.5%)
+   Observação: 4 (6.9%)
+   Observação 1: 1 (1.7%)
+   Observação 2: 1 (1.7%)
+
+============================================================
+9. TOP ATTENDING PHYSICIANS
+============================================================
+   Francisco Anderson Vasconcelos de Sales: 9 cases (15.5%)
+   Lidia Maria da Cunha Machado: 9 cases (15.5%)
+   Cleiton: 9 cases (15.5%)
+   Isabely Azevedo Frota Mont Alverne: 8 cases (13.8%)
+   Tallys de Souza Furtado: 4 cases (6.9%)
+   Francisco Neuton Costa de Paulo: 4 cases (6.9%)
+   Diego Lopes e Silva: 4 cases (6.9%)
+   Caio César Carneiro: 3 cases (5.2%)
+   Yarla Santos de Figueiredo Lima Cavalcante: 3 cases (5.2%)
+   Tamizi Sampaio Teles: 2 cases (3.4%)
+
+================================================================================
+SCOUTING COMPLETED
+================================================================================

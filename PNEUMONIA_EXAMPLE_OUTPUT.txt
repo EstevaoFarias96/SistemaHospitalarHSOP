@@ -1,0 +1,145 @@
+================================================================================
+SCOUTING FOR PNEUMONIA PATIENTS
+================================================================================
+Period: 01/07/2024 to 31/11/2024
+CID Codes: J18.9, J18, J189, J180
+================================================================================
+
+Total patients found: 15
+
+✓ Data exported to: pneumonia_patients_20250110_153045.csv
+
+================================================================================
+PATIENT SUMMARY
+================================================================================
+
+[1] Patient: Maria Santos Silva
+    ID: 1234 | Internação: 567 | Atendimento: E0001234
+    Age: 72 anos | Sex: Feminino
+    Admission: 15/07/2024 14:30
+    Discharge: 23/07/2024 10:00
+    CID Principal: J18.9
+    Diagnosis: Pneumonia bacteriana não especificada. Paciente apresentou febre alta, tosse produtiva e dispneia...
+    Doctor: Dr. João Paulo Mendes
+    Bed: Enfermaria A - 03
+--------------------------------------------------------------------------------
+
+[2] Patient: José da Silva
+    ID: 1235 | Internação: 568 | Atendimento: E0001235
+    Age: 65 anos | Sex: Masculino
+    Admission: 20/07/2024 08:15
+    Discharge: 28/07/2024 16:30
+    CID Principal: J18.9
+    Diagnosis: Pneumonia bacteriana. Paciente idoso com comorbidades, apresentando quadro de insuficiência respi...
+    Doctor: Dr. Maria Augusta Santos
+    Bed: Enfermaria B - 05
+--------------------------------------------------------------------------------
+
+[3] Patient: Ana Paula Costa
+    ID: 1236 | Internação: 569 | Atendimento: E0001236
+    Age: 8 anos | Sex: Feminino
+    Admission: 25/07/2024 22:45
+    Discharge: Em internação
+    CID Principal: J18
+    Diagnosis: Pneumonia viral. Criança com quadro febril há 3 dias, evoluindo com desconforto respiratório...
+    Doctor: Dr. Pedro Henrique Lima
+    Bed: Pediatria - 02
+--------------------------------------------------------------------------------
+
+... (12 more patients)
+
+================================================================================
+PATIENT PROFILE STUDY - PNEUMONIA (CID J18.x)
+================================================================================
+
+📊 TOTAL PATIENTS: 15
+
+============================================================
+1. GENDER DISTRIBUTION
+============================================================
+   Masculino: 8 (53.3%)
+   Feminino: 7 (46.7%)
+
+============================================================
+2. AGE DISTRIBUTION
+============================================================
+   Average age: 52.3 years
+   Min age: 3 years
+   Max age: 89 years
+
+   Age Group Distribution:
+   - 0-17 (Pediatric): 3 (20.0%)
+   - 18-39 (Young Adult): 2 (13.3%)
+   - 40-59 (Adult): 4 (26.7%)
+   - 60+ (Elderly): 6 (40.0%)
+
+============================================================
+3. CID-10 CODE DISTRIBUTION
+============================================================
+   J18.9: 10 cases (66.7%)
+   J18: 4 cases (26.7%)
+   J189: 1 cases (6.7%)
+
+============================================================
+4. GEOGRAPHIC DISTRIBUTION (by Municipality)
+============================================================
+   Rondônia: 8 (53.3%)
+   Vilhena: 4 (26.7%)
+   Colorado do Oeste: 2 (13.3%)
+   Cerejeiras: 1 (6.7%)
+
+============================================================
+5. HOSPITALIZATION STATUS
+============================================================
+   Still hospitalized: 2 (13.3%)
+   Discharged: 13 (86.7%)
+
+============================================================
+6. LENGTH OF STAY (Discharged Patients)
+============================================================
+   Average stay: 7.2 days
+   Min stay: 3 days
+   Max stay: 15 days
+
+   Stay Duration Distribution:
+   - 1-3 days: 2 (15.4%)
+   - 4-7 days: 6 (46.2%)
+   - 8-14 days: 4 (30.8%)
+   - 15+ days: 1 (7.7%)
+
+============================================================
+7. MONTHLY ADMISSION DISTRIBUTION
+============================================================
+   July/2024: 5 admissions (33.3%)
+   August/2024: 4 admissions (26.7%)
+   September/2024: 3 admissions (20.0%)
+   October/2024: 2 admissions (13.3%)
+   November/2024: 1 admissions (6.7%)
+
+============================================================
+8. BED/WARD DISTRIBUTION
+============================================================
+   Enfermaria A - 03: 3 (20.0%)
+   Enfermaria B - 05: 2 (13.3%)
+   Pediatria - 02: 2 (13.3%)
+   Enfermaria A - 01: 2 (13.3%)
+   UTI - 01: 1 (6.7%)
+   Enfermaria C - 04: 1 (6.7%)
+   Observação - 03: 1 (6.7%)
+   Enfermaria B - 02: 1 (6.7%)
+   Enfermaria A - 05: 1 (6.7%)
+   Pediatria - 01: 1 (6.7%)
+
+============================================================
+9. TOP ATTENDING PHYSICIANS
+============================================================
+   Dr. João Paulo Mendes: 4 cases (26.7%)
+   Dr. Maria Augusta Santos: 3 cases (20.0%)
+   Dr. Pedro Henrique Lima: 3 cases (20.0%)
+   Dr. Ana Carolina Ferreira: 2 cases (13.3%)
+   Dr. Carlos Eduardo Silva: 2 cases (13.3%)
+   Dr. Fernanda Oliveira: 1 cases (6.7%)
+
+================================================================================
+SCOUTING COMPLETED
+================================================================================

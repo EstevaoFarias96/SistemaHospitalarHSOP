@@ -1,0 +1,205 @@
+WARNING:root:DATABASE_URL não encontrada, usando SQLite como fallback
+🔌 Connecting to PRODUCTION database...
+================================================================================
+DETAILED PNEUMONIA PATIENT PROFILE STUDY - PRODUCTION DATABASE
+================================================================================
+Period: 01/07/2025 to 30/11/2025
+CID Codes: J18.9, J18, J189, J180
+================================================================================
+
+✅ Total pneumonia patients found: 58
+
+✓ Detailed data exported to: pneumonia_patients_detailed_20251110_151114.csv
+
+
+================================================================================
+DETAILED PATIENT PROFILE STUDY - PNEUMONIA (CID J18.x)
+================================================================================
+
+📊 TOTAL PATIENTS ANALYZED: 58
+
+================================================================================
+1. DETAILED AGE ANALYSIS
+================================================================================
+
+📈 Age Statistics:
+   • Average age: 51.8 years
+   • Median age: 64.0 years
+   • Min age: 0 years
+   • Max age: 90 years
+   • Standard deviation: 32.5 years
+
+📊 Detailed Age Categories:
+   • Idoso (60-79 anos)            :  15 ( 25.9%)
+   • Muito idoso (80+ anos)        :  14 ( 24.1%)
+   • Adulto (40-59 anos)           :  11 ( 19.0%)
+   • Criança pequena (1-4 anos)    :   6 ( 10.3%)
+   • Neonato (< 1 ano)             :   5 (  8.6%)
+   • Criança (5-11 anos)           :   4 (  6.9%)
+   • Adulto jovem (18-39 anos)     :   2 (  3.4%)
+   • Adolescente (12-17 anos)      :   1 (  1.7%)
+
+📊 Age Distribution by Decade:
+   0-9 years      :  15 ( 25.9%) ████████████
+   10-19 years    :   1 (  1.7%) 
+   30-39 years    :   2 (  3.4%) █
+   40-49 years    :   2 (  3.4%) █
+   50-59 years    :   9 ( 15.5%) ███████
+   60-69 years    :   3 (  5.2%) ██
+   70-79 years    :  12 ( 20.7%) ██████████
+   80-89 years    :  13 ( 22.4%) ███████████
+   90-99 years    :   1 (  1.7%) 
+
+================================================================================
+2. DETAILED GENDER ANALYSIS
+================================================================================
+
+📊 Gender Distribution:
+   • Feminino       :  28 ( 48.3%)
+   • Masculino      :  30 ( 51.7%)
+
+📊 Gender Distribution by Age Category:
+
+   Adolescente (12-17 anos):
+      - Masculino:  0 (  0.0%)
+      - Feminino:   1 (100.0%)
+
+   Adulto (40-59 anos):
+      - Masculino: 10 ( 90.9%)
+      - Feminino:   1 (  9.1%)
+
+   Adulto jovem (18-39 anos):
+      - Masculino:  2 (100.0%)
+      - Feminino:   0 (  0.0%)
+
+   Criança (5-11 anos):
+      - Masculino:  4 (100.0%)
+      - Feminino:   0 (  0.0%)
+
+   Criança pequena (1-4 anos):
+      - Masculino:  4 ( 66.7%)
+      - Feminino:   2 ( 33.3%)
+
+   Idoso (60-79 anos):
+      - Masculino:  2 ( 13.3%)
+      - Feminino:  13 ( 86.7%)
+
+   Muito idoso (80+ anos):
+      - Masculino:  5 ( 35.7%)
+      - Feminino:   9 ( 64.3%)
+
+   Neonato (< 1 ano):
+      - Masculino:  3 ( 60.0%)
+      - Feminino:   2 ( 40.0%)
+
+================================================================================
+3. DETAILED GEOGRAPHIC ANALYSIS
+================================================================================
+
+📍 Distribution by Municipality:
+   • Massapê                       :  30 ( 53.6%)
+   • MASSAPÊ                       :  14 ( 25.0%)
+   • MASSAPE                       :   6 ( 10.7%)
+   • MASSAPÊ                       :   3 (  5.4%)
+   • MASSAPE                       :   2 (  3.6%)
+   • MASSAPÊ CE                    :   1 (  1.8%)
+
+📍 Most Common Neighborhoods (Top 15):
+   • ZONA RURAL                              :   6 ( 10.3%)
+   • RODAGEM                                 :   5 (  8.6%)
+   • CENTRO                                  :   4 (  6.9%)
+   • MUMBABA DE BAIXO                        :   4 (  6.9%)
+   • DISTRITO                                :   3 (  5.2%)
+   • TUINA                                   :   2 (  3.4%)
+   • TUÍNA                                   :   2 (  3.4%)
+   • SALGADINHO                              :   2 (  3.4%)
+   • Centro                                  :   2 (  3.4%)
+   • BEIRA RIO                               :   1 (  1.7%)
+   • BANDEIRA BRANCA                         :   1 (  1.7%)
+   • GINASIO                                 :   1 (  1.7%)
+   • MUMBABA                                 :   1 (  1.7%)
+   • CAMPESTRE                               :   1 (  1.7%)
+   • nsf                                     :   1 (  1.7%)
+
+================================================================================
+4. RACE/COLOR ANALYSIS
+================================================================================
+
+🎨 Distribution by Race/Color:
+   • Parda                         :  27 ( 46.6%)
+   • Branca                        :  10 ( 17.2%)
+   • PARDA                         :   9 ( 15.5%)
+   • Não informada                 :   7 ( 12.1%)
+   • Preta                         :   5 (  8.6%)
+
+================================================================================
+5. DATA COMPLETENESS ANALYSIS
+================================================================================
+
+📋 Patient Registration Data Completeness:
+   • Phone number:        47/58 ( 81.0%)
+   • CPF:                 58/58 (100.0%)
+   • SUS Card:            33/58 ( 56.9%)
+
+================================================================================
+6. DETAILED LENGTH OF STAY ANALYSIS
+================================================================================
+
+⏱️  Stay Duration Statistics:
+   • Average stay:       5.1 days
+   • Median stay:        4 days
+   • Min stay:           0 days
+   • Max stay:           19 days
+   • Total hospital days: 286 days
+
+⏱️  Average Stay Duration by Age Category:
+   • Adolescente (12-17 anos)      :   3.0 days (n=1)
+   • Adulto (40-59 anos)           :   7.2 days (n=11)
+   • Adulto jovem (18-39 anos)     :  11.0 days (n=2)
+   • Criança (5-11 anos)           :   4.0 days (n=4)
+   • Criança pequena (1-4 anos)    :   2.8 days (n=6)
+   • Idoso (60-79 anos)            :   4.5 days (n=13)
+   • Muito idoso (80+ anos)        :   6.1 days (n=14)
+   • Neonato (< 1 ano)             :   1.2 days (n=5)
+
+⏱️  Average Stay Duration by Gender:
+   • Masculino      :   6.0 days (n=30)
+   • Feminino       :   4.1 days (n=26)
+
+================================================================================
+7. CID-10 CODE DETAILED DISTRIBUTION
+================================================================================
+
+🏥 Distribution by CID Code:
+   • J18.9     :  19 ( 32.8%) ████████████████
+   • J18       :  13 ( 22.4%) ███████████
+   • J189      :  11 ( 19.0%) █████████
+   • J180      :   7 ( 12.1%) ██████
+   • J18.9     :   6 ( 10.3%) █████
+   • J18,9     :   1 (  1.7%) 
+   • J18.1     :   1 (  1.7%) 
+
+================================================================================
+8. TEMPORAL PATTERNS
+================================================================================
+
+📅 Monthly Admission Trends:
+   • July       2025-07:   8 ( 13.8%) ██████
+   • August     2025-08:   8 ( 13.8%) ██████
+   • September  2025-09:  12 ( 20.7%) ██████████
+   • October    2025-10:  25 ( 43.1%) █████████████████████
+   • November   2025-11:   5 (  8.6%) ████
+
+================================================================================
+9. RISK PROFILE SUMMARY
+================================================================================
+
+⚠️  High-Risk Groups:
+   • Elderly (60+):            29 ( 50.0%)
+   • Pediatric (<18):          11 ( 19.0%)
+   • Neonates (<1 year):        0 (  0.0%)
+   • Prolonged stay (>10d):     6 ( 10.3%)
+
+================================================================================
+DETAILED ANALYSIS COMPLETED
+================================================================================

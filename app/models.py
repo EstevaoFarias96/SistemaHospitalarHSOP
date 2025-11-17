@@ -68,6 +68,9 @@ class Paciente(db.Model):
     identificado = db.Column(db.Boolean, nullable=False, default=True)
     descricao_nao_identificado = db.Column(db.Text)
     cor = db.Column(db.String(20), default='Não informada')
+    alergias = db.Column(db.Text)
+    prioridade = db.Column(db.Boolean, nullable=False, default=False)
+    desc_prioridade = db.Column(db.Text)
 
     atendimentos = relationship('Atendimento', backref='paciente', lazy=True)
     internacoes_sae = relationship('InternacaoSae', backref='paciente', lazy=True)
@@ -105,7 +108,6 @@ class Atendimento(db.Model):
     data_atendimento = db.Column(db.Date, nullable=False)
     hora_atendimento = db.Column(db.Time, nullable=False)
     triagem = db.Column(db.Text)
-    alergias = db.Column(db.Text)
     temp = db.Column(db.String(20))
     status = db.Column(db.String(50))
     sp02 = db.Column(db.String(20))
