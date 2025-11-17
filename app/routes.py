@@ -707,6 +707,22 @@ def api_medico_atendimentos_aguardando():
             paciente = Paciente.query.get(a.paciente_id)
             if not paciente:
                 continue
+
+            # Verifica se há chamado ativo para este atendimento
+            chamado_ativo = Chamado.query.filter(
+                Chamado.id_atendimento == a.id,
+                Chamado.status == 'ativo'
+            ).order_by(Chamado.data.desc(), Chamado.hora.desc()).first()
+
+            chamado_info = None
+            if chamado_ativo:
+                medico = Funcionario.query.get(chamado_ativo.id_medico) if chamado_ativo.id_medico else None
+                chamado_info = {
+                    'medico_nome': medico.nome if medico else None,
+                    'local': chamado_ativo.local,
+                    'hora': chamado_ativo.hora.strftime('%H:%M') if chamado_ativo.hora else None
+                }
+
             resultado.append({
                 'atendimento_id': a.id,
                 'paciente_id': paciente.id,
@@ -715,7 +731,10 @@ def api_medico_atendimentos_aguardando():
                 'idade': calcular_idade(paciente.data_nascimento) if paciente.data_nascimento else None,
                 'classificacao_risco': a.classificacao_risco,
                 'triagem': a.triagem,
-                'horario_triagem': a.horario_triagem.strftime('%Y-%m-%d %H:%M:%S') if a.horario_triagem else None
+                'horario_triagem': a.horario_triagem.strftime('%Y-%m-%d %H:%M:%S') if a.horario_triagem else None,
+                'prioridade': paciente.prioridade if hasattr(paciente, 'prioridade') else False,
+                'desc_prioridade': paciente.desc_prioridade if hasattr(paciente, 'desc_prioridade') else None,
+                'chamado_ativo': chamado_info
             })
 
         return jsonify({'success': True, 'atendimentos': resultado, 'total': len(resultado)})
@@ -911,6 +930,8 @@ def api_medico_atendimentos_reavaliacao_medicacao():
                 'minutos_para_reavaliacao': round(minutos_para_reavaliacao) if minutos_para_reavaliacao is not None else None,
                 'precisa_observacao': precisa_observacao,
                 'passou_2_horas': horas_decorridas >= 2 if horas_decorridas is not None else False,
+                'prioridade': paciente.prioridade if hasattr(paciente, 'prioridade') else False,
+                'desc_prioridade': paciente.desc_prioridade if hasattr(paciente, 'desc_prioridade') else None
             })
 
         return jsonify({'success': True, 'atendimentos': resultado, 'total': len(resultado)})
@@ -972,6 +993,8 @@ def api_medico_atendimentos_gestantes():
                 'classificacao_risco': a.classificacao_risco,
                 'triagem': a.triagem,
                 'horario_triagem': a.horario_triagem.strftime('%Y-%m-%d %H:%M:%S') if a.horario_triagem else None,
+                'prioridade': paciente.prioridade if hasattr(paciente, 'prioridade') else False,
+                'desc_prioridade': paciente.desc_prioridade if hasattr(paciente, 'desc_prioridade') else None
             })
 
         return jsonify({'success': True, 'atendimentos': resultado, 'total': len(resultado)})
@@ -1094,6 +1117,8 @@ def api_medico_aguardando_triagem():
                 'classificacao_risco': a.classificacao_risco,
                 'triagem': a.triagem,
                 'horario_triagem': a.horario_triagem.strftime('%Y-%m-%d %H:%M:%S') if a.horario_triagem else criado_em,
+                'prioridade': paciente.prioridade if hasattr(paciente, 'prioridade') else False,
+                'desc_prioridade': paciente.desc_prioridade if hasattr(paciente, 'desc_prioridade') else None
             })
 
         return jsonify({'success': True, 'atendimentos': resultado, 'total': len(resultado)})

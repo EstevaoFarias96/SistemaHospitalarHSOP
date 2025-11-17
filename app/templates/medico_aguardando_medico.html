@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Aguardando Médico</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='Imagens/favicon hsop.svgz') }}">
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
   <style>
@@ -312,6 +313,282 @@
     .badge-danger { background: linear-gradient(135deg, #EF4444, #DC2626); }
     .badge-warning { background: linear-gradient(135deg, #F59E0B, #D97706); }
     .badge-primary { background: linear-gradient(135deg, var(--azul-principal), var(--azul-medio)); }
+
+    /* Destaque para prioridade administrativa */
+    .card-item.prioridade-admin {
+      border-left: 4px solid #F59E0B !important;
+      background: linear-gradient(135deg, #FFFBEB, #FFF) !important;
+    }
+
+    .card-item.prioridade-admin::before {
+      background: linear-gradient(90deg, #F59E0B, #FBBF24) !important;
+    }
+
+    .badge-prioridade {
+      background: linear-gradient(135deg, #F59E0B, #D97706);
+      color: white;
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Paciente já chamado */
+    .card-item.paciente-chamado {
+      opacity: 0.7;
+      background: linear-gradient(135deg, #F3F4F6, #FFF) !important;
+      border-left-color: #9CA3AF !important;
+    }
+
+    .card-item.paciente-chamado::before {
+      background: linear-gradient(90deg, #9CA3AF, #D1D5DB) !important;
+    }
+
+    .badge-chamado {
+      background: linear-gradient(135deg, #6B7280, #4B5563);
+      color: white;
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      box-shadow: 0 2px 4px rgba(107, 114, 128, 0.3);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .info-chamado {
+      background: #F3F4F6;
+      border-left: 3px solid #6B7280;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #4B5563;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .info-chamado i {
+      color: #6B7280;
+    }
+
+    /* Controles melhorados - Ordenação e Setor */
+    .controls-wrapper {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: white;
+      padding: 8px 14px;
+      border-radius: 10px;
+      box-shadow: var(--sombra-suave);
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+
+    .control-group:hover {
+      box-shadow: var(--sombra-media);
+      border-color: var(--azul-claro);
+    }
+
+    .control-group.setor-ativo {
+      border-color: var(--azul-principal);
+      background: linear-gradient(135deg, #F0F9FF, white);
+    }
+
+    .control-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--cinza-texto);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .control-label i {
+      color: var(--azul-principal);
+      font-size: 14px;
+    }
+
+    .control-select {
+      border: 2px solid var(--azul-claro);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--cinza-texto);
+      background: white;
+      transition: all 0.3s ease;
+      min-width: 180px;
+    }
+
+    .control-select:focus {
+      outline: none;
+      border-color: var(--azul-principal);
+      box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    }
+
+    .control-select option {
+      padding: 8px;
+    }
+
+    /* Indicador de setor ativo */
+    .setor-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: linear-gradient(135deg, var(--azul-principal), var(--azul-medio));
+      color: white;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(74, 144, 226, 0.3);
+      animation: pulse-setor 2s infinite;
+    }
+
+    @keyframes pulse-setor {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.85; }
+    }
+
+    .setor-indicator i {
+      color: white;
+    }
+
+    /* Info tooltip para ordenação */
+    .info-tooltip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--azul-claro);
+      color: var(--azul-principal);
+      font-size: 11px;
+      font-weight: bold;
+      cursor: help;
+      margin-left: 4px;
+      transition: all 0.3s ease;
+    }
+
+    .info-tooltip:hover {
+      background: var(--azul-principal);
+      color: white;
+      transform: scale(1.1);
+    }
+
+    .info-tooltip .tooltip-text {
+      visibility: hidden;
+      width: 280px;
+      background: var(--cinza-texto);
+      color: white;
+      text-align: left;
+      border-radius: 8px;
+      padding: 10px 12px;
+      position: absolute;
+      z-index: 1000;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -140px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 12px;
+      font-weight: normal;
+      line-height: 1.4;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .info-tooltip .tooltip-text::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: var(--cinza-texto) transparent transparent transparent;
+    }
+
+    .info-tooltip:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    /* Responsividade */
+    @media (max-width: 1400px) {
+      .controls-wrapper {
+        flex-wrap: wrap;
+      }
+
+      .control-select {
+        min-width: 160px;
+      }
+    }
+
+    @media (max-width: 992px) {
+      .controls-wrapper {
+        width: 100%;
+      }
+
+      .control-group {
+        flex: 1 1 auto;
+      }
+
+      #inputPesquisaAtendimento {
+        width: 100% !important;
+      }
+
+      .position-relative {
+        width: 100% !important;
+        flex: 1 1 100%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .header {
+        padding: 12px 16px;
+      }
+
+      .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .controls-wrapper {
+        flex-direction: column;
+        width: 100%;
+        gap: 8px;
+      }
+
+      .control-group {
+        width: 100%;
+        flex-direction: row;
+      }
+
+      .control-select {
+        flex: 1;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
@@ -323,20 +600,63 @@
             <h3 class="mb-1"><i class="fas fa-user-md mr-2"></i>Atendimentos Médicos</h3>
             <small class="text-muted">Visualize e gerencie seus atendimentos por categoria</small>
           </div>
-          <div class="d-flex align-items-center gap-2">
+          <div class="controls-wrapper">
+            <!-- Pesquisa de Atendimento -->
             <div class="position-relative" style="width: 300px;">
-              <input type="text" id="inputPesquisaAtendimento" class="form-control" placeholder="Buscar por nº atendimento..." autocomplete="off">
+              <input type="text" id="inputPesquisaAtendimento" class="form-control" placeholder="🔍 Buscar por nº atendimento..." autocomplete="off" style="border-radius: 10px; border: 2px solid var(--azul-claro); padding: 8px 16px;">
               <div id="resultadosPesquisa" class="list-group position-absolute w-100" style="z-index: 1000; max-height: 300px; overflow-y: auto; display: none;"></div>
             </div>
-            <select id="setorMedico" class="form-control" style="width: 200px;">
-              <option value="">Selecione o setor</option>
-              <option value="Consultório 1">Consultório 1</option>
-              <option value="Consultório 2">Consultório 2</option>
-              <option value="Maternidade">Maternidade</option>
-              <option value="Centro Cirúrgico">Centro Cirúrgico</option>
-            </select>
-            <button id="btnAtualizar" class="btn btn-primary"><i class="fas fa-sync-alt mr-1"></i>Atualizar</button>
-            <a href="/medico" class="btn btn-outline-secondary"><i class="fas fa-arrow-left mr-1"></i>Voltar</a>
+
+            <!-- Grupo de Ordenação -->
+            <div class="control-group">
+              <div class="control-label">
+                <i class="fas fa-sort"></i>
+                <span>Ordenar por:</span>
+                <span class="info-tooltip">
+                  i
+                  <span class="tooltip-text">
+                    <strong>⭐ Prioridade Administrativa sempre primeiro!</strong><br>
+                    <br>
+                    <strong>⏰ Chegada:</strong> Ordem cronológica de chegada<br>
+                    <strong>🚨 Risco:</strong> Vermelho → Laranja → Amarelo → Verde → Azul
+                  </span>
+                </span>
+              </div>
+              <select id="ordenacaoSelect" class="control-select">
+                <option value="chegada">⏰ Ordem de Chegada</option>
+                <option value="risco">🚨 Classificação de Risco</option>
+              </select>
+            </div>
+
+            <!-- Grupo de Setor Médico -->
+            <div class="control-group" id="groupSetorMedico">
+              <div class="control-label">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>Meu local:</span>
+              </div>
+              <select id="setorMedico" class="control-select">
+                <option value="">Selecionar setor...</option>
+                <option value="Consultório 1">🏥 Consultório 1</option>
+                <option value="Consultório 2">🏥 Consultório 2</option>
+                <option value="Maternidade">👶 Maternidade</option>
+                <option value="Centro Cirúrgico">⚕️ Centro Cirúrgico</option>
+                <option value="Triagem Cirúrgica">🔬 Triagem Cirúrgica</option>
+              </select>
+            </div>
+
+            <!-- Indicador de Setor Ativo -->
+            <div id="setorIndicator" class="setor-indicator" style="display: none;">
+              <i class="fas fa-map-marker-alt"></i>
+              <span id="setorAtualTexto"></span>
+            </div>
+
+            <!-- Botões de Ação -->
+            <button id="btnAtualizar" class="btn btn-primary" style="border-radius: 10px; padding: 8px 16px;">
+              <i class="fas fa-sync-alt mr-1"></i>Atualizar
+            </button>
+            <a href="/medico" class="btn btn-outline-secondary" style="border-radius: 10px; padding: 8px 16px;">
+              <i class="fas fa-arrow-left mr-1"></i>Voltar
+            </a>
           </div>
         </div>
 
@@ -417,25 +737,102 @@
       return '<span class="badge badge-info risk-badge">' + risco + '</span>';
     }
 
+    function ordenarItens(itens) {
+      const tipoOrdenacao = $('#ordenacaoSelect').val() || 'chegada';
+      const itensCopia = [...itens];
+
+      if (tipoOrdenacao === 'risco') {
+        // Mapa de prioridades de risco
+        const riscoMap = {
+          'vermelho': 1,
+          'laranja': 2,
+          'amarelo': 3,
+          'verde': 4,
+          'azul': 5
+        };
+
+        itensCopia.sort((a, b) => {
+          // Prioridade administrativa sempre primeiro
+          const prioA = a.prioridade ? 1 : 0;
+          const prioB = b.prioridade ? 1 : 0;
+          if (prioB !== prioA) return prioB - prioA;
+
+          // Depois ordena por classificação de risco
+          const riscoA = (a.classificacao_risco || '').toLowerCase();
+          const riscoB = (b.classificacao_risco || '').toLowerCase();
+          const valorA = riscoMap[riscoA] || 999;
+          const valorB = riscoMap[riscoB] || 999;
+          if (valorA !== valorB) return valorA - valorB;
+
+          // Por último, ordem de chegada
+          const dataA = a.horario_triagem ? new Date(a.horario_triagem) : new Date(0);
+          const dataB = b.horario_triagem ? new Date(b.horario_triagem) : new Date(0);
+          return dataA - dataB;
+        });
+      } else {
+        // Ordem de chegada (padrão)
+        itensCopia.sort((a, b) => {
+          // Prioridade administrativa sempre primeiro
+          const prioA = a.prioridade ? 1 : 0;
+          const prioB = b.prioridade ? 1 : 0;
+          if (prioB !== prioA) return prioB - prioA;
+
+          // Depois ordem de chegada
+          const dataA = a.horario_triagem ? new Date(a.horario_triagem) : new Date(0);
+          const dataB = b.horario_triagem ? new Date(b.horario_triagem) : new Date(0);
+          return dataA - dataB;
+        });
+      }
+
+      return itensCopia;
+    }
+
     function renderLista(containerSel, itens, vazioHtml) {
       if (!itens || itens.length === 0) { $(containerSel).html(vazioHtml); return; }
+
+      // Ordena os itens
+      const itensOrdenados = ordenarItens(itens);
+
       let html = '';
-      itens.forEach(item => {
+      itensOrdenados.forEach(item => {
         // Pega o ID do paciente - pode estar em paciente_id ou id
         const pacienteId = item.paciente_id || item.id_paciente || item.id;
+
+        // Classes e badges para prioridade administrativa
+        const prioridadeClass = item.prioridade ? ' prioridade-admin' : '';
+        const prioridadeBadge = item.prioridade ?
+          `<span class="badge-prioridade"><i class="fas fa-star"></i>${item.desc_prioridade || 'Prioridade'}</span>` : '';
+
+        // Verifica se o paciente já foi chamado
+        const chamadoClass = item.chamado_ativo ? ' paciente-chamado' : '';
+        const chamadoBadge = item.chamado_ativo ?
+          `<span class="badge-chamado ml-2"><i class="fas fa-phone mr-1"></i>Chamado</span>` : '';
+
+        const chamadoInfo = item.chamado_ativo ? `
+          <div class="info-chamado">
+            <i class="fas fa-info-circle"></i>
+            <span><strong>Chamado por ${item.chamado_ativo.medico_nome || 'Médico'}</strong> às ${item.chamado_ativo.hora} para <strong>${item.chamado_ativo.local}</strong></span>
+          </div>
+        ` : '';
+
         html += `
-          <div class="card card-item mb-2">
+          <div class="card card-item mb-2${prioridadeClass}${chamadoClass}">
             <div class="card-body" style="padding: 16px;">
               <div class="d-flex justify-content-between align-items-start mb-2">
-                <div>
-                  <h5 class="mb-1" style="color: var(--cinza-texto); font-weight: 600; font-size: 1.1rem;">${item.nome || 'Paciente'}</h5>
+                <div class="flex-grow-1">
+                  <div class="d-flex align-items-center mb-1 flex-wrap">
+                    <h5 class="mb-0 mr-2" style="color: var(--cinza-texto); font-weight: 600; font-size: 1.1rem;">${item.nome || 'Paciente'}</h5>
+                    ${prioridadeBadge}
+                    ${chamadoBadge}
+                  </div>
                   <div class="text-muted" style="font-size: 13px;">${item.idade != null ? item.idade + ' anos' : 'Idade N/A'}${item.horario_triagem ? ' • Triagem: ' + new Date(item.horario_triagem).toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : ''}</div>
                 </div>
                 <div>${badgeRisco(item.classificacao_risco)}</div>
               </div>
               <div class="triagem-text" style="padding: 10px; background: var(--azul-claro); border-radius: 0.5rem; font-size: 13px;">${(item.triagem || 'Sem texto de triagem').replace(/\n/g,'<br>')}</div>
+              ${chamadoInfo}
               <div class="mt-2 text-right">
-                <button class="btn btn-success btn-sm mr-2" onclick="chamarPaciente(${pacienteId}, '${(item.nome || 'Paciente').replace(/'/g, "\\'")}', '${item.atendimento_id}')"><i class="fas fa-bell mr-1"></i>Chamar Paciente</button>
+                <button class="btn btn-success btn-sm mr-2" onclick="chamarPaciente(${pacienteId}, '${(item.nome || 'Paciente').replace(/'/g, "\\'")}', '${item.atendimento_id}')" ${item.chamado_ativo ? 'title="Este paciente já foi chamado"' : ''}><i class="fas fa-bell mr-1"></i>${item.chamado_ativo ? 'Chamar Novamente' : 'Chamar Paciente'}</button>
                 <a class="btn btn-outline-primary btn-sm" href="/medico/atendimento/${item.atendimento_id}"><i class="fas fa-notes-medical mr-1"></i>Abrir atendimento</a>
               </div>
             </div>
@@ -534,21 +931,25 @@
 
     function renderListaReavaliacao(containerSel, itens, vazioHtml) {
       if (!itens || itens.length === 0) { $(containerSel).html(vazioHtml); return; }
+
+      // Ordena os itens
+      const itensOrdenados = ordenarItens(itens);
+
       let html = '';
-      itens.forEach(item => {
+      itensOrdenados.forEach(item => {
         // Determinar classes de alerta
         const ciclo = item.ciclo_atual || 1;
         const passou2h = item.passou_2_horas;
         const precisaObs = item.precisa_observacao;
         const horas = item.horas_decorridas || 0;
         const minutos = item.minutos_para_reavaliacao || 0;
-        
+
         let containerClass = '';
         let tempoClass = '';
         let statusClass = '';
         let statusTexto = '';
         let progressoPct = 0;
-        
+
         if (precisaObs) {
           containerClass = 'observacao';
           tempoClass = 'urgente';
@@ -570,9 +971,9 @@
           statusTexto = minutos > 0 ? `Próxima reavaliação em ${Math.floor(minutos)} minutos` : 'Aguardando reavaliação';
           progressoPct = Math.min((horas / 2) * 100, 100);
         }
-        
+
         const progressoClass = passou2h ? 'urgente' : (horas >= 1.5 ? 'alerta' : '');
-        
+
         // Horário de referência
         const horarioRef = item.horario_medicacao || item.horario_consulta_medica;
         const horarioTexto = horarioRef ? new Date(horarioRef).toLocaleString('pt-BR', {
@@ -581,19 +982,40 @@
           hour: '2-digit',
           minute: '2-digit'
         }) : 'N/A';
-        
+
         // Pega o ID do paciente
         const pacienteId = item.paciente_id || item.id_paciente || item.id;
-        
+
+        // Classes e badges para prioridade administrativa
+        const prioridadeClass = item.prioridade ? ' prioridade-admin' : '';
+        const prioridadeBadge = item.prioridade ?
+          `<span class="badge-prioridade ml-2"><i class="fas fa-star"></i>${item.desc_prioridade || 'Prioridade'}</span>` : '';
+
+        // Verifica se o paciente já foi chamado
+        const chamadoClass = item.chamado_ativo ? ' paciente-chamado' : '';
+        const chamadoBadge = item.chamado_ativo ?
+          `<span class="badge-chamado ml-2"><i class="fas fa-phone mr-1"></i>Chamado</span>` : '';
+
+        const chamadoInfo = item.chamado_ativo ? `
+          <div class="info-chamado">
+            <i class="fas fa-info-circle"></i>
+            <span><strong>Chamado por ${item.chamado_ativo.medico_nome || 'Médico'}</strong> às ${item.chamado_ativo.hora} para <strong>${item.chamado_ativo.local}</strong></span>
+          </div>
+        ` : '';
+
         html += `
-          <div class="card card-item mb-2">
+          <div class="card card-item mb-2${prioridadeClass}${chamadoClass}">
             <div class="card-body" style="padding: 16px;">
               <div class="d-flex justify-content-between align-items-start mb-2">
-                <div>
-                  <h5 class="mb-1" style="color: var(--cinza-texto); font-weight: 600; font-size: 1.1rem;">
-                    ${item.nome || 'Paciente'}
-                    ${precisaObs ? '<span class="badge-observacao ml-2">OBSERVAÇÃO</span>' : ''}
-                  </h5>
+                <div class="flex-grow-1">
+                  <div class="d-flex align-items-center mb-1 flex-wrap">
+                    <h5 class="mb-0 mr-2" style="color: var(--cinza-texto); font-weight: 600; font-size: 1.1rem;">
+                      ${item.nome || 'Paciente'}
+                      ${precisaObs ? '<span class="badge-observacao ml-2">OBSERVAÇÃO</span>' : ''}
+                    </h5>
+                    ${prioridadeBadge}
+                    ${chamadoBadge}
+                  </div>
                   <div class="text-muted" style="font-size: 13px;">
                     ${item.idade != null ? item.idade + ' anos' : 'Idade N/A'}
                     ${item.horario_triagem ? ' • ' + new Date(item.horario_triagem).toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : ''}
@@ -601,9 +1023,9 @@
                 </div>
                 <div>${badgeRisco(item.classificacao_risco)}</div>
               </div>
-              
+
               <div class="triagem-text" style="padding: 10px; background: var(--azul-claro); border-radius: 0.5rem; font-size: 13px; margin-bottom: 8px;">${(item.triagem || 'Sem texto de triagem').replace(/\n/g,'<br>')}</div>
-              
+
               <div class="ciclo-container ${containerClass}">
                 <div class="ciclo-badge ciclo-${ciclo}">${ciclo}</div>
                 <div class="ciclo-info">
@@ -618,9 +1040,10 @@
                   ` : ''}
                 </div>
               </div>
-              
+              ${chamadoInfo}
+
               <div class="mt-2 text-right">
-                <button class="btn btn-success btn-sm mr-2" onclick="chamarPaciente(${pacienteId}, '${(item.nome || 'Paciente').replace(/'/g, "\\'")}', '${item.atendimento_id}')"><i class="fas fa-bell mr-1"></i>Chamar Paciente</button>
+                <button class="btn btn-success btn-sm mr-2" onclick="chamarPaciente(${pacienteId}, '${(item.nome || 'Paciente').replace(/'/g, "\\'")}', '${item.atendimento_id}')" ${item.chamado_ativo ? 'title="Este paciente já foi chamado"' : ''}><i class="fas fa-bell mr-1"></i>${item.chamado_ativo ? 'Chamar Novamente' : 'Chamar Paciente'}</button>
                 <a class="btn btn-outline-primary btn-sm" href="/medico/atendimento/${item.atendimento_id}">
                   <i class="fas fa-notes-medical mr-1"></i>${precisaObs ? 'Definir Conduta' : 'Reavaliar'}
                 </a>
@@ -691,20 +1114,60 @@
       }
     }
 
+    // Função para atualizar indicador de setor
+    function atualizarIndicadorSetor() {
+      const setor = $('#setorMedico').val();
+
+      if (setor) {
+        // Mostra o indicador com o setor selecionado
+        $('#setorAtualTexto').text(setor);
+        $('#setorIndicator').fadeIn(300);
+        $('#groupSetorMedico').addClass('setor-ativo');
+      } else {
+        // Esconde o indicador
+        $('#setorIndicator').fadeOut(300);
+        $('#groupSetorMedico').removeClass('setor-ativo');
+      }
+    }
+
     $(function(){
       // Carrega o setor salvo do localStorage
       const setorSalvo = localStorage.getItem('setorMedico');
       if (setorSalvo) {
         $('#setorMedico').val(setorSalvo);
+        atualizarIndicadorSetor();
       }
-      
+
+      // Carrega ordenação salva do localStorage
+      const ordenacaoSalva = localStorage.getItem('ordenacaoAtendimentos');
+      if (ordenacaoSalva) {
+        $('#ordenacaoSelect').val(ordenacaoSalva);
+      }
+
       // Salva o setor quando alterado
       $('#setorMedico').on('change', function() {
         const setor = $(this).val();
         if (setor) {
           localStorage.setItem('setorMedico', setor);
           console.log('Setor selecionado:', setor);
+        } else {
+          localStorage.removeItem('setorMedico');
         }
+        atualizarIndicadorSetor();
+      });
+
+      // Salva ordenação e recarrega quando alterado
+      $('#ordenacaoSelect').on('change', function() {
+        const ordenacao = $(this).val();
+        localStorage.setItem('ordenacaoAtendimentos', ordenacao);
+        console.log('Ordenação alterada para:', ordenacao);
+
+        // Recarrega a aba ativa
+        const activeId = $('.nav-link.active').attr('id');
+        if (activeId === 'tab-aguardando') carregarAba('aguardando');
+        else if (activeId === 'tab-triagem') carregarAba('triagem');
+        else if (activeId === 'tab-gestantes') carregarAba('gestantes');
+        else if (activeId === 'tab-reavaliacao') carregarAba('reavaliacao');
       });
       
       carregarAba('aguardando');
