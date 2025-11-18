@@ -38373,3 +38373,143 @@ IndentationError: unindent does not match any outer indentation level
 2025-11-18 09:21:20,978 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
 2025-11-18 09:21:21,098 [INFO] __init__:114 - Blueprints registrados com sucesso
 2025-11-18 09:21:21,100 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-11-18 10:00:45,784 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-11-18 10:00:45,784 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-11-18 10:00:45,785 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-11-18 10:00:45,785 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-11-18 10:00:45,785 [INFO] __init__:63 - Configurações básicas definidas
+2025-11-18 10:00:45,808 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-11-18 10:00:45,808 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-11-18 10:00:45,854 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-11-18 10:00:46,005 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-11-18 10:00:46,025 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-11-18 10:00:46,220 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-11-18 10:00:46,220 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-11-18 10:00:46,220 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-11-18 10:00:46,220 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-11-18 10:00:46,220 [INFO] __init__:63 - Configurações básicas definidas
+2025-11-18 10:00:46,240 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-11-18 10:00:46,240 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-11-18 10:00:46,282 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-11-18 10:00:46,449 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-11-18 10:00:46,467 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-11-18 11:08:57,979 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-11-18 11:08:57,979 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-11-18 11:08:57,979 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-11-18 11:08:57,979 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-11-18 11:08:57,979 [INFO] __init__:63 - Configurações básicas definidas
+2025-11-18 11:08:58,006 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-11-18 11:08:58,006 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-11-18 11:08:58,055 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-11-18 11:08:58,296 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-11-18 11:08:58,316 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-11-18 12:56:30,447 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-11-18 12:56:30,453 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-11-18 12:56:30,453 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-11-18 12:56:30,453 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-11-18 12:56:30,453 [INFO] __init__:63 - Configurações básicas definidas
+2025-11-18 12:56:30,487 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-11-18 12:56:30,487 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-11-18 12:56:30,548 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-11-18 12:56:30,845 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-11-18 12:56:30,875 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-11-18 12:59:07,787 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-11-18 12:59:07,787 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-11-18 12:59:07,787 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-11-18 12:59:07,787 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-11-18 12:59:07,787 [INFO] __init__:63 - Configurações básicas definidas
+2025-11-18 12:59:07,814 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-11-18 12:59:07,814 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-11-18 12:59:07,865 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-11-18 12:59:08,146 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-11-18 12:59:08,169 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-11-18 13:01:27,477 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-11-18 13:01:27,477 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-11-18 13:01:27,477 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-11-18 13:01:27,477 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-11-18 13:01:27,477 [INFO] __init__:63 - Configurações básicas definidas
+2025-11-18 13:01:27,511 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-11-18 13:01:27,511 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-11-18 13:01:27,570 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-11-18 13:01:27,856 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-11-18 13:01:27,883 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-11-18 13:02:18,129 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-11-18 13:02:18,129 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-11-18 13:02:18,129 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-11-18 13:02:18,129 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-11-18 13:02:18,129 [INFO] __init__:63 - Configurações básicas definidas
+2025-11-18 13:02:18,161 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-11-18 13:02:18,162 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-11-18 13:02:18,230 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-11-18 13:02:18,510 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-11-18 13:02:18,536 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-11-18 13:20:31,092 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-11-18 13:20:31,093 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-11-18 13:20:31,093 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-11-18 13:20:31,093 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-11-18 13:20:31,093 [INFO] __init__:63 - Configurações básicas definidas
+2025-11-18 13:20:31,116 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-11-18 13:20:31,116 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-11-18 13:20:31,161 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-11-18 13:20:31,418 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-11-18 13:20:31,438 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-11-18 13:46:59,589 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-11-18 13:46:59,589 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-11-18 13:46:59,589 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-11-18 13:46:59,589 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-11-18 13:46:59,589 [INFO] __init__:63 - Configurações básicas definidas
+2025-11-18 13:46:59,634 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-11-18 13:46:59,634 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-11-18 13:46:59,692 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-11-18 13:46:59,968 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-11-18 13:46:59,991 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-11-18 13:47:24,416 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-11-18 13:47:24,416 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-11-18 13:47:24,416 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-11-18 13:47:24,416 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-11-18 13:47:24,416 [INFO] __init__:63 - Configurações básicas definidas
+2025-11-18 13:47:24,446 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-11-18 13:47:24,446 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-11-18 13:47:24,500 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-11-18 13:47:24,783 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-11-18 13:47:24,808 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-11-18 13:51:42,008 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-11-18 13:51:42,008 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-11-18 13:51:42,008 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-11-18 13:51:42,008 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-11-18 13:51:42,009 [INFO] __init__:63 - Configurações básicas definidas
+2025-11-18 13:51:42,037 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-11-18 13:51:42,037 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-11-18 13:51:42,106 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-11-18 13:51:42,309 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-11-18 13:51:42,328 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-11-18 13:52:59,584 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-11-18 13:52:59,585 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-11-18 13:52:59,585 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-11-18 13:52:59,585 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-11-18 13:52:59,585 [INFO] __init__:63 - Configurações básicas definidas
+2025-11-18 13:52:59,613 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-11-18 13:52:59,613 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-11-18 13:52:59,666 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-11-18 13:52:59,930 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-11-18 13:52:59,952 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-11-18 13:53:51,171 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-11-18 13:53:51,171 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-11-18 13:53:51,171 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-11-18 13:53:51,171 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-11-18 13:53:51,171 [INFO] __init__:63 - Configurações básicas definidas
+2025-11-18 13:53:51,197 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-11-18 13:53:51,197 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-11-18 13:53:51,245 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-11-18 13:53:51,528 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-11-18 13:53:51,547 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas
+2025-11-18 13:56:15,926 [INFO] __init__:45 - Logging configurado: /home/estevaofilho/HSOP/HSOP/logs/app.log
+2025-11-18 13:56:15,926 [INFO] __init__:54 - SECRET_KEY configurada: ✓
+2025-11-18 13:56:15,926 [INFO] __init__:55 - SQLALCHEMY_DATABASE_URI configurada: ✓
+2025-11-18 13:56:15,926 [INFO] __init__:59 - Banco de dados: postgresql://hsop:Estv,123
+2025-11-18 13:56:15,926 [INFO] __init__:63 - Configurações básicas definidas
+2025-11-18 13:56:15,957 [INFO] __init__:67 - Banco de dados inicializado com sucesso
+2025-11-18 13:56:15,957 [INFO] __init__:72 - LoginManager inicializado com sucesso
+2025-11-18 13:56:16,009 [INFO] __init__:104 - Filtros Jinja2 customizados registrados
+2025-11-18 13:56:16,280 [INFO] __init__:114 - Blueprints registrados com sucesso
+2025-11-18 13:56:16,303 [INFO] __init__:123 - Tabelas do banco de dados criadas/verificadas

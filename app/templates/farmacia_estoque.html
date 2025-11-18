@@ -194,9 +194,9 @@
         <small class="text-muted">Farmácia Central e Farmácia Satélite 1</small>
       </div>
       <div>
-        <a class="btn btn-outline-secondary" href="/farmacia">
+        <button class="btn btn-outline-secondary" onclick="voltarAoPainel()">
           <i class="fas fa-arrow-left mr-1"></i>Voltar ao painel
-        </a>
+        </button>
       </div>
     </div>
 
@@ -820,15 +820,20 @@
         } else {
           button.prop('disabled', false);
           // Restaura o texto original baseado no ID do botão
-          if (button.attr('id') === 'btn-salvar-classe') {
+          const buttonId = button.attr('id');
+          if (buttonId === 'btn-salvar-classe') {
             const mode = button.data('mode') || $('#modalClasse').data('mode') || 'create';
             if (mode === 'edit') {
               button.html('<i class="fas fa-save mr-1"></i>Atualizar Classe');
             } else {
               button.html('<i class="fas fa-save mr-1"></i>Salvar Classe');
             }
-          } else if (button.attr('id') === 'btn-salvar-entrada') {
+          } else if (buttonId === 'btn-salvar-entrada') {
             button.html('<i class="fas fa-sign-in-alt mr-1"></i>Registrar Entrada');
+          } else if (buttonId === 'btn-confirmar-transferencia') {
+            button.html('<i class="fas fa-exchange-alt mr-1"></i>Confirmar Transferência');
+          } else if (buttonId === 'btn-confirmar-saida') {
+            button.html('<i class="fas fa-exclamation-triangle mr-1"></i>Confirmar Retirada Forçada');
           }
         }
       }
@@ -892,11 +897,11 @@
       });
 
       $('#btn-saida').on('click', function(){
-        showToast('Fluxo de Saída será implementado em breve.', 'info', 'Em Desenvolvimento');
+        showToast('Por favor, selecione um medicamento específico para realizar saída.', 'info', 'Selecionar Medicamento');
       });
 
       $('#btn-transferir').on('click', function(){
-        showToast('Fluxo de Transferência será implementado em breve.', 'info', 'Em Desenvolvimento');
+        showToast('Por favor, selecione um medicamento específico para transferir.', 'info', 'Selecionar Medicamento');
       });
 
       // Salvar nova classe
@@ -1720,7 +1725,7 @@
         }
 
         const btn = $(this);
-        setLoading(btn, true);
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Salvando...');
 
         $.ajax({
           url: `/api/medicamentos/itens/${id}`,
@@ -1746,13 +1751,27 @@
             showToast(msg, 'error');
           },
           complete: function(){
-            setLoading(btn, false);
+            btn.prop('disabled', false).html('<i class="fas fa-save mr-1"></i>Salvar');
           }
         });
       });
 
+      // Event listener para o botão excluir no modal
+      $('#btn-excluir-item-modal').on('click', function(){
+        const itemId = $('#item-id').val();
+        if (!itemId) {
+          showToast('ID do item não encontrado.', 'error');
+          return;
+        }
+        excluirItem(itemId);
+      });
+
       function excluirItem(itemId) {
         if (!confirm('Confirmar exclusão deste lote? Esta ação não pode ser desfeita.')) return;
+        
+        const btn = $('#btn-excluir-item-modal');
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Excluindo...');
+        
         $.ajax({
           url: `/api/medicamentos/itens/${itemId}`,
           method: 'DELETE',
@@ -1773,6 +1792,9 @@
           error: function(xhr) {
             const msg = xhr.responseJSON ? xhr.responseJSON.message : 'Erro interno do servidor';
             showToast(msg, 'error');
+          },
+          complete: function(){
+            btn.prop('disabled', false).html('<i class="fas fa-trash mr-1"></i>Excluir');
           }
         });
       }
@@ -2149,8 +2171,124 @@
         $('#saida-quantidade').attr('max', quantidade);
       });
 
+      // Event listeners para atualizar lotes quando origem for alterada na transferência
+      $('#transferencia-origem').on('change', function() {
+        atualizarLotesDisponiveis();
+        validarOrigemDestino();
+      });
+      
+      $('#transferencia-destino').on('change', function() {
+        validarOrigemDestino();
+      });
+      
+      function validarOrigemDestino() {
+        const origem = $('#transferencia-origem').val();
+        const destino = $('#transferencia-destino').val();
+        
+        if (origem && destino && origem === destino) {
+          showToast('Origem e destino não podem ser iguais.', 'warning');
+          $('#transferencia-destino').val('');
+        }
+      }
+
+      function atualizarLotesDisponiveis() {
+        const origem = $('#transferencia-origem').val();
+        const loteSelect = $('#transferencia-lote');
+        
+        // Se não há origem selecionada, mostrar todos os lotes
+        if (!origem) {
+          loteSelect.find('option').show();
+          return;
+        }
+        
+        // Filtrar lotes apenas do local de origem
+        loteSelect.find('option').each(function() {
+          const option = $(this);
+          const localLote = option.data('local');
+          
+          if (option.val() === '') {
+            option.show(); // Manter opção padrão "Selecione um lote"
+          } else if (localLote === origem) {
+            option.show();
+          } else {
+            option.hide();
+          }
+        });
+        
+        // Reset da seleção se o lote atual não é da origem selecionada
+        const loteAtual = loteSelect.val();
+        if (loteAtual) {
+          const opcaoAtual = loteSelect.find(`option[value="${loteAtual}"]`);
+          if (opcaoAtual.data('local') !== origem) {
+            loteSelect.val('');
+            $('#disponivel-lote').text('0');
+          }
+        }
+      }
+
+      // Event listeners para atualizar lotes quando local for alterado na saída
+      $('#saida-local').on('change', function() {
+        const local = $(this).val();
+        const loteSelect = $('#saida-lote');
+        
+        // Se não há local selecionado, mostrar todos os lotes
+        if (!local) {
+          loteSelect.find('option').show();
+          return;
+        }
+        
+        // Filtrar lotes apenas do local selecionado
+        loteSelect.find('option').each(function() {
+          const option = $(this);
+          const localLote = option.data('local');
+          
+          if (option.val() === '') {
+            option.show(); // Manter opção padrão "Selecione um lote"
+          } else if (localLote === local) {
+            option.show();
+          } else {
+            option.hide();
+          }
+        });
+        
+        // Reset da seleção se o lote atual não é do local selecionado
+        const loteAtual = loteSelect.val();
+        if (loteAtual) {
+          const opcaoAtual = loteSelect.find(`option[value="${loteAtual}"]`);
+          if (opcaoAtual.data('local') !== local) {
+            loteSelect.val('');
+            $('#saida-disponivel-lote').text('0');
+          }
+        }
+      });
+
+      // Função para voltar ao painel principal da farmácia
+      function voltarAoPainel() {
+        // Mostrar feedback visual
+        showToast('Voltando ao painel principal...', 'info', 'Navegando');
+        
+        // Tentar múltiplas opções de navegação
+        try {
+          // Primeira tentativa: rota direta
+          window.location.href = '/farmacia';
+        } catch (error) {
+          console.error('Erro ao navegar para /farmacia:', error);
+          
+          // Fallback: voltar na história do navegador
+          try {
+            window.history.back();
+          } catch (historyError) {
+            console.error('Erro ao usar history.back():', historyError);
+            
+            // Último recurso: tentar rota alternativa
+            window.location.href = '/';
+          }
+        }
+      }
+
       // Garantir que a função voltarParaClasses esteja disponível globalmente
       window.voltarParaClasses = voltarParaClasses;
+      window.voltarAoPainel = voltarAoPainel;
 
       // Carregar dados iniciais (opcional)
       carregarFiltroClasses();

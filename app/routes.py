@@ -13440,8 +13440,11 @@ def buscar_prescricoes_fluxo_pendentes():
 
         from app.models import FluxoDisp, Atendimento, Paciente, Funcionario
 
-        # Buscar prescrições pendentes (id_responsavel=0)
-        prescricoes_pendentes = FluxoDisp.query.filter_by(id_responsavel=0).all()
+        # Buscar prescrições pendentes (status='Pendente' E id_responsavel=0)
+        prescricoes_pendentes = FluxoDisp.query.filter_by(
+            status='Pendente',
+            id_responsavel=0
+        ).all()
 
         prescricoes_data = []
         for prescricao in prescricoes_pendentes:
@@ -13525,9 +13528,9 @@ def processar_dispensacao_fluxo():
             if campo not in dados:
                 return jsonify({'success': False, 'message': f'Campo {campo} obrigatório.'}), 400
 
-        status_permitidos = ['Dispensado', 'Parcial', 'Cancelado']
+        status_permitidos = ['Aprovado', 'Dispensado', 'Parcial', 'Cancelado']
         if dados['status'] not in status_permitidos:
-            return jsonify({'success': False, 'message': 'Status inválido. Deve ser: Dispensado, Parcial ou Cancelado.'}), 400
+            return jsonify({'success': False, 'message': 'Status inválido. Deve ser: Aprovado, Dispensado, Parcial ou Cancelado.'}), 400
 
         from app.models import FluxoDisp, MedicacaoClasse, MedicacaoItem
 
@@ -13609,6 +13612,8 @@ def processar_dispensacao_fluxo():
             mensagem = f'Prescrição cancelada com sucesso!'
         elif status_dispensacao == 'Parcial':
             mensagem = f'Dispensação parcial realizada com sucesso! {quantidade_solicitada} unidade(s) dispensada(s).'
+        elif status_dispensacao == 'Aprovado':
+            mensagem = f'Prescrição aprovada com sucesso! {quantidade_solicitada} unidade(s) dispensada(s).'
         else:
             mensagem = f'Dispensação realizada com sucesso! {quantidade_solicitada} unidade(s) dispensada(s).'
 
@@ -13784,6 +13789,352 @@ def processar_dispensacao_fluxo_multiplos():
         logging.error(f"Erro ao processar dispensação do fluxo (lote): {str(e)}")
         logging.error(traceback.format_exc())
         return jsonify({'success': False, 'message': 'Erro interno do servidor.', 'error': str(e)}), 500
+
+@bp.route('/api/dispensacoes/emergencia-pendentes', methods=['GET'])
+@login_required
+def buscar_prescricoes_emergencia_pendentes():
+    """
+    Endpoint para buscar prescrições pendentes da tabela prescricoes_emergencia
+    """
+    try:
+        usuario_atual = get_current_user()
+        if not usuario_atual:
+            return jsonify({'success': False, 'message': 'Sessão expirada. Faça login novamente.'}), 401
+
+        if usuario_atual.cargo.strip().lower() != 'farmacia':
+            return jsonify({'success': False, 'message': 'Acesso restrito à Farmácia.'}), 403
+
+        from app.models import PrescricaoEmergencia, Atendimento, Paciente, Funcionario
+
+        # Buscar apenas prescrições de emergência pendentes
+        prescricoes = PrescricaoEmergencia.query.filter_by(status='Pendente')\
+            .order_by(PrescricaoEmergencia.horario_prescricao.desc()).all()
+
+        prescricoes_data = []
+        for prescricao in prescricoes:
+            # Buscar informações relacionadas
+            atendimento = Atendimento.query.get(prescricao.atendimento_id) if prescricao.atendimento_id else None
+            paciente = Paciente.query.get(atendimento.paciente_id) if atendimento else None
+            medico = Funcionario.query.get(prescricao.medico_id) if prescricao.medico_id else None
+
+            if not atendimento or not paciente:
+                continue
+
+            # Extrair medicamentos da coluna JSON ou texto
+            medicamentos_texto = ""
+            if prescricao.medicamentos:
+                if isinstance(prescricao.medicamentos, list):
+                    # Se for JSON array, formatar os medicamentos
+                    medicamentos_lista = []
+                    for idx, med in enumerate(prescricao.medicamentos, 1):
+                        nome = med.get('nome_medicamento', med.get('medicamento', 'Medicamento não especificado'))
+                        descricao = med.get('descricao_uso', med.get('dose', ''))
+                        medicamentos_lista.append(f"{idx}. {nome}\n   {descricao}")
+                    medicamentos_texto = "\n\n".join(medicamentos_lista)
+                else:
+                    medicamentos_texto = str(prescricao.medicamentos)
+
+            prescricao_info = {
+                'id': prescricao.id,
+                'atendimento_id': prescricao.atendimento_id,
+                'medicamentos_texto': medicamentos_texto,
+                'horario_prescricao': prescricao.horario_prescricao.isoformat() if prescricao.horario_prescricao else None,
+                'paciente': {
+                    'id': paciente.id,
+                    'nome': paciente.nome,
+                    'cpf': paciente.cpf,
+                    'telefone': paciente.telefone,
+                    'data_nascimento': paciente.data_nascimento.isoformat() if paciente.data_nascimento else None
+                },
+                'atendimento': {
+                    'id': atendimento.id,
+                    'data_atendimento': atendimento.data_atendimento.isoformat() if atendimento.data_atendimento else None,
+                    'hora_atendimento': atendimento.hora_atendimento.isoformat() if atendimento.hora_atendimento else None,
+                    'dx': atendimento.dx,
+                    'status': atendimento.status
+                },
+                'medico': {
+                    'id': medico.id if medico else None,
+                    'nome': medico.nome if medico else None,
+                    'numero_profissional': medico.numero_profissional if medico else None
+                },
+                'texto_dieta': prescricao.texto_dieta,
+                'texto_procedimento_medico': prescricao.texto_procedimento_medico,
+                'texto_procedimento_multi': prescricao.texto_procedimento_multi
+            }
+
+            prescricoes_data.append(prescricao_info)
+
+        return jsonify({
+            'success': True,
+            'data': prescricoes_data,
+            'total': len(prescricoes_data)
+        }), 200
+
+    except Exception as e:
+        logging.error(f"Erro ao buscar prescrições de emergência: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro interno do servidor.', 'error': str(e)}), 500
+
+
+@bp.route('/api/dispensacoes/emergencia-processar', methods=['POST'])
+@login_required
+def processar_dispensacao_emergencia():
+    """
+    Endpoint para processar dispensação de prescrições de emergência
+    """
+    try:
+        usuario_atual = get_current_user()
+        if not usuario_atual:
+            return jsonify({'success': False, 'message': 'Sessão expirada. Faça login novamente.'}), 401
+
+        if usuario_atual.cargo.strip().lower() != 'farmacia':
+            return jsonify({'success': False, 'message': 'Acesso restrito à Farmácia.'}), 403
+
+        dados = request.get_json()
+
+        campos_obrigatorios = ['prescricao_id', 'itens']
+        for campo in campos_obrigatorios:
+            if campo not in dados:
+                return jsonify({'success': False, 'message': f'Campo {campo} obrigatório.'}), 400
+
+        from app.models import PrescricaoEmergencia, MedicacaoClasse, MedicacaoItem
+
+        # Buscar a prescrição
+        prescricao = PrescricaoEmergencia.query.get(dados['prescricao_id'])
+        if not prescricao:
+            return jsonify({'success': False, 'message': 'Prescrição não encontrada.'}), 404
+
+        itens = dados.get('itens', [])
+        setor = dados.get('setor', 'Farmacia Satelite')  # Padrão: Farmacia Satelite
+
+        resultados = []
+        total_dispensado = 0
+
+        for item in itens:
+            medicamento_id = item.get('medicamento_id')
+            quantidade = item.get('quantidade', 0)
+            status = item.get('status', 'Dispensado')
+            observacoes = item.get('observacoes', '')
+
+            if not medicamento_id or quantidade <= 0:
+                continue
+
+            # Buscar o medicamento
+            medicamento_classe = MedicacaoClasse.query.get(medicamento_id)
+            if not medicamento_classe:
+                resultados.append({
+                    'success': False,
+                    'medicamento_id': medicamento_id,
+                    'message': 'Medicamento não encontrado.'
+                })
+                continue
+
+            # Buscar itens disponíveis no estoque
+            itens_query = MedicacaoItem.query.filter_by(id_med_classe=medicamento_classe.id)\
+                .filter(MedicacaoItem.quantidade > 0)\
+                .filter(MedicacaoItem.local.ilike(f"%{setor}%"))\
+                .order_by(MedicacaoItem.validade.asc())
+
+            itens_disponiveis = itens_query.all()
+            quantidade_total_disponivel = sum(itm.quantidade for itm in itens_disponiveis)
+
+            if quantidade_total_disponivel < quantidade:
+                resultados.append({
+                    'success': False,
+                    'medicamento': medicamento_classe.nome,
+                    'message': f'Quantidade insuficiente. Disponível: {quantidade_total_disponivel}, Necessário: {quantidade}'
+                })
+                continue
+
+            # Processar dispensação - reduzir estoque
+            quantidade_restante = quantidade
+            dispensacoes_processadas = []
+
+            for itm in itens_disponiveis:
+                if quantidade_restante <= 0:
+                    break
+
+                quantidade_deste_lote = min(quantidade_restante, itm.quantidade)
+                itm.quantidade -= quantidade_deste_lote
+                quantidade_restante -= quantidade_deste_lote
+
+                dispensacoes_processadas.append({
+                    'lote': itm.lote,
+                    'quantidade': quantidade_deste_lote,
+                    'local': itm.local
+                })
+
+                # Se o lote ficou vazio, remover
+                if itm.quantidade == 0:
+                    db.session.delete(itm)
+
+            total_dispensado += quantidade
+
+            resultados.append({
+                'success': True,
+                'medicamento': medicamento_classe.nome,
+                'quantidade': quantidade,
+                'dispensacoes': dispensacoes_processadas,
+                'status': status,
+                'observacoes': observacoes
+            })
+
+            # Log da dispensação
+            logging.info(f"DISPENSAÇÃO EMERGÊNCIA - Prescrição: {prescricao.id} - Farmacêutico: {usuario_atual.nome}")
+            for disp in dispensacoes_processadas:
+                logging.info(f"  • {medicamento_classe.nome} - Lote: {disp['lote']} - Qtd: {disp['quantidade']} - Local: {disp['local']}")
+
+        # Atualizar status da prescrição de emergência para Aprovado
+        prescricao.status = 'Aprovado'
+        prescricao.farmaceutico_id = usuario_atual.id
+        prescricao.data_dispensacao = datetime.now(timezone.utc)
+
+        # Adicionar observações se houver
+        obs_itens = [r.get('observacoes', '') for r in resultados if r.get('observacoes')]
+        if obs_itens:
+            prescricao.observacoes = '\n'.join(obs_itens)
+
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': f'Prescrição aprovada com sucesso! {total_dispensado} unidade(s) dispensada(s).',
+            'resultados': resultados
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Erro ao processar dispensação de emergência: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro interno do servidor.', 'error': str(e)}), 500
+
+
+@bp.route('/api/dispensacoes/aprovar-todas-emergencia', methods=['POST'])
+@login_required
+def aprovar_todas_dispensacoes_emergencia():
+    """
+    ENDPOINT DE EMERGÊNCIA - Aprova todas as solicitações pendentes SEM baixa no estoque
+    Use apenas em casos de emergência (queda de energia, falha do sistema, etc)
+    """
+    try:
+        usuario_atual = get_current_user()
+        if not usuario_atual:
+            return jsonify({'success': False, 'message': 'Sessão expirada. Faça login novamente.'}), 401
+
+        if usuario_atual.cargo.strip().lower() != 'farmacia':
+            return jsonify({'success': False, 'message': 'Acesso restrito à Farmácia.'}), 403
+
+        dados = request.get_json() or {}
+        setor = dados.get('setor', 'Farmacia Satelite')
+        timestamp = dados.get('timestamp', datetime.now(timezone.utc).isoformat())
+
+        from app.models import FluxoDisp, PrescricaoEmergencia
+
+        # MARCAR TODAS AS PRESCRIÇÕES DO FLUXO COMO DISPENSADAS (sem baixa no estoque)
+        prescricoes_fluxo = FluxoDisp.query.filter_by(status='Pendente').all()
+        count_fluxo = 0
+
+        for presc in prescricoes_fluxo:
+            try:
+                presc.status = 'Dispensado'
+                presc.data_dispensacao = datetime.now(timezone.utc)
+                presc.farmaceutico_id = usuario_atual.id
+                obs_atual = presc.observacoes or ''
+                presc.observacoes = obs_atual + f"\n[APROVAÇÃO EMERGENCIAL - SEM BAIXA - {timestamp}]"
+                count_fluxo += 1
+            except Exception as e_presc:
+                logging.error(f"Erro ao processar prescrição fluxo {presc.id}: {str(e_presc)}")
+                continue
+
+        # ATUALIZAR STATUS DE TODAS AS PRESCRIÇÕES DE EMERGÊNCIA PENDENTES
+        prescricoes_emergencia = PrescricaoEmergencia.query.filter_by(status='Pendente').all()
+        count_emergencia = 0
+        for presc_emerg in prescricoes_emergencia:
+            try:
+                presc_emerg.status = 'Aprovado'
+                presc_emerg.farmaceutico_id = usuario_atual.id
+                presc_emerg.data_dispensacao = datetime.now(timezone.utc)
+                obs_atual = presc_emerg.observacoes or ''
+                presc_emerg.observacoes = obs_atual + f"\n[APROVAÇÃO EMERGENCIAL - SEM BAIXA - {timestamp}]"
+                count_emergencia += 1
+            except Exception as e_emerg:
+                logging.error(f"Erro ao processar prescrição emergência {presc_emerg.id}: {str(e_emerg)}")
+                continue
+
+        db.session.commit()
+
+        # Log da operação
+        logging.warning(f"⚠️ APROVAÇÃO EMERGENCIAL - Farmacêutico: {usuario_atual.nome}")
+        logging.warning(f"  • Prescrições Fluxo aprovadas: {count_fluxo}")
+        logging.warning(f"  • Prescrições Emergência aprovadas: {count_emergencia}")
+        logging.warning(f"  • Setor: {setor}")
+        logging.warning(f"  • ATENÇÃO: BAIXAS NÃO REGISTRADAS NO ESTOQUE!")
+
+        return jsonify({
+            'success': True,
+            'message': 'Aprovação emergencial concluída com sucesso.',
+            'total': count_fluxo + count_emergencia,
+            'total_fluxo': count_fluxo,
+            'total_emergencia': count_emergencia,
+            'setor': setor,
+            'timestamp': timestamp,
+            'farmaceutico': usuario_atual.nome
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Erro na aprovação emergencial: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': f'Erro interno: {str(e)}'}), 500
+
+
+@bp.route('/api/dispensacoes/estatisticas', methods=['GET'])
+@login_required
+def obter_estatisticas_dispensacoes():
+    """
+    Endpoint para obter estatísticas de dispensações
+    """
+    try:
+        from app.models import FluxoDisp, PrescricaoEmergencia
+
+        # Contar prescrições do fluxo
+        pendentes_fluxo = FluxoDisp.query.filter_by(status='Pendente').count()
+        dispensadas_fluxo = FluxoDisp.query.filter_by(status='Dispensado').count()
+        parciais_fluxo = FluxoDisp.query.filter_by(status='Parcial').count()
+        canceladas_fluxo = FluxoDisp.query.filter_by(status='Cancelado').count()
+
+        # Contar prescrições de emergência (todas são consideradas pendentes)
+        pendentes_emergencia = PrescricaoEmergencia.query.count()
+
+        # Totais
+        total_pendentes = pendentes_fluxo + pendentes_emergencia
+        total_dispensadas = dispensadas_fluxo
+        total_rejeitadas = canceladas_fluxo
+
+        return jsonify({
+            'success': True,
+            'pendentes': total_pendentes,
+            'dispensadas': total_dispensadas,
+            'rejeitadas': total_rejeitadas,
+            'parciais': parciais_fluxo,
+            'detalhes': {
+                'fluxo': {
+                    'pendentes': pendentes_fluxo,
+                    'dispensadas': dispensadas_fluxo,
+                    'parciais': parciais_fluxo,
+                    'canceladas': canceladas_fluxo
+                },
+                'emergencia': {
+                    'pendentes': pendentes_emergencia
+                }
+            }
+        }), 200
+
+    except Exception as e:
+        logging.error(f"Erro ao obter estatísticas: {str(e)}")
+        return jsonify({'success': False, 'message': 'Erro ao obter estatísticas.'}), 500
+
 
 @bp.route('/api/medicamentos/buscar', methods=['GET'])
 @login_required

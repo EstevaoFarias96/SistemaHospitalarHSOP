@@ -651,8 +651,13 @@ class PrescricaoEmergencia(db.Model):
     texto_procedimento_multi = db.Column(db.Text, nullable=True)
     horario_prescricao = db.Column(db.DateTime(timezone=True), default=now_brasilia, nullable=False)
     medicamentos = db.Column(JSONType, default=list, nullable=False)
+    status = db.Column(db.String(50), default='Pendente', nullable=False)
+    farmaceutico_id = db.Column(db.Integer, db.ForeignKey('funcionarios.id', onupdate='CASCADE'), nullable=True)
+    data_dispensacao = db.Column(db.DateTime(timezone=True), nullable=True)
+    observacoes = db.Column(db.Text, nullable=True)
 
     atendimento = db.relationship('Atendimento', backref=db.backref('prescricoes_emergencia', cascade='all, delete-orphan'))
+    farmaceutico = db.relationship('Funcionario', foreign_keys=[farmaceutico_id])
     medico = db.relationship('Funcionario', foreign_keys=[medico_id])
     enfermeiro = db.relationship('Funcionario', foreign_keys=[enfermeiro_id])
 

@@ -12,242 +12,462 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      background-color: #f8f9fa;
-    }
-
-    /* Sidebar igual ao farmacia.html */
-    .sidebar {
-      width: 80px;
-      height: 100vh;
-      background-color: #2d2ddcec;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding-top: 20px;
-      position: relative;
-    }
-
-    .sidebar ul {
-      list-style: none;
+      background: #f5f5f7;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Display', 'SF Pro Text', Helvetica, Arial, sans-serif;
+      margin: 0;
       padding: 0;
-      width: 100%;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
-    .sidebar li {
+    /* ===== HEADER HORIZONTAL MODERNO ===== */
+    .top-header {
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 30px;
+      max-width: 1800px;
+      margin: 0 auto;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-brand i {
+      font-size: 1.8rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-brand .brand-text h1 {
+      margin: 0;
+      font-size: 1.3rem;
+      color: #2c3e50;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .header-brand .brand-text small {
+      font-size: 0.8rem;
+      color: #7f8c8d;
+      font-weight: 400;
+    }
+
+    .header-nav {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .header-nav .btn {
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .header-nav .btn-outline-primary {
+      border: 1px solid #667eea;
+      color: #667eea;
+    }
+
+    .header-nav .btn-outline-primary:hover {
+      background: #667eea;
+      color: white;
+    }
+
+    .header-user {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-left: 12px;
+      border-left: 1px solid #ecf0f1;
       position: relative;
-      width: 100%;
     }
 
-    .sidebar a {
-      color: #fff;
-      text-align: center;
+    .user-info {
+      text-align: right;
+    }
+
+    .user-info .user-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin: 0;
+    }
+
+    .user-info .user-role {
+      font-size: 0.75rem;
+      color: #7f8c8d;
+    }
+
+    .user-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 15px;
-      width: 100%;
-      font-size: 18px;
-      white-space: nowrap;
-      position: relative;
-      text-decoration: none;
-    }
-
-    .menu-label {
-      display: none;
-      margin-left: 10px;
-      font-size: 16px;
-    }
-
-    .sidebar.expanded {
-      width: 220px;
-      align-items: flex-start;
-      padding-left: 10px;
-    }
-
-    .sidebar.expanded a {
-      justify-content: flex-start;
-    }
-
-    .sidebar.expanded .menu-label {
-      display: inline-block;
-    }
-
-    /* Expandir ao passar o mouse */
-    .sidebar:hover {
-      width: 220px;
-      align-items: flex-start;
-      padding-left: 10px;
-    }
-
-    .sidebar:hover a {
-      justify-content: flex-start;
-    }
-
-    .sidebar:hover .menu-label {
-      display: inline-block;
-    }
-
-    .sidebar a:hover::after {
-      content: attr(data-title);
-      position: absolute;
-      left: 100%;
-      background-color: rgba(0, 0, 0, 0.75);
-      color: #fff;
-      padding: 5px 10px;
-      border-radius: 5px;
-      white-space: nowrap;
-      margin-left: 10px;
-      font-size: 14px;
-    }
-
-    /* Menu do Usuário na sidebar */
-    .user-menu {
-      position: absolute;
-      bottom: 20px;
-      width: 100%;
-      text-align: center;
-    }
-
-    .user-menu-button {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background-color: #fff;
-      color: #2d2ddcec;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 0.9rem;
       cursor: pointer;
-      font-size: 24px;
-      border: none;
+      transition: transform 0.2s;
+    }
+
+    .user-avatar:hover {
+      transform: scale(1.05);
     }
 
     .user-dropdown {
       display: none;
       position: absolute;
-      bottom: 70px;
-      left: 50%;
-      transform: translateX(20px);
-      background-color: #fff;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      min-width: 150px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-      z-index: 1000;
+      top: 55px;
+      right: 0;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+      min-width: 180px;
+      z-index: 1001;
+      overflow: hidden;
+      border: 1px solid #ecf0f1;
+    }
+
+    .user-dropdown.show {
+      display: block;
+      animation: fadeInDown 0.2s;
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .user-dropdown a, .user-dropdown span {
       display: block;
-      padding: 10px;
-      color: #333;
+      padding: 10px 16px;
+      color: #2c3e50;
       text-decoration: none;
+      font-size: 0.9rem;
+      transition: background 0.2s;
     }
 
     .user-dropdown a:hover {
-      background-color: #f8f9fa;
+      background: #f8f9fa;
+    }
+
+    .user-dropdown span {
+      font-weight: 600;
+      border-bottom: 1px solid #ecf0f1;
     }
 
     .main-content {
-      padding: 20px;
+      padding: 20px 30px;
+      max-width: 1800px;
+      margin: 0 auto;
     }
 
     .hidden {
       display: none;
     }
 
-    /* Estilos específicos para dispensações */
+    /* ===== CARDS ESTILO APPLE - MINIMALISTA E ELEGANTE ===== */
     .dispensation-card {
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      transition: transform 0.2s;
-      margin-bottom: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.02);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-bottom: 0;
+      border: 0.5px solid rgba(0,0,0,0.06);
+      overflow: hidden;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      height: 100%;
     }
 
     .dispensation-card:hover {
-      transform: translateY(-2px);
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.08), 0 12px 32px rgba(0,0,0,0.04);
+      border-color: rgba(102, 126, 234, 0.2);
     }
 
-    .status-pending {
-      background-color: #fff3cd;
-      color: #856404;
-      border: 1px solid #ffeaa7;
+    .dispensation-card .card-header {
+      padding: 8px 10px;
+      border-bottom: 0.5px solid rgba(0,0,0,0.06);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
     }
 
-    .status-approved {
-      background-color: #d1ecf1;
-      color: #0c5460;
-      border: 1px solid #bee5eb;
+    .dispensation-card .card-header h6 {
+      font-size: 0.8rem;
+      margin-bottom: 1px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
     }
 
-    .status-dispensed {
-      background-color: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
+    .dispensation-card .card-header small {
+      font-size: 0.65rem;
+      opacity: 0.7;
+      font-weight: 400;
     }
 
-    .status-cancelled {
-      background-color: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
+    .dispensation-card .card-body {
+      padding: 8px 10px;
+      font-size: 0.75rem;
+      line-height: 1.4;
     }
 
-    .prescription-header {
-      background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-      color: white;
-      padding: 1rem;
-      border-radius: 8px 8px 0 0;
+    .dispensation-card .card-body .mb-2 {
+      margin-bottom: 4px !important;
     }
 
-    .prescription-body {
-      padding: 1rem;
+    .dispensation-card .card-body strong {
+      font-size: 0.7rem;
+      color: #86868b;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      display: block;
+      margin-bottom: 1px;
     }
 
-    .medicamento-item {
-      background: #f8f9fa;
-      border: 1px solid #dee2e6;
+    .dispensation-card .card-body > div {
+      color: #1d1d1f;
+      font-size: 0.75rem;
+    }
+
+    .dispensation-card .btn-sm {
+      font-size: 0.7rem;
+      padding: 4px 8px;
       border-radius: 6px;
-      padding: 0.75rem;
-      margin-bottom: 0.5rem;
     }
 
-    .medicamento-item:last-child {
-      margin-bottom: 0;
-    }
-
-    .btn-dispense {
-      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-      border: none;
-      color: white;
-    }
-
-    .btn-dispense:hover {
-      background: linear-gradient(135deg, #218838 0%, #1aa085 100%);
-      color: white;
-    }
-
-    .filter-section {
-      background: white;
-      border-radius: 8px;
-      padding: 1rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .stats-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border-radius: 8px;
-      padding: 1rem;
-      margin-bottom: 1rem;
+    /* Gap utility para Bootstrap 4 */
+    .gap-1 {
+      gap: 0.25rem;
     }
 
     .prescription-actions {
+      margin-top: 8px;
+    }
+
+    /* Badges estilo Apple */
+    .badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 12px;
+      letter-spacing: -0.2px;
+      border: none;
+    }
+
+    .status-pending, .badge-warning {
+      background: rgba(255, 149, 0, 0.1);
+      color: #ff9500;
+    }
+
+    .status-approved, .badge-info {
+      background: rgba(0, 122, 255, 0.1);
+      color: #007aff;
+    }
+
+    .status-dispensed, .badge-success {
+      background: rgba(52, 199, 89, 0.1);
+      color: #34c759;
+    }
+
+    .status-cancelled, .badge-danger {
+      background: rgba(255, 59, 48, 0.1);
+      color: #ff3b30;
+    }
+
+    .badge-light {
+      background: rgba(0,0,0,0.05);
+      color: #1d1d1f;
+    }
+
+    /* ===== ESTATÍSTICAS ESTILO APPLE ===== */
+    .stats-card {
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 18px;
+      padding: 20px;
+      border: 0.5px solid rgba(0,0,0,0.04);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      height: 100%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .stats-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      border-color: rgba(0,122,255,0.15);
+    }
+
+    .stats-card .card-body {
+      padding: 0;
+    }
+
+    .stats-card h5 {
+      font-size: 0.7rem;
+      color: #86868b;
+      margin-bottom: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stats-card h3 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #1d1d1f;
+      letter-spacing: -1px;
+    }
+
+    .stats-card small {
+      font-size: 0.75rem;
+      color: #86868b;
+      font-weight: 400;
+    }
+
+    .stats-card i {
+      opacity: 0.15;
+      font-size: 2.5rem;
+    }
+
+    /* ===== FILTROS ESTILO APPLE ===== */
+    .filter-section {
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 16px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+      border: 0.5px solid rgba(0,0,0,0.06);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .filter-section label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #86868b;
+      margin-bottom: 6px;
+      letter-spacing: -0.2px;
+    }
+
+    .filter-section .form-control {
+      font-size: 0.85rem;
+      border-radius: 10px;
+      border: 0.5px solid rgba(0,0,0,0.1);
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.8);
+      transition: all 0.2s;
+    }
+
+    .filter-section .form-control:focus {
+      border-color: #007aff;
+      box-shadow: 0 0 0 4px rgba(0,122,255,0.1);
+      outline: none;
+    }
+
+    .filter-section .btn {
+      font-size: 0.8rem;
+      border-radius: 10px;
+    }
+
+    /* ===== BOTÕES ESTILO APPLE ===== */
+    .prescription-actions {
       display: flex;
-      gap: 0.5rem;
+      gap: 6px;
       justify-content: flex-end;
-      margin-top: 1rem;
+      margin-top: 10px;
+    }
+
+    .prescription-actions .btn, .btn-sm {
+      font-size: 0.75rem;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+      border: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-outline-primary, .btn-outline-danger, .btn-outline-info, .btn-outline-secondary {
+      background: transparent;
+      border: 1px solid rgba(0,0,0,0.1);
+      color: #1d1d1f;
+    }
+
+    .btn-outline-danger {
+      border-color: rgba(255, 59, 48, 0.2);
+      color: #ff3b30;
+    }
+
+    .btn-outline-info {
+      border-color: rgba(0, 122, 255, 0.2);
+      color: #007aff;
+    }
+
+    .btn-primary, .btn-info {
+      background: #007aff;
+      color: white;
+      box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+    }
+
+    .btn-danger {
+      background: #ff3b30;
+      color: white;
+      box-shadow: 0 2px 8px rgba(255, 59, 48, 0.3);
+    }
+
+    .btn-success {
+      background: #34c759;
+      color: white;
+      box-shadow: 0 2px 8px rgba(52, 199, 89, 0.3);
+    }
+
+    .btn:hover {
+      transform: scale(1.03);
+      opacity: 0.9;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-dispense {
+      background: #34c759;
+      color: white;
+      box-shadow: 0 2px 8px rgba(52, 199, 89, 0.3);
     }
 
     .empty-state {
@@ -271,15 +491,493 @@
       background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
     }
 
+    /* UI MELHORADA - Auto-complete e busca rápida */
+    .autocomplete-container {
+      position: relative;
+      width: 100%;
+    }
+
+    .autocomplete-results {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #ddd;
+      border-top: none;
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 1000;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      display: none;
+    }
+
+    .autocomplete-item {
+      padding: 10px 15px;
+      cursor: pointer;
+      border-bottom: 1px solid #f0f0f0;
+      transition: background 0.2s;
+    }
+
+    .autocomplete-item:hover {
+      background: #f8f9fa;
+    }
+
+    .autocomplete-item.active {
+      background: #e9ecef;
+    }
+
+    .autocomplete-item .med-name {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 3px;
+    }
+
+    .autocomplete-item .med-info {
+      font-size: 0.85rem;
+      color: #6c757d;
+    }
+
+    .autocomplete-item .med-stock {
+      float: right;
+      font-weight: 600;
+      color: #28a745;
+    }
+
+    .autocomplete-item .med-stock.low {
+      color: #ffc107;
+    }
+
+    .autocomplete-item .med-stock.out {
+      color: #dc3545;
+    }
+
+    /* Botão de ação rápida */
+    .btn-quick-dispense {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-quick-dispense::after {
+      content: '⚡';
+      margin-left: 5px;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Badge de quantidade */
+    .qty-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: #007bff;
+      color: white;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-left: 5px;
+    }
+
+    /* Indicador de processamento */
+    .processing-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .processing-overlay.show {
+      display: flex;
+    }
+
+    .processing-content {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .processing-content .spinner {
+      font-size: 3rem;
+      color: #007bff;
+      margin-bottom: 15px;
+    }
+
+    /* Modal otimizado */
+    .modal-quick {
+      transition: all 0.2s;
+    }
+
+    .quick-add-item {
+      background: #f8f9fa;
+      border: 2px dashed #dee2e6;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 10px;
+      transition: all 0.3s;
+    }
+
+    .quick-add-item.added {
+      border-color: #28a745;
+      border-style: solid;
+      background: #d4edda;
+    }
+
+    .quick-input-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .quick-input-group input {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .quick-input-group .btn {
+      flex-shrink: 0;
+    }
+
+    /* Atalhos de teclado */
+    .keyboard-hint {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-size: 0.85rem;
+      z-index: 1000;
+      display: none;
+    }
+
+    .keyboard-hint.show {
+      display: block;
+      animation: slideIn 0.3s;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .kbd {
+      background: #fff;
+      color: #333;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 0.9em;
+      border: 1px solid #ccc;
+    }
+
+    /* ===== MODAL ELEGANTE ===== */
+    .modal-content {
+      border-radius: 16px;
+      border: none;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    }
+
+    .modal-header {
+      border-bottom: 1px solid #e1e8ed;
+      padding: 20px 24px;
+      border-radius: 16px 16px 0 0;
+    }
+
+    .modal-header .modal-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: white;
+    }
+
+    .modal-header .close {
+      padding: 0;
+      margin: 0;
+      color: white;
+      opacity: 0.9;
+      font-size: 1.5rem;
+      text-shadow: none;
+    }
+
+    .modal-header .close:hover {
+      opacity: 1;
+    }
+
+    .modal-body {
+      padding: 24px;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .modal-body .card {
+      border-radius: 10px;
+      border: 1px solid #e1e8ed;
+      margin-bottom: 16px;
+    }
+
+    .modal-body .card-header {
+      background: #f8f9fa;
+      border-bottom: 1px solid #e1e8ed;
+      padding: 12px 16px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .modal-body .card-body {
+      padding: 16px;
+      font-size: 0.85rem;
+    }
+
+    .modal-footer {
+      border-top: 1px solid #e1e8ed;
+      padding: 16px 24px;
+      border-radius: 0 0 16px 16px;
+      background: #f8f9fa;
+    }
+
+    .modal-footer .btn {
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    /* Tabela principal de prescrições */
+    #prescriptions-table table {
+      font-size: 0.85rem;
+    }
+
+    #prescriptions-table thead th {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #1d1d1f;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      padding: 12px 10px;
+      background: #f5f5f7;
+      border-bottom: 2px solid #e1e8ed;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    #prescriptions-table tbody td {
+      padding: 10px;
+      vertical-align: middle;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      font-size: 0.8rem;
+    }
+
+    #prescriptions-table tbody tr:hover {
+      background: rgba(0,122,255,0.03);
+      transition: all 0.2s ease;
+    }
+
+    #prescriptions-table .tipo-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    #prescriptions-table .tipo-emergencia {
+      background: rgba(255,59,48,0.1);
+      color: #ff3b30;
+      border: 1px solid rgba(255,59,48,0.2);
+    }
+
+    #prescriptions-table .tipo-fluxo {
+      background: rgba(0,122,255,0.1);
+      color: #007aff;
+      border: 1px solid rgba(0,122,255,0.2);
+    }
+
+    #prescriptions-table .medicamentos-preview {
+      max-height: 60px;
+      overflow-y: auto;
+      font-size: 0.75rem;
+      line-height: 1.4;
+      color: #5a6c7d;
+    }
+
+    /* Tabela no modal */
+    .modal-body table {
+      font-size: 0.85rem;
+    }
+
+    .modal-body table th {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #5a6c7d;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      padding: 10px;
+    }
+
+    .modal-body table td {
+      padding: 10px;
+      vertical-align: middle;
+    }
+
+    /* Form controls no modal */
+    .modal-body .form-control, .modal-body .form-control-sm {
+      border-radius: 6px;
+      border: 1px solid #e1e8ed;
+      font-size: 0.85rem;
+    }
+
+    .modal-body .form-control:focus, .modal-body .form-control-sm:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    /* Botão de Emergência - Discreto */
+    .btn-emergency {
+      background: #9CA3AF;
+      color: white;
+      border: 1px solid #D1D5DB;
+      font-weight: 400;
+      font-size: 0.75rem;
+      padding: 6px 12px;
+      border-radius: 6px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      transition: all 0.2s ease;
+      opacity: 0.6;
+    }
+
+    .btn-emergency:hover {
+      background: #DC2626;
+      border-color: #991B1B;
+      opacity: 1;
+      color: white;
+      box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
+    }
+
+    .btn-emergency i {
+      font-size: 0.7rem;
+    }
+
+    /* Controles de Setor */
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: white;
+      padding: 8px 14px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+
+    .control-group:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      border-color: rgba(102, 126, 234, 0.3);
+    }
+
+    .control-group.setor-ativo {
+      border-color: #667eea;
+      background: linear-gradient(135deg, #F0F9FF, white);
+    }
+
+    .control-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #4A5568;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .control-label i {
+      color: #667eea;
+      font-size: 14px;
+    }
+
+    .control-select {
+      border: 2px solid #E2E8F0;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #4A5568;
+      background: white;
+      transition: all 0.3s ease;
+      min-width: 180px;
+    }
+
+    .control-select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .setor-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+      animation: pulse-setor 2s infinite;
+    }
+
+    @keyframes pulse-setor {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.85; }
+    }
+
+    .setor-indicator i {
+      color: white;
+    }
+
     /* Responsividade */
     @media (max-width: 768px) {
-      .sidebar {
-        width: 60px;
+      .header-content {
+        padding: 10px 15px;
       }
 
-      .sidebar.expanded,
-      .sidebar:hover {
-        width: 200px;
+      .header-brand .brand-text h1 {
+        font-size: 1.1rem;
+      }
+
+      .header-nav .btn {
+        padding: 5px 10px;
+        font-size: 0.8rem;
+      }
+
+      .user-info {
+        display: none;
+      }
+
+      .main-content {
+        padding: 15px;
       }
 
       .prescription-actions {
@@ -289,78 +987,65 @@
       .prescription-actions .btn {
         width: 100%;
       }
+
+      .stats-card h3 {
+        font-size: 1.5rem;
+      }
+
+      .control-group {
+        width: 100%;
+        flex-direction: row;
+      }
+
+      .control-select {
+        flex: 1;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container-fluid">
-    <div class="row">
-      <!-- Sidebar -->
-      <div class="sidebar" id="sidebar">
-        <ul class="nav flex-column">
-          <li class="nav-item" data-title="Menu">
-            <a class="nav-link" href="#" id="toggleSidebarBtn" onclick="toggleSidebar(); return false;">
-              <i class="fas fa-bars"></i><span class="menu-label">Menu</span>
-            </a>
-          </li>
-          <li class="nav-item" data-title="Painel Principal">
-            <a class="nav-link" href="/farmacia" title="Voltar ao Painel">
-              <i class="fas fa-home"></i><span class="menu-label">Painel</span>
-            </a>
-          </li>
-          <li class="nav-item" data-title="Controle de Estoque">
-            <a class="nav-link" href="/farmacia/estoque" title="Estoque">
-              <i class="fas fa-boxes"></i><span class="menu-label">Estoque</span>
-            </a>
-          </li>
-          <li class="nav-item" data-title="Dispensações">
-            <a class="nav-link active" href="/farmacia/dispensacoes" title="Dispensações">
-              <i class="fas fa-prescription-bottle-alt"></i><span class="menu-label">Dispensações</span>
-            </a>
-          </li>
-          <li class="nav-item" data-title="Relatórios">
-            <a class="nav-link" href="#" onclick="abrirRelatorios()" title="Relatórios">
-              <i class="fas fa-chart-bar"></i><span class="menu-label">Relatórios</span>
-            </a>
-          </li>
-          <li class="nav-item" data-title="Configurações">
-            <a class="nav-link" href="#" onclick="abrirConfiguracoes()" title="Configurações">
-              <i class="fas fa-cog"></i><span class="menu-label">Configurações</span>
-            </a>
-          </li>
-        </ul>
-
-        <!-- Menu do Usuário -->
-        <div class="user-menu">
-          <button class="user-menu-button" id="userMenuButton">
-            <i class="fas fa-user"></i>
-          </button>
-          <div class="user-dropdown" id="userDropdown">
-            <span id="userNameDisplay">Funcionário da Farmácia</span>
-            <a href="#" id="changePasswordOption">Mudar a senha</a>
-            <a href="/logout" id="logoutOption">Sair</a>
-          </div>
+  <!-- Header Horizontal -->
+  <div class="top-header">
+    <div class="header-content">
+      <div class="header-brand">
+        <i class="fas fa-pills"></i>
+        <div class="brand-text">
+          <h1>Farmácia - Dispensações</h1>
+          <small id="dataHoraAtual">Carregando...</small>
         </div>
       </div>
 
-      <!-- Main Content -->
-      <div class="col main-content">
-        <!-- Header da Página -->
-        <div class="row mb-4">
-          <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <h2 class="text-primary mb-1">
-                  <i class="fas fa-prescription-bottle-alt mr-2"></i>Dispensações
-                </h2>
-                <p class="text-muted mb-0">Gerenciamento de prescrições médicas e dispensação de medicamentos</p>
-              </div>
-              <div class="text-right">
-                <small class="text-muted" id="dataHoraAtual"></small>
-              </div>
-            </div>
-          </div>
+      <div class="header-nav">
+        <a href="/farmacia" class="btn btn-outline-primary btn-sm">
+          <i class="fas fa-home mr-1"></i>Painel
+        </a>
+        <a href="/farmacia/estoque" class="btn btn-outline-primary btn-sm">
+          <i class="fas fa-boxes mr-1"></i>Estoque
+        </a>
+        <button class="btn btn-outline-secondary btn-sm" onclick="window.location.reload()">
+          <i class="fas fa-sync-alt"></i>
+        </button>
+      </div>
+
+      <div class="header-user">
+        <div class="user-info">
+          <div class="user-name" id="userNameDisplay">Farmácia</div>
+          <div class="user-role">Funcionário</div>
         </div>
+        <div class="user-avatar" id="userMenuButton">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="user-dropdown" id="userDropdown">
+          <span id="userNameDisplay2">Funcionário</span>
+          <a href="#" id="changePasswordOption">Mudar a senha</a>
+          <a href="/logout">Sair</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
 
         <!-- Cards de Estatísticas -->
         <div class="row mb-4">
@@ -433,6 +1118,43 @@
           </div>
         </div>
 
+        <!-- Controles de Setor e Emergência -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="d-flex flex-wrap align-items-center gap-3" style="gap: 12px;">
+              <!-- Grupo de Setor Médico -->
+              <div class="control-group" id="groupSetorFarmacia">
+                <div class="control-label">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>Setor:</span>
+                </div>
+                <select id="setorFarmacia" class="control-select">
+                  <option value="">Selecionar setor...</option>
+                  <option value="Farmácia Central">🏥 Farmácia Central</option>
+                  <option value="Farmácia Satélite 1">💊 Farmácia Satélite 1</option>
+                  <option value="Farmácia Satélite 2">💊 Farmácia Satélite 2</option>
+                  <option value="Farmacia Clinica">⚕️ Farmácia Clínica</option>
+                </select>
+              </div>
+
+              <!-- Indicador de Setor Ativo -->
+              <div id="setorIndicatorFarmacia" class="setor-indicator" style="display: none;">
+                <i class="fas fa-map-marker-alt"></i>
+                <span id="setorAtualTextoFarmacia"></span>
+              </div>
+
+              <!-- Espaçador -->
+              <div style="flex-grow: 1;"></div>
+
+              <!-- Botão de Emergência -->
+              <button id="btnEmergenciaAprovar" class="btn btn-emergency" title="Função de emergência - Usar apenas em casos críticos">
+                <i class="fas fa-exclamation-triangle mr-1"></i>
+                Emergência
+              </button>
+            </div>
+          </div>
+        </div>
+
         <!-- Filtros e Busca -->
         <div class="filter-section">
           <div class="row align-items-end">
@@ -486,45 +1208,29 @@
                     <i class="fas fa-prescription mr-2 text-primary"></i>Prescrições
                     <span class="badge badge-primary ml-2" id="total-prescricoes">0</span>
                   </h5>
-                  <div class="btn-group btn-group-sm">
-                    <button class="btn btn-outline-secondary active" id="view-mode-cards">
-                      <i class="fas fa-th"></i> Cards
-                    </button>
-                    <button class="btn btn-outline-secondary" id="view-mode-table">
-                      <i class="fas fa-table"></i> Tabela
-                    </button>
-                  </div>
                 </div>
               </div>
-              <div class="card-body">
-
-                <!-- Visualização em Cards -->
-                <div id="prescriptions-cards">
-                  <!-- Cards de prescrições serão inseridos aqui dinamicamente -->
-                  <div class="empty-state">
-                    <i class="fas fa-prescription-bottle-alt"></i>
-                    <h5>Nenhuma prescrição encontrada</h5>
-                    <p>As prescrições médicas aparecerão aqui quando forem enviadas pelo sistema.</p>
-                  </div>
-                </div>
+              <div class="card-body p-0">
 
                 <!-- Visualização em Tabela -->
-                <div id="prescriptions-table" class="d-none">
+                <div id="prescriptions-table">
                   <div class="table-responsive">
                     <table class="table table-hover mb-0">
                       <thead class="thead-light">
                         <tr>
-                          <th>Paciente</th>
-                          <th>Médico</th>
-                          <th>Data</th>
-                          <th>Medicamentos</th>
-                          <th>Status</th>
-                          <th>Ações</th>
+                          <th width="5%">Tipo</th>
+                          <th width="20%">Paciente</th>
+                          <th width="15%">Médico</th>
+                          <th width="10%">Data/Hora</th>
+                          <th width="10%">Atendimento</th>
+                          <th width="25%">Medicamentos</th>
+                          <th width="10%">Status</th>
+                          <th width="5%">Ações</th>
                         </tr>
                       </thead>
                       <tbody id="tabela-prescricoes">
                         <tr>
-                          <td colspan="6" class="text-center text-muted py-5">
+                          <td colspan="8" class="text-center text-muted py-5">
                             <i class="fas fa-table fa-2x mb-2"></i><br/>
                             Selecione a visualização em tabela para ver os dados.
                           </td>
@@ -538,9 +1244,11 @@
             </div>
           </div>
         </div>
-
       </div>
     </div>
+  </div>
+
+  <!-- Fecha Main Content -->
   </div>
 
   <!-- Modal de Detalhes da Prescrição -->
@@ -724,21 +1432,17 @@
             </div>
             <div class="card-body">
               <div class="row">
-                <div class="col-md-4">
-                  <label class="font-weight-bold">Setor do Estoque:</label>
-                  <select class="form-control" id="select-setor-fluxo">
-                    <option value="">Selecione o setor...</option>
-                  </select>
-                  <small class="text-muted">Obrigatório para buscar medicamentos.</small>
-                </div>
-                <div class="col-md-5">
-                  <label class="font-weight-bold">Buscar Medicamento:</label>
-                  <input type="text" class="form-control" id="busca-medicamento-fluxo" placeholder="Digite o nome do medicamento...">
+                <div class="col-md-9">
+                  <label class="font-weight-bold">Buscar Medicamento: <small class="text-muted">(digite para buscar automaticamente)</small></label>
+                  <div class="autocomplete-container">
+                    <input type="text" class="form-control" id="busca-medicamento-fluxo" placeholder="Digite o nome do medicamento..." autocomplete="off">
+                    <div class="autocomplete-results" id="autocomplete-results"></div>
+                  </div>
                 </div>
                 <div class="col-md-3">
                   <label class="font-weight-bold">&nbsp;</label>
-                  <button class="btn btn-outline-primary btn-block" id="btn-buscar-medicamento-fluxo">
-                    <i class="fas fa-search mr-1"></i>Buscar
+                  <button class="btn btn-success btn-block" id="btn-adicionar-rapido">
+                    <i class="fas fa-plus-circle mr-1"></i>Adicionar Rápido
                   </button>
                 </div>
               </div>
@@ -804,6 +1508,26 @@
     </div>
   </div>
 
+  <!-- Overlay de Processamento -->
+  <div class="processing-overlay" id="processingOverlay">
+    <div class="processing-content">
+      <div class="spinner">
+        <i class="fas fa-spinner fa-spin"></i>
+      </div>
+      <h5 id="processingMessage">Processando dispensação...</h5>
+      <p class="text-muted mb-0" id="processingDetail">Aguarde um momento</p>
+    </div>
+  </div>
+
+  <!-- Hint de Atalhos de Teclado -->
+  <div class="keyboard-hint" id="keyboardHint">
+    <strong>Atalhos:</strong><br>
+    <span class="kbd">Ctrl</span> + <span class="kbd">F</span> - Buscar medicamento<br>
+    <span class="kbd">Ctrl</span> + <span class="kbd">Enter</span> - Confirmar dispensação<br>
+    <span class="kbd">Esc</span> - Fechar modal<br>
+    <span class="kbd">?</span> - Mostrar/ocultar atalhos
+  </div>
+
   <!-- jQuery e Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -814,27 +1538,151 @@
       $.getJSON('/api/farmacia/nome', function(data) {
         if(data.nome) {
           $('#userNameDisplay').text(data.nome);
+          $('#userNameDisplay2').text(data.nome);
         }
       }).fail(function() {
         $('#userNameDisplay').text('Funcionário da Farmácia');
+        $('#userNameDisplay2').text('Funcionário');
       });
 
       // Atualizar data e hora
       atualizarDataHora();
       setInterval(atualizarDataHora, 60000);
 
-      // Carregar prescrições pendentes do fluxo
-      carregarPrescricoesFluxo();
+      // Carregar prescrições pendentes do fluxo e emergência
+      carregarTodasPrescricoes();
 
-      // Carregar lista de setores para o modal
-      carregarSetoresEstoque();
+      // Carregar estatísticas
+      carregarEstatisticas();
+
+      // Configurar atalhos de teclado
+      configurarAtalhosTeclado();
+
+      // Configurar auto-complete
+      configurarAutoComplete();
+
+      // Configurar controle de setor
+      configurarControleSetor();
+
+      // Configurar botão de emergência
+      configurarBotaoEmergencia();
     });
 
 
+    // Função para carregar estatísticas
+    function carregarEstatisticas() {
+      $.ajax({
+        url: '/api/dispensacoes/estatisticas',
+        method: 'GET',
+        success: function(response) {
+          if (response.success) {
+            $('#stats-pendentes').text(response.pendentes || 0);
+            $('#stats-aprovadas').text(response.dispensadas || 0);
+            $('#stats-dispensadas').text(response.dispensadas || 0);
+            $('#stats-rejeitadas').text(response.rejeitadas || 0);
+            $('#total-prescricoes').text(response.pendentes || 0);
+          }
+        },
+        error: function() {
+          $('#stats-pendentes').text('--');
+          $('#stats-aprovadas').text('--');
+          $('#stats-dispensadas').text('--');
+          $('#stats-rejeitadas').text('--');
+        }
+      });
+    }
+
     // Função para atualizar estatísticas com prescrições do fluxo
-    function atualizarEstatisticasComFluxo(totalFluxo) {
-      $('#total-prescricoes').text(totalFluxo);
-      $('#stats-pendentes').text(totalFluxo);
+    function atualizarEstatisticasComFluxo(totalFluxo, totalEmergencia) {
+      const total = totalFluxo + (totalEmergencia || 0);
+      $('#total-prescricoes').text(total);
+      $('#stats-pendentes').text(total);
+      // Recarregar estatísticas completas
+      carregarEstatisticas();
+    }
+
+    // Função para carregar todas as prescrições (fluxo + emergência)
+    function carregarTodasPrescricoes() {
+      console.log('>>> Iniciando carregamento de prescrições...');
+
+      // Mostrar loading na tabela
+      $('#tabela-prescricoes').html(`
+        <tr>
+          <td colspan="8" class="text-center py-5">
+            <i class="fas fa-spinner fa-spin fa-2x text-primary mb-3"></i><br/>
+            <p class="text-muted">Carregando prescrições...</p>
+          </td>
+        </tr>
+      `);
+
+      // Carregar prescrições do fluxo e emergência em paralelo
+      Promise.all([
+        $.ajax({url: '/api/dispensacoes/fluxo-pendentes', method: 'GET'}),
+        $.ajax({url: '/api/dispensacoes/emergencia-pendentes', method: 'GET'})
+      ])
+      .then(function(results) {
+        const fluxoResponse = results[0];
+        const emergenciaResponse = results[1];
+
+        console.log('Dados recebidos do servidor:');
+        console.log('- Fluxo:', fluxoResponse);
+        console.log('- Emergência:', emergenciaResponse);
+
+        const prescricoesFluxo = (fluxoResponse.success) ? fluxoResponse.data : [];
+        const prescricoesEmergencia = (emergenciaResponse.success) ? emergenciaResponse.data : [];
+
+        console.log(`Total prescrições: ${prescricoesFluxo.length} fluxo + ${prescricoesEmergencia.length} emergência`);
+
+        exibirTodasPrescricoes(prescricoesFluxo, prescricoesEmergencia);
+        atualizarEstatisticasComFluxo(prescricoesFluxo.length, prescricoesEmergencia.length);
+      })
+      .catch(function(error) {
+        console.error('Erro ao carregar prescrições:', error);
+        $('#tabela-prescricoes').html(`
+          <tr>
+            <td colspan="8" class="text-center text-danger py-5">
+              <i class="fas fa-exclamation-triangle fa-2x mb-2"></i><br/>
+              <strong>Erro ao carregar prescrições</strong>
+            </td>
+          </tr>
+        `);
+        atualizarEstatisticasComFluxo(0, 0);
+      });
+    }
+
+    // Função para exibir todas as prescrições em tabela
+    function exibirTodasPrescricoes(prescricoesFluxo, prescricoesEmergencia) {
+      const tbody = $('#tabela-prescricoes');
+
+      if (prescricoesFluxo.length === 0 && prescricoesEmergencia.length === 0) {
+        tbody.html(`
+          <tr>
+            <td colspan="8" class="text-center text-muted py-5">
+              <i class="fas fa-clipboard-check fa-2x mb-2"></i><br/>
+              <strong>Nenhuma prescrição pendente</strong><br/>
+              <small>Todas as prescrições foram processadas.</small>
+            </td>
+          </tr>
+        `);
+        $('#total-prescricoes').text('0');
+        return;
+      }
+
+      tbody.empty();
+
+      // Exibir prescrições de emergência primeiro
+      prescricoesEmergencia.forEach(function(prescricao) {
+        const row = criarLinhaEmergencia(prescricao);
+        tbody.append(row);
+      });
+
+      // Exibir prescrições do fluxo
+      prescricoesFluxo.forEach(function(prescricao) {
+        const row = criarLinhaFluxo(prescricao);
+        tbody.append(row);
+      });
+
+      $('#total-prescricoes').text(prescricoesFluxo.length + prescricoesEmergencia.length);
     }
 
     // Função para carregar prescrições pendentes do fluxo_disp
@@ -900,106 +1748,114 @@
       });
     }
 
-    // Função para criar card de prescrição do fluxo
-    function criarCardPrescricaoFluxo(prescricao) {
-      const dataFormatada = new Date(prescricao.data).toLocaleDateString('pt-BR');
-      const horaFormatada = prescricao.hora ? prescricao.hora.substring(0, 5) : 'N/A';
+    // Função para criar linha de tabela - Emergência
+    function criarLinhaEmergencia(prescricao) {
+      const dataHora = prescricao.horario_prescricao ? new Date(prescricao.horario_prescricao) : new Date();
+      const dataFormatada = dataHora.toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'});
+      const horaFormatada = dataHora.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
+
+      const medicamentosTexto = prescricao.medicamentos_texto || 'Nenhum medicamento prescrito';
+      const medicamentosPreview = medicamentosTexto.length > 100 ?
+        medicamentosTexto.substring(0, 100) + '...' : medicamentosTexto;
+
+      const medicoNome = prescricao.medico.nome || 'N/A';
 
       return `
-        <div class="col-lg-6 col-xl-4 mb-4">
-          <div class="card dispensation-card fluxo-card" data-prescricao-id="${prescricao.id}">
-            <div class="card-header bg-info text-white">
-              <div class="d-flex justify-content-between align-items-start">
-                <div class="flex-grow-1">
-                  <h6 class="mb-1">${prescricao.paciente.nome}</h6>
-                  <small class="text-white">${dataFormatada} às ${horaFormatada}</small>
-                </div>
-                <span class="badge badge-light">Fluxo</span>
-              </div>
+        <tr data-prescricao-id="${prescricao.id}" data-tipo="emergencia">
+          <td>
+            <span class="tipo-badge tipo-emergencia">EMG</span>
+          </td>
+          <td>
+            <strong>${prescricao.paciente.nome}</strong>
+          </td>
+          <td>${medicoNome}</td>
+          <td>
+            <small>${dataFormatada}<br/>${horaFormatada}</small>
+          </td>
+          <td>
+            <span class="badge badge-light">${prescricao.atendimento_id}</span>
+          </td>
+          <td>
+            <div class="medicamentos-preview">${medicamentosPreview}</div>
+          </td>
+          <td>
+            <span class="badge badge-warning">Pendente</span>
+          </td>
+          <td>
+            <div class="btn-group btn-group-sm">
+              <button class="btn btn-outline-info btn-sm btn-ver-detalhes-emergencia" data-prescricao-id="${prescricao.id}" title="Ver detalhes">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button class="btn btn-danger btn-sm btn-processar-emergencia" data-prescricao-id="${prescricao.id}" title="Processar">
+                <i class="fas fa-check"></i>
+              </button>
             </div>
-            <div class="card-body">
-              <div class="mb-2">
-                <strong>Médico:</strong> ${prescricao.medico.nome || 'N/A'}
-              </div>
-
-              <div class="mb-2">
-                <strong>Medicamento:</strong>
-                <div class="text-primary font-weight-bold">${prescricao.medicamento}</div>
-                <small class="text-muted">Quantidade solicitada: ${prescricao.quantidade}</small>
-                <div class="mt-1">
-                  ${prescricao.status === 'Dispensado' ? '<span class="badge badge-success">Status: Dispensado</span>' :
-                    prescricao.status === 'Parcial' ? '<span class="badge badge-warning">Status: Parcial</span>' :
-                    prescricao.status === 'Cancelado' ? '<span class="badge badge-danger">Status: Cancelado</span>' :
-                    '<span class="badge badge-secondary">Status: Pendente</span>'}
-                </div>
-              </div>
-
-              ${prescricao.atendimento.dx ? `<div class="mb-2"><strong>Diagnóstico:</strong> ${prescricao.atendimento.dx}</div>` : ''}
-
-              ${prescricao.atendimento.prescricao_medica ? `
-                <div class="mb-2">
-                  <strong>Prescrição Médica:</strong>
-                  <div class="small text-muted">${prescricao.atendimento.prescricao_medica.substring(0, 100)}${prescricao.atendimento.prescricao_medica.length > 100 ? '...' : ''}</div>
-                </div>
-              ` : ''}
-
-              <div class="prescription-actions">
-                <button class="btn btn-sm btn-outline-info btn-ver-detalhes-fluxo" data-prescricao-id="${prescricao.id}">
-                  <i class="fas fa-eye mr-1"></i>Detalhes
-                </button>
-                ${prescricao.status === 'Pendente' ?
-                  `<button class="btn btn-sm btn-info btn-processar-fluxo" data-prescricao-id="${prescricao.id}">
-                    <i class="fas fa-check mr-1"></i>Confirmar
-                  </button>` :
-                  `<button class="btn btn-sm btn-secondary" disabled>
-                    <i class="fas fa-check-circle mr-1"></i>${prescricao.status}
-                  </button>`
-                }
-              </div>
-            </div>
-          </div>
-        </div>
+          </td>
+        </tr>
       `;
     }
 
-    function toggleSidebar() {
-      $('#sidebar').toggleClass('expanded');
+    // Função para criar linha de tabela - Fluxo
+    function criarLinhaFluxo(prescricao) {
+      const dataFormatada = new Date(prescricao.data).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'});
+      const horaFormatada = prescricao.hora ? prescricao.hora.substring(0, 5) : 'N/A';
+
+      const medicoNome = prescricao.medico.nome || 'N/A';
+      const medicamentoInfo = `${prescricao.medicamento} (${prescricao.quantidade})`;
+
+      let statusBadge = '';
+      if (prescricao.status === 'Dispensado') {
+        statusBadge = '<span class="badge badge-success">Dispensado</span>';
+      } else if (prescricao.status === 'Parcial') {
+        statusBadge = '<span class="badge badge-warning">Parcial</span>';
+      } else if (prescricao.status === 'Cancelado') {
+        statusBadge = '<span class="badge badge-danger">Cancelado</span>';
+      } else {
+        statusBadge = '<span class="badge badge-secondary">Pendente</span>';
+      }
+
+      const botoesAcao = prescricao.status === 'Pendente' ? `
+        <div class="btn-group btn-group-sm">
+          <button class="btn btn-outline-info btn-sm btn-ver-detalhes-fluxo" data-prescricao-id="${prescricao.id}" title="Ver detalhes">
+            <i class="fas fa-eye"></i>
+          </button>
+          <button class="btn btn-info btn-sm btn-processar-fluxo" data-prescricao-id="${prescricao.id}" title="Processar">
+            <i class="fas fa-check"></i>
+          </button>
+        </div>
+      ` : `
+        <button class="btn btn-sm btn-secondary" disabled title="Já processado">
+          <i class="fas fa-check-circle"></i>
+        </button>
+      `;
+
+      return `
+        <tr data-prescricao-id="${prescricao.id}" data-tipo="fluxo">
+          <td>
+            <span class="tipo-badge tipo-fluxo">FLX</span>
+          </td>
+          <td>
+            <strong>${prescricao.paciente.nome}</strong>
+          </td>
+          <td>${medicoNome}</td>
+          <td>
+            <small>${dataFormatada}<br/>${horaFormatada}</small>
+          </td>
+          <td>
+            <span class="badge badge-light">${prescricao.atendimento_id || '-'}</span>
+          </td>
+          <td>
+            <div class="medicamentos-preview">${medicamentoInfo}</div>
+          </td>
+          <td>${statusBadge}</td>
+          <td>${botoesAcao}</td>
+        </tr>
+      `;
     }
 
-    // Carrega setores disponíveis do estoque
-    function carregarSetoresEstoque() {
-      const select = $('#select-setor-fluxo');
-      if (!select.length) return;
+    // Função removida - não há mais sidebar
 
-      // Exibe um estado de carregamento básico
-      select.prop('disabled', true);
-      select.html('<option value="">Carregando setores...</option>');
-
-      $.ajax({
-        url: '/api/estoque/setores',
-        method: 'GET'
-      })
-      .done(function(resp) {
-        const setores = (resp && resp.setores) ? resp.setores : [];
-        if (!Array.isArray(setores) || setores.length === 0) {
-          select.html('<option value="">Nenhum setor disponível</option>');
-          return;
-        }
-        let opts = '<option value="">Selecione o setor...</option>';
-        setores.forEach(function(s) {
-          const valor = (typeof s === 'string') ? s : (s.nome || s.valor || '');
-          const label = (typeof s === 'string') ? s : (s.label || s.nome || s.valor || 'Sem nome');
-          opts += `<option value="${valor}">${label}</option>`;
-        });
-        select.html(opts);
-      })
-      .fail(function() {
-        select.html('<option value="">Erro ao carregar setores</option>');
-      })
-      .always(function() {
-        select.prop('disabled', false);
-      });
-    }
+    // Função removida - não é mais necessária pois o setor está apenas na página principal
 
     // Função para mostrar toast notifications
     function showToast(message, type = 'info', title = 'Notificação') {
@@ -1073,20 +1929,21 @@
       $('#dataHoraAtual').text(dataHoraFormatada);
     }
 
-    // Menu do usuário
-    $('#userMenuButton').click(function() {
-      $('#userDropdown').toggle();
+    // Menu do usuário - Atualizado para novo header
+    $('#userMenuButton').click(function(e) {
+      e.stopPropagation();
+      $('#userDropdown').toggleClass('show');
     });
 
     $(document).click(function(event) {
-      if(!$(event.target).closest('#userMenuButton, #userDropdown').length) {
-        $('#userDropdown').hide();
+      if(!$(event.target).closest('.header-user').length) {
+        $('#userDropdown').removeClass('show');
       }
     });
 
     $('#changePasswordOption').click(function(e) {
       e.preventDefault();
-      $('#userDropdown').hide();
+      $('#userDropdown').removeClass('show');
       $('#changePasswordModal').modal('show');
     });
 
@@ -1150,21 +2007,6 @@
       });
     });
 
-    // Funções para alternar visualizações
-    $('#view-mode-cards').on('click', function() {
-      $('#view-mode-cards').addClass('active');
-      $('#view-mode-table').removeClass('active');
-      $('#prescriptions-cards').removeClass('d-none');
-      $('#prescriptions-table').addClass('d-none');
-    });
-
-    $('#view-mode-table').on('click', function() {
-      $('#view-mode-table').addClass('active');
-      $('#view-mode-cards').removeClass('active');
-      $('#prescriptions-table').removeClass('d-none');
-      $('#prescriptions-cards').addClass('d-none');
-    });
-
     // Funções placeholder
     function abrirRelatorios() {
       alert('Funcionalidade de relatórios será implementada.');
@@ -1208,8 +2050,104 @@
       showToast('Funcionalidade de detalhes será implementada.', 'info');
     });
 
+    // ========== FUNÇÕES PARA PRESCRIÇÕES DE EMERGÊNCIA ==========
+
+    let prescricaoAtualEmergencia = null;
+
+    // Event listener para botão de processar emergência
+    $(document).on('click', '.btn-processar-emergencia', function() {
+      const prescricaoId = $(this).data('prescricao-id');
+      abrirModalConfirmacaoEmergencia(prescricaoId);
+    });
+
+    // Event listener para botão de ver detalhes de emergência
+    $(document).on('click', '.btn-ver-detalhes-emergencia', function() {
+      const prescricaoId = $(this).data('prescricao-id');
+      // Aqui poderia abrir um modal com detalhes completos
+      showToast('Visualizando detalhes da prescrição de emergência...', 'info');
+    });
+
+    // Função para abrir modal de confirmação para prescrição de emergência
+    function abrirModalConfirmacaoEmergencia(prescricaoId) {
+      // Verificar se o setor foi selecionado
+      const setorSelecionado = $('#setorFarmacia').val();
+      if (!setorSelecionado) {
+        showToast('⚠️ Selecione o setor na página principal antes de processar a prescrição!', 'warning');
+        $('#setorFarmacia').focus();
+        return;
+      }
+
+      // Buscar dados da prescrição
+      $.ajax({
+        url: '/api/dispensacoes/emergencia-pendentes',
+        method: 'GET',
+        success: function(response) {
+          if (response.success) {
+            const prescricao = response.data.find(p => p.id === prescricaoId);
+            if (prescricao) {
+              prescricaoAtualEmergencia = prescricao;
+              preencherModalConfirmacaoEmergencia(prescricao);
+              $('#modalConfirmacaoFluxo').modal('show');
+            } else {
+              showToast('Prescrição não encontrada.', 'error');
+            }
+          } else {
+            showToast('Erro ao carregar prescrição.', 'error');
+          }
+        },
+        error: function(xhr) {
+          console.error('Erro ao buscar prescrição:', xhr);
+          showToast('Erro ao carregar prescrição.', 'error');
+        }
+      });
+    }
+
+    // Função para preencher modal com dados da prescrição de emergência
+    function preencherModalConfirmacaoEmergencia(prescricao) {
+      // Resetar estado do modal
+      medicamentoSelecionadoFluxo = null;
+      $('#card-medicamentos-selecionados').hide();
+      $('#resultado-busca-medicamento').hide();
+      $('#btn-confirmar-dispensacao-fluxo').prop('disabled', true);
+      $('#busca-medicamento-fluxo').val('');
+      itensSelecionadosFluxo = [];
+      renderizarItensSelecionados();
+
+      // Preencher informações da prescrição
+      $('#fluxo-paciente-nome').text(prescricao.paciente.nome);
+      $('#fluxo-paciente-cpf').text(prescricao.paciente.cpf || 'N/A');
+      $('#fluxo-medico-nome').text(prescricao.medico.nome || 'N/A');
+      $('#fluxo-quantidade-solicitada').text('Conforme prescrição');
+
+      const dataHora = prescricao.horario_prescricao ? new Date(prescricao.horario_prescricao) : new Date();
+      const dataFormatada = dataHora.toLocaleDateString('pt-BR');
+      $('#fluxo-data').text(dataFormatada);
+
+      // Alterar título do modal para indicar que é emergência
+      $('#modalConfirmacaoFluxo .modal-title').html('<i class="fas fa-ambulance mr-2"></i>Confirmar Dispensação - Emergência');
+      $('#modalConfirmacaoFluxo .modal-header').removeClass('bg-info').addClass('bg-danger');
+
+      // Exibir medicamentos da prescrição de emergência
+      const medicamentosTexto = prescricao.medicamentos_texto || 'Nenhum medicamento prescrito';
+
+      $('#fluxo-medicamento-nome').html(`
+        <div style="white-space: pre-line; max-height: 200px; overflow-y: auto; background: #f8f9fa; padding: 10px; border-radius: 5px; border-left: 4px solid #dc3545;">
+          ${medicamentosTexto}
+        </div>
+        <small class="text-muted mt-2 d-block">Busque e adicione os medicamentos disponíveis no estoque abaixo.</small>
+      `);
+    }
+
     // Função para abrir modal de confirmação
     function abrirModalConfirmacaoFluxo(prescricaoId) {
+      // Verificar se o setor foi selecionado
+      const setorSelecionado = $('#setorFarmacia').val();
+      if (!setorSelecionado) {
+        showToast('⚠️ Selecione o setor na página principal antes de processar a prescrição!', 'warning');
+        $('#setorFarmacia').focus();
+        return;
+      }
+
       // Buscar dados da prescrição
       $.ajax({
         url: '/api/dispensacoes/fluxo-pendentes',
@@ -1246,6 +2184,10 @@
       itensSelecionadosFluxo = [];
       renderizarItensSelecionados();
 
+      // Resetar título do modal para fluxo (caso tenha sido alterado pela emergência)
+      $('#modalConfirmacaoFluxo .modal-title').html('<i class="fas fa-check-circle mr-2"></i>Confirmar Dispensação - Fluxo');
+      $('#modalConfirmacaoFluxo .modal-header').removeClass('bg-danger').addClass('bg-info');
+
       // Preencher informações da prescrição
       $('#fluxo-paciente-nome').text(prescricao.paciente.nome);
       $('#fluxo-paciente-cpf').text(prescricao.paciente.cpf || 'N/A');
@@ -1272,7 +2214,7 @@
     // Função para buscar medicamentos
     function buscarMedicamentosFluxo() {
       const termoBusca = $('#busca-medicamento-fluxo').val().trim();
-      const setor = $('#select-setor-fluxo').val();
+      const setor = $('#setorFarmacia').val();
 
       if (!setor) {
         showToast('Selecione o setor do estoque antes de buscar.', 'warning');
@@ -1377,7 +2319,7 @@
         return;
       }
 
-      const setor = $('#select-setor-fluxo').val();
+      const setor = $('#setorFarmacia').val();
       if (!setor) {
         showToast('Selecione o setor do estoque antes de adicionar.', 'warning');
         return;
@@ -1402,7 +2344,7 @@
               estoque_total: med.quantidade_total || 0,
               lotes: (med.itens && med.itens.length) ? med.itens.length : 0,
               quantidade: quantidadeDefault,
-              status: 'Dispensado',
+              status: 'Aprovado',
               observacoes: ''
             };
 
@@ -1449,7 +2391,7 @@
             </td>
             <td>
               <select class="form-control form-control-sm campo-status">
-                <option value="Dispensado" ${item.status === 'Dispensado' ? 'selected' : ''}>Dispensado</option>
+                <option value="Aprovado" ${item.status === 'Aprovado' ? 'selected' : ''}>Aprovado</option>
                 <option value="Parcial" ${item.status === 'Parcial' ? 'selected' : ''}>Parcial</option>
                 <option value="Cancelado" ${item.status === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
               </select>
@@ -1532,7 +2474,11 @@
 
     // Função para confirmar dispensação
     function confirmarDispensacaoFluxo() {
-      if (!prescricaoAtualFluxo) {
+      // Verificar se é prescrição de fluxo ou emergência
+      const isPrescricaoEmergencia = (prescricaoAtualEmergencia !== null);
+      const prescricaoAtual = isPrescricaoEmergencia ? prescricaoAtualEmergencia : prescricaoAtualFluxo;
+
+      if (!prescricaoAtual) {
         showToast('Dados da prescrição ausentes.', 'error');
         return;
       }
@@ -1549,40 +2495,65 @@
       }
 
       const resumo = itensValidos.map(i => `• ${i.nome}: ${i.quantidade} ${i.unidade} (${i.status})`).join('\n');
-      const mensagem = `Confirmar dispensação para ${prescricaoAtualFluxo.paciente.nome}?\n\n${resumo}`;
+      const tipoPrescricao = isPrescricaoEmergencia ? 'Emergência' : 'Fluxo';
+      const mensagem = `Confirmar dispensação [${tipoPrescricao}] para ${prescricaoAtual.paciente.nome}?\n\n${resumo}`;
       if (!confirm(mensagem)) return;
 
       $('#btn-confirmar-dispensacao-fluxo').prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i>Processando...');
 
+      // Se for prescrição de emergência, usar endpoint diferente
+      if (isPrescricaoEmergencia) {
+        processarDispensacaoEmergencia(itensValidos);
+        return;
+      }
+
       // Tenta enviar em lote; se não disponível, cai no sequencial
+      const payloadLote = {
+        prescricao_id: prescricaoAtualFluxo.id,
+        setor: $('#setorFarmacia').val() || '',
+        itens: itensValidos.map(i => ({
+          medicamento_id: i.id,
+          quantidade_confirmada: i.quantidade,
+          status: i.status,
+          observacoes: i.observacoes || ''
+        }))
+      };
+
+      console.log('Tentando processamento em lote:', payloadLote);
+
       $.ajax({
         url: '/api/dispensacoes/fluxo-processar-multiplos',
         method: 'POST',
         contentType: 'application/json',
-        data: JSON.stringify({
-          prescricao_id: prescricaoAtualFluxo.id,
-          setor: $('#select-setor-fluxo').val() || '',
-          itens: itensValidos.map(i => ({
-            medicamento_id: i.id,
-            quantidade_confirmada: i.quantidade,
-            status: i.status,
-            observacoes: i.observacoes || ''
-          }))
-        }),
+        data: JSON.stringify(payloadLote),
         success: function(response) {
+          console.log('Resposta processamento lote:', response);
           if (response && response.success) {
             showToast(response.message || 'Dispensação concluída.', 'success');
             $('#modalConfirmacaoFluxo').modal('hide');
-            carregarPrescricoesFluxo();
+
+            console.log('Processamento em lote concluído. Recarregando em 500ms...');
+
+            // Dar tempo para o banco processar
+            setTimeout(function() {
+              console.log('Recarregando prescrições e estatísticas...');
+              carregarTodasPrescricoes();
+              carregarEstatisticas();
+            }, 500);
+
             prescricaoAtualFluxo = null;
             itensSelecionadosFluxo = [];
+            $('#btn-confirmar-dispensacao-fluxo').prop('disabled', false).html('<i class="fas fa-check mr-1"></i>Confirmar Dispensação');
           } else {
+            console.warn('Resposta sem success, processando sequencialmente');
             // Se endpoint não implementado ou falha geral, processa sequencialmente
             processarSequencialmente(itensValidos);
           }
         },
         error: function(xhr) {
+          console.error('Erro no processamento em lote:', xhr);
           if (xhr && (xhr.status === 404 || xhr.status === 405)) {
+            console.log('Endpoint não encontrado, usando fallback sequencial');
             // Fallback: processar item a item
             processarSequencialmente(itensValidos);
           } else {
@@ -1591,7 +2562,10 @@
             try {
               const resp = xhr && xhr.responseJSON ? xhr.responseJSON : JSON.parse(xhr.responseText);
               if (resp && resp.message) msg = resp.message;
-            } catch (e) {}
+              console.error('Mensagem de erro do servidor:', msg);
+            } catch (e) {
+              console.error('Erro ao processar resposta de erro:', e);
+            }
             showToast(msg, 'error');
             $('#btn-confirmar-dispensacao-fluxo').prop('disabled', false).html('<i class="fas fa-check mr-1"></i>Confirmar Dispensação');
           }
@@ -1611,7 +2585,16 @@
             showToast(`Concluído com falhas em ${falhas.length} item(ns).`, 'warning');
           }
           $('#modalConfirmacaoFluxo').modal('hide');
-          carregarPrescricoesFluxo();
+
+          console.log('Processamento sequencial concluído. Recarregando em 500ms...');
+
+          // Dar tempo para o banco processar
+          setTimeout(function() {
+            console.log('Recarregando prescrições e estatísticas...');
+            carregarTodasPrescricoes();
+            carregarEstatisticas();
+          }, 500);
+
           prescricaoAtualFluxo = null;
           itensSelecionadosFluxo = [];
           $('#btn-confirmar-dispensacao-fluxo').prop('disabled', false).html('<i class="fas fa-check mr-1"></i>Confirmar Dispensação');
@@ -1619,28 +2602,37 @@
         }
 
         const i = itens[indice];
+        const payload = {
+          prescricao_id: prescricaoAtualFluxo.id,
+          setor: $('#setorFarmacia').val() || '',
+          medicamento_id: i.id,
+          quantidade_confirmada: i.quantidade,
+          status: i.status,
+          observacoes: i.observacoes || ''
+        };
+
+        console.log('Enviando dispensação:', payload);
+
         $.ajax({
           url: '/api/dispensacoes/fluxo-processar',
           method: 'POST',
           contentType: 'application/json',
-          data: JSON.stringify({
-            prescricao_id: prescricaoAtualFluxo.id,
-            setor: $('#select-setor-fluxo').val() || '',
-            medicamento_id: i.id,
-            quantidade_confirmada: i.quantidade,
-            status: i.status,
-            observacoes: i.observacoes || ''
-          })
+          data: JSON.stringify(payload)
         })
         .done(function(resp) {
+          console.log('Resposta do servidor:', resp);
           resultados.push({ success: !!(resp && resp.success), item: i, response: resp });
         })
         .fail(function(xhr) {
+          console.error('Erro na dispensação:', xhr);
           let msg = 'Falha ao processar item.';
           try {
             const resp = xhr && xhr.responseJSON ? xhr.responseJSON : JSON.parse(xhr.responseText);
             if (resp && resp.message) msg = resp.message;
-          } catch (e) {}
+            console.error('Mensagem de erro:', msg);
+          } catch (e) {
+            console.error('Erro ao processar resposta de erro:', e);
+          }
           showToast(`${i.nome}: ${msg}`, 'error');
           resultados.push({ success: false, item: i, error: xhr });
         })
@@ -1652,14 +2644,460 @@
       processar(0);
     }
 
+    // Função para processar dispensação de emergência
+    function processarDispensacaoEmergencia(itensValidos) {
+      $.ajax({
+        url: '/api/dispensacoes/emergencia-processar',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+          prescricao_id: prescricaoAtualEmergencia.id,
+          setor: $('#setorFarmacia').val() || 'Farmacia Satelite',
+          itens: itensValidos.map(i => ({
+            medicamento_id: i.id,
+            quantidade: i.quantidade,
+            status: i.status,
+            observacoes: i.observacoes || ''
+          }))
+        }),
+        success: function(response) {
+          if (response && response.success) {
+            showToast(response.message || 'Dispensação de emergência concluída.', 'success');
+            $('#modalConfirmacaoFluxo').modal('hide');
+            carregarTodasPrescricoes();
+            carregarEstatisticas();
+            prescricaoAtualEmergencia = null;
+            itensSelecionadosFluxo = [];
+          } else {
+            showToast(response.message || 'Erro ao processar dispensação.', 'error');
+          }
+        },
+        error: function(xhr) {
+          console.error('Erro na dispensação de emergência:', xhr);
+          let msg = 'Erro ao processar dispensação de emergência.';
+          try {
+            const resp = xhr && xhr.responseJSON ? xhr.responseJSON : JSON.parse(xhr.responseText);
+            if (resp && resp.message) msg = resp.message;
+          } catch (e) {}
+          showToast(msg, 'error');
+        },
+        complete: function() {
+          $('#btn-confirmar-dispensacao-fluxo').prop('disabled', false).html('<i class="fas fa-check mr-1"></i>Confirmar Dispensação');
+        }
+      });
+    }
+
     // Resetar modal quando for fechado
     $('#modalConfirmacaoFluxo').on('hidden.bs.modal', function() {
       prescricaoAtualFluxo = null;
+      prescricaoAtualEmergencia = null;
       medicamentoSelecionadoFluxo = null;
       itensSelecionadosFluxo = [];
       renderizarItensSelecionados();
       $('#card-medicamentos-selecionados').hide();
+      // Resetar título do modal
+      $('#modalConfirmacaoFluxo .modal-title').html('<i class="fas fa-check-circle mr-2"></i>Confirmar Dispensação - Fluxo');
+      $('#modalConfirmacaoFluxo .modal-header').removeClass('bg-danger').addClass('bg-info');
     });
+
+    // ========== MELHORIAS DE UI - AUTO-COMPLETE E ATALHOS ==========
+
+    let autoCompleteTimeout = null;
+    let autoCompleteResults = [];
+    let autoCompleteSelectedIndex = -1;
+
+    // Configurar auto-complete de medicamentos
+    function configurarAutoComplete() {
+      const input = $('#busca-medicamento-fluxo');
+      const resultsContainer = $('#autocomplete-results');
+
+      // Busca dinâmica enquanto digita
+      input.on('input', function() {
+        const termo = $(this).val().trim();
+        const setor = $('#setorFarmacia').val();
+
+        clearTimeout(autoCompleteTimeout);
+
+        if (termo.length < 2) {
+          resultsContainer.hide().empty();
+          return;
+        }
+
+        if (!setor) {
+          resultsContainer.html('<div class="autocomplete-item"><div class="text-warning">⚠️ Selecione o setor primeiro</div></div>').show();
+          return;
+        }
+
+        // Debounce - espera 300ms após parar de digitar
+        autoCompleteTimeout = setTimeout(function() {
+          buscarMedicamentosAutoComplete(termo, setor);
+        }, 300);
+      });
+
+      // Navegação com teclado
+      input.on('keydown', function(e) {
+        const items = resultsContainer.find('.autocomplete-item');
+
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          autoCompleteSelectedIndex = Math.min(autoCompleteSelectedIndex + 1, items.length - 1);
+          atualizarSelecaoAutoComplete();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          autoCompleteSelectedIndex = Math.max(autoCompleteSelectedIndex - 1, 0);
+          atualizarSelecaoAutoComplete();
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          if (autoCompleteSelectedIndex >= 0 && autoCompleteResults[autoCompleteSelectedIndex]) {
+            adicionarMedicamentoALista(autoCompleteResults[autoCompleteSelectedIndex].id);
+            input.val('');
+            resultsContainer.hide();
+            autoCompleteSelectedIndex = -1;
+          }
+        } else if (e.key === 'Escape') {
+          resultsContainer.hide();
+          autoCompleteSelectedIndex = -1;
+        }
+      });
+
+      // Fechar ao clicar fora
+      $(document).on('click', function(e) {
+        if (!$(e.target).closest('.autocomplete-container').length) {
+          resultsContainer.hide();
+          autoCompleteSelectedIndex = -1;
+        }
+      });
+    }
+
+    // Buscar medicamentos para auto-complete
+    function buscarMedicamentosAutoComplete(termo, setor) {
+      const resultsContainer = $('#autocomplete-results');
+
+      resultsContainer.html('<div class="autocomplete-item"><i class="fas fa-spinner fa-spin mr-2"></i>Buscando...</div>').show();
+
+      $.ajax({
+        url: '/api/medicamentos/buscar',
+        method: 'GET',
+        data: { q: termo, setor: setor },
+        success: function(response) {
+          if (response.success && response.medicamentos && response.medicamentos.length > 0) {
+            autoCompleteResults = response.medicamentos;
+            exibirResultadosAutoComplete(response.medicamentos);
+          } else {
+            resultsContainer.html('<div class="autocomplete-item"><div class="text-muted">Nenhum medicamento encontrado</div></div>').show();
+          }
+        },
+        error: function() {
+          resultsContainer.html('<div class="autocomplete-item"><div class="text-danger">Erro ao buscar medicamentos</div></div>').show();
+        }
+      });
+    }
+
+    // Exibir resultados do auto-complete
+    function exibirResultadosAutoComplete(medicamentos) {
+      const resultsContainer = $('#autocomplete-results');
+      resultsContainer.empty();
+
+      medicamentos.forEach(function(med, index) {
+        const stockClass = med.quantidade_total > 10 ? '' : (med.quantidade_total > 0 ? 'low' : 'out');
+        const stockText = med.quantidade_total > 0 ? `${med.quantidade_total} ${med.unidade}` : 'Sem estoque';
+
+        const item = $(`
+          <div class="autocomplete-item" data-index="${index}" data-med-id="${med.id}">
+            <div class="med-name">${med.nome} <span class="med-stock ${stockClass}">${stockText}</span></div>
+            <div class="med-info">${med.apresentacao} • ${med.classe}</div>
+          </div>
+        `);
+
+        item.on('click', function() {
+          adicionarMedicamentoALista(med.id);
+          $('#busca-medicamento-fluxo').val('');
+          resultsContainer.hide();
+          autoCompleteSelectedIndex = -1;
+        });
+
+        resultsContainer.append(item);
+      });
+
+      resultsContainer.show();
+      autoCompleteSelectedIndex = -1;
+    }
+
+    // Atualizar seleção visual do auto-complete
+    function atualizarSelecaoAutoComplete() {
+      const items = $('#autocomplete-results .autocomplete-item');
+      items.removeClass('active');
+
+      if (autoCompleteSelectedIndex >= 0 && autoCompleteSelectedIndex < items.length) {
+        $(items[autoCompleteSelectedIndex]).addClass('active');
+      }
+    }
+
+    // Botão de adição rápida
+    $('#btn-adicionar-rapido').on('click', function() {
+      const termo = $('#busca-medicamento-fluxo').val().trim();
+      const setor = $('#setorFarmacia').val();
+
+      if (!setor) {
+        showToast('Selecione o setor do estoque primeiro.', 'warning');
+        return;
+      }
+
+      if (!termo) {
+        showToast('Digite o nome do medicamento.', 'warning');
+        return;
+      }
+
+      // Se houver resultados no autocomplete, adicionar o primeiro
+      if (autoCompleteResults.length > 0) {
+        adicionarMedicamentoALista(autoCompleteResults[0].id);
+        $('#busca-medicamento-fluxo').val('');
+        $('#autocomplete-results').hide();
+      } else {
+        showToast('Nenhum medicamento encontrado com esse nome.', 'info');
+      }
+    });
+
+    // Configurar atalhos de teclado globais
+    function configurarAtalhosTeclado() {
+      let hintVisible = false;
+
+      $(document).on('keydown', function(e) {
+        // Ctrl + F - Focar no campo de busca
+        if (e.ctrlKey && e.key === 'f') {
+          e.preventDefault();
+          if ($('#modalConfirmacaoFluxo').hasClass('show')) {
+            $('#busca-medicamento-fluxo').focus();
+          }
+        }
+
+        // Ctrl + Enter - Confirmar dispensação
+        if (e.ctrlKey && e.key === 'Enter') {
+          e.preventDefault();
+          if ($('#modalConfirmacaoFluxo').hasClass('show')) {
+            $('#btn-confirmar-dispensacao-fluxo').click();
+          }
+        }
+
+        // ESC - Fechar modal
+        if (e.key === 'Escape') {
+          if ($('#modalConfirmacaoFluxo').hasClass('show')) {
+            $('#modalConfirmacaoFluxo').modal('hide');
+          }
+        }
+
+        // ? - Mostrar/ocultar hint de atalhos
+        if (e.key === '?' && !$(e.target).is('input, textarea')) {
+          e.preventDefault();
+          hintVisible = !hintVisible;
+          if (hintVisible) {
+            $('#keyboardHint').addClass('show');
+            setTimeout(function() {
+              $('#keyboardHint').removeClass('show');
+              hintVisible = false;
+            }, 5000);
+          } else {
+            $('#keyboardHint').removeClass('show');
+          }
+        }
+      });
+
+      // Mostrar hint ao abrir modal
+      $('#modalConfirmacaoFluxo').on('shown.bs.modal', function() {
+        $('#keyboardHint').addClass('show');
+        setTimeout(function() {
+          $('#keyboardHint').removeClass('show');
+        }, 3000);
+      });
+    }
+
+    // Função auxiliar para mostrar overlay de processamento
+    function mostrarProcessamento(mensagem, detalhe) {
+      $('#processingMessage').text(mensagem || 'Processando...');
+      $('#processingDetail').text(detalhe || 'Aguarde um momento');
+      $('#processingOverlay').addClass('show');
+    }
+
+    function ocultarProcessamento() {
+      $('#processingOverlay').removeClass('show');
+    }
+
+    // Melhorar feedback visual durante dispensação
+    function processarDispensacaoEmergenciaComFeedback(itensValidos) {
+      mostrarProcessamento('Processando dispensação de emergência', `${itensValidos.length} medicamento(s)`);
+
+      $.ajax({
+        url: '/api/dispensacoes/emergencia-processar',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+          prescricao_id: prescricaoAtualEmergencia.id,
+          setor: $('#setorFarmacia').val() || 'Farmacia Satelite',
+          itens: itensValidos.map(i => ({
+            medicamento_id: i.id,
+            quantidade: i.quantidade,
+            status: i.status,
+            observacoes: i.observacoes || ''
+          }))
+        }),
+        success: function(response) {
+          ocultarProcessamento();
+          if (response && response.success) {
+            showToast(response.message || 'Dispensação de emergência concluída.', 'success');
+            $('#modalConfirmacaoFluxo').modal('hide');
+            carregarTodasPrescricoes();
+            carregarEstatisticas();
+            prescricaoAtualEmergencia = null;
+            itensSelecionadosFluxo = [];
+          } else {
+            showToast(response.message || 'Erro ao processar dispensação.', 'error');
+          }
+        },
+        error: function(xhr) {
+          ocultarProcessamento();
+          console.error('Erro na dispensação de emergência:', xhr);
+          let msg = 'Erro ao processar dispensação de emergência.';
+          try {
+            const resp = xhr && xhr.responseJSON ? xhr.responseJSON : JSON.parse(xhr.responseText);
+            if (resp && resp.message) msg = resp.message;
+          } catch (e) {}
+          showToast(msg, 'error');
+        },
+        complete: function() {
+          $('#btn-confirmar-dispensacao-fluxo').prop('disabled', false).html('<i class="fas fa-check mr-1"></i>Confirmar Dispensação');
+        }
+      });
+    }
+
+    // Substituir chamada antiga pela nova com feedback
+    window.processarDispensacaoEmergencia = processarDispensacaoEmergenciaComFeedback;
+
+    // ========== CONTROLE DE SETOR ==========
+    function configurarControleSetor() {
+      // Carregar setor salvo do localStorage
+      const setorSalvo = localStorage.getItem('setorFarmacia');
+      if (setorSalvo) {
+        $('#setorFarmacia').val(setorSalvo);
+        atualizarIndicadorSetor();
+      }
+
+      // Salvar o setor quando alterado
+      $('#setorFarmacia').on('change', function() {
+        const setor = $(this).val();
+        if (setor) {
+          localStorage.setItem('setorFarmacia', setor);
+          console.log('Setor selecionado:', setor);
+        } else {
+          localStorage.removeItem('setorFarmacia');
+        }
+        atualizarIndicadorSetor();
+      });
+    }
+
+    function atualizarIndicadorSetor() {
+      const setor = $('#setorFarmacia').val();
+
+      if (setor) {
+        // Mostra o indicador com o setor selecionado
+        $('#setorAtualTextoFarmacia').text(setor);
+        $('#setorIndicatorFarmacia').fadeIn(300);
+        $('#groupSetorFarmacia').addClass('setor-ativo');
+      } else {
+        // Esconde o indicador
+        $('#setorIndicatorFarmacia').fadeOut(300);
+        $('#groupSetorFarmacia').removeClass('setor-ativo');
+      }
+    }
+
+    // ========== BOTÃO DE EMERGÊNCIA ==========
+    function configurarBotaoEmergencia() {
+      $('#btnEmergenciaAprovar').on('click', function() {
+        // Modal de confirmação com aviso forte
+        const confirmacao = confirm(
+          '⚠️ ATENÇÃO - FUNÇÃO DE EMERGÊNCIA ⚠️\n\n' +
+          'Este botão irá APROVAR TODAS as solicitações pendentes SEM REGISTRO DE BAIXA no estoque.\n\n' +
+          'Use APENAS em casos de emergência (queda de energia, falha do sistema, etc.)\n\n' +
+          'Prescrições afetadas:\n' +
+          '• Todas as prescrições do FLUXO pendentes\n' +
+          '• Todas as prescrições de EMERGÊNCIA pendentes\n\n' +
+          'Esta ação NÃO PODE ser desfeita!\n\n' +
+          'Deseja REALMENTE continuar?'
+        );
+
+        if (!confirmacao) return;
+
+        // Segunda confirmação
+        const segundaConfirmacao = confirm(
+          '⚠️ ÚLTIMA CONFIRMAÇÃO ⚠️\n\n' +
+          'Você tem CERTEZA ABSOLUTA de que deseja aprovar todas as solicitações pendentes sem baixa no estoque?\n\n' +
+          'Digite OK na próxima tela para confirmar.'
+        );
+
+        if (!segundaConfirmacao) return;
+
+        // Terceira confirmação com prompt
+        const textoConfirmacao = prompt(
+          'Digite "CONFIRMAR EMERGENCIA" (sem aspas) para prosseguir:'
+        );
+
+        if (textoConfirmacao !== 'CONFIRMAR EMERGENCIA') {
+          alert('Operação cancelada. Texto de confirmação incorreto.');
+          return;
+        }
+
+        // Processar aprovação em massa
+        processarAprovacaoEmergencial();
+      });
+    }
+
+    function processarAprovacaoEmergencial() {
+      const btn = $('#btnEmergenciaAprovar');
+      const textoOriginal = btn.html();
+
+      // Desabilitar botão e mostrar loading
+      btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Processando Emergência...');
+
+      // Chamar endpoint de emergência
+      $.ajax({
+        url: '/api/dispensacoes/aprovar-todas-emergencia',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+          setor: $('#setorFarmacia').val() || 'Farmacia Satelite',
+          timestamp: new Date().toISOString()
+        }),
+        success: function(response) {
+          if (response && response.success) {
+            alert(
+              '✅ APROVAÇÃO EMERGENCIAL CONCLUÍDA\n\n' +
+              `Total de prescrições aprovadas: ${response.total || 0}\n` +
+              `• Fluxo: ${response.total_fluxo || 0}\n` +
+              `• Emergência: ${response.total_emergencia || 0}\n\n` +
+              'IMPORTANTE: Estas dispensações foram aprovadas SEM baixa no estoque.\n' +
+              'Registre manualmente as saídas posteriormente.'
+            );
+            // Recarregar lista e estatísticas
+            carregarTodasPrescricoes();
+            carregarEstatisticas();
+          } else {
+            alert('Erro: ' + (response.message || 'Não foi possível processar a aprovação emergencial.'));
+          }
+        },
+        error: function(xhr) {
+          console.error('Erro na aprovação emergencial:', xhr);
+          let msg = 'Erro ao processar aprovação emergencial.';
+          try {
+            const resp = xhr && xhr.responseJSON ? xhr.responseJSON : JSON.parse(xhr.responseText);
+            if (resp && resp.message) msg = resp.message;
+          } catch (e) {}
+          alert('❌ ERRO: ' + msg);
+        },
+        complete: function() {
+          btn.prop('disabled', false).html(textoOriginal);
+        }
+      });
+    }
+
   </script>
 
 </body>
