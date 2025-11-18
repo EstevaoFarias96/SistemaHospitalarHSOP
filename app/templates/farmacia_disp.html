@@ -1616,10 +1616,11 @@
       `);
 
       // Carregar prescrições do fluxo e emergência em paralelo
-      // Filtrar apenas prescrições após 18/11/2025
+      // Filtrar apenas prescrições do dia atual
+      const hoje = new Date().toISOString().split('T')[0]; // Formato: YYYY-MM-DD
       Promise.all([
-        $.ajax({url: '/api/dispensacoes/fluxo-pendentes?data_inicio=2025-11-18', method: 'GET'}),
-        $.ajax({url: '/api/dispensacoes/emergencia-pendentes?data_inicio=2025-11-18', method: 'GET'})
+        $.ajax({url: `/api/dispensacoes/fluxo-pendentes?data_inicio=${hoje}`, method: 'GET'}),
+        $.ajax({url: `/api/dispensacoes/emergencia-pendentes?data_inicio=${hoje}`, method: 'GET'})
       ])
       .then(function(results) {
         const fluxoResponse = results[0];
@@ -1696,8 +1697,9 @@
         </div>
       `);
 
+      const hoje = new Date().toISOString().split('T')[0]; // Formato: YYYY-MM-DD
       $.ajax({
-        url: '/api/dispensacoes/fluxo-pendentes?data_inicio=2025-11-18',
+        url: `/api/dispensacoes/fluxo-pendentes?data_inicio=${hoje}`,
         method: 'GET',
         success: function(response) {
           if (response.success) {
@@ -3058,6 +3060,9 @@
       // Desabilitar botão e mostrar loading
       btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-2"></i>Processando Emergência...');
 
+      // Obter data atual para filtrar apenas prescrições do dia
+      const hoje = new Date().toISOString().split('T')[0]; // Formato: YYYY-MM-DD
+
       // Chamar endpoint de emergência
       $.ajax({
         url: '/api/dispensacoes/aprovar-todas-emergencia',
@@ -3065,7 +3070,8 @@
         contentType: 'application/json',
         data: JSON.stringify({
           setor: $('#setorFarmacia').val() || 'Farmacia Satelite',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          data_inicio: hoje  // Enviar data do dia para filtrar apenas prescrições de hoje
         }),
         success: function(response) {
           if (response && response.success) {

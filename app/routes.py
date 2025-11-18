@@ -14074,11 +14074,21 @@ def aprovar_todas_dispensacoes_emergencia():
         dados = request.get_json() or {}
         setor = dados.get('setor', 'Farmacia Satelite')
         timestamp = dados.get('timestamp', datetime.now(timezone.utc).isoformat())
+        data_inicio = dados.get('data_inicio')  # Filtro de data (YYYY-MM-DD)
 
         from app.models import FluxoDisp, PrescricaoEmergencia
 
         # MARCAR TODAS AS PRESCRIÇÕES DO FLUXO COMO DISPENSADAS (sem baixa no estoque)
-        prescricoes_fluxo = FluxoDisp.query.filter_by(status='Pendente').all()
+        # Filtrar apenas prescrições do dia se data_inicio for fornecida
+        query_fluxo = FluxoDisp.query.filter_by(status='Pendente')
+        if data_inicio:
+            try:
+                data_filtro = datetime.strptime(data_inicio, '%Y-%m-%d').date()
+                query_fluxo = query_fluxo.filter(FluxoDisp.data == data_filtro)
+            except ValueError:
+                logging.warning(f"Data inválida recebida: {data_inicio}")
+
+        prescricoes_fluxo = query_fluxo.all()
         count_fluxo = 0
 
         for presc in prescricoes_fluxo:
@@ -14095,7 +14105,18 @@ def aprovar_todas_dispensacoes_emergencia():
                 continue
 
         # ATUALIZAR STATUS DE TODAS AS PRESCRIÇÕES DE EMERGÊNCIA PENDENTES
-        prescricoes_emergencia = PrescricaoEmergencia.query.filter_by(status='Pendente').all()
+        # Filtrar apenas prescrições do dia se data_inicio for fornecida
+        query_emergencia = PrescricaoEmergencia.query.filter_by(status='Pendente')
+        if data_inicio:
+            try:
+                data_filtro = datetime.strptime(data_inicio, '%Y-%m-%d').date()
+                query_emergencia = query_emergencia.filter(
+                    db.func.date(PrescricaoEmergencia.horario_prescricao) == data_filtro
+                )
+            except ValueError:
+                pass
+
+        prescricoes_emergencia = query_emergencia.all()
         count_emergencia = 0
         for presc_emerg in prescricoes_emergencia:
             try:
@@ -14116,9 +14137,14 @@ def aprovar_todas_dispensacoes_emergencia():
         logging.warning(f"  • Prescrições Fluxo aprovadas: {count_fluxo}")
         logging.warning(f"  • Prescrições Emergência aprovadas: {count_emergencia}")
         logging.warning(f"  • Setor: {setor}")
+        if data_inicio:
+            logging.warning(f"  • Data filtrada: {data_inicio}")
         logging.warning(f"  • ATENÇÃO: BAIXAS NÃO REGISTRADAS NO ESTOQUE!")
 
-        mensagem = f'Aprovadas {count_fluxo + count_emergencia} prescrições em aprovação emergencial.'
+        mensagem = f'Aprovadas {count_fluxo + count_emergencia} prescrições'
+        if data_inicio:
+            mensagem += f' do dia {data_inicio}'
+        mensagem += ' em aprovação emergencial.'
 
         return jsonify({
             'success': True,
