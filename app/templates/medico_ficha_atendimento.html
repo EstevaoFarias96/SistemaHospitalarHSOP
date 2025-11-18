@@ -1675,6 +1675,7 @@
                 <option>OBSERVACAO</option>
                 <option>EVASAO POR CONTA PROPRIA</option>
                 <option>INTERNAMENTO</option>
+                <option>ENCAMINHAR PARA CIRURGIA</option>
                 <option>TRANSFERENCIA</option>
                 <option>RECUSA TRANSFERENCIA APOS CONDUTA MEDICA</option>
                 <option>ASSINOU TERMO DE RESPONSABILIDADE</option>
@@ -1874,15 +1875,21 @@
           return;
         }
 
-        // ALTAS/EVASÃO/RECUSAS/TERMO -> encerrar direto
-        const payloadEncerramento = { 
+        // ALTAS/EVASÃO/RECUSAS/TERMO/CIRURGIA -> encerrar direto
+        const payloadEncerramento = {
           conduta_final: conduta
         };
-        
+
         // Se for EVASÃO, atualizar status para "Evasão"
         if (v === 'EVASAO POR CONTA PROPRIA') {
           payloadEncerramento.status = 'Evasão';
           console.log('🚨 Evasão detectada - atualizando status para "Evasão"');
+        }
+
+        // Se for ENCAMINHAR PARA CIRURGIA, atualizar status para "aguardando cirurgia"
+        if (v === 'ENCAMINHAR PARA CIRURGIA') {
+          payloadEncerramento.status = 'aguardando cirurgia';
+          console.log('🏥 Encaminhamento para cirurgia - atualizando status para "aguardando cirurgia"');
         }
         
         console.log('📤 Enviando encerramento com payload:', payloadEncerramento);
@@ -1902,9 +1909,11 @@
               }
               
               modalEnc.hide();
-              // Se for reavaliação, mantemos a ficha aberta e apenas informamos sucesso
+              // Se for reavaliação ou cirurgia, mantemos a ficha aberta e apenas informamos sucesso
               if ((conduta||'').toUpperCase().indexOf('REAVALIA') >= 0){
                 alert('Conduta registrada: reavaliação. O atendimento permanece em aberto.');
+              } else if ((conduta||'').toUpperCase().indexOf('CIRURGIA') >= 0){
+                alert('Paciente encaminhado para cirurgia. O atendimento permanece em aberto.');
               } else {
                 $('#btnImprimirFicha').attr('href', `/imprimir/ficha_atendimento/${ATENDIMENTO_ID}`);
                 modalPos.show();

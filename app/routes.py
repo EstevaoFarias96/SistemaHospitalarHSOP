@@ -290,6 +290,9 @@ def observacao_paciente():
 
                     if paciente_existente:
                         paciente = paciente_existente
+                        # Atualizar alergias do paciente existente se fornecidas
+                        if dados.get('alergias'):
+                            paciente.alergias = dados.get('alergias')
                     else:
                         try:
                             data_nascimento = datetime.strptime(dados['data_nascimento'], '%Y-%m-%d').date()
@@ -316,6 +319,7 @@ def observacao_paciente():
                             cartao_sus=cartao_sus,
                             nome_social=dados.get('nome_social', ''),
                             cor=dados.get('cor', 'Não informada'),
+                            alergias=dados.get('alergias', ''),
                             identificado=True
                         )
                         db.session.add(paciente)
@@ -938,6 +942,76 @@ def api_medico_atendimentos_reavaliacao_medicacao():
 
     except Exception as e:
         logging.error(f"Erro ao listar atendimentos de reavaliação após medicação: {str(e)}")
+        logging.error(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
+
+
+@bp.route('/api/medico/atendimentos/aguardando-cirurgia', methods=['GET'])
+@login_required
+def api_medico_atendimentos_aguardando_cirurgia():
+    """
+    Retorna lista de atendimentos com status "aguardando cirurgia" para a aba de cirurgia.
+    """
+    try:
+        current_user = get_current_user()
+        if not current_user:
+            return jsonify({'success': False, 'message': 'Usuário não autenticado.'}), 401
+
+        if current_user.cargo.lower() not in ['medico', 'multi', 'admin']:
+            return jsonify({'success': False, 'message': 'Acesso não autorizado'}), 403
+
+        atendimentos = Atendimento.query.filter(
+            Atendimento.status.ilike('%aguardando%cirurgia%')
+        ).order_by(Atendimento.horario_consulta_medica.desc().nullslast(), Atendimento.data_atendimento.desc()).all()
+
+        def calcular_idade(data_nascimento):
+            if not data_nascimento:
+                return None
+            hoje = date.today()
+            anos = hoje.year - data_nascimento.year - ((hoje.month, hoje.day) < (data_nascimento.month, data_nascimento.day))
+            return anos
+
+        resultado = []
+        for a in atendimentos:
+            paciente = Paciente.query.get(a.paciente_id)
+            if not paciente:
+                continue
+
+            # Verifica se há chamado ativo para este atendimento
+            chamado_ativo = Chamado.query.filter(
+                Chamado.id_atendimento == a.id,
+                Chamado.status == 'ativo'
+            ).order_by(Chamado.data.desc(), Chamado.hora.desc()).first()
+
+            chamado_info = None
+            if chamado_ativo:
+                medico = Funcionario.query.get(chamado_ativo.id_medico) if chamado_ativo.id_medico else None
+                chamado_info = {
+                    'medico_nome': medico.nome if medico else None,
+                    'local': chamado_ativo.local,
+                    'hora': chamado_ativo.hora.strftime('%H:%M') if chamado_ativo.hora else None
+                }
+
+            resultado.append({
+                'atendimento_id': a.id,
+                'paciente_id': paciente.id,
+                'nome': paciente.nome,
+                'data_nascimento': paciente.data_nascimento.strftime('%Y-%m-%d') if paciente.data_nascimento else None,
+                'idade': calcular_idade(paciente.data_nascimento) if paciente.data_nascimento else None,
+                'classificacao_risco': a.classificacao_risco,
+                'triagem': a.triagem,
+                'horario_triagem': a.horario_triagem.strftime('%Y-%m-%d %H:%M:%S') if a.horario_triagem else None,
+                'horario_consulta_medica': a.horario_consulta_medica.strftime('%Y-%m-%d %H:%M:%S') if a.horario_consulta_medica else None,
+                'conduta_final': a.conduta_final,
+                'prioridade': paciente.prioridade if hasattr(paciente, 'prioridade') else False,
+                'desc_prioridade': paciente.desc_prioridade if hasattr(paciente, 'desc_prioridade') else None,
+                'chamado_ativo': chamado_info
+            })
+
+        return jsonify({'success': True, 'atendimentos': resultado, 'total': len(resultado)})
+
+    except Exception as e:
+        logging.error(f"Erro ao listar atendimentos aguardando cirurgia: {str(e)}")
         logging.error(traceback.format_exc())
         return jsonify({'success': False, 'message': 'Erro interno do servidor'}), 500
 
@@ -1676,10 +1750,28 @@ def api_encerrar_atendimento(atendimento_id):
         # Horário do servidor menos 3 horas
         agora = datetime.utcnow() - timedelta(hours=3)
 
-        # Caso especial: REAVALIACAO mantém atendimento em aberto
+        # Casos especiais que mantém atendimento em aberto: REAVALIACAO e ENCAMINHAR PARA CIRURGIA
         if conduta_norm == 'REAVALIACAO':
             db.session.commit()
             return jsonify({'success': True, 'message': 'Atendimento marcado para reavaliação; permanece em aberto'})
+
+        if 'CIRURGIA' in conduta_norm or (status_customizado and 'cirurgia' in status_customizado.lower()):
+            # Registrar fluxo do paciente
+            try:
+                fluxo = FluxoPaciente(
+                    id_atendimento=atendimento.id,
+                    id_medico=current_user.id if current_user else None,
+                    id_enfermeiro=None,
+                    nome_paciente=atendimento.paciente.nome if atendimento.paciente else '',
+                    mudanca_status='Aguardando Cirurgia',
+                    mudanca_hora=datetime.utcnow() - timedelta(hours=3)
+                )
+                db.session.add(fluxo)
+                logging.info(f"FluxoPaciente registrado: Aguardando Cirurgia")
+            except Exception as e:
+                logging.error(f"Falha ao registrar FluxoPaciente no encaminhamento para cirurgia: {str(e)}")
+            db.session.commit()
+            return jsonify({'success': True, 'message': 'Paciente encaminhado para cirurgia; atendimento permanece em aberto'})
 
         # Para condutas de encerramento (alta, evasão, etc.), registrar horário de alta
         if conduta_final and conduta_norm != 'REAVALIACAO':
@@ -15751,6 +15843,9 @@ def internar_paciente():
 
             if paciente_existente:
                 paciente = paciente_existente
+                # Atualizar alergias do paciente existente se fornecidas
+                if dados.get('alergias'):
+                    paciente.alergias = dados.get('alergias')
             else:
                 try:
                     data_nascimento = datetime.strptime(dados['data_nascimento'], '%Y-%m-%d').date()
@@ -15778,6 +15873,7 @@ def internar_paciente():
                     cartao_sus=cartao_sus,
                     nome_social=dados.get('nome_social', ''),
                     cor=dados.get('cor', 'Não informada'),
+                    alergias=dados.get('alergias', ''),
                     identificado=True
                 )
                 db.session.add(paciente)
@@ -15803,6 +15899,10 @@ def internar_paciente():
                 numero_unico = str(paciente.id)[-2:].zfill(2)
                 atendimento_id = f"{prefixo_data}{numero_unico}"
 
+            # Atualizar alergias do paciente se fornecidas
+            if dados.get('alergias'):
+                paciente.alergias = dados.get('alergias')
+
             atendimento = Atendimento(
                 id=atendimento_id,
                 paciente_id=paciente.id,
@@ -15811,8 +15911,7 @@ def internar_paciente():
                 data_atendimento=date.today(),
                 hora_atendimento=time(agora.hour, agora.minute, agora.second),
                 status='Internado',
-                horario_internacao=agora,
-                alergias=dados.get('alergias', '')
+                horario_internacao=agora
             )
             db.session.add(atendimento)
             db.session.flush()

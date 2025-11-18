@@ -673,6 +673,9 @@
           <li class="nav-item" role="presentation">
             <a class="nav-link" id="tab-reavaliacao" data-toggle="tab" href="#pane-reavaliacao" role="tab" aria-controls="pane-reavaliacao" aria-selected="false">Reavaliação</a>
           </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" id="tab-cirurgia" data-toggle="tab" href="#pane-cirurgia" role="tab" aria-controls="pane-cirurgia" aria-selected="false">Aguardando Cirurgia</a>
+          </li>
         </ul>
       </div>
     </div>
@@ -707,6 +710,14 @@
           <div class="empty-state">
             <div class="spinner-border spinner-border-primary" role="status"><span class="sr-only">Carregando...</span></div>
             <p class="text-muted mt-3 mb-0">Carregando reavaliações...</p>
+          </div>
+        </div>
+      </div>
+      <div class="tab-pane fade" id="pane-cirurgia" role="tabpanel" aria-labelledby="tab-cirurgia">
+        <div id="lista-cirurgia">
+          <div class="empty-state">
+            <div class="spinner-border spinner-border-primary" role="status"><span class="sr-only">Carregando...</span></div>
+            <p class="text-muted mt-3 mb-0">Carregando pacientes aguardando cirurgia...</p>
           </div>
         </div>
       </div>
@@ -1065,12 +1076,14 @@
         fetch('/api/medico/atendimentos/aguardando').then(r=>r.json()).catch(()=>({atendimentos:[]})),
         fetch('/api/medico/atendimentos/aguardando-triagem').then(r=>r.json()).catch(()=>({atendimentos:[]})),
         fetch('/api/medico/atendimentos/gestantes').then(r=>r.json()).catch(()=>({atendimentos:[]})),
-        fetch('/api/medico/atendimentos/reavaliacao-medicacao').then(r=>r.json()).catch(()=>({atendimentos:[]}))
-      ]).then(([aguardando, triagem, gestantes, reav])=>{
+        fetch('/api/medico/atendimentos/reavaliacao-medicacao').then(r=>r.json()).catch(()=>({atendimentos:[]})),
+        fetch('/api/medico/atendimentos/aguardando-cirurgia').then(r=>r.json()).catch(()=>({atendimentos:[]}))
+      ]).then(([aguardando, triagem, gestantes, reav, cirurgia])=>{
         setTabCount('tab-aguardando', 'Aguardando Médico', (aguardando.atendimentos||[]).length);
         setTabCount('tab-triagem', 'Aguardando Triagem', (triagem.atendimentos||[]).length);
         setTabCount('tab-gestantes', 'Gestantes', (gestantes.atendimentos||[]).length);
         setTabCount('tab-reavaliacao', 'Reavaliação', (reav.atendimentos||[]).length);
+        setTabCount('tab-cirurgia', 'Aguardando Cirurgia', (cirurgia.atendimentos||[]).length);
       });
     }
 
@@ -1111,6 +1124,15 @@
             setTabCount('tab-reavaliacao', 'Reavaliação', (data.atendimentos||[]).length);
           })
           .catch(() => { $('#lista-reavaliacao').html('<p class="text-danger">Erro ao carregar dados</p>'); });
+      } else if (tipo === 'cirurgia') {
+        fetch('/api/medico/atendimentos/aguardando-cirurgia')
+          .then(r => r.json())
+          .then(data => {
+            if (!data.success) { $('#lista-cirurgia').html('<p class="text-danger">Erro ao carregar</p>'); return; }
+            renderLista('#lista-cirurgia', data.atendimentos, '<div class="empty-state"><i class="fas fa-procedures fa-3x"></i><h5>Sem pacientes aguardando cirurgia</h5></div>');
+            setTabCount('tab-cirurgia', 'Aguardando Cirurgia', (data.atendimentos||[]).length);
+          })
+          .catch(() => { $('#lista-cirurgia').html('<p class="text-danger">Erro ao carregar dados</p>'); });
       }
     }
 
@@ -1168,6 +1190,7 @@
         else if (activeId === 'tab-triagem') carregarAba('triagem');
         else if (activeId === 'tab-gestantes') carregarAba('gestantes');
         else if (activeId === 'tab-reavaliacao') carregarAba('reavaliacao');
+        else if (activeId === 'tab-cirurgia') carregarAba('cirurgia');
       });
       
       carregarAba('aguardando');
@@ -1178,6 +1201,7 @@
         if (id === 'tab-triagem') carregarAba('triagem');
         if (id === 'tab-gestantes') carregarAba('gestantes');
         if (id === 'tab-reavaliacao') carregarAba('reavaliacao');
+        if (id === 'tab-cirurgia') carregarAba('cirurgia');
         carregarContadores();
       });
       $('#btnAtualizar').click(function(){
@@ -1188,6 +1212,7 @@
         if (activeId === 'tab-triagem') carregarAba('triagem');
         if (activeId === 'tab-gestantes') carregarAba('gestantes');
         if (activeId === 'tab-reavaliacao') carregarAba('reavaliacao');
+        if (activeId === 'tab-cirurgia') carregarAba('cirurgia');
         carregarContadores();
         setTimeout(()=>{ btn.prop('disabled', false); icon.removeClass('fa-spin'); }, 800);
       });

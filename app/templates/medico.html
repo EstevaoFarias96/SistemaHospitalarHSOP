@@ -1139,8 +1139,14 @@
       $('#input-busca-fichas').on('keypress', function(e){ if(e.key === 'Enter'){ buscarFichasAtendimento(); }});
 
       // Abrir modais diretamente a partir das ações rápidas
-      $('#btnInternarPacienteHome').on('click', function(){ $('#internarPacienteModal').modal('show'); });
-      $('#btnObservacaoPaciente').on('click', function(){ $('#observacaoPacienteModal').modal('show'); });
+      $('#btnInternarPacienteHome').on('click', function(){ 
+        $('#internarPacienteModal').modal('show'); 
+        resetarModalInternacao();
+      });
+      $('#btnObservacaoPaciente').on('click', function(){ 
+        $('#observacaoPacienteModal').modal('show'); 
+        resetarModalObservacao();
+      });
 
       // Carregar dashboard
       carregarDashboardMedico();
@@ -1180,6 +1186,9 @@
         // Limpar dados temporários
         sessionStorage.removeItem('dadosPaciente');
         sessionStorage.removeItem('pacienteEncontrado');
+        
+        // Carregar leitos disponíveis
+        carregarLeitos();
       }
 
       // Submissão do formulário de pesquisa de paciente
@@ -1551,12 +1560,6 @@
         }
       });
 
-      // Botão de adicionar paciente em observação
-      $('#btnObservacaoPaciente').click(function() {
-        $('#observacaoPacienteModal').modal('show');
-        // Reset das abas quando abrir o modal
-        resetarModalObservacao();
-      });
 
       // Função para resetar o modal de observação
       function resetarModalObservacao() {
@@ -2010,26 +2013,31 @@
       });
     });
 
-    document.addEventListener('DOMContentLoaded', function () {
+    // Função para carregar leitos disponíveis
+    function carregarLeitos() {
       fetch('/api/leitos/opcoes')
         .then(response => response.json())
         .then(data => {
           const leitoSelect = document.getElementById('leito');
-          leitoSelect.innerHTML = ''; // Limpa opções anteriores
+          if (leitoSelect) {
+            leitoSelect.innerHTML = '<option value="">Selecione um leito...</option>'; // Limpa opções anteriores
 
-          data.forEach(leito => {
-            const option = document.createElement('option');
-            option.value = leito.nome;
-            option.textContent = `${leito.nome} (${leito.status})`;
-            leitoSelect.appendChild(option);
-          });
+            data.forEach(leito => {
+              const option = document.createElement('option');
+              option.value = leito.nome;
+              option.textContent = `${leito.nome} (${leito.status})`;
+              leitoSelect.appendChild(option);
+            });
+          }
         })
         .catch(error => {
           console.error('Erro ao carregar leitos:', error);
           const leitoSelect = document.getElementById('leito');
-          leitoSelect.innerHTML = '<option value="">Erro ao carregar</option>';
+          if (leitoSelect) {
+            leitoSelect.innerHTML = '<option value="">Erro ao carregar</option>';
+          }
         });
-    });
+    }
 
     function abrirEmergencia() {
       alert("Funcionalidade ainda não disponível na versão beta");
@@ -2145,18 +2153,52 @@
     }
 
     // Máscara de CPF para o campo de dados do paciente
-    document.getElementById('cpf').addEventListener('input', function (e) {
-      let value = e.target.value.replace(/\D/g, '');
+    function aplicarMascaraCPF(element) {
+      element.addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, '');
 
-      if (value.length > 11) {
-        value = value.substring(0, 11);
-      }
+        if (value.length > 11) {
+          value = value.substring(0, 11);
+        }
 
-      value = value.replace(/(\d{3})(\d)/, '$1.$2');
-      value = value.replace(/(\d{3})(\d)/, '$1.$2');
-      value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        value = value.replace(/(\d{3})(\d)/, '$1.$2');
+        value = value.replace(/(\d{3})(\d)/, '$1.$2');
+        value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
 
-      e.target.value = value;
+        e.target.value = value;
+      });
+    }
+
+    // Máscara de telefone para os campos
+    function aplicarMascaraTelefone(element) {
+      element.addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, '');
+
+        if (value.length > 11) {
+          value = value.substring(0, 11);
+        }
+
+        if (value.length <= 10) {
+          value = value.replace(/(\d{2})(\d)/, '($1) $2');
+          value = value.replace(/(\d{4})(\d)/, '$1-$2');
+        } else {
+          value = value.replace(/(\d{2})(\d)/, '($1) $2');
+          value = value.replace(/(\d{5})(\d)/, '$1-$2');
+        }
+
+        e.target.value = value;
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Aplicar máscaras aos campos quando o DOM estiver carregado
+      const cpfField = document.getElementById('cpf');
+      const telefoneField = document.getElementById('telefone');
+      const telefoneObsField = document.getElementById('telefoneObs');
+
+      if (cpfField) aplicarMascaraCPF(cpfField);
+      if (telefoneField) aplicarMascaraTelefone(telefoneField);
+      if (telefoneObsField) aplicarMascaraTelefone(telefoneObsField);
     });
   </script>
 </body>
