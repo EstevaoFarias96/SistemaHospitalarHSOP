@@ -14084,10 +14084,11 @@ def aprovar_todas_dispensacoes_emergencia():
         for presc in prescricoes_fluxo:
             try:
                 presc.status = 'Dispensado'
-                presc.data_dispensacao = datetime.now(timezone.utc)
-                presc.farmaceutico_id = usuario_atual.id
-                obs_atual = presc.observacoes or ''
-                presc.observacoes = obs_atual + f"\n[APROVAÇÃO EMERGENCIAL - SEM BAIXA - {timestamp}]"
+                # TODO: Descomentar após executar SQL de migração:
+                # presc.data_dispensacao = datetime.now(timezone.utc)
+                # presc.farmaceutico_id = usuario_atual.id
+                # obs_atual = presc.observacoes or ''
+                # presc.observacoes = obs_atual + f"\n[APROVAÇÃO EMERGENCIAL - SEM BAIXA - {timestamp}]"
                 count_fluxo += 1
             except Exception as e_presc:
                 logging.error(f"Erro ao processar prescrição fluxo {presc.id}: {str(e_presc)}")
@@ -14117,9 +14118,11 @@ def aprovar_todas_dispensacoes_emergencia():
         logging.warning(f"  • Setor: {setor}")
         logging.warning(f"  • ATENÇÃO: BAIXAS NÃO REGISTRADAS NO ESTOQUE!")
 
+        mensagem = f'Aprovadas {count_fluxo + count_emergencia} prescrições em aprovação emergencial.'
+
         return jsonify({
             'success': True,
-            'message': 'Aprovação emergencial concluída com sucesso.',
+            'message': mensagem,
             'total': count_fluxo + count_emergencia,
             'total_fluxo': count_fluxo,
             'total_emergencia': count_emergencia,
