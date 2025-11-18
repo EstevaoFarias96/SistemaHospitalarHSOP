@@ -4680,16 +4680,16 @@
         if (dataNascimentoRN) {
             const dataHoje = new Date();
             const dataNasc = new Date(dataNascimentoRN);
-            const umMesAtras = new Date();
-            umMesAtras.setMonth(umMesAtras.getMonth() - 1);
+            const tresMesesAtras = new Date();
+            tresMesesAtras.setMonth(tresMesesAtras.getMonth() - 3);
             
             if (dataNasc > dataHoje) {
                 $('#dataNascimentoRN').addClass('is-invalid');
                 $('#dataNascimentoRN').after('<div class="invalid-feedback">A data de nascimento não pode ser no futuro</div>');
                 hasError = true;
-            } else if (dataNasc < umMesAtras) {
+            } else if (dataNasc < tresMesesAtras) {
                 $('#dataNascimentoRN').addClass('is-invalid');
-                $('#dataNascimentoRN').after('<div class="invalid-feedback">Data muito antiga para um RN (máximo 1 mês)</div>');
+                $('#dataNascimentoRN').after('<div class="invalid-feedback">Data muito antiga para um RN (máximo 3 meses)</div>');
                 hasError = true;
             }
         }
@@ -4806,11 +4806,36 @@
         // Recuperar dados do RN
         const dadosRN = JSON.parse(sessionStorage.getItem('dadosRN'));
         
-        // Criar payload completo
+        // Criar payload completo mesclando dados do RN e internação
         const payload = {
-            paciente: dadosRN,
-            internacao: dadosInternacao,
-            paciente_mae_id: "{{ paciente.id }}", // ID da mãe
+            // Dados do RN
+            nome: dadosRN.nome,
+            data_nascimento: dadosRN.data_nascimento,
+            sexo: dadosRN.sexo,
+            peso_ao_nascer: dadosRN.peso,
+            altura: dadosRN.altura,
+            cor: dadosRN.cor,
+            filiacao: dadosRN.filiacao,
+            telefone: dadosRN.telefone,
+            endereco: dadosRN.endereco,
+            bairro: dadosRN.bairro,
+            municipio: dadosRN.municipio,
+            alergias: null, // RN não tem alergias conhecidas ainda
+            observacoes_rn: dadosRN.observacoes,
+            
+            // Dados da internação
+            leito: dadosInternacao.leito,
+            carater_internacao: dadosInternacao.carater_internacao,
+            hda: dadosInternacao.hda,
+            diagnostico_inicial: dadosInternacao.diagnostico_inicial,
+            exame_fisico: dadosInternacao.anamnese_exame_fisico,
+            conduta_inicial: dadosInternacao.conduta_inicial,
+            primeira_evolucao: dadosInternacao.primeira_evolucao,
+            cid_principal: dadosInternacao.cid_principal,
+            cid_secundario: dadosInternacao.cid_10_secundario,
+            
+            // Identificação
+            responsavel_id: {{ paciente.id }}, // ID da mãe
             tipo: 'rn' // Identificar como RN
         };
         
@@ -4822,7 +4847,7 @@
         btnSubmit.html('<i class="fas fa-spinner fa-spin me-1"></i> Cadastrando RN...').prop('disabled', true);
         
         // Enviar para o backend
-        fetch('/api/adicionar-rn', {
+        fetch('/api/rn-internacao', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

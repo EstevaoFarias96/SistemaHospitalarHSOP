@@ -16059,6 +16059,9 @@ def adicionar_rn_internacao():
 
         if paciente_existente:
             paciente = paciente_existente
+            # Atualizar alergias do paciente existente se fornecidas
+            if dados.get('alergias'):
+                paciente.alergias = dados.get('alergias')
         else:
             # Criar novo paciente RN
             paciente = Paciente(
@@ -16074,6 +16077,7 @@ def adicionar_rn_internacao():
                 cartao_sus=dados.get('cartao_sus'),
                 nome_social=dados.get('nome_social', ''),
                 cor=dados.get('cor', 'Não informada'),
+                alergias=dados.get('alergias', ''),
                 identificado=True
             )
             db.session.add(paciente)
@@ -16102,7 +16106,6 @@ def adicionar_rn_internacao():
             hora_atendimento=time(agora.hour, agora.minute, agora.second),
             status='Internado',
             horario_internacao=agora,
-            alergias=dados.get('alergias', ''),
             peso=dados.get('peso_ao_nascer'),
             altura=dados.get('altura')
         )
