@@ -1,26 +1,6 @@
 {% macro menu_sidebar() %}
 <div class="sidebar" id="sidebar">
   <ul class="nav flex-column">
-    <li class="nav-item" data-title="Buscar Pacientes">
-      <a class="nav-link" href="#" onclick="abrirBuscaPacientes()">
-        <i class="fas fa-search"></i>
-      </a>
-    </li>
-    <li class="nav-item" data-title="Triagem">
-      <a class="nav-link" href="#" onclick="abrirTriagem()">
-        <i class="fas fa-notes-medical"></i>
-      </a>
-    </li>
-    <li class="nav-item" data-title="Maternidade">
-      <a class="nav-link" href="#" onclick="abrirMaternidade()">
-        <i class="fas fa-baby"></i>
-      </a>
-    </li>
-    <li class="nav-item" data-title="Pacientes Internados">
-      <a class="nav-link" href="#" onclick="abrirInternados()">
-        <i class="fas fa-bed"></i>
-      </a>
-    </li>
     {% if session.get('cargo', '').lower() == 'administrador' %}
     <li class="nav-item" data-title="Dashboard">
       <a class="nav-link" href="{{ url_for('main.painel_administrador') }}">
@@ -49,6 +29,8 @@
     </li>
     {% endif %}
   </ul>
+
+  <!-- Menu do Usuário -->
   <div class="user-menu">
     <button class="user-menu-button" id="userMenuButton">
       <i class="fas fa-user"></i>
@@ -72,18 +54,142 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
   {% block styles %}{% endblock %}
   <style>
-    body { background-color: #f8f9fa; }
-    .sidebar { width: 80px; height: 100vh; background-color: #2d2ddcec; color: #fff; display: flex; flex-direction: column; align-items: center; padding-top: 20px; position: relative; }
-    .sidebar ul { list-style: none; padding: 0; width: 100%; }
-    .sidebar li { position: relative; width: 100%; }
-    .sidebar a { color: #fff; text-align: center; display: flex; align-items: center; justify-content: center; padding: 15px; width: 100%; font-size: 18px; white-space: nowrap; text-decoration: none; }
-    .sidebar a:hover::after { content: attr(data-title); position: absolute; left: 100%; background-color: rgba(0, 0, 0, 0.75); color: #fff; padding: 5px 10px; border-radius: 5px; white-space: nowrap; margin-left: 10px; font-size: 14px; }
-    .main-content { padding: 20px; }
-    .user-menu { position: absolute; bottom: 20px; width: 100%; text-align: center; }
-    .user-menu-button { width: 50px; height: 50px; border-radius: 50%; background-color: #fff; color: #2d2ddcec; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: 24px; border: none; }
-    .user-dropdown { display: none; position: absolute; bottom: 70px; left: 50%; transform: translateX(20px); background-color: #fff; border: 1px solid #ddd; border-radius: 5px; min-width: 150px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 1000; }
-    .user-dropdown a, .user-dropdown span { display: block; padding: 10px; color: #333; text-decoration: none; }
-    .user-dropdown a:hover { background-color: #f8f9fa; }
+    body {
+      background: linear-gradient(135deg, #F8FCFF 0%, #E8F4FF 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 80px;
+      height: 100vh;
+      background: linear-gradient(180deg, #4A90E2 0%, #357ABD 100%);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 20px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      box-shadow: 4px 0 20px rgba(74, 144, 226, 0.15);
+      z-index: 1000;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      width: 100%;
+    }
+
+    .sidebar li {
+      position: relative;
+      width: 100%;
+      margin: 8px 0;
+    }
+
+    .sidebar a {
+      color: #fff;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+      width: 100%;
+      font-size: 20px;
+      white-space: nowrap;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border-radius: 10px;
+      margin: 0 auto;
+    }
+
+    .sidebar a:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+      transform: translateX(5px);
+    }
+
+    .sidebar a:hover::after {
+      content: attr(data-title);
+      position: absolute;
+      left: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 8px;
+      white-space: nowrap;
+      margin-left: 15px;
+      font-size: 13px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+    }
+
+    .main-content {
+      padding: 30px 40px;
+      margin-left: 80px;
+    }
+
+    /* User Menu */
+    .user-menu {
+      position: absolute;
+      bottom: 20px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .user-menu-button {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #fff;
+      color: #4A90E2;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 22px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .user-menu-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .user-dropdown {
+      display: none;
+      position: absolute;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(20px);
+      background-color: #fff;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      min-width: 180px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      overflow: hidden;
+    }
+
+    .user-dropdown a, .user-dropdown span {
+      display: block;
+      padding: 12px 16px;
+      color: #4A5568;
+      text-decoration: none;
+      transition: background 0.2s ease;
+    }
+
+    .user-dropdown a:hover {
+      background-color: #E8F4FF;
+      color: #4A90E2;
+    }
+
+    .user-dropdown span {
+      font-weight: 600;
+      border-bottom: 1px solid #E2E8F0;
+    }
   </style>
 </head>
 <body>
@@ -102,6 +208,116 @@
 
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script>
+    $(document).ready(function() {
+      // Toggle do menu do usuário
+      $('#userMenuButton').click(function () {
+        $('#userDropdown').toggle();
+      });
+
+      $(document).click(function (event) {
+        if (!$(event.target).closest('#userMenuButton, #userDropdown').length) {
+          $('#userDropdown').hide();
+        }
+      });
+
+      // Carregar nome do usuário
+      $.getJSON('/api/funcionario/nome', function(data) {
+        if (data.nome) {
+          $('#userNameDisplay').text(data.nome);
+        }
+      }).fail(function() {
+        console.error("Erro ao buscar nome do funcionário.");
+      });
+
+      // Abrir modal de mudança de senha
+      $('#changePasswordOption').click(function (e) {
+        e.preventDefault();
+        $('#userDropdown').hide();
+        // Criar modal de senha se ainda não existir
+        if ($('#changePasswordModal').length === 0) {
+          $('body').append(`
+            <div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">Mudar a senha</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                      <span>&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <form id="changePasswordForm">
+                      <div class="form-group">
+                        <label for="senhaAtual">Senha Atual</label>
+                        <input type="password" class="form-control" id="senhaAtual" required>
+                      </div>
+                      <div class="form-group">
+                        <label for="novaSenha">Nova Senha</label>
+                        <input type="password" class="form-control" id="novaSenha" required>
+                      </div>
+                      <div class="form-group">
+                        <label for="confirmarNovaSenha">Confirmar Nova Senha</label>
+                        <input type="password" class="form-control" id="confirmarNovaSenha" required>
+                      </div>
+                      <button type="submit" class="btn btn-primary">Alterar Senha</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `);
+        }
+        $('#changePasswordModal').modal('show');
+      });
+
+      // Submissão do formulário de mudança de senha
+      $(document).on('submit', '#changePasswordForm', function(e) {
+        e.preventDefault();
+        const senhaAtual = $('#senhaAtual').val();
+        const novaSenha = $('#novaSenha').val();
+        const confirmarNovaSenha = $('#confirmarNovaSenha').val();
+
+        if (novaSenha !== confirmarNovaSenha) {
+          alert('A nova senha e a confirmação não conferem.');
+          return;
+        }
+
+        if (!senhaAtual.trim() || !novaSenha.trim()) {
+          alert('Por favor, preencha todos os campos.');
+          return;
+        }
+
+        fetch('/api/funcionario/mudar-senha', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: JSON.stringify({
+            senha_atual: senhaAtual,
+            nova_senha: novaSenha
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Senha alterada com sucesso.');
+            $('#changePasswordModal').modal('hide');
+            $('#changePasswordForm')[0].reset();
+          } else {
+            alert(data.message || 'Erro ao alterar senha.');
+          }
+        })
+        .catch(error => {
+          console.error('Erro:', error);
+          alert('Erro ao alterar senha. Tente novamente.');
+        });
+      });
+    });
+  </script>
+
   {% block scripts %}{% endblock %}
 </body>
 </html>

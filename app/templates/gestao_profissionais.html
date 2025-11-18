@@ -83,6 +83,7 @@
                         <option value="">Todos os cargos</option>
                         <option value="Médico">Médico</option>
                         <option value="Enfermeiro">Enfermeiro</option>
+                        <option value="Farmacia">Farmácia</option>
                         <option value="Administrador">Administrador</option>
                         <option value="Recepcionista">Recepcionista</option>
                     </select>
@@ -162,6 +163,7 @@
             <div class="modal-body">
                 <form id="formProfissional">
                     <input type="hidden" id="profissionalId">
+                    <h6 class="border-bottom pb-2 mb-3">Dados Pessoais</h6>
                     <div class="row">
                         <div class="col-md-8">
                             <div class="form-group">
@@ -171,57 +173,70 @@
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label>CPF <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="cpf" required maxlength="14" placeholder="000.000.000-00">
+                                <label>Data de Nascimento <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="data_nascimento" required>
                             </div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
+                                <label>CPF <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="cpf" required maxlength="14" placeholder="000.000.000-00">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>E-mail <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="email" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Telefone <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="telefone" required placeholder="(00) 00000-0000">
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="border-bottom pb-2 mb-3 mt-4">Dados Profissionais</h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
                                 <label>Cargo <span class="text-danger">*</span></label>
                                 <select class="form-control" id="cargo" required>
                                     <option value="">Selecione...</option>
-                                    <option value="Médico">Médico</option>
+                                    <option value="Medico">Médico</option>
                                     <option value="Enfermeiro">Enfermeiro</option>
+                                    <option value="Farmacia">Farmácia</option>
                                     <option value="Administrador">Administrador</option>
                                     <option value="Recepcionista">Recepcionista</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <div class="form-group">
-                                <label>CRM</label>
-                                <input type="text" class="form-control" id="crm">
+                                <label>Tipo de Contrato <span class="text-danger">*</span></label>
+                                <select class="form-control" id="tipo_contrato" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="Contratado">Contratado</option>
+                                    <option value="Efetivo">Efetivo</option>
+                                    <option value="Terceirizado">Terceirizado</option>
+                                    <option value="Estagiário">Estagiário</option>
+                                </select>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <div class="form-group">
-                                <label>COREN</label>
-                                <input type="text" class="form-control" id="coren">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Especialidade</label>
-                        <input type="text" class="form-control" id="especialidade">
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Telefone</label>
-                                <input type="text" class="form-control" id="telefone" placeholder="(00) 00000-0000">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>E-mail</label>
-                                <input type="email" class="form-control" id="email">
+                                <label>Número Profissional <small class="text-muted">(CRM/COREN)</small></label>
+                                <input type="text" class="form-control" id="numero_profissional" placeholder="Ex: 27688">
                             </div>
                         </div>
                     </div>
                     <div class="alert alert-info mt-2">
-                        <i class="fas fa-info-circle"></i> A senha inicial será o CPF sem pontuação
+                        <i class="fas fa-info-circle"></i> A senha inicial será os 5 primeiros números do CPF
                     </div>
                 </form>
             </div>
@@ -311,23 +326,23 @@ function salvarProfissional() {
     const id = $('#profissionalId').val();
     const data = {
         nome: $('#nome').val(),
+        data_nascimento: $('#data_nascimento').val(),
         cpf: $('#cpf').val(),
-        cargo: $('#cargo').val(),
-        crm: $('#crm').val(),
-        coren: $('#coren').val(),
-        especialidade: $('#especialidade').val(),
+        email: $('#email').val(),
         telefone: $('#telefone').val(),
-        email: $('#email').val()
+        cargo: $('#cargo').val(),
+        tipo_contrato: $('#tipo_contrato').val(),
+        numero_profissional: $('#numero_profissional').val()
     };
-    
-    if (!data.nome || !data.cpf || !data.cargo) {
-        alert('Preencha os campos obrigatórios');
+
+    if (!data.nome || !data.cpf || !data.cargo || !data.data_nascimento || !data.email || !data.telefone || !data.tipo_contrato) {
+        alert('Preencha todos os campos obrigatórios (*)');
         return;
     }
-    
+
     const url = id ? `/administrador/profissionais/${id}/editar` : '/administrador/profissionais/cadastrar';
     const method = id ? 'PUT' : 'POST';
-    
+
     $.ajax({
         url: url,
         method: method,
@@ -345,10 +360,10 @@ function salvarProfissional() {
 }
 
 function resetarSenha(id) {
-    if (!confirm('Deseja resetar a senha deste profissional para o CPF?')) {
+    if (!confirm('Deseja resetar a senha deste profissional para os 5 primeiros dígitos do CPF?')) {
         return;
     }
-    
+
     $.ajax({
         url: `/administrador/profissionais/${id}/resetar-senha`,
         method: 'POST',

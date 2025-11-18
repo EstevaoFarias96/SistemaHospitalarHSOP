@@ -3399,39 +3399,51 @@ def cadastrar_profissional():
         user = get_current_user()
         if not user or user.cargo.strip().lower() != 'administrador':
             return jsonify({'success': False, 'message': 'Acesso negado'}), 403
-        
+
         data = request.get_json()
-        
+
         # Validar dados obrigatórios
-        if not data.get('nome') or not data.get('cpf') or not data.get('cargo'):
-            return jsonify({'success': False, 'message': 'Nome, CPF e cargo são obrigatórios'}), 400
-        
+        required_fields = ['nome', 'data_nascimento', 'cpf', 'email', 'telefone', 'cargo', 'tipo_contrato']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({'success': False, 'message': f'Campo {field} é obrigatório'}), 400
+
         # Verificar se CPF já existe
         cpf_exists = db.session.query(Funcionario).filter_by(cpf=data['cpf']).first()
         if cpf_exists:
             return jsonify({'success': False, 'message': 'CPF já cadastrado'}), 400
-        
+
+        # Verificar se email já existe
+        email_exists = db.session.query(Funcionario).filter_by(email=data['email']).first()
+        if email_exists:
+            return jsonify({'success': False, 'message': 'E-mail já cadastrado'}), 400
+
+        # Converter data_nascimento de string para date
+        from datetime import datetime
+        data_nascimento = datetime.strptime(data['data_nascimento'], '%Y-%m-%d').date()
+
         # Criar novo profissional
         novo_profissional = Funcionario(
             nome=data['nome'],
+            data_nascimento=data_nascimento,
             cpf=data['cpf'],
+            email=data['email'],
+            telefone=data['telefone'],
             cargo=data['cargo'],
-            crm=data.get('crm'),
-            coren=data.get('coren'),
-            especialidade=data.get('especialidade'),
-            telefone=data.get('telefone'),
-            email=data.get('email')
+            tipo_contrato=data['tipo_contrato'],
+            numero_profissional=data.get('numero_profissional', '')
         )
-        
-        # Gerar senha inicial (CPF sem pontuação)
-        senha_inicial = data['cpf'].replace('.', '').replace('-', '')
+
+        # Gerar senha inicial (5 primeiros números do CPF)
+        cpf_numeros = data['cpf'].replace('.', '').replace('-', '')
+        senha_inicial = cpf_numeros[:5]
         novo_profissional.set_password(senha_inicial)
-        
+
         db.session.add(novo_profissional)
         db.session.commit()
-        
+
         return jsonify({
-            'success': True, 
+            'success': True,
             'message': 'Profissional cadastrado com sucesso',
             'profissional_id': novo_profissional.id
         })
@@ -3491,9 +3503,10 @@ def resetar_senha_profissional(id):
         profissional = db.session.query(Funcionario).get(id)
         if not profissional:
             return jsonify({'success': False, 'message': 'Profissional não encontrado'}), 404
-        
-        # Resetar senha para CPF
-        senha_inicial = profissional.cpf.replace('.', '').replace('-', '')
+
+        # Resetar senha para os 5 primeiros dígitos do CPF
+        cpf_numeros = profissional.cpf.replace('.', '').replace('-', '')
+        senha_inicial = cpf_numeros[:5]
         profissional.set_password(senha_inicial)
         
         db.session.commit()
@@ -3636,31 +3649,37 @@ def editar_paciente(id):
             paciente.nome = data['nome']
         
         if 'nome_social' in data:
-            paciente.nome_social = data['nome_social']
+            paciente.nome_social = data['nome_social'].strip() if data['nome_social'] else None
         
-        if 'cpf' in data and data['cpf'] != paciente.cpf:
-            # Verificar se CPF já existe em outro paciente
-            if data['cpf']:
-                cpf_existe = db.session.query(Paciente).filter(
-                    Paciente.cpf == data['cpf'],
-                    Paciente.id != id
-                ).first()
-                if cpf_existe:
-                    return jsonify({'success': False, 'message': 'CPF já cadastrado para outro paciente'}), 400
-            alteracoes.append(f"CPF: {paciente.cpf} → {data['cpf']}")
-            paciente.cpf = data['cpf']
-        
-        if 'cartao_sus' in data and data['cartao_sus'] != paciente.cartao_sus:
-            # Verificar se cartão SUS já existe
-            if data['cartao_sus']:
-                sus_existe = db.session.query(Paciente).filter(
-                    Paciente.cartao_sus == data['cartao_sus'],
-                    Paciente.id != id
-                ).first()
-                if sus_existe:
-                    return jsonify({'success': False, 'message': 'Cartão SUS já cadastrado para outro paciente'}), 400
-            alteracoes.append(f"Cartão SUS: {paciente.cartao_sus} → {data['cartao_sus']}")
-            paciente.cartao_sus = data['cartao_sus']
+        if 'cpf' in data:
+            # Converter string vazia em None
+            cpf_value = data['cpf'].strip() if data['cpf'] else None
+            if cpf_value != paciente.cpf:
+                # Verificar se CPF já existe em outro paciente
+                if cpf_value:
+                    cpf_existe = db.session.query(Paciente).filter(
+                        Paciente.cpf == cpf_value,
+                        Paciente.id != id
+                    ).first()
+                    if cpf_existe:
+                        return jsonify({'success': False, 'message': 'CPF já cadastrado para outro paciente'}), 400
+                alteracoes.append(f"CPF: {paciente.cpf} → {cpf_value}")
+                paciente.cpf = cpf_value
+
+        if 'cartao_sus' in data:
+            # Converter string vazia em None
+            sus_value = data['cartao_sus'].strip() if data['cartao_sus'] else None
+            if sus_value != paciente.cartao_sus:
+                # Verificar se cartão SUS já existe
+                if sus_value:
+                    sus_existe = db.session.query(Paciente).filter(
+                        Paciente.cartao_sus == sus_value,
+                        Paciente.id != id
+                    ).first()
+                    if sus_existe:
+                        return jsonify({'success': False, 'message': 'Cartão SUS já cadastrado para outro paciente'}), 400
+                alteracoes.append(f"Cartão SUS: {paciente.cartao_sus} → {sus_value}")
+                paciente.cartao_sus = sus_value
         
         if 'data_nascimento' in data:
             from datetime import datetime
@@ -3671,25 +3690,25 @@ def editar_paciente(id):
                 paciente.data_nascimento = nova_data
         
         if 'sexo' in data:
-            paciente.sexo = data['sexo']
-        
+            paciente.sexo = data['sexo'] if data['sexo'] else None
+
         if 'cor' in data:
-            paciente.cor = data['cor']
-        
+            paciente.cor = data['cor'] if data['cor'] else None
+
         if 'filiacao' in data:
-            paciente.filiacao = data['filiacao']
-        
+            paciente.filiacao = data['filiacao'].strip() if data['filiacao'] else None
+
         if 'endereco' in data:
-            paciente.endereco = data['endereco']
-        
+            paciente.endereco = data['endereco'].strip() if data['endereco'] else None
+
         if 'bairro' in data:
-            paciente.bairro = data['bairro']
-        
+            paciente.bairro = data['bairro'].strip() if data['bairro'] else None
+
         if 'municipio' in data:
-            paciente.municipio = data['municipio']
-        
+            paciente.municipio = data['municipio'].strip() if data['municipio'] else None
+
         if 'telefone' in data:
-            paciente.telefone = data['telefone']
+            paciente.telefone = data['telefone'].strip() if data['telefone'] else None
         
         db.session.commit()
         
