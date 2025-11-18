@@ -13475,7 +13475,8 @@ def buscar_prescricoes_fluxo_pendentes():
             except ValueError:
                 pass  # Ignora se o formato da data for inválido
 
-        prescricoes_pendentes = query.all()
+        # Limitar número de resultados para evitar timeout
+        prescricoes_pendentes = query.limit(500).all()
 
         prescricoes_data = []
         for prescricao in prescricoes_pendentes:
@@ -13533,6 +13534,7 @@ def buscar_prescricoes_fluxo_pendentes():
         }), 200
 
     except Exception as e:
+        db.session.rollback()  # Rollback em caso de erro para evitar PendingRollbackError
         logging.error(f"Erro ao buscar prescrições pendentes do fluxo: {str(e)}")
         logging.error(traceback.format_exc())
         return jsonify({'success': False, 'message': 'Erro interno do servidor.', 'error': str(e)}), 500
@@ -13850,7 +13852,8 @@ def buscar_prescricoes_emergencia_pendentes():
             except ValueError:
                 pass  # Ignora se o formato da data for inválido
 
-        prescricoes = query.order_by(PrescricaoEmergencia.horario_prescricao.desc()).all()
+        # Limitar número de resultados para evitar timeout
+        prescricoes = query.order_by(PrescricaoEmergencia.horario_prescricao.desc()).limit(500).all()
 
         prescricoes_data = []
         for prescricao in prescricoes:
@@ -13914,6 +13917,7 @@ def buscar_prescricoes_emergencia_pendentes():
         }), 200
 
     except Exception as e:
+        db.session.rollback()  # Rollback em caso de erro para evitar PendingRollbackError
         logging.error(f"Erro ao buscar prescrições de emergência: {str(e)}")
         logging.error(traceback.format_exc())
         return jsonify({'success': False, 'message': 'Erro interno do servidor.', 'error': str(e)}), 500
