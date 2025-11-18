@@ -16645,8 +16645,14 @@ def api_chamados_recentes():
             hora_str = chamado.hora.strftime('%H:%M') if chamado.hora else '--:--'
             data_str = chamado.data.strftime('%d/%m/%Y') if chamado.data else '--/--/----'
             
-            # Pega o nome do paciente
-            nome_paciente = chamado.paciente.nome if chamado.paciente else 'Paciente não identificado'
+            # Pega o nome do paciente (prioriza nome social se disponível)
+            if chamado.paciente:
+                if chamado.paciente.nome_social and chamado.paciente.nome_social.strip():
+                    nome_paciente = chamado.paciente.nome_social
+                else:
+                    nome_paciente = chamado.paciente.nome
+            else:
+                nome_paciente = 'Paciente não identificado'
             
             # Pega o profissional responsável (médico ou enfermeiro)
             profissional = None
