@@ -15156,7 +15156,10 @@ def api_pacientes_aguardando_medico():
             paciente = Paciente.query.get(a.paciente_id)
             if not paciente:
                 continue
-            medico = Funcionario.query.get(a.medico_id) if hasattr(a, 'medico_id') else None
+            # Verificar se medico_id existe e não é None antes de buscar
+            medico = None
+            if hasattr(a, 'medico_id') and a.medico_id:
+                medico = Funcionario.query.get(a.medico_id)
 
             pacientes_data.append({
                 'id': paciente.id,

@@ -594,7 +594,7 @@ class MedicacaoItem(db.Model):
 
 class FluxoDisp(db.Model):
     __tablename__ = 'fluxo_disp'
-    
+
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     id_atendimento = db.Column(db.Integer, nullable=False)
     id_medico = db.Column(db.Integer, nullable=False)
@@ -605,7 +605,10 @@ class FluxoDisp(db.Model):
     medicamento = db.Column(db.String(255), nullable=False)
     quantidade = db.Column(db.Integer, nullable=False, default=0)
     status = db.Column(db.String(50), nullable=False, default='Pendente')
-    
+    observacoes = db.Column(db.Text, nullable=True)
+    farmaceutico_id = db.Column(db.Integer, db.ForeignKey('funcionarios.id', onupdate='CASCADE'), nullable=True)
+    data_dispensacao = db.Column(db.DateTime(timezone=True), nullable=True)
+
     def __repr__(self):
         return f'<FluxoDisp {self.medicamento} - {self.status}>'
 
