@@ -1616,9 +1616,10 @@
       `);
 
       // Carregar prescrições do fluxo e emergência em paralelo
+      // Filtrar apenas prescrições após 18/11/2025
       Promise.all([
-        $.ajax({url: '/api/dispensacoes/fluxo-pendentes', method: 'GET'}),
-        $.ajax({url: '/api/dispensacoes/emergencia-pendentes', method: 'GET'})
+        $.ajax({url: '/api/dispensacoes/fluxo-pendentes?data_inicio=2025-11-18', method: 'GET'}),
+        $.ajax({url: '/api/dispensacoes/emergencia-pendentes?data_inicio=2025-11-18', method: 'GET'})
       ])
       .then(function(results) {
         const fluxoResponse = results[0];
@@ -1696,7 +1697,7 @@
       `);
 
       $.ajax({
-        url: '/api/dispensacoes/fluxo-pendentes',
+        url: '/api/dispensacoes/fluxo-pendentes?data_inicio=2025-11-18',
         method: 'GET',
         success: function(response) {
           if (response.success) {
@@ -2079,7 +2080,7 @@
 
       // Buscar dados da prescrição
       $.ajax({
-        url: '/api/dispensacoes/emergencia-pendentes',
+        url: '/api/dispensacoes/emergencia-pendentes?data_inicio=2025-11-18',
         method: 'GET',
         success: function(response) {
           if (response.success) {
@@ -2150,7 +2151,7 @@
 
       // Buscar dados da prescrição
       $.ajax({
-        url: '/api/dispensacoes/fluxo-pendentes',
+        url: '/api/dispensacoes/fluxo-pendentes?data_inicio=2025-11-18',
         method: 'GET',
         success: function(response) {
           if (response.success) {

@@ -13458,12 +13458,24 @@ def buscar_prescricoes_fluxo_pendentes():
             return jsonify({'success': False, 'message': 'Acesso restrito à Farmácia.'}), 403
 
         from app.models import FluxoDisp, Atendimento, Paciente, Funcionario
+        from datetime import datetime
 
         # Buscar prescrições pendentes (status='Pendente' E id_responsavel=0)
-        prescricoes_pendentes = FluxoDisp.query.filter_by(
+        query = FluxoDisp.query.filter_by(
             status='Pendente',
             id_responsavel=0
-        ).all()
+        )
+
+        # Filtrar por data se o parâmetro foi fornecido
+        data_inicio_param = request.args.get('data_inicio')
+        if data_inicio_param:
+            try:
+                data_inicio = datetime.strptime(data_inicio_param, '%Y-%m-%d').date()
+                query = query.filter(FluxoDisp.data >= data_inicio)
+            except ValueError:
+                pass  # Ignora se o formato da data for inválido
+
+        prescricoes_pendentes = query.all()
 
         prescricoes_data = []
         for prescricao in prescricoes_pendentes:
@@ -13824,10 +13836,21 @@ def buscar_prescricoes_emergencia_pendentes():
             return jsonify({'success': False, 'message': 'Acesso restrito à Farmácia.'}), 403
 
         from app.models import PrescricaoEmergencia, Atendimento, Paciente, Funcionario
+        from datetime import datetime
 
         # Buscar apenas prescrições de emergência pendentes
-        prescricoes = PrescricaoEmergencia.query.filter_by(status='Pendente')\
-            .order_by(PrescricaoEmergencia.horario_prescricao.desc()).all()
+        query = PrescricaoEmergencia.query.filter_by(status='Pendente')
+
+        # Filtrar por data se o parâmetro foi fornecido
+        data_inicio_param = request.args.get('data_inicio')
+        if data_inicio_param:
+            try:
+                data_inicio = datetime.strptime(data_inicio_param, '%Y-%m-%d')
+                query = query.filter(PrescricaoEmergencia.horario_prescricao >= data_inicio)
+            except ValueError:
+                pass  # Ignora se o formato da data for inválido
+
+        prescricoes = query.order_by(PrescricaoEmergencia.horario_prescricao.desc()).all()
 
         prescricoes_data = []
         for prescricao in prescricoes:
